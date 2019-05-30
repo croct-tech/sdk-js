@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="dist/croct-sdk.js"></script>
+</head>
+<body>
+<a href="index.html">Link</a>
+
+<div id="id"></div>
+<div id="user"></div>
+
+<button id="login">Log in</button>
+<button id="show">Show user</button>
+
+<script>
+    croct.install({apiKey: 'api_key', debug: true});
+    croct.tracker.identify('marcos');
+    croct.tracker.start();
+
+
+    document.getElementById("login").onclick = function() {
+        const user = prompt("Username:");
+        croct.tracker.identify(user === '' ? null : user);
+    };
+
+    document.getElementById("show").onclick = function() {
+        let token = croct.tracker.getToken();
+
+        console.log(token);
+
+        alert(token === null ? "anonymous" : token.value);
+    };
+
+</script>
+
+</body>
+</html>

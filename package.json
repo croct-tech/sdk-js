@@ -1,0 +1,35 @@
+{
+  "name": "croct-sdk",
+  "version": "1.0.0",
+  "description": "Croct JavaScript SDK",
+  "author": "Croct Inc",
+  "license": "UNLICENSED",
+  "main": "src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/croctools/sdk-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/croctools/sdk-js/issues"
+  },
+  "homepage": "https://github.com/croctools/sdk-js#readme",
+  "dependencies": {
+    "dt": "0.0.1",
+    "rrweb": "^0.7.14",
+    "rrweb-snapshot": "^0.7.11"
+  },
+  "devDependencies": {
+    "rollup": "^1.12.3",
+    "rollup-plugin-node-resolve": "^5.0.0",
+    "rollup-plugin-re": "^1.0.7",
+    "rollup-plugin-typescript": "^1.0.1",
+    "rollup-plugin-typescript2": "^0.21.1",
+    "rollup-plugin-uglify": "^6.0.2",
+    "temp-dir": "^2.0.0",
+    "tslib": "^1.9.3",
+    "typescript": "^3.4.5"
+  },
+  "browserslist": [
+    "last 1 version"
+  ]
+}
