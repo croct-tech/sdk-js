@@ -1,28 +1,28 @@
-type WebBeaconPayload = {
-    type: 'contextMenuOpened' |
-        'elementFocused' |
-        'elementScrolled' |
-        'elementUnfocused' |
-        'formSubmitted' |
-        'inputChanged' |
-        'mouseClicked' |
-        'mouseDoubleClicked' |
-        'mouseMoved' |
-        'mousePressed' |
-        'mouseReleased' |
-        'nothingChanged' |
-        'pageChanged' |
-        'pageSnapshotCaptured' |
-        'pageOpened' |
-        'pageVisibilityChanged' |
-        'tabOpened' |
-        'touchEnded' |
-        'touchMoved' |
-        'touchStarted' |
-        'viewportResized'
-}
+type OnsiteBeaconPayloadType =
+    'contextMenuOpened' |
+    'elementFocused' |
+    'elementScrolled' |
+    'elementUnfocused' |
+    'formSubmitted' |
+    'inputChanged' |
+    'mouseClicked' |
+    'mouseDoubleClicked' |
+    'mouseMoved' |
+    'mousePressed' |
+    'mouseReleased' |
+    'nothingChanged' |
+    'pageChanged' |
+    'pageSnapshotCaptured' |
+    'pageOpened' |
+    'pageVisibilityChanged' |
+    'tabOpened' |
+    'touchEnded' |
+    'touchMoved' |
+    'touchStarted' |
+    'viewportResized'
 
-type OnsiteEventPayload = WebBeaconPayload & {
+type OnsiteEventPayload = {
+    type: OnsiteBeaconPayloadType
     tabId: string
     url: string
 }
