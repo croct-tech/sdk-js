@@ -1,6 +1,6 @@
 import {Token} from "./token";
 
-enum PayloadType {
+export enum PayloadType {
     CONTEXT_MENU_OPENED = 'contextMenuOpened',
     ELEMENT_FOCUSED = 'elementFocused',
     ELEMENT_SCROLLED = 'elementScrolled',
@@ -24,15 +24,6 @@ enum PayloadType {
     VIEWPORT_RESIZED = 'viewportResized',
 }
 
-type EventPayload = {
-    type: PayloadType
-}
-
-type OnsiteEventPayload = EventPayload & {
-    tabId: string
-    url: string
-}
-
 type Point = {
     x: number
     y: number
@@ -43,42 +34,54 @@ type Dimension = {
     width: number
 }
 
-export type ContextMenuOpened = OnsiteEventPayload & {
+type Payload = {
+    type: PayloadType
+}
+
+export type ContextMenuOpened = Payload & {
+    type: PayloadType.CONTEXT_MENU_OPENED
     nodeId: number
     point: Point
 }
 
-export type ElementFocused = OnsiteEventPayload & {
+export type ElementFocused = Payload & {
+    type: PayloadType.ELEMENT_FOCUSED
     nodeId: number
 }
 
-export type ElementScrolled = OnsiteEventPayload & {
+export type ElementScrolled = Payload & {
+    type: PayloadType.ELEMENT_SCROLLED
     nodeId: number
     point: Point
 }
 
-export type ElementUnfocused = OnsiteEventPayload & {
+export type ElementUnfocused = Payload & {
+    type: PayloadType.ELEMENT_UNFOCUSED
     url: URL
     nodeId: number
 }
 
-export type FormSubmitted = OnsiteEventPayload & {
+export type FormSubmitted = Payload & {
+    type: PayloadType.FORM_SUBMITTED
     nodeId: number
-    data: Map<string, string>
+    data: {[key: string]: string}
 }
 
-export type InputChanged = OnsiteEventPayload & {
+export type InputChanged = Payload & {
+    type: PayloadType.INPUT_CHANGED
     nodeId: number
     value: string
     checked: boolean
 }
 
-export type MouseClicked = OnsiteEventPayload & {
+export type MouseClicked = Payload & {
+    type: PayloadType.MOUSE_CLICKED
     nodeId: number
     point: Point
 }
 
-export type MouseDoubleClicked = OnsiteEventPayload & {
+export type MouseDoubleClicked = Payload & {
+    type: PayloadType.MOUSE_DOUBLE_CLICKED
     nodeId: number
     point: Point
 }
@@ -89,21 +92,26 @@ type MouseOffset = {
     timeOffset: number
 }
 
-export type MouseMoved = OnsiteEventPayload & {
+export type MouseMoved = Payload & {
+    type: PayloadType.MOUSE_MOVED
     offsets: MouseOffset[]
 }
 
-export type MousePressed = OnsiteEventPayload & {
+export type MousePressed = Payload & {
+    type: PayloadType.MOUSE_PRESSED
     nodeId: number
     point: Point
 }
 
-export type MouseReleased = OnsiteEventPayload & {
+export type MouseReleased = Payload & {
+    type: PayloadType.MOUSE_RELEASED
     nodeId: number
     point: Point
 }
 
-export type NothingChanged = OnsiteEventPayload;
+export type NothingChanged = Payload & {
+    type: PayloadType.NOTHING_CHANGED
+}
 
 type DataNode = {
     id: number
@@ -142,7 +150,6 @@ type Node =
     DocumentTypeNode |
     ElementNode |
     TextNode
-;
 
 type NodeAddition = {
     parentId: number
@@ -166,20 +173,23 @@ type TextChange = {
     value: string
 }
 
-export type PageChanged = OnsiteEventPayload & {
+export type PageChanged = Payload & {
+    type: PayloadType.PAGE_CHANGED
     nodesAdded: NodeAddition[]
     nodesRemoved: NodeRemoval[]
     attributesChanged: AttributeChange[]
     textsChanged: TextChange[]
 }
 
-export type PageSnapshotCaptured = OnsiteEventPayload & {
+export type PageSnapshotCaptured = Payload & {
+    type: PayloadType.PAGE_SNAPSHOT_CAPTURED
     viewportSize: Dimension
     scrollOffset: Point
     content: Node
 }
 
-export type PageOpened = OnsiteEventPayload & {
+export type PageOpened = Payload & {
+    type: PayloadType.PAGE_OPENED
     ip: string
     userAgent: string
     preferredLanguages: string
@@ -190,33 +200,40 @@ enum PageVisibility {
     HIDDEN
 }
 
-export type PageVisibilityChanged = OnsiteEventPayload & {
+export type PageVisibilityChanged = Payload & {
+    type: PayloadType.PAGE_VISIBILITY_CHANGED
     visibility: PageVisibility
 }
 
-export type TabOpened = OnsiteEventPayload;
+export type TabOpened = Payload & {
+    type: PayloadType.TAB_OPENED
+}
 
-export type TouchEnded = OnsiteEventPayload & {
+export type TouchEnded = Payload & {
+    type: PayloadType.TOUCH_ENDED
     nodeId: number
     point: Point
 }
 
-export type TouchMoved = OnsiteEventPayload & {
+export type TouchMoved = Payload & {
+    type: PayloadType.TOUCH_MOVED
     nodeId: number
     point: Point
 }
 
-export type TouchStarted = OnsiteEventPayload & {
+export type TouchStarted = Payload & {
+    type: PayloadType.TOUCH_STARTED
     nodeId: number
     point: Point
 }
 
-export type ViewportResized = OnsiteEventPayload & {
+export type ViewportResized = Payload & {
+    type: PayloadType.VIEWPORT_RESIZED
     nodeId: number
     viewportSize: Dimension
 }
 
-export type BeaconPayload =
+type OnsitePayload =
     ContextMenuOpened |
     ElementFocused |
     ElementScrolled |
@@ -238,7 +255,13 @@ export type BeaconPayload =
     TouchMoved |
     TouchStarted |
     ViewportResized
-;
+
+type OnsiteBeaconPayload = OnsitePayload & {
+    tabId: string
+    url: string
+}
+
+export type BeaconPayload = OnsiteBeaconPayload
 
 export type Beacon = {
     tenantId: string
