@@ -1,4 +1,28 @@
-type OnsitePayload = {
+type WebBeaconPayload = {
+    type: 'contextMenuOpened' |
+        'elementFocused' |
+        'elementScrolled' |
+        'elementUnfocused' |
+        'formSubmitted' |
+        'inputChanged' |
+        'mouseClicked' |
+        'mouseDoubleClicked' |
+        'mouseMoved' |
+        'mousePressed' |
+        'mouseReleased' |
+        'nothingChanged' |
+        'pageChanged' |
+        'pageLoaded' |
+        'pageOpened' |
+        'pageVisibilityChanged' |
+        'tabOpened' |
+        'touchEnded' |
+        'touchMoved' |
+        'touchStarted' |
+        'viewportResized'
+}
+
+type OnsiteEventPayload = WebBeaconPayload & {
     tabId: string
     url: string
 }
@@ -13,42 +37,42 @@ type Dimension = {
     width: number
 }
 
-export type ContextMenuOpened = OnsitePayload & {
+export type ContextMenuOpened = OnsiteEventPayload & {
     nodeId: number
     point: Point
 };
 
-export type ElementFocused = OnsitePayload & {
+export type ElementFocused = OnsiteEventPayload & {
     nodeId: number
 };
 
-export type ElementScrolled = OnsitePayload & {
+export type ElementScrolled = OnsiteEventPayload & {
     nodeId: number
     point: Point
 };
 
-export type ElementUnfocused = OnsitePayload & {
+export type ElementUnfocused = OnsiteEventPayload & {
     url: URL
     nodeId: number
 };
 
-export type FormSubmitted = OnsitePayload & {
+export type FormSubmitted = OnsiteEventPayload & {
     nodeId: number
     data: Map<string, string>
 };
 
-export type InputChanged = OnsitePayload & {
+export type InputChanged = OnsiteEventPayload & {
     nodeId: number
     value: string
     checked: boolean
 };
 
-export type MouseClicked = OnsitePayload & {
+export type MouseClicked = OnsiteEventPayload & {
     nodeId: number
     point: Point
 };
 
-export type MouseDoubleClicked = OnsitePayload & {
+export type MouseDoubleClicked = OnsiteEventPayload & {
     nodeId: number
     point: Point
 };
@@ -59,21 +83,21 @@ type MouseOffset = {
     timeOffset: number
 }
 
-export type MouseMoved = OnsitePayload & {
+export type MouseMoved = OnsiteEventPayload & {
     offsets: MouseOffset[]
 };
 
-export type MousePressed = OnsitePayload & {
+export type MousePressed = OnsiteEventPayload & {
     nodeId: number
     point: Point
 };
 
-export type MouseReleased = OnsitePayload & {
+export type MouseReleased = OnsiteEventPayload & {
     nodeId: number
     point: Point
 };
 
-export type NothingChanged = OnsitePayload;
+export type NothingChanged = OnsiteEventPayload;
 
 type Node = {
     id: number
@@ -106,20 +130,20 @@ type TextChange = {
     value: string
 }
 
-export type PageChanged = OnsitePayload & {
+export type PageChanged = OnsiteEventPayload & {
     nodesAdded: NodeAddition[]
     nodesRemoved: NodeRemoval[]
     attributesChanged: AttributeChange[]
     textsChanged: TextChange[]
 };
 
-export type PageLoaded = OnsitePayload & {
+export type PageLoaded = OnsiteEventPayload & {
     viewportSize: Dimension
     scrollOffset: Point
     content: Node
 };
 
-export type PageOpened = OnsitePayload & {
+export type PageOpened = OnsiteEventPayload & {
     ip: string
     userAgent: string
     preferredLanguages: string
@@ -130,28 +154,28 @@ enum PageVisibility {
     HIDDEN
 }
 
-export type PageVisibilityChanged = OnsitePayload & {
+export type PageVisibilityChanged = OnsiteEventPayload & {
     visibility: PageVisibility
 };
 
-export type TabOpened = OnsitePayload;
+export type TabOpened = OnsiteEventPayload;
 
-export type TouchEnded = OnsitePayload & {
+export type TouchEnded = OnsiteEventPayload & {
     nodeId: number
     point: Point
 };
 
-export type TouchMoved = OnsitePayload & {
+export type TouchMoved = OnsiteEventPayload & {
     nodeId: number
     point: Point
 };
 
-export type TouchStarted = OnsitePayload & {
+export type TouchStarted = OnsiteEventPayload & {
     nodeId: number
     point: Point
 };
 
-export type ViewportResized = OnsitePayload & {
+export type ViewportResized = OnsiteEventPayload & {
     nodeId: number
     viewportSize: Dimension
 };
