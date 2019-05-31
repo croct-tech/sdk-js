@@ -1,27 +1,28 @@
 import {Token} from "./token";
 
-type PayloadType =
-    'contextMenuOpened' |
-    'elementFocused' |
-    'elementScrolled' |
-    'elementUnfocused' |
-    'formSubmitted' |
-    'inputChanged' |
-    'mouseClicked' |
-    'mouseDoubleClicked' |
-    'mouseMoved' |
-    'mousePressed' |
-    'mouseReleased' |
-    'nothingChanged' |
-    'pageChanged' |
-    'pageSnapshotCaptured' |
-    'pageOpened' |
-    'pageVisibilityChanged' |
-    'tabOpened' |
-    'touchEnded' |
-    'touchMoved' |
-    'touchStarted' |
-    'viewportResized'
+enum PayloadType {
+    CONTEXT_MENU_OPENED = 'contextMenuOpened',
+    ELEMENT_FOCUSED = 'elementFocused',
+    ELEMENT_SCROLLED = 'elementScrolled',
+    ELEMENT_UNFOCUSED = 'elementUnfocused',
+    FORM_SUBMITTED = 'formSubmitted',
+    INPUT_CHANGED = 'inputChanged',
+    MOUSE_CLICKED = 'mouseClicked',
+    MOUSE_DOUBLE_CLICKED = 'mouseDoubleClicked',
+    MOUSE_MOVED = 'mouseMoved',
+    MOUSE_PRESSED = 'mousePressed',
+    MOUSE_RELEASED = 'mouseReleased',
+    NOTHING_CHANGED = 'nothingChanged',
+    PAGE_CHANGED = 'pageChanged',
+    PAGE_SNAPSHOT_CAPTURED = 'pageSnapshotCaptured',
+    PAGE_OPENED = 'pageOpened',
+    PAGE_VISIBILITY_CHANGED = 'pageVisibilityChanged',
+    TAB_OPENED = 'tabOpened',
+    TOUCH_ENDED = 'touchEnded',
+    TOUCH_MOVED = 'touchMoved',
+    TOUCH_STARTED = 'touchStarted',
+    VIEWPORT_RESIZED = 'viewportResized',
+}
 
 type EventPayload = {
     type: PayloadType
@@ -104,6 +105,44 @@ export type MouseReleased = OnsiteEventPayload & {
 };
 
 export type NothingChanged = OnsiteEventPayload;
+
+type DataNode = {
+    id: number
+    value: string
+}
+
+type CdataNode = DataNode
+
+type CommentNode = DataNode
+
+type TextNode = DataNode
+
+type DocumentNode = {
+    id: number
+    children: Node[]
+}
+
+type DocumentTypeNode = {
+    id: number
+    name: string
+    publicId: string
+    systemId: string
+}
+
+type ElementNode = {
+    id: number
+    tagName: string
+    attributes: {[key: string]: string}
+    children: Node[]
+}
+
+type Node =
+    CdataNode |
+    CommentNode |
+    DocumentNode |
+    DocumentTypeNode |
+    ElementNode |
+    TextNode
 
 type Node = {
     id: number
