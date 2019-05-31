@@ -29,7 +29,6 @@ type EventPayload = {
 }
 
 type OnsiteEventPayload = EventPayload & {
-    type: PayloadType
     tabId: string
     url: string
 }
@@ -47,42 +46,42 @@ type Dimension = {
 export type ContextMenuOpened = OnsiteEventPayload & {
     nodeId: number
     point: Point
-};
+}
 
 export type ElementFocused = OnsiteEventPayload & {
     nodeId: number
-};
+}
 
 export type ElementScrolled = OnsiteEventPayload & {
     nodeId: number
     point: Point
-};
+}
 
 export type ElementUnfocused = OnsiteEventPayload & {
     url: URL
     nodeId: number
-};
+}
 
 export type FormSubmitted = OnsiteEventPayload & {
     nodeId: number
     data: Map<string, string>
-};
+}
 
 export type InputChanged = OnsiteEventPayload & {
     nodeId: number
     value: string
     checked: boolean
-};
+}
 
 export type MouseClicked = OnsiteEventPayload & {
     nodeId: number
     point: Point
-};
+}
 
 export type MouseDoubleClicked = OnsiteEventPayload & {
     nodeId: number
     point: Point
-};
+}
 
 type MouseOffset = {
     nodeId: number
@@ -92,17 +91,17 @@ type MouseOffset = {
 
 export type MouseMoved = OnsiteEventPayload & {
     offsets: MouseOffset[]
-};
+}
 
 export type MousePressed = OnsiteEventPayload & {
     nodeId: number
     point: Point
-};
+}
 
 export type MouseReleased = OnsiteEventPayload & {
     nodeId: number
     point: Point
-};
+}
 
 export type NothingChanged = OnsiteEventPayload;
 
@@ -136,22 +135,14 @@ type ElementNode = {
     children: Node[]
 }
 
-type Node =
+type Node = 
     CdataNode |
     CommentNode |
     DocumentNode |
     DocumentTypeNode |
     ElementNode |
     TextNode
-
-type Node = {
-    id: number
-    type: number
-    name: string
-    attributes: {[key: string]: string}
-    children: Node[]
-    meta: {[key: string]: boolean | null | string}
-}
+;
 
 type NodeAddition = {
     parentId: number
@@ -180,19 +171,19 @@ export type PageChanged = OnsiteEventPayload & {
     nodesRemoved: NodeRemoval[]
     attributesChanged: AttributeChange[]
     textsChanged: TextChange[]
-};
+}
 
 export type PageSnapshotCaptured = OnsiteEventPayload & {
     viewportSize: Dimension
     scrollOffset: Point
     content: Node
-};
+}
 
 export type PageOpened = OnsiteEventPayload & {
     ip: string
     userAgent: string
     preferredLanguages: string
-};
+}
 
 enum PageVisibility {
     VISIBLE,
@@ -201,29 +192,29 @@ enum PageVisibility {
 
 export type PageVisibilityChanged = OnsiteEventPayload & {
     visibility: PageVisibility
-};
+}
 
 export type TabOpened = OnsiteEventPayload;
 
 export type TouchEnded = OnsiteEventPayload & {
     nodeId: number
     point: Point
-};
+}
 
 export type TouchMoved = OnsiteEventPayload & {
     nodeId: number
     point: Point
-};
+}
 
 export type TouchStarted = OnsiteEventPayload & {
     nodeId: number
     point: Point
-};
+}
 
 export type ViewportResized = OnsiteEventPayload & {
     nodeId: number
     viewportSize: Dimension
-};
+}
 
 export type BeaconPayload =
     ContextMenuOpened |
