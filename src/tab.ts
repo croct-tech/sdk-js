@@ -187,7 +187,7 @@ export class Tab {
             <EventHandler> {
                 emmit(): void {
                     tab.emit(
-                        this.isVisible() ?
+                        tab.isVisible() ?
                             TabEventType.VISIBLE :
                             TabEventType.HIDDEN
                     );

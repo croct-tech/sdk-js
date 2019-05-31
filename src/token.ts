@@ -9,6 +9,10 @@ export class Token {
     public readonly timestamp : number;
 
     constructor(value: string, timestamp: number) {
+        if (value === '') {
+            throw new Error('The value cannot be empty.');
+        }
+
         this.value = value;
         this.timestamp = timestamp;
     }

@@ -12,25 +12,39 @@
 <div id="user"></div>
 
 <button id="login">Log in</button>
+<button id="logout">Log out</button>
 <button id="show">Show user</button>
+<br/>
+<br/>
+<input type="checkbox" id="enabled" checked> <label for="enabled">Enable tracking</label>
 
 <script>
     croct.install({apiKey: 'api_key', debug: true});
-    croct.tracker.identify('marcos');
-    croct.tracker.start();
+    croct.user.login('marcos');
+    croct.tracker.enable();
 
-
-    document.getElementById("login").onclick = function() {
-        const user = prompt("Username:");
-        croct.tracker.identify(user === '' ? null : user);
+    document.getElementById('enabled').onchange = function() {
+        if (this.checked) {
+            croct.tracker.enable();
+        } else {
+            croct.tracker.disable();
+        }
     };
 
-    document.getElementById("show").onclick = function() {
+    document.getElementById('login').onclick = function() {
+        croct.user.login(prompt('Username:'));
+    };
+
+    document.getElementById('logout').onclick = function() {
+        croct.user.logout();
+    };
+
+    document.getElementById('show').onclick = function() {
         let token = croct.tracker.getToken();
 
         console.log(token);
 
-        alert(token === null ? "anonymous" : token.value);
+        alert(token === null ? 'anonymous' : token.value);
     };
 
 </script>

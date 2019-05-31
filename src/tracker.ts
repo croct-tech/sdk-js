@@ -1,115 +1,82 @@
-import {record, mirror} from "rrweb";
-import {EventType, eventWithTime} from 'rrweb/typings/types';
-import {Logger, NullLogger} from "./logging";
-import {Tab} from "./tab";
+import {record, mirror} from 'rrweb';
 import {
-    InMemoryTokenStorage,
-    ReplicatedTokenStorage,
-    Token,
-    TokenScope,
-    TokenStorage,
-    WebTokenStorage
-} from "./token";
-
-interface Options {
-    tokenScope?: TokenScope,
-    storageNamespace?: string,
-    logger?: Logger,
-}
+    eventWithTime as Event,
+    incrementalData as IncrementalData, IncrementalSource,
+    listenerHandler as StopRecorderCallback, metaEvent as MetaEvent, MouseInteractions
+} from 'rrweb/typings/types';
+import {Logger} from "./logging";
+import {Token} from "./token";
+import {Context} from "./context";
+import {BeaconPayload} from "./beacon";
 
 class Tracker {
     private logger: Logger;
-    private readonly tab: Tab;
-    private readonly tokenStorage: TokenStorage;
+    private readonly context: Context;
+    private enabled: boolean = false;
+    private stopRecording?: StopRecorderCallback;
+    private pendingEvents: Event[] = [];
 
-    constructor(tab: Tab, tokenStorage: TokenStorage, logger: Logger) {
-        this.tab = tab;
-        this.tokenStorage = tokenStorage;
+    constructor(context: Context, logger: Logger) {
+        this.context = context;
         this.logger = logger;
     }
 
-    static initialize(options: Options) {
-        const {
-            storageNamespace = '',
-            tokenScope = TokenScope.GLOBAL,
-            logger = new NullLogger()
-        } = options;
+    enable() {
+        if (this.enabled) {
+            return;
+        }
 
-        const prefix = storageNamespace + (storageNamespace ? '.' : '');
-        const tabKey = prefix + 'tab';
-        const tokenKey = prefix + 'token';
+        this.stopRecording = record({emit: this.emit});
 
-        const tabId : string | null = sessionStorage.getItem(tabKey);
-        const tab = new Tab(tabId || Date.now() + '', tabId === null);
+        this.enabled = true;
 
-        sessionStorage.removeItem(tabKey);
-
-        tab.onUnload(() => {
-            sessionStorage.setItem(tabKey, tab.getId())
-        });
-
-        const tokenStorages: {[key in TokenScope]: {(): TokenStorage}} = {
-            [TokenScope.ISOLATED]: () => {
-                return new InMemoryTokenStorage();
-            },
-            [TokenScope.GLOBAL]: () => {
-                return new WebTokenStorage(localStorage, tokenKey);
-            },
-            [TokenScope.CONTEXTUAL]: () => {
-                const primaryStorage = new WebTokenStorage(sessionStorage, tokenKey);
-                const secondaryStorage = new WebTokenStorage(localStorage, tokenKey);
-
-                if (tab.isNew()) {
-                    primaryStorage.setToken(secondaryStorage.getToken())
-                }
-
-                tab.onVisible(() => {
-                    secondaryStorage.setToken(primaryStorage.getToken());
-                });
-
-                return new ReplicatedTokenStorage(primaryStorage, secondaryStorage);
-            }
-        };
-
-        logger.log('Tracker initialized');
-        logger.log(`Token scope: ${tokenScope}`);
-        logger.log(`${tab.isNew() ? 'New' : 'Current'} tab: ${tab.getId()}`);
-
-        return new Tracker(tab, tokenStorages[tokenScope](), logger)
+        this.logger.log('Tracker enabled');
     }
 
-    start() {
-        this.logger.log('Tracking started');
+    disable() {
+        if (!this.enabled) {
+            return;
+        }
 
-        this.tab.wakeup()
+        if (this.stopRecording) {
+            this.stopRecording();
+            delete  this.stopRecording;
+        }
+
+        this.enabled = false;
+
+        this.logger.log('Tracker disabled');
     }
 
-    stop() {
-        this.logger.log('Tracking stopped');
-    }
+    identify(userId: string) {
+        if (userId === '') {
+            throw new Error('The user ID cannot be empty');
+        }
 
-    shutdown() {
-        this.stop();
-        this.tab.sleep();
-    }
+        this.logger.log(`User identified: ${userId}`);
 
-    identify(user: string | null) {
-        this.tokenStorage.setToken(user == null ? null : new Token(user, Date.now()));
+        this.context.setToken(new Token(userId, Date.now()));
     }
 
     anonymize() {
-        this.tokenStorage.setToken(null);
+        this.logger.log('User anonymized');
+
+        this.context.setToken(null);
+    }
+
+    hasToken() : boolean {
+        return this.getToken() !== null;
     }
 
     getToken() : Token | null {
-        return this.tokenStorage.getToken();
+        return this.context.getToken();
     }
 
-    private emit(event: eventWithTime) : void {
-        console.log(this.createBeacon(event));
+    private emit(event: Event) : void {
+        console.log(event);
     }
 
-    private createBeacon(event: eventWithTime) : object | null {
+    private createBeacon(event: Event) : object | null {
         const payload = this.createPayload(event);
 
         if (payload === null) {
@@ -125,7 +92,7 @@ class Tracker {
         };
     }
 
-    private createPayload(event: eventWithTime) : object | null {
+    private createPayload(event: Event) : BeaconPayload | null {
         switch (event.type) {
             //case EventType.DomContentLoaded:
             case 0:
@@ -135,19 +102,46 @@ class Tracker {
                 break;
             //case EventType.FullSnapshot:
             case 2:
+                const meta = this.pendingEvents.pop() as MetaEvent;
+
+                return {
+
+                }
+
                 break;
             //case EventType.IncrementalSnapshot:
             case 3:
                 break;
-
             //case EventType.Meta:
             case 4:
+                this.pendingEvents.push(event);
                 break;
-
         }
 
-
         return null;
+    }
+
+    private createIncrementalPayload(data: IncrementalData) : BeaconPayload {
+        switch (data.source) {
+            //case IncrementalSource.Mutation:
+            case 0:
+                break;
+            //case IncrementalSource.MouseMove:
+            case 1:
+                break;
+            //case IncrementalSource.MouseInteraction:
+            case 2:
+                break;
+            //case IncrementalSource.Scroll:
+            case 3:
+                break;
+            //case IncrementalSource.ViewportResize:
+            case 4:
+                break;
+            //case IncrementalSource.Input:
+            case 5:
+                break;
+        }
     }
 }
 

@@ -9,10 +9,7 @@
     "sourceMap": true,
     "rootDir": "src",
     "outDir": "dist",
-    "lib": ["es6", "dom"],
-    "typeRoots": [
-      "node_modules/@types"
-    ]
+    "lib": ["es6", "dom"]
   },
   "include": [
     "src"

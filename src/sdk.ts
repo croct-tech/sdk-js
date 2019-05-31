@@ -1,98 +1,117 @@
 import Tracker from './tracker';
 import {ConsoleLogger, Logger, NullLogger} from './logging';
 import {TokenScope} from './token';
+import {BeaconTransport, WebSocketTransport, WebStorageQueue} from "./transport";
+import {Context} from "./context";
+import {NamespacedStorage} from "./storage";
 
-const enum SdkError {
-    NOT_INSTALLED = 'Croct SDK is not installed, see http://croct.com/getting-started.',
-    ALREADY_INSTALLED = 'The SDK is already configured.',
-    INVALID_CONFIGURATION = 'The configuration must a key-value map.',
-    INVALID_API_KEY = 'The API key must be a non-empty string.',
-    INVALID_STORAGE_NAMESPACE = 'The option "storageNamespace" must be a non-empty string.',
-    INVALID_TOKEN_SCOPE = 'The option "tokenScope" is invalid.',
-    INVALID_DEBUG_FLAG = 'The option "debug" must be true or false.',
-}
-
-interface Config {
+type Config = {
     readonly apiKey: string;
     readonly storageNamespace: string;
     readonly tokenScope: TokenScope;
     readonly debug: boolean;
 }
 
-export class SDK {
-    private static instance: SDK;
+export default class Sdk {
+    private static singleton: Sdk;
+
     private readonly config: Config;
     private tracker: Tracker;
+    private context: Context;
     private logger: Logger;
+    private transport: BeaconTransport;
 
-    private constructor(settings: Config) {
-        this.config = settings;
+    private constructor(config: Config) {
+        this.config = config;
+
+        this.initialize();
     }
 
-    static install(config: any) {
-        if (SDK.instance) {
-            throw new Error(SdkError.ALREADY_INSTALLED);
+    private static get instance() : Sdk {
+        if (Sdk.singleton === undefined) {
+            throw new Error('Croct SDK is not installed');
         }
 
-        SDK.instance = SDK.configure(config);
-
-        const logger = SDK.instance.getLogger();
-        logger.info('Croct SDK installed');
+        return Sdk.singleton;
     }
 
-    static uninstall() {
-        if (!SDK.instance) {
-            return;
+    static install(config: Config) : void {
+        if (Sdk.singleton) {
+            throw new Error('The SDK is already installed');
         }
 
-        const logger = SDK.instance.getLogger();
-        logger.info('Croct SDK uninstalled');
-
-        SDK.instance.dispose();
-
-        delete SDK.instance;
-    }
-
-    private static configure(config: any) : SDK {
-        if (typeof config !== 'object') {
-            throw new Error(SdkError.INVALID_CONFIGURATION)
-        }
-
-        config = {
+        Sdk.singleton = new Sdk({
             storageNamespace: 'croct',
             tokenScope: TokenScope.GLOBAL,
             debug: false,
-            ...config,
-        };
-
-        if (typeof config.apiKey !== 'string' || !config.apiKey) {
-            throw new Error(SdkError.INVALID_API_KEY);
-        }
-
-        if (typeof config.storageNamespace !== 'string') {
-            throw new Error(SdkError.INVALID_STORAGE_NAMESPACE);
-        }
-
-        if (!Object.values(TokenScope).includes(config.tokenScope)) {
-            throw new Error(SdkError.INVALID_TOKEN_SCOPE);
-        }
-
-        if (![true, false].includes(config.debug)) {
-            throw new Error(SdkError.INVALID_DEBUG_FLAG);
-        }
-
-        return new SDK(config);
+            ...config
+        });
     }
 
-    static get singleton() : SDK {
-        if (SDK.instance === undefined) {
-            throw new Error(SdkError.NOT_INSTALLED);
+    static uninstall() : void {
+        if (!Sdk.singleton) {
+            return;
         }
 
-        return SDK.instance;
+        Sdk.singleton.destroy();
+
+        delete Sdk.singleton;
     }
 
-    getTracker(): Tracker {
+    static get tracker() : Tracker {
+        return Sdk.instance.getTracker();
+    }
+
+    private initialize() : void {
+        const logger = this.getLogger();
+
+        logger.info('Croct SDK installed');
+
+        const context = this.getContext();
+        const tab = context.getCurrentTab();
+
+        logger.info('Context initialized');
+        logger.log(`Token scope: ${this.config.tokenScope}`);
+        logger.log(`${tab.isNew() ? 'New' : 'Current'} tab: ${tab.getId()}`);
+
+        const transport = this.getTransport();
+
+        /*transport.send({
+            clientId: '60003a15-b42d-4cc3-ad94-c9c5b36eda7e',
+            tenantId: '60003a18-b42d-4cc3-ad94-c9c5b36eda7e',
+            timestamp: Date.now(),
+            userToken: {
+                timestamp: Date.now(),
+                value: 'marcos'
+            },
+            payload: {
+                type: 'nothingChanged',
+                url: 'http://croct.com',
+                tabId: 'a89dcb02-1e04-4537-a89b-37fc087de90f',
+            }
+        });*/
+
+    }
+
+    private destroy() : void {
+        if (this.context) {
+            this.context.dispose();
+        }
+
+        if (this.tracker) {
+            this.tracker.disable();
+        }
+
+        if (this.transport) {
+            this.transport.disconnect();
+        }
+
+        const logger = this.getLogger();
+
+        logger.info('Croct SDK uninstalled');
+    }
+
+    private getTracker(): Tracker {
         if (this.tracker === undefined) {
             this.tracker = this.createTracker();
         }
@@ -101,11 +120,23 @@ export class SDK {
     }
 
     private createTracker() : Tracker {
-        return Tracker.initialize({
-            tokenScope: this.config.tokenScope,
-            storageNamespace: this.config.storageNamespace,
-            logger: this.logger,
-        })
+        return new Tracker(this.getContext(), this.getLogger());
+    }
+
+    private getContext() : Context {
+        if (this.context === undefined) {
+            this.context = this.createContext();
+        }
+
+        return this.context;
+    }
+
+    private createContext() : Context {
+        return Context.initialize(
+            this.getTabStorage('context'),
+            this.getGlobalStorage('context'),
+            this.config.tokenScope
+        )
     }
 
     private getLogger() : Logger {
@@ -120,9 +151,52 @@ export class SDK {
         return this.config.debug ? new ConsoleLogger() : new NullLogger();
     }
 
-    dispose() : void {
-        if (this.tracker) {
-            this.tracker.shutdown();
+    private getTransport() : BeaconTransport {
+        if (this.transport === undefined) {
+            this.transport = this.createTransport();
         }
+
+        return this.transport;
+    }
+
+    private createTransport() : BeaconTransport {
+        const context = this.getContext();
+        const tab = context.getCurrentTab();
+
+        return new WebSocketTransport(
+            'ws://127.0.0.1:8080/track',
+            [],
+            new WebStorageQueue(
+                this.getTabStorage('queues'),
+                tab.getId()
+            ),
+            5000,
+            this.getLogger()
+        )
+    }
+
+    private getTabStorage(namespace: string ) : Storage {
+        return new NamespacedStorage(
+            sessionStorage,
+            this.resolveStorageNamespace(namespace)
+        );
+    }
+
+    private getGlobalStorage(namespace: string) : Storage {
+        return new NamespacedStorage(
+            localStorage,
+            this.resolveStorageNamespace(namespace)
+        );
+    }
+
+    private resolveStorageNamespace(namespace: string) : string {
+        let prefix = this.config.storageNamespace;
+
+        if (prefix !== '') {
+            prefix += '.'
+        }
+
+        return prefix + namespace;
     }
 }
+
