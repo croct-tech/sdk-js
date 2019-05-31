@@ -12,7 +12,7 @@ type WebBeaconPayload = {
         'mouseReleased' |
         'nothingChanged' |
         'pageChanged' |
-        'pageLoaded' |
+        'pageSnapshotCaptured' |
         'pageOpened' |
         'pageVisibilityChanged' |
         'tabOpened' |
@@ -137,7 +137,7 @@ export type PageChanged = OnsiteEventPayload & {
     textsChanged: TextChange[]
 };
 
-export type PageLoaded = OnsiteEventPayload & {
+export type PageSnapshotCaptured = OnsiteEventPayload & {
     viewportSize: Dimension
     scrollOffset: Point
     content: Node
@@ -194,7 +194,7 @@ export type WebBeaconPayload =
     MouseReleased |
     NothingChanged |
     PageChanged |
-    PageLoaded |
+    PageSnapshotCaptured |
     PageOpened |
     PageVisibilityChanged |
     TabOpened |
