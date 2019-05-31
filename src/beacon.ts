@@ -1,4 +1,6 @@
-type OnsiteBeaconPayloadType =
+import {Token} from "./token";
+
+type PayloadType =
     'contextMenuOpened' |
     'elementFocused' |
     'elementScrolled' |
@@ -21,8 +23,12 @@ type OnsiteBeaconPayloadType =
     'touchStarted' |
     'viewportResized'
 
-type OnsiteEventPayload = {
-    type: OnsiteBeaconPayloadType
+type EventPayload = {
+    type: PayloadType
+}
+
+type OnsiteEventPayload = EventPayload & {
+    type: PayloadType
     tabId: string
     url: string
 }
@@ -180,7 +186,7 @@ export type ViewportResized = OnsiteEventPayload & {
     viewportSize: Dimension
 };
 
-export type WebBeaconPayload =
+export type BeaconPayload =
     ContextMenuOpened |
     ElementFocused |
     ElementScrolled |
@@ -204,15 +210,10 @@ export type WebBeaconPayload =
     ViewportResized
 ;
 
-type UserToken = {
-    value: string
-    timestamp: number
-}
-
-export type WebBeacon = {
+export type Beacon = {
     tenantId: string
     clientId: string
-    userToken: UserToken
+    userToken: Token
     timestamp: number
-    payload: WebBeaconPayload
+    payload: BeaconPayload
 }
