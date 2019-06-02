@@ -48,6 +48,8 @@ export class Tab {
     constructor(id: string, isNew: boolean) {
         this.id = id;
         this.newTab = isNew;
+
+        this.wakeup();
     }
 
     public wakeup() : void {

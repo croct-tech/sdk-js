@@ -1,51 +1,78 @@
-import {record, mirror} from 'rrweb';
-import {
-    eventWithTime as Event,
-    incrementalData as IncrementalData, IncrementalSource,
-    listenerHandler as StopRecorderCallback, metaEvent as MetaEvent, MouseInteractions
-} from 'rrweb/typings/types';
 import {Logger} from "./logging";
 import {Token} from "./token";
 import {Context} from "./context";
-import {BeaconPayload} from "./beacon";
+import Recorder, {RecorderEvent} from "./recorder";
+import {Beacon, PayloadType} from "./beacon";
+import {Tab} from "./tab";
 
 class Tracker {
-    private logger: Logger;
     private readonly context: Context;
-    private enabled: boolean = false;
-    private stopRecording?: StopRecorderCallback;
-    private pendingEvents: Event[] = [];
+    private readonly recorder: Recorder;
+    private readonly logger: Logger;
+    private initialized: boolean = false;
 
     constructor(context: Context, logger: Logger) {
         this.context = context;
+        this.recorder = new Recorder(logger);
         this.logger = logger;
     }
 
+    isEnabled() {
+        return this.recorder.isRecording();
+    }
+
     enable() {
-        if (this.enabled) {
+        if (this.isEnabled()) {
             return;
         }
 
-        this.stopRecording = record({emit: this.emit});
-
-        this.enabled = true;
-
         this.logger.log('Tracker enabled');
+
+        this.initialize();
+
+        this.recorder.start();
     }
 
     disable() {
-        if (!this.enabled) {
+        if (!this.isEnabled()) {
             return;
         }
 
-        if (this.stopRecording) {
-            this.stopRecording();
-            delete  this.stopRecording;
-        }
-
-        this.enabled = false;
+        this.recorder.stop();
 
         this.logger.log('Tracker disabled');
+    }
+
+    private initialize() {
+        const tab: Tab = this.context.getCurrentTab();
+
+        if (tab.isNew()) {
+            this.send({
+                userToken: this.context.getToken(),
+                timestamp: Date.now(),
+                tenantId: 'tenant_id',
+                payload: {
+                    type: PayloadType.TAB_OPENED,
+                    tabId: tab.getId(),
+                    url: tab.getUrl(),
+                }
+            })
+        }
+
+        this.send({
+            userToken: this.context.getToken(),
+            timestamp: Date.now(),
+            tenantId: 'tenant_id',
+            payload: {
+                type: PayloadType.PAGE_OPENED,
+                tabId: tab.getId(),
+                url: tab.getUrl(),
+            }
+        });
+
+        this.recorder.registerListener((event) => this.handle(event));
+
+        this.initialized = true;
     }
 
     identify(userId: string) {
@@ -72,77 +99,26 @@ class Tracker {
         return this.context.getToken();
     }
 
-    private emit(event: Event) : void {
-        console.log(event);
-    }
-
-    private createBeacon(event: Event) : object | null {
-        const payload = this.createPayload(event);
-
-        if (payload === null) {
-            return null;
-        }
-
-        return {
-            userToken: null,
+    private handle(event: RecorderEvent) : void {
+        const tab = this.context.getCurrentTab();
+        const beacon : Beacon = {
+            userToken: this.context.getToken(),
             timestamp: event.timestamp,
+            tenantId: 'tenant_id',
             payload: {
-                ...this.createPayload(event)
+                tabId: tab.getId(),
+                url: tab.getUrl(),
+                ...event.payload
             }
         };
+
+        this.send(beacon);
     }
 
-    private createPayload(event: Event) : BeaconPayload | null {
-        switch (event.type) {
-            //case EventType.DomContentLoaded:
-            case 0:
-                break;
-            //case EventType.Load:
-            case 1:
-                break;
-            //case EventType.FullSnapshot:
-            case 2:
-                const meta = this.pendingEvents.pop() as MetaEvent;
-
-                return {
-
-                }
-
-                break;
-            //case EventType.IncrementalSnapshot:
-            case 3:
-                break;
-            //case EventType.Meta:
-            case 4:
-                this.pendingEvents.push(event);
-                break;
-        }
-
-        return null;
+    private send(beacon: Beacon) : void {
+        console.log(beacon);
     }
 
-    private createIncrementalPayload(data: IncrementalData) : BeaconPayload {
-        switch (data.source) {
-            //case IncrementalSource.Mutation:
-            case 0:
-                break;
-            //case IncrementalSource.MouseMove:
-            case 1:
-                break;
-            //case IncrementalSource.MouseInteraction:
-            case 2:
-                break;
-            //case IncrementalSource.Scroll:
-            case 3:
-                break;
-            //case IncrementalSource.ViewportResize:
-            case 4:
-                break;
-            //case IncrementalSource.Input:
-            case 5:
-                break;
-        }
-    }
 }
 
 export default Tracker;

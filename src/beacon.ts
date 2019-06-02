@@ -34,146 +34,183 @@ type Dimension = {
     width: number
 }
 
-type Payload = {
-    type: PayloadType
-}
-
-export type ContextMenuOpened = Payload & {
+export type ContextMenuOpened = {
     type: PayloadType.CONTEXT_MENU_OPENED
     nodeId: number
     point: Point
 }
 
-export type ElementFocused = Payload & {
+export type ElementFocused = {
     type: PayloadType.ELEMENT_FOCUSED
     nodeId: number
 }
 
-export type ElementScrolled = Payload & {
+export type ElementScrolled = {
     type: PayloadType.ELEMENT_SCROLLED
     nodeId: number
     point: Point
 }
 
-export type ElementUnfocused = Payload & {
+export type ElementUnfocused = {
     type: PayloadType.ELEMENT_UNFOCUSED
-    url: URL
     nodeId: number
 }
 
-export type FormSubmitted = Payload & {
+export type FileMetadata = {
+    name: string
+    size: number
+    type: string
+    lastModified: number
+}
+
+export type FieldValue =
+    string |
+    string[] |
+    FileMetadata |
+    FileMetadata[]
+;
+
+export type FormData = {
+    [key: string]: FieldValue
+}
+
+export type FormSubmitted = {
     type: PayloadType.FORM_SUBMITTED
     nodeId: number
-    data: {[key: string]: string}
+    data: FormData
 }
 
-export type InputChanged = Payload & {
+export type InputChanged = {
     type: PayloadType.INPUT_CHANGED
     nodeId: number
     value: string
     checked: boolean
 }
 
-export type MouseClicked = Payload & {
+export type MouseClicked = {
     type: PayloadType.MOUSE_CLICKED
     nodeId: number
     point: Point
 }
 
-export type MouseDoubleClicked = Payload & {
+export type MouseDoubleClicked = {
     type: PayloadType.MOUSE_DOUBLE_CLICKED
     nodeId: number
     point: Point
 }
 
-type MouseOffset = {
+export type MouseOffset = {
     nodeId: number
     point: Point
     timeOffset: number
 }
 
-export type MouseMoved = Payload & {
+export type MouseMoved = {
     type: PayloadType.MOUSE_MOVED
     offsets: MouseOffset[]
 }
 
-export type MousePressed = Payload & {
+export type MousePressed = {
     type: PayloadType.MOUSE_PRESSED
     nodeId: number
     point: Point
 }
 
-export type MouseReleased = Payload & {
+export type MouseReleased = {
     type: PayloadType.MOUSE_RELEASED
     nodeId: number
     point: Point
 }
 
-export type NothingChanged = Payload & {
+export type NothingChanged = {
     type: PayloadType.NOTHING_CHANGED
 }
 
-type DataNode = {
+export enum NodeType {
+    DOCUMENT = 'document',
+    DOCUMENT_TYPE = 'documentType',
+    ELEMENT = 'element',
+    CDATA = 'cdata',
+    COMMENT = 'comment',
+    TEXT = 'text',
+}
+
+export type CdataNode = {
+    type: NodeType.CDATA
     id: number
     value: string
 }
 
-type CdataNode = DataNode
+export type CommentNode = {
+    type: NodeType.COMMENT
+    id: number
+    value: string
+}
 
-type CommentNode = DataNode
+export type TextNode = {
+    type: NodeType.TEXT
+    id: number
+    value: string
+}
 
-type TextNode = DataNode
-
-type DocumentNode = {
+export type DocumentNode = {
+    type: NodeType.DOCUMENT
     id: number
     children: Node[]
 }
 
-type DocumentTypeNode = {
+export type DocumentTypeNode = {
+    type: NodeType.DOCUMENT_TYPE
     id: number
     name: string
     publicId: string
     systemId: string
 }
 
-type ElementNode = {
+export declare type attributes = {
+    [key: string]: string | boolean;
+};
+
+export type ElementNode = {
+    type: NodeType.ELEMENT
     id: number
     tagName: string
-    attributes: {[key: string]: string}
+    attributes: attributes
     children: Node[]
 }
 
-type Node = 
+export type Node =
     CdataNode |
     CommentNode |
     DocumentNode |
     DocumentTypeNode |
     ElementNode |
     TextNode
+;
 
-type NodeAddition = {
+export type NodeAddition = {
     parentId: number
-    nextId: number
-    previousId: number
+    nextId: number | null
+    previousId: number | null
     node: Node
 }
 
-type NodeRemoval = {
+export type NodeRemoval = {
     nodeId: number
     parentId: number
 }
 
-type AttributeChange = {
+export type AttributeChange = {
     nodeId: number
-    attributes: {[key: string]: string}
+    attributes: {[key: string]: string | null}
 }
 
-type TextChange = {
+export type TextChange = {
     nodeId: number
-    value: string
+    value: string | null
 }
 
-export type PageChanged = Payload & {
+export type PageChanged = {
     type: PayloadType.PAGE_CHANGED
     nodesAdded: NodeAddition[]
     nodesRemoved: NodeRemoval[]
@@ -181,18 +218,18 @@ export type PageChanged = Payload & {
     textsChanged: TextChange[]
 }
 
-export type PageSnapshotCaptured = Payload & {
+export type PageSnapshotCaptured = {
     type: PayloadType.PAGE_SNAPSHOT_CAPTURED
     viewportSize: Dimension
     scrollOffset: Point
     content: Node
 }
 
-export type PageOpened = Payload & {
+export type PageOpened = {
     type: PayloadType.PAGE_OPENED
-    ip: string
-    userAgent: string
-    preferredLanguages: string
+    //ip: string
+    //userAgent: string
+    //preferredLanguages: string
 }
 
 enum PageVisibility {
@@ -200,40 +237,39 @@ enum PageVisibility {
     HIDDEN
 }
 
-export type PageVisibilityChanged = Payload & {
+export type PageVisibilityChanged = {
     type: PayloadType.PAGE_VISIBILITY_CHANGED
     visibility: PageVisibility
 }
 
-export type TabOpened = Payload & {
+export type TabOpened = {
     type: PayloadType.TAB_OPENED
 }
 
-export type TouchEnded = Payload & {
+export type TouchEnded = {
     type: PayloadType.TOUCH_ENDED
     nodeId: number
     point: Point
 }
 
-export type TouchMoved = Payload & {
+export type TouchMoved = {
     type: PayloadType.TOUCH_MOVED
     nodeId: number
     point: Point
 }
 
-export type TouchStarted = Payload & {
+export type TouchStarted = {
     type: PayloadType.TOUCH_STARTED
     nodeId: number
     point: Point
 }
 
-export type ViewportResized = Payload & {
+export type ViewportResized = {
     type: PayloadType.VIEWPORT_RESIZED
-    nodeId: number
     viewportSize: Dimension
 }
 
-type OnsitePayload =
+export type OnsitePayload =
     ContextMenuOpened |
     ElementFocused |
     ElementScrolled |
@@ -255,6 +291,7 @@ type OnsitePayload =
     TouchMoved |
     TouchStarted |
     ViewportResized
+;
 
 type OnsiteBeaconPayload = OnsitePayload & {
     tabId: string
@@ -265,8 +302,7 @@ export type BeaconPayload = OnsiteBeaconPayload
 
 export type Beacon = {
     tenantId: string
-    clientId: string
-    userToken: Token
+    userToken: Token | null
     timestamp: number
     payload: BeaconPayload
 }

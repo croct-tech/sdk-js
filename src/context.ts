@@ -1,6 +1,5 @@
 import {InMemoryTokenStorage, ReplicatedTokenStorage, Token, TokenScope, TokenStorage, WebTokenStorage} from "./token";
 import {Tab} from "./tab";
-import {Logger, NullLogger} from "./logging";
 
 export class Context {
     private readonly tab: Tab;

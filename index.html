@@ -18,6 +18,22 @@
 <br/>
 <input type="checkbox" id="enabled" checked> <label for="enabled">Enable tracking</label>
 
+
+<form>
+    <input name="checkbox-element" type="checkbox" id="checkbox" value="bar" />
+    <input name="file-element1" type="file" value="file1" />
+    <input name="file-element2" type="file" value="file2" />
+
+    <input name="number-element" type="number">
+
+    <select multiple id="multiple" name="select-element">
+        <option value="foo">Foo</option>
+        <option value="bar">Bar</option>
+    </select>
+
+    <input type="submit" />
+</form>
+
 <script>
     croct.install({apiKey: 'api_key', debug: true});
     croct.user.login('marcos');
