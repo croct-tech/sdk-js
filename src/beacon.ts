@@ -56,6 +56,25 @@ export type ElementUnfocused = {
     nodeId: number
 }
 
+export enum FieldType {
+    INPUT = 'input',
+    SELECT = 'select',
+    FILE = 'file',
+    TEXTAREA = 'textarea',
+}
+
+export type InputValue = {
+    type: FieldType.INPUT,
+    nodeId: number,
+    value: string,
+}
+
+export type SelectValue = {
+    type: FieldType.SELECT,
+    nodeId: number,
+    value: string[],
+}
+
 export type FileMetadata = {
     name: string
     size: number
@@ -63,11 +82,23 @@ export type FileMetadata = {
     lastModified: number
 }
 
+export type FileValue = {
+    type: FieldType.FILE,
+    nodeId: number,
+    value: FileMetadata[],
+}
+
+export type TextareaValue = {
+    type: FieldType.TEXTAREA,
+    nodeId: number,
+    value: string,
+}
+
 export type FieldValue =
-    string |
-    string[] |
-    FileMetadata |
-    FileMetadata[]
+    InputValue |
+    TextareaValue |
+    SelectValue |
+    FileValue
 ;
 
 export type FormData = {
