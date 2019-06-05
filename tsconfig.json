@@ -3,6 +3,7 @@
     "module": "es2015",
     "target": "es5",
     "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "removeComments": true,

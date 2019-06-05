@@ -14,17 +14,22 @@
   },
   "homepage": "https://github.com/croctools/sdk-js#readme",
   "dependencies": {
-    "rrweb": "^0.7.15",
+    "rrweb": "^0.7.16",
     "rrweb-snapshot": "^0.7.11"
   },
   "devDependencies": {
-    "rollup": "^1.13.0",
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.7",
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4",
+    "rollup": "^1.14.2",
     "rollup-plugin-node-resolve": "^5.0.1",
     "rollup-plugin-re": "^1.0.7",
     "rollup-plugin-replace": "^2.2.0",
     "rollup-plugin-typescript2": "^0.21.1",
     "rollup-plugin-uglify": "^6.0.2",
     "temp-dir": "^2.0.0",
+    "ts-node": "^8.2.0",
     "tslib": "^1.9.3",
     "typescript": "^3.5.1",
     "uglify-js": "^3.6.0"

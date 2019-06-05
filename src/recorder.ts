@@ -1,15 +1,14 @@
-import {record} from 'rrweb';
+import {record, mirror} from 'rrweb';
 
 import {
     cdataNode as CdataNodeSnapshot,
     commentNode as CommentNodeSnapshot,
     documentNode as DocumentNodeSnapshot,
     documentTypeNode as DocumentTypeNodeSnapshot,
-    elementNode as ElementNodeSnapshot,
-    serializedNodeWithId as SnapshotNode,
-    textNode as TextNodeSnapshot,
-    NodeType as NodeSnapshotType,
-    INode
+    elementNode as ElementNodeSnapshot, INode,
+    NodeType as RrwebNodeType,
+    serializedNodeWithId as RrwebNode,
+    textNode as TextNodeSnapshot
 } from 'rrweb-snapshot';
 
 import {
@@ -18,26 +17,26 @@ import {
     eventWithTime as RrwebEvent,
     fullSnapshotEvent as FullSnapshotEvent,
     incrementalData as IncrementalData,
+    incrementalSnapshotEvent as IncrementalSnapshotEvent,
     inputData as InputData,
     listenerHandler as StopRecorderCallback,
     metaEvent as MetaEvent,
     mouseInteractionData as MouseInteractionData,
-    MouseInteractions,
     mousemoveData as MouseMoveData,
     mutationData as MutationData,
     removedNodeMutation as RemovedNodeMutation,
     scrollData as MouseScrollData,
     textMutation as TextMutation,
-    viewportResizeData as ViewportResizeData,
-    incrementalSnapshotEvent as IncrementalSnapshotEvent
+    viewportResizeData as ViewportResizeData
 } from 'rrweb/typings/types';
 
 import {
     AttributeChange,
+    FieldType,
     FileMetadata,
     FormData,
     MouseOffset,
-    Node,
+    Node as NodeSnapshot,
     NodeAddition,
     NodeRemoval,
     NodeType,
@@ -164,13 +163,11 @@ export default class Recorder {
     }
 
     private handleSubmitEvent(event: Event) : void {
-        event.preventDefault();
-
         this.emit({
             timestamp: Date.now(),
             payload: {
                 type: PayloadType.FORM_SUBMITTED,
-                nodeId: (event.target as INode).__sn.id,
+                nodeId: mirror.getId(event.target as INode),
                 data: this.extractFormData(event.target as HTMLFormElement)
             }
         });
@@ -191,7 +188,7 @@ export default class Recorder {
                 case 'submit':
                 case 'reset':
                 case 'button':
-                    // ignored
+                    // ignore
                     break;
 
                 case 'file':
@@ -207,7 +204,11 @@ export default class Recorder {
                     }
 
                     if (files.length > 0) {
-                        data[element.name] = element.multiple ? files : files[0];
+                        data[element.name] = {
+                            type: FieldType.FILE,
+                            nodeId: mirror.getId((element as Node) as INode),
+                            files: files
+                        };
                     }
                     break;
 
@@ -222,23 +223,41 @@ export default class Recorder {
                     }
 
                     if (options.length > 0) {
-                        data[element.name] = element.multiple ? options : options[0];
+                        data[element.name] = {
+                            type: FieldType.SELECT,
+                            nodeId: mirror.getId((element as Node) as INode),
+                            options: options
+                        };
                     }
+                    break;
+
+                case 'textarea':
+                    data[element.name] = {
+                        type: FieldType.TEXTAREA,
+                        nodeId: mirror.getId((element as Node) as INode),
+                        // normalize linefeeds for textareas
+                        // https://infra.spec.whatwg.org/#normalize-newlines
+                        value: element.value.replace(/\r\n|\r/g, '\n')
+                    };
                     break;
 
                 case 'checkbox':
                 case 'radio':
                     if ((element as HTMLInputElement).checked) {
-                        data[element.name] = element.value;
+                        data[element.name] = {
+                            type: FieldType.INPUT,
+                            nodeId: mirror.getId((element as Node) as INode),
+                            value: element.value
+                        };
                     }
                     break;
 
-                case 'textarea':
-                    data[element.name] = element.value;
-                    break;
-
                 default:
-                    data[element.name] = element.value;
+                    data[element.name] = {
+                        type: FieldType.INPUT,
+                        nodeId: mirror.getId((element as Node) as INode),
+                        value: element.value
+                    };
                     break;
             }
         }
@@ -541,9 +560,9 @@ export default class Recorder {
         );
     }
 
-    private createNode(node: SnapshotNode) : Node {
+    private createNode(node: RrwebNode) : NodeSnapshot {
         switch (node.type) {
-            case NodeSnapshotType.Document:
+            case RrwebNodeType.Document:
                 const document = node as DocumentNodeSnapshot;
 
                 return {
@@ -554,7 +573,7 @@ export default class Recorder {
                     ),
                 };
 
-            case NodeSnapshotType.DocumentType:
+            case RrwebNodeType.DocumentType:
             case 1:
                 const documentType = node as DocumentTypeNodeSnapshot;
 
@@ -566,7 +585,7 @@ export default class Recorder {
                     systemId: documentType.systemId,
                 };
 
-            case NodeSnapshotType.Element:
+            case RrwebNodeType.Element:
                 const element = node as ElementNodeSnapshot;
 
                 return {
@@ -579,7 +598,7 @@ export default class Recorder {
                     ),
                 };
 
-            case NodeSnapshotType.Text:
+            case RrwebNodeType.Text:
                 const text = node as TextNodeSnapshot;
 
                 return {
@@ -588,7 +607,7 @@ export default class Recorder {
                     value: text.textContent
                 };
 
-            case NodeSnapshotType.CDATA:
+            case RrwebNodeType.CDATA:
                 const cdata = node as CdataNodeSnapshot;
 
                 return {
@@ -597,11 +616,11 @@ export default class Recorder {
                     value: cdata.textContent
                 };
 
-            case NodeSnapshotType.Comment:
+            case RrwebNodeType.Comment:
                 const comment = node as CommentNodeSnapshot;
 
                 return {
-                    type: NodeType.CDATA,
+                    type: NodeType.COMMENT,
                     id: node.id,
                     value: comment.textContent
                 };

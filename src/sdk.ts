@@ -1,9 +1,12 @@
 import Tracker from './tracker';
-import {ConsoleLogger, Logger, NullLogger} from './logging';
+import {ConsoleLogger, Logger, NullLogger, PrefixedLogger} from './logging';
 import {TokenScope} from './token';
-import {BeaconTransport, WebSocketTransport, WebStorageQueue} from "./transport";
+import {BeaconTransport, WebSocketTransport} from "./transport";
 import {Context} from "./context";
 import {NamespacedStorage} from "./storage";
+import {PayloadType} from "./beacon";
+import {BackoffPolicy} from "./retry";
+import {WebStorageQueue} from "./queue";
 
 type Config = {
     readonly apiKey: string;
@@ -73,24 +76,6 @@ export default class Sdk {
         logger.info('Context initialized');
         logger.log(`Token scope: ${this.config.tokenScope}`);
         logger.log(`${tab.isNew() ? 'New' : 'Current'} tab: ${tab.getId()}`);
-
-        const transport = this.getTransport();
-
-        /*transport.send({
-            clientId: '60003a15-b42d-4cc3-ad94-c9c5b36eda7e',
-            tenantId: '60003a18-b42d-4cc3-ad94-c9c5b36eda7e',
-            timestamp: Date.now(),
-            userToken: {
-                timestamp: Date.now(),
-                value: 'marcos'
-            },
-            payload: {
-                type: 'nothingChanged',
-                url: 'http://croct.com',
-                tabId: 'a89dcb02-1e04-4537-a89b-37fc087de90f',
-            }
-        });*/
-
     }
 
     private destroy() : void {
@@ -103,7 +88,7 @@ export default class Sdk {
         }
 
         if (this.transport) {
-            this.transport.disconnect();
+            this.transport.close();
         }
 
         const logger = this.getLogger();
@@ -120,7 +105,20 @@ export default class Sdk {
     }
 
     private createTracker() : Tracker {
-        return new Tracker(this.getContext(), this.getLogger());
+        const context = this.getContext();
+        const tab = context.getCurrentTab();
+
+        return new Tracker(
+            this.getContext(),
+            this.getTransport(),
+            new WebStorageQueue(
+                this.getTabStorage('queue'),
+                tab.getId(),
+            ),
+            50,
+            0.5,
+            this.getLogger('Tracker')
+        );
     }
 
     private getContext() : Context {
@@ -139,9 +137,13 @@ export default class Sdk {
         )
     }
 
-    private getLogger() : Logger {
+    private getLogger(prefix?: string) : Logger {
         if (this.logger === undefined) {
             this.logger = this.createLogger();
+        }
+
+        if (prefix) {
+            return new PrefixedLogger(this.logger, prefix);
         }
 
         return this.logger;
@@ -160,18 +162,12 @@ export default class Sdk {
     }
 
     private createTransport() : BeaconTransport {
-        const context = this.getContext();
-        const tab = context.getCurrentTab();
-
         return new WebSocketTransport(
-            'ws://127.0.0.1:8080/track',
+            'ws://127.0.0.1:8080/track/' + this.config.apiKey,
             [],
-            new WebStorageQueue(
-                this.getTabStorage('queues'),
-                tab.getId()
-            ),
-            5000,
-            this.getLogger()
+            new BackoffPolicy(),
+            2000,
+            this.getLogger('Transporter')
         )
     }
 

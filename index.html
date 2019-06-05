@@ -35,8 +35,12 @@
 </form>
 
 <script>
-    croct.install({apiKey: 'api_key', debug: true});
-    croct.user.login('marcos');
+
+
+    console.log(croct.uuid(window.location.hostname));
+
+    croct.install({apiKey: '31c19e96-3ff2-4475-a20a-9ada44d9e1b9', debug: true});
+    //croct.user.login('marcos');
     croct.tracker.enable();
 
     document.getElementById('enabled').onchange = function() {

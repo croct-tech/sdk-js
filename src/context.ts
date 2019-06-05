@@ -1,6 +1,22 @@
 import {InMemoryTokenStorage, ReplicatedTokenStorage, Token, TokenScope, TokenStorage, WebTokenStorage} from "./token";
 import {Tab} from "./tab";
 
+function uuid() {
+    let uuid = '';
+
+    for (let i = 0; i < 32; i++) {
+        const random = Math.random() * 16 | 0;
+
+        if (i == 8 || i == 12 || i == 16 || i == 20) {
+            uuid += "-";
+        }
+
+        uuid += (i == 12 ? 4 : (i == 16 ? (random & 3 | 8) : random)).toString(16);
+    }
+
+    return uuid;
+}
+
 export class Context {
     private readonly tab: Tab;
     private readonly tokenStorage: TokenStorage;
@@ -12,7 +28,7 @@ export class Context {
 
     static initialize(tabStorage : Storage, globalStorage: Storage, tokenScope: TokenScope) {
         const tabId : string | null = tabStorage.getItem('tab');
-        const tab = new Tab(tabId || Date.now() + '', tabId === null);
+        const tab = new Tab(tabId || uuid(), tabId === null);
 
         tabStorage.removeItem('tab');
 

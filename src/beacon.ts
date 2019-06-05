@@ -72,7 +72,7 @@ export type InputValue = {
 export type SelectValue = {
     type: FieldType.SELECT,
     nodeId: number,
-    value: string[],
+    options: string[],
 }
 
 export type FileMetadata = {
@@ -85,7 +85,7 @@ export type FileMetadata = {
 export type FileValue = {
     type: FieldType.FILE,
     nodeId: number,
-    value: FileMetadata[],
+    files: FileMetadata[],
 }
 
 export type TextareaValue = {
@@ -332,7 +332,6 @@ type OnsiteBeaconPayload = OnsitePayload & {
 export type BeaconPayload = OnsiteBeaconPayload
 
 export type Beacon = {
-    tenantId: string
     userToken: Token | null
     timestamp: number
     payload: BeaconPayload

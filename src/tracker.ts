@@ -4,21 +4,40 @@ import {Context} from "./context";
 import Recorder, {RecorderEvent} from "./recorder";
 import {Beacon, PayloadType} from "./beacon";
 import {Tab} from "./tab";
+import {BeaconPromise, BeaconTransport} from "./transport";
+import {BeaconQueue} from "./queue";
 
 class Tracker {
     private readonly context: Context;
-    private readonly recorder: Recorder;
+    private readonly transport: BeaconTransport;
+    private readonly queue: BeaconQueue;
     private readonly logger: Logger;
+    private readonly recorder: Recorder;
+    private readonly maxQueueLength: number;
+    private readonly underrunThreshold: number;
     private initialized: boolean = false;
+    private enabled: boolean = false;
+    private promise: BeaconPromise | undefined;
 
-    constructor(context: Context, logger: Logger) {
+    constructor(
+        context: Context,
+        transport: BeaconTransport,
+        queue: BeaconQueue,
+        maxQueueLength: number,
+        underrunThreshold: number,
+        logger: Logger
+    ) {
         this.context = context;
-        this.recorder = new Recorder(logger);
+        this.transport = transport;
+        this.queue = queue;
+        this.maxQueueLength = maxQueueLength;
+        this.underrunThreshold = underrunThreshold;
         this.logger = logger;
+        this.recorder = new Recorder(logger);
     }
 
     isEnabled() {
-        return this.recorder.isRecording();
+        return this.enabled;
     }
 
     enable() {
@@ -26,17 +45,23 @@ class Tracker {
             return;
         }
 
+        this.enabled = true;
+
         this.logger.log('Tracker enabled');
 
         this.initialize();
 
         this.recorder.start();
+
+        this.flush();
     }
 
     disable() {
         if (!this.isEnabled()) {
             return;
         }
+
+        this.enabled = false;
 
         this.recorder.stop();
 
@@ -50,7 +75,6 @@ class Tracker {
             this.send({
                 userToken: this.context.getToken(),
                 timestamp: Date.now(),
-                tenantId: 'tenant_id',
                 payload: {
                     type: PayloadType.TAB_OPENED,
                     tabId: tab.getId(),
@@ -62,7 +86,6 @@ class Tracker {
         this.send({
             userToken: this.context.getToken(),
             timestamp: Date.now(),
-            tenantId: 'tenant_id',
             payload: {
                 type: PayloadType.PAGE_OPENED,
                 tabId: tab.getId(),
@@ -101,24 +124,63 @@ class Tracker {
 
     private handle(event: RecorderEvent) : void {
         const tab = this.context.getCurrentTab();
-        const beacon : Beacon = {
+
+        this.send({
             userToken: this.context.getToken(),
             timestamp: event.timestamp,
-            tenantId: 'tenant_id',
             payload: {
                 tabId: tab.getId(),
                 url: tab.getUrl(),
                 ...event.payload
             }
-        };
-
-        this.send(beacon);
+        });
     }
 
     private send(beacon: Beacon) : void {
-        console.log(beacon);
+        this.enqueue(beacon);
+        this.flush();
     }
 
+    private enqueue(beacon: Beacon) : void {
+        if (this.queue.length() >= this.maxQueueLength) {
+            this.recorder.stop();
+
+            return;
+        }
+
+        this.queue.push(beacon);
+    }
+
+    private dequeue() : void {
+        this.queue.shift();
+
+        const minCapacity = this.maxQueueLength * this.underrunThreshold;
+
+        if (this.isEnabled() && this.queue.length() <= minCapacity) {
+            this.recorder.start();
+        }
+    }
+
+    private flush() : void {
+        if (this.promise) {
+            return;
+        }
+
+        const beacon = this.queue.peek();
+
+        if (beacon === null) {
+            return;
+        }
+
+        this.promise = this.transport.send(beacon);
+
+        this.promise.finally(() => {
+            delete this.promise;
+
+            this.dequeue();
+            this.flush();
+        });
+    }
 }
 
 export default Tracker;

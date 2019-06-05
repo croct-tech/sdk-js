@@ -1,7 +1,17 @@
 import Sdk from "./sdk";
 import {Token, TokenScope} from "./token";
+import {Md5} from "md5-typescript";
+
+
+
 
 export default {
+    uuid: function(value: string) {
+        const hash = Md5.init(value);
+
+        return [hash.slice(0, 8), hash.slice(8, 12), hash.slice(12, 16), hash.slice(16, 20), hash.slice(20)].join('-');
+
+    },
     install(config: any) : void {
         if (typeof config !== 'object') {
             throw new Error('The configuration must a key-value map.')

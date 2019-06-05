@@ -1,190 +1,298 @@
 import {Beacon} from "./beacon";
 import {Logger, NullLogger} from "./logging";
+import {RetryPolicy} from "./retry";
+
+type TransmissionCallback = {
+    (beacon: Beacon, error?: Error) : void
+};
+
+class BeaconTransmission {
+    readonly id: string;
+    readonly beacon: Beacon;
+    private readonly successCallbacks: TransmissionCallback[] = [];
+    private readonly failureCallbacks: TransmissionCallback[] = [];
+    currentAttempt: number = 0;
+    private resolved: boolean = false;
+    private error?: Error;
+
+    constructor(id: string, beacon: Beacon) {
+        this.id = id;
+        this.beacon = beacon;
+    }
+
+    get attempt() : number {
+        return this.currentAttempt;
+    }
+
+    set attempt(attempt: number){
+        if (attempt < this.currentAttempt) {
+            throw new Error(`The attempt number must be greater than ${this.currentAttempt}`);
+        }
+
+        this.currentAttempt = attempt;
+    }
+
+    succeeded() : void {
+        if (this.resolved) {
+            throw new Error('Transmission already resolved');
+        }
+
+        this.resolved = true;
+
+        for (let callback of this.successCallbacks) {
+            callback(this.beacon);
+        }
+    }
+
+    failed(error: Error) : void {
+        if (this.resolved) {
+            throw new Error('Transmission already resolved');
+        }
+
+        this.resolved = true;
+        this.error = error;
+
+        for (let callback of this.failureCallbacks) {
+            callback(this.beacon, error);
+        }
+    }
+
+    onSuccess(callback: TransmissionCallback) : BeaconTransmission {
+        if (!this.resolved) {
+            this.successCallbacks.push(callback);
+
+            return this;
+        }
+
+        if (!this.error) {
+            callback(this.beacon);
+        }
+
+        return this;
+    }
+
+    onFailure(callback: TransmissionCallback): BeaconTransmission {
+        if (!this.resolved) {
+            this.failureCallbacks.push(callback);
+
+            return this;
+        }
+
+        if (this.error) {
+            callback(this.beacon, this.error);
+        }
+
+        return this;
+    }
+}
+
+export class BeaconPromise {
+    private readonly transmission: BeaconTransmission;
+
+    constructor(transmission: BeaconTransmission) {
+        this.transmission = transmission;
+    }
+
+    then(callback: TransmissionCallback) : BeaconPromise {
+        this.transmission.onSuccess(callback);
+
+        return this;
+    }
+
+    catch(callback: TransmissionCallback) : BeaconPromise {
+        this.transmission.onFailure(callback);
+
+        return this;
+    }
+
+    finally(callback: TransmissionCallback) : BeaconPromise {
+        return this.then(callback).catch(callback);
+    }
+}
 
 export interface BeaconTransport {
-    connect() : void;
-    disconnect() : void;
-    send(beacon: Beacon) : void;
+    send(beacon: Beacon) : BeaconPromise;
+    close() : void;
 }
 
-interface BeaconQueue {
-    push(beacon: Beacon) : void;
-    pop() : Beacon;
-    isEmpty() : boolean;
-    length() : number;
+function ab2str(buf: number[]) : string {
+    return String.fromCharCode.apply(null, new Uint8Array(buf));
 }
 
-export class InMemoryQueue implements BeaconQueue {
-    private queue: Beacon[] = [];
-
-    isEmpty(): boolean {
-        return this.queue.length === 0;
-    }
-
-    pop(): Beacon {
-        const beacon = this.queue.pop();
-
-        if (!beacon) {
-            throw new Error('The queue is empty.');
-        }
-
-        return beacon;
-    }
-
-    push(beacon: Beacon): void {
-        this.queue.unshift(beacon);
-    }
-
-    length(): number {
-        return this.queue.length;
-    }
-}
-
-export class WebStorageQueue implements BeaconQueue {
-    private cache: Beacon[] = [];
-    private readonly storage: Storage;
-    private readonly key: string;
-
-    constructor(storage: Storage, key: string = 'queue') {
-        this.storage = storage;
-        this.key = key;
-    }
-
-    isEmpty(): boolean {
-        return this.length() === 0;
-    }
-
-    length(): number {
-        return this.queue.length;
-    }
-
-    pop(): Beacon {
-        const beacon = this.queue.pop();
-
-        if (!beacon) {
-            throw new Error('The queue is empty.');
-        }
-
-        this.flush();
-
-        return beacon;
-    }
-
-    push(beacon: Beacon): void {
-        this.queue.unshift(beacon);
-
-        this.flush();
-    }
-
-    private get queue() : Beacon[] {
-        if (!this.cache) {
-            this.cache = this.load();
-        }
-
-        return this.cache;
-    }
-
-    private flush() : void {
-        this.storage.setItem(this.key, JSON.stringify(this.cache));
-    }
-
-    private load() : Beacon[] {
-        let data = this.storage.getItem(this.key);
-
-        if (data === null) {
-            return [];
-        }
-
-        try {
-            return JSON.parse(data);
-        } catch (error) {
-            return [];
-        }
-    }
+function str2ab(str: string) : ArrayBuffer {
+    const encoder = new TextEncoder();
+    return encoder.encode(str).buffer;
 }
 
 export class WebSocketTransport implements BeaconTransport {
     private readonly url: string;
     private readonly protocols : string | string[];
-    private readonly retryDelay: number;
+    private readonly retryPolicy: RetryPolicy<Beacon>;
+    private readonly ackTimeout: number;
     private readonly logger: Logger;
     private connection: WebSocket;
-    private queue: BeaconQueue;
+    private transmission?: BeaconTransmission;
+    private queue: BeaconTransmission[] = [];
 
     constructor(
         url: string,
-        protocols: string | string[] = [],
-        queue?: BeaconQueue,
-        retryDelay: number = 1000,
+        protocols: string | string[],
+        retryPolicy: RetryPolicy<Beacon>,
+        ackTimeout: number,
         logger?: Logger
     ) {
         this.url = url;
         this.protocols = protocols || [];
-        this.queue = queue || new InMemoryQueue();
-        this.retryDelay = retryDelay;
+        this.retryPolicy = retryPolicy;
+        this.ackTimeout = ackTimeout;
         this.logger = logger || new NullLogger();
     }
 
-    send(beacon: Beacon): void {
-        this.queue.push(beacon);
+    send(beacon: Beacon): BeaconPromise {
+        const transmission = new BeaconTransmission(Date.now() + '', beacon);
 
-        this.flush();
+        this.queue.unshift(transmission);
+
+        setTimeout(() => this.flush(), 0);
+
+        return new BeaconPromise(transmission);
     }
 
     private flush() : void {
+        if (this.transmission) {
+            return;
+        }
+
         this.logger.info('Flushing beacons...');
-        this.logger.info(`Queue length: ${this.queue.length()}`);
+        this.logger.info(`Queue length: ${this.queue.length}`);
 
-        while (!this.queue.isEmpty()) {
-            if (!this.connection) {
-                this.connect();
+        this.transmission = this.queue.pop();
 
-                return;
-            }
-
-            if (this.connection.readyState !== WebSocket.OPEN) {
-                this.logger.info('Waiting for connection...');
-
-                return;
-            }
-
-            const beacon = this.queue.pop();
-
-            this.logger.info('Sending beacon...', beacon);
-
-            this.connection.send(JSON.stringify(beacon));
+        if (this.transmission) {
+            this.resume();
         }
     }
 
-    connect() : void {
-        if (this.connection) {
+    private resume(error?: Error) {
+        if (!this.transmission) {
+            this.flush();
+
+            return;
+        }
+
+        const {id, attempt, beacon} = this.transmission;
+
+        if (error) {
+            if (!this.retryPolicy.shouldRetry(beacon, attempt, error)) {
+                this.logger.log('Max attempts exhausted');
+
+                this.transmission.failed(error);
+
+                delete this.transmission;
+
+                this.flush();
+
+                return;
+            }
+
+            const nextAttempt = attempt + 1;
+
+            this.transmission.attempt = nextAttempt;
+
+            const delay = this.retryPolicy.getDelay(nextAttempt);
+
+            this.logger.log(`Retrying in ${delay / 1000} seconds...`);
+
+            this.schedule(id, nextAttempt, delay, () => this.resume());
+
+            return;
+        }
+
+        this.logger.info('Sending beacon...', {
+            transmission: id,
+            attempt: attempt,
+            beacon: beacon,
+        });
+
+        if (!this.connection) {
+            this.connect();
+
+            return;
+        }
+
+        if (this.connection.readyState !== WebSocket.OPEN) {
+            this.logger.info('Waiting for connection...');
+
+            return;
+        }
+
+        this.connection.send(str2ab(JSON.stringify({
+            id: id,
+            data: beacon
+        })));
+
+        this.schedule(id, attempt, this.ackTimeout, () => {
+            this.resume(new Error('Acknowledgement timeout'));
+        });
+    }
+
+    private schedule(id: string, attempt: number, delay: number, callback: {() : void}) : void {
+        setTimeout(() =>  {
+            if (this.transmission
+                && this.transmission.id === id
+                && this.transmission.attempt === attempt) {
+                callback();
+            }
+        }, delay);
+    }
+
+    private acknowledge(transmissionId: string) {
+        const transmission = this.transmission;
+
+        if (!transmission || transmission.id !== transmissionId) {
+            this.logger.info(`Delayed acknowledgement: ${transmissionId}`);
+
+            return;
+        }
+
+        this.logger.info(`Acknowledgement received: ${transmissionId}`);
+
+        delete this.transmission;
+
+        transmission.succeeded();
+    }
+
+    private connect() : void {
+        if (this.connection && this.connection.readyState !== WebSocket.CLOSED) {
             return;
         }
 
         this.logger.info('Connecting to websocket server...');
 
-        const connection = new WebSocket(this.url, this.protocols);
+        let connection = new WebSocket(this.url, this.protocols);
+        connection.binaryType = 'arraybuffer';
 
         connection.onopen = () => {
             this.logger.info('Connection established');
-            this.flush();
+
+            this.resume();
         };
 
         connection.onclose = (event: CloseEvent) => {
             this.logger.error(`Connection closed, reason: ${event.reason || 'unknown'}`);
 
-            if (this.retryDelay > 0) {
-                this.logger.info(`Reconnecting in ${Math.floor(this.retryDelay / 1000)} seconds...`);
+            delete this.connection;
 
-                setTimeout(() => this.connect(), this.retryDelay);
-            }
+            this.resume(new Error(event.reason || 'Unknown error'));
         };
 
         connection.onmessage = (event: MessageEvent) => {
-            this.logger.error('Message received: ' + event.data);
+            this.acknowledge(ab2str(event.data));
+
+            this.resume();
         };
 
-        connection.onerror = () => {
+        connection.onerror = (event) => {
             this.logger.error('Connection error, closing...');
 
             if (connection.readyState !== WebSocket.OPEN) {
@@ -195,7 +303,7 @@ export class WebSocketTransport implements BeaconTransport {
         this.connection = connection;
     }
 
-    disconnect() : void {
+    close() : void {
         if (!this.connection) {
             return;
         }
@@ -205,9 +313,9 @@ export class WebSocketTransport implements BeaconTransport {
         this.connection.onerror = null;
         this.connection.onopen = null;
 
-        this.connection.close();
+        delete this.transmission;
 
-        delete this.connection;
+        this.connection.close();
 
         this.logger.info('Disconnected from websocket server.');
     }
