@@ -163,7 +163,7 @@ export default class Sdk {
 
     private createTransport() : BeaconTransport {
         return new WebSocketTransport(
-            'ws://127.0.0.1:8080/track/' + this.config.apiKey,
+            'wss://croct.local:8443/track/' + this.config.apiKey,
             [],
             new BackoffPolicy(),
             2000,
