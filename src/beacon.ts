@@ -14,6 +14,7 @@ export enum PayloadType {
     MOUSE_RELEASED = 'mouseReleased',
     NOTHING_CHANGED = 'nothingChanged',
     PAGE_CHANGED = 'pageChanged',
+    PAGE_LOADED = 'pageLoaded',
     PAGE_SNAPSHOT_CAPTURED = 'pageSnapshotCaptured',
     PAGE_OPENED = 'pageOpened',
     PAGE_VISIBILITY_CHANGED = 'pageVisibilityChanged',
@@ -108,7 +109,9 @@ export type FormData = {
 export type FormSubmitted = {
     type: PayloadType.FORM_SUBMITTED
     nodeId: number
-    data: FormData
+    formId?: string
+    formName?: string
+    formData: FormData
 }
 
 export type InputChanged = {
@@ -254,6 +257,14 @@ export type PageSnapshotCaptured = {
     viewportSize: Dimension
     scrollOffset: Point
     content: Node
+}
+
+export type PageLoaded = {
+    type: PayloadType.PAGE_LOADED
+    title: string
+    description: string
+    keywords: string[]
+    lastModified: number
 }
 
 export type PageOpened = {
