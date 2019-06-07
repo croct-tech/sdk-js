@@ -257,13 +257,13 @@ export type PageSnapshotCaptured = {
     viewportSize: Dimension
     scrollOffset: Point
     content: Node
+    version: number
 }
 
 export type PageLoaded = {
     type: PayloadType.PAGE_LOADED
     title: string
     description: string
-    keywords: string[]
     lastModified: number
 }
 
