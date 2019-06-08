@@ -1,33 +1,40 @@
-import {record, mirror} from 'rrweb';
+import {
+    record,
+    mirror,
+    MouseInteractions as RrwebMouseInteractions,
+    IncrementalSource as RrwebIncrementalSource,
+    EventType as RrwebEventType,
+} from 'rrweb';
 
 import {
-    cdataNode as CdataNodeSnapshot,
-    commentNode as CommentNodeSnapshot,
-    documentNode as DocumentNodeSnapshot,
-    documentTypeNode as DocumentTypeNodeSnapshot,
-    elementNode as ElementNodeSnapshot, INode,
+    cdataNode as RrwebCdataNode,
+    commentNode as RrwebCommentNode,
+    documentNode as RrwebDocumentNode,
+    textNode as RrwebTextNode,
+    documentTypeNode as RrwebDocumentTypeNode,
+    elementNode as RrwebElementNode,
+    INode as RrwebINode,
     NodeType as RrwebNodeType,
     serializedNodeWithId as RrwebNode,
-    textNode as TextNodeSnapshot
 } from 'rrweb-snapshot';
 
 import {
-    addedNodeMutation as AddedNodeMutation,
-    attributeMutation as AttributeMutation,
+    addedNodeMutation as RrwebAddedNodeMutation,
+    attributeMutation as RrwebAttributeMutation,
     eventWithTime as RrwebEvent,
-    fullSnapshotEvent as FullSnapshotEvent,
-    incrementalData as IncrementalData,
-    incrementalSnapshotEvent as IncrementalSnapshotEvent,
-    inputData as InputData,
+    fullSnapshotEvent as RrwebFullSnapshotEvent,
+    incrementalData as RrwebIncrementalData,
+    incrementalSnapshotEvent as RrwebIncrementalSnapshotEvent,
+    inputData as RrwebInputData,
     listenerHandler as StopRecorderCallback,
-    metaEvent as MetaEvent,
-    mouseInteractionData as MouseInteractionData,
-    mousemoveData as MouseMoveData,
-    mutationData as MutationData,
-    removedNodeMutation as RemovedNodeMutation,
-    scrollData as MouseScrollData,
-    textMutation as TextMutation,
-    viewportResizeData as ViewportResizeData
+    metaEvent as RrwebMetaEvent,
+    mouseInteractionData as RrwebMouseInteractionData,
+    mousemoveData as RrwebMouseMoveData,
+    mutationData as RrwebMutationData,
+    removedNodeMutation as RrwebRemovedNodeMutation,
+    scrollData as RrwebMouseScrollData,
+    textMutation as RrwebTextMutation,
+    viewportResizeData as RrwebViewportResizeData
 } from 'rrweb/typings/types';
 
 import {
@@ -63,6 +70,7 @@ export default class Recorder {
     private pendingEvents: RrwebEvent[] = [];
     private listeners: RecorderListener[] = [];
     private logger: Logger;
+    private version: number = 0;
 
     constructor(logger: Logger) {
         this.logger = logger;
@@ -78,7 +86,7 @@ export default class Recorder {
         }
 
         const stopRecording: StopCallback | undefined = record({
-            emit: this.handleRrwebEvent.bind(this),
+            emit: this.getEmitter()
         });
 
         if (!stopRecording) {
@@ -117,6 +125,27 @@ export default class Recorder {
         if (index >= 0) {
             this.listeners.splice(index, 1);
         }
+    }
+
+    private getEmitter() : {(event: RrwebEvent) : void} {
+        let emulatedEvents: RrwebEvent[] = [];
+
+        if (this.version === 0 && document.readyState !== 'loading') {
+            emulatedEvents.push({
+                type: RrwebEventType.DomContentLoaded,
+                timestamp: Date.now(),
+                data: {}
+            });
+        }
+
+        return event => {
+            if (emulatedEvents.length > 0) {
+                emulatedEvents.map(this.handleRrwebEvent.bind(this));
+                emulatedEvents = [];
+            }
+
+            this.handleRrwebEvent(event);
+        };
     }
 
     private listen(event: string, listener: EventListener, capture: boolean = false) : void {
@@ -163,12 +192,16 @@ export default class Recorder {
     }
 
     private handleSubmitEvent(event: Event) : void {
+        const form = event.target as HTMLFormElement;
+
         this.emit({
             timestamp: Date.now(),
             payload: {
                 type: PayloadType.FORM_SUBMITTED,
-                nodeId: mirror.getId(event.target as INode),
-                data: this.extractFormData(event.target as HTMLFormElement)
+                nodeId: mirror.getId(event.target as RrwebINode),
+                formData: this.extractFormData(form),
+                formName: form.name,
+                formId: form.id,
             }
         });
     }
@@ -206,7 +239,7 @@ export default class Recorder {
                     if (files.length > 0) {
                         data[element.name] = {
                             type: FieldType.FILE,
-                            nodeId: mirror.getId((element as Node) as INode),
+                            nodeId: mirror.getId((element as Node) as RrwebINode),
                             files: files
                         };
                     }
@@ -225,7 +258,7 @@ export default class Recorder {
                     if (options.length > 0) {
                         data[element.name] = {
                             type: FieldType.SELECT,
-                            nodeId: mirror.getId((element as Node) as INode),
+                            nodeId: mirror.getId((element as Node) as RrwebINode),
                             options: options
                         };
                     }
@@ -234,7 +267,7 @@ export default class Recorder {
                 case 'textarea':
                     data[element.name] = {
                         type: FieldType.TEXTAREA,
-                        nodeId: mirror.getId((element as Node) as INode),
+                        nodeId: mirror.getId((element as Node) as RrwebINode),
                         // normalize linefeeds for textareas
                         // https://infra.spec.whatwg.org/#normalize-newlines
                         value: element.value.replace(/\r\n|\r/g, '\n')
@@ -246,7 +279,7 @@ export default class Recorder {
                     if ((element as HTMLInputElement).checked) {
                         data[element.name] = {
                             type: FieldType.INPUT,
-                            nodeId: mirror.getId((element as Node) as INode),
+                            nodeId: mirror.getId((element as Node) as RrwebINode),
                             value: element.value
                         };
                     }
@@ -255,7 +288,7 @@ export default class Recorder {
                 default:
                     data[element.name] = {
                         type: FieldType.INPUT,
-                        nodeId: mirror.getId((element as Node) as INode),
+                        nodeId: mirror.getId((element as Node) as RrwebINode),
                         value: element.value
                     };
                     break;
@@ -267,23 +300,24 @@ export default class Recorder {
 
     private createPayload(event: RrwebEvent) : OnsitePayload | null {
         switch (event.type) {
-            //case EventType.DomContentLoaded:
-            case 0:
-                // ignored
-                break;
+            case RrwebEventType.DomContentLoaded:
+                return {
+                    type: PayloadType.PAGE_LOADED,
+                    title: document.title,
+                    lastModified: Date.parse(document.lastModified),
+                };
 
-            //case EventType.Load:
-            case 1:
+            case RrwebEventType.Load:
                 // ignored
-                break;
+                return null;
 
-            //case EventType.FullSnapshot:
-            case 2:
-                const meta = (this.pendingEvents.pop() as MetaEvent).data;
-                const {node, initialOffset} = (event as FullSnapshotEvent).data;
+            case RrwebEventType.FullSnapshot:
+                const meta = (this.pendingEvents.pop() as RrwebMetaEvent).data;
+                const {node, initialOffset} = (event as RrwebFullSnapshotEvent).data;
 
                 return {
                     type: PayloadType.PAGE_SNAPSHOT_CAPTURED,
+                    version: this.version++,
                     viewportSize: {
                         width: meta.width,
                         height: meta.height,
@@ -295,24 +329,20 @@ export default class Recorder {
                     content: this.createNode(node)
                 };
 
-            //case EventType.IncrementalSnapshot:
-            case 3:
-                return this.createIncrementalPayload((event as IncrementalSnapshotEvent).data);
+            case RrwebEventType.IncrementalSnapshot:
+                return this.createIncrementalPayload((event as RrwebIncrementalSnapshotEvent).data);
 
-            //case EventType.Meta:
-            case 4:
+            case RrwebEventType.Meta:
                 this.pendingEvents.push(event);
-                break;
-        }
 
-        return null;
+                return null;
+        }
     }
 
-    private createIncrementalPayload(data: IncrementalData) : OnsitePayload {
+    private createIncrementalPayload(data: RrwebIncrementalData) : OnsitePayload {
         switch (data.source) {
-            //case IncrementalSource.Mutation:
-            case 0:
-                const mutation = data as MutationData;
+            case RrwebIncrementalSource.Mutation:
+                const mutation = data as RrwebMutationData;
 
                 return {
                     type: PayloadType.PAGE_CHANGED,
@@ -321,9 +351,8 @@ export default class Recorder {
                     attributesChanged: this.createAttributeChanges(mutation.attributes),
                     textsChanged: this.createTextChanges(mutation.texts),
                 };
-            //case IncrementalSource.MouseMove:
-            case 1:
-                const mouseMove = data as MouseMoveData;
+            case RrwebIncrementalSource.MouseMove:
+                const mouseMove = data as RrwebMouseMoveData;
 
                 return {
                     type: PayloadType.MOUSE_MOVED,
@@ -339,13 +368,11 @@ export default class Recorder {
                     ),
                 };
 
-            //case IncrementalSource.MouseInteraction:
-            case 2:
-                return this.createMouseInteractionPayload(data as MouseInteractionData);
+            case RrwebIncrementalSource.MouseInteraction:
+                return this.createMouseInteractionPayload(data as RrwebMouseInteractionData);
 
-            //case IncrementalSource.Scroll:
-            case 3:
-                const mouseScroll = data as MouseScrollData;
+            case RrwebIncrementalSource.Scroll:
+                const mouseScroll = data as RrwebMouseScrollData;
 
                 return {
                     type: PayloadType.ELEMENT_SCROLLED,
@@ -356,9 +383,8 @@ export default class Recorder {
                     }
                 };
 
-            //case IncrementalSource.ViewportResize:
-            case 4:
-                const viewportResize = data as ViewportResizeData;
+            case RrwebIncrementalSource.ViewportResize:
+                const viewportResize = data as RrwebViewportResizeData;
 
                 return {
                     type: PayloadType.VIEWPORT_RESIZED,
@@ -368,9 +394,8 @@ export default class Recorder {
                     }
                 };
 
-            //case IncrementalSource.Input:
-            case 5:
-                const input = data as InputData;
+            case RrwebIncrementalSource.Input:
+                const input = data as RrwebInputData;
 
                 return {
                     type: PayloadType.INPUT_CHANGED,
@@ -378,17 +403,12 @@ export default class Recorder {
                     checked: input.isChecked,
                     value: input.text
                 };
-
-            default:
-                // @todo: remove it
-                throw new Error('Unexpected incremental source.');
         }
     }
 
-    private createMouseInteractionPayload(data: MouseInteractionData) : OnsitePayload {
+    private createMouseInteractionPayload(data: RrwebMouseInteractionData) : OnsitePayload {
         switch (data.type) {
-            //case MouseInteractions.MouseUp:
-            case 0:
+            case RrwebMouseInteractions.MouseUp:
                 return {
                     type: PayloadType.MOUSE_RELEASED,
                     nodeId: data.id,
@@ -398,8 +418,7 @@ export default class Recorder {
                     }
                 };
 
-            //case MouseInteractions.MouseDown:
-            case 1:
+            case RrwebMouseInteractions.MouseDown:
                 return {
                     type: PayloadType.MOUSE_PRESSED,
                     nodeId: data.id,
@@ -409,8 +428,7 @@ export default class Recorder {
                     }
                 };
 
-            //case MouseInteractions.Click:
-            case 2:
+            case RrwebMouseInteractions.Click:
                 return {
                     type: PayloadType.MOUSE_CLICKED,
                     nodeId: data.id,
@@ -420,8 +438,7 @@ export default class Recorder {
                     }
                 };
 
-            //case MouseInteractions.ContextMenu:
-            case 3:
+            case RrwebMouseInteractions.ContextMenu:
                 return {
                     type: PayloadType.CONTEXT_MENU_OPENED,
                     nodeId: data.id,
@@ -431,8 +448,7 @@ export default class Recorder {
                     }
                 };
 
-            //case MouseInteractions.DblClick:
-            case 4:
+            case RrwebMouseInteractions.DblClick:
                 return {
                     type: PayloadType.MOUSE_DOUBLE_CLICKED,
                     nodeId: data.id,
@@ -442,22 +458,19 @@ export default class Recorder {
                     }
                 };
 
-            //case MouseInteractions.Focus:
-            case 5:
+            case RrwebMouseInteractions.Focus:
                 return {
                     type: PayloadType.ELEMENT_FOCUSED,
                     nodeId: data.id,
                 };
 
-            //case MouseInteractions.Blur:
-            case 6:
+            case RrwebMouseInteractions.Blur:
                 return {
                     type: PayloadType.ELEMENT_UNFOCUSED,
                     nodeId: data.id,
                 };
 
-            //case MouseInteractions.TouchStart:
-            case 7:
+            case RrwebMouseInteractions.TouchStart:
                 return {
                     type: PayloadType.TOUCH_STARTED,
                     nodeId: data.id,
@@ -467,8 +480,7 @@ export default class Recorder {
                     }
                 };
 
-            //case MouseInteractions.TouchMove:
-            case 8:
+            case RrwebMouseInteractions.TouchMove:
                 return {
                     type: PayloadType.TOUCH_MOVED,
                     nodeId: data.id,
@@ -478,8 +490,7 @@ export default class Recorder {
                     }
                 };
 
-            //case MouseInteractions.TouchEnd:
-            case 9:
+            case RrwebMouseInteractions.TouchEnd:
                 return {
                     type: PayloadType.TOUCH_ENDED,
                     nodeId: data.id,
@@ -488,14 +499,10 @@ export default class Recorder {
                         y: data.y
                     }
                 };
-
-            default:
-                // @todo: remove it
-                throw new Error('Unexpected mouse interaction type');
         }
     }
 
-    private createNodeAdditions(mutations: AddedNodeMutation[]) : NodeAddition[] {
+    private createNodeAdditions(mutations: RrwebAddedNodeMutation[]) : NodeAddition[] {
         const previous: {[key: number]: number} = {};
         const next: {[key: number]: number} = {};
 
@@ -533,7 +540,7 @@ export default class Recorder {
         return additions;
     }
 
-    private createNodeRemovals(mutations: RemovedNodeMutation[]) : NodeRemoval[] {
+    private createNodeRemovals(mutations: RrwebRemovedNodeMutation[]) : NodeRemoval[] {
         return mutations.map(
             (mutation) : NodeRemoval => ({
                 nodeId: mutation.id,
@@ -542,7 +549,7 @@ export default class Recorder {
         );
     }
 
-    private createTextChanges(mutations: TextMutation[]) : TextChange[] {
+    private createTextChanges(mutations: RrwebTextMutation[]) : TextChange[] {
         return mutations.map(
             (mutation) : TextChange => ({
                 nodeId: mutation.id,
@@ -551,7 +558,7 @@ export default class Recorder {
         );
     }
 
-    private createAttributeChanges(mutations: AttributeMutation[]) : AttributeChange[] {
+    private createAttributeChanges(mutations: RrwebAttributeMutation[]) : AttributeChange[] {
         return mutations.map(
             (mutation) : AttributeChange => ({
                 nodeId: mutation.id,
@@ -563,66 +570,66 @@ export default class Recorder {
     private createNode(node: RrwebNode) : NodeSnapshot {
         switch (node.type) {
             case RrwebNodeType.Document:
-                const document = node as DocumentNodeSnapshot;
+                const documentNode = node as RrwebDocumentNode;
 
                 return {
                     type: NodeType.DOCUMENT,
                     id: node.id,
-                    children: document.childNodes.map(
+                    children: documentNode.childNodes.map(
                         (child) => this.createNode(child)
                     ),
                 };
 
             case RrwebNodeType.DocumentType:
             case 1:
-                const documentType = node as DocumentTypeNodeSnapshot;
+                const documentTypeNode = node as RrwebDocumentTypeNode;
 
                 return {
                     type: NodeType.DOCUMENT_TYPE,
                     id: node.id,
-                    name: documentType.name,
-                    publicId: documentType.publicId,
-                    systemId: documentType.systemId,
+                    name: documentTypeNode.name,
+                    publicId: documentTypeNode.publicId,
+                    systemId: documentTypeNode.systemId,
                 };
 
             case RrwebNodeType.Element:
-                const element = node as ElementNodeSnapshot;
+                const elementNode = node as RrwebElementNode;
 
                 return {
                     type: NodeType.ELEMENT,
                     id: node.id,
-                    tagName: element.tagName,
-                    attributes: element.attributes,
-                    children: element.childNodes.map(
+                    tagName: elementNode.tagName,
+                    attributes: elementNode.attributes,
+                    children: elementNode.childNodes.map(
                         (child) => this.createNode(child)
                     ),
                 };
 
             case RrwebNodeType.Text:
-                const text = node as TextNodeSnapshot;
+                const textNode = node as RrwebTextNode;
 
                 return {
                     type: NodeType.TEXT,
                     id: node.id,
-                    value: text.textContent
+                    value: textNode.textContent
                 };
 
             case RrwebNodeType.CDATA:
-                const cdata = node as CdataNodeSnapshot;
+                const cdataNode = node as RrwebCdataNode;
 
                 return {
                     type: NodeType.CDATA,
                     id: node.id,
-                    value: cdata.textContent
+                    value: cdataNode.textContent
                 };
 
             case RrwebNodeType.Comment:
-                const comment = node as CommentNodeSnapshot;
+                const commentNode = node as RrwebCommentNode;
 
                 return {
                     type: NodeType.COMMENT,
                     id: node.id,
-                    value: comment.textContent
+                    value: commentNode.textContent
                 };
         }
     }

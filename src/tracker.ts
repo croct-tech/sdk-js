@@ -2,8 +2,8 @@ import {Logger} from "./logging";
 import {Token} from "./token";
 import {Context} from "./context";
 import Recorder, {RecorderEvent} from "./recorder";
-import {Beacon, PayloadType} from "./beacon";
-import {Tab} from "./tab";
+import {Beacon, OnsitePayload, PageVisibility, PayloadType} from "./beacon";
+import {Tab, TabEventListener} from "./tab";
 import {BeaconPromise, BeaconTransport} from "./transport";
 import {BeaconQueue} from "./queue";
 
@@ -18,6 +18,15 @@ class Tracker {
     private initialized: boolean = false;
     private enabled: boolean = false;
     private promise: BeaconPromise | undefined;
+
+    private readonly tabVisibilityListener: TabEventListener = (tab) => {
+        this.emmit({
+            type: PayloadType.PAGE_VISIBILITY_CHANGED,
+            visibility: tab.isVisible() ?
+                PageVisibility.VISIBLE :
+                PageVisibility.HIDDEN
+        });
+    };
 
     constructor(
         context: Context,
@@ -49,9 +58,16 @@ class Tracker {
 
         this.logger.log('Tracker enabled');
 
-        this.initialize();
+        if (!this.initialized) {
+            this.initialize();
+            this.initialized = true;
+        }
 
         this.recorder.start();
+
+        const tab: Tab = this.context.getTab();
+
+        tab.onVisibilityChange(this.tabVisibilityListener, true);
 
         this.flush();
     }
@@ -65,37 +81,28 @@ class Tracker {
 
         this.recorder.stop();
 
+        const tab: Tab = this.context.getTab();
+
+        tab.onVisibilityChange(this.tabVisibilityListener, false);
+
         this.logger.log('Tracker disabled');
     }
 
-    private initialize() {
-        const tab: Tab = this.context.getCurrentTab();
+    private initialize() : void {
+        const tab: Tab = this.context.getTab();
 
         if (tab.isNew()) {
-            this.send({
-                userToken: this.context.getToken(),
-                timestamp: Date.now(),
-                payload: {
-                    type: PayloadType.TAB_OPENED,
-                    tabId: tab.getId(),
-                    url: tab.getUrl(),
-                }
-            })
+            this.emmit({
+                type: PayloadType.TAB_OPENED,
+            });
         }
 
-        this.send({
-            userToken: this.context.getToken(),
-            timestamp: Date.now(),
-            payload: {
-                type: PayloadType.PAGE_OPENED,
-                tabId: tab.getId(),
-                url: tab.getUrl(),
-            }
+        this.emmit({
+            type: PayloadType.PAGE_OPENED,
+            referrer: tab.getReferrer()
         });
 
         this.recorder.registerListener((event) => this.handle(event));
-
-        this.initialized = true;
     }
 
     identify(userId: string) {
@@ -123,7 +130,7 @@ class Tracker {
     }
 
     private handle(event: RecorderEvent) : void {
-        const tab = this.context.getCurrentTab();
+        const tab = this.context.getTab();
 
         this.send({
             userToken: this.context.getToken(),
@@ -132,6 +139,20 @@ class Tracker {
                 tabId: tab.getId(),
                 url: tab.getUrl(),
                 ...event.payload
+            }
+        });
+    }
+
+    private emmit(payload: OnsitePayload) : void {
+        const tab = this.context.getTab();
+
+        this.send({
+            userToken: this.context.getToken(),
+            timestamp: Date.now(),
+            payload: {
+                tabId: tab.getId(),
+                url: tab.getUrl(),
+                ...payload
             }
         });
     }

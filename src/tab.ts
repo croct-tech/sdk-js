@@ -96,6 +96,10 @@ export class Tab {
         return window.location.href;
     }
 
+    getReferrer() : string {
+        return document.referrer;
+    }
+
     isVisible() : boolean {
         return !this.isHidden();
     }
@@ -110,32 +114,45 @@ export class Tab {
         }
     }
 
-    onVisible(listener: TabEventListener) {
-        this.addListener(TabEventType.VISIBLE, listener);
+    onVisibilityChange(listener: TabEventListener, enable: boolean = true) {
+        this.onVisible(listener, enable);
+        this.onHidden(listener, enable);
     }
 
-    onHidden(listener: TabEventListener) {
-        this.addListener(TabEventType.HIDDEN, listener);
+    onVisible(listener: TabEventListener, enable: boolean = true) {
+        this.on(TabEventType.VISIBLE, listener, enable);
     }
 
-    onFocus(listener: TabEventListener) {
-        this.addListener(TabEventType.FOCUS, listener);
+    onHidden(listener: TabEventListener, enable: boolean = true) {
+        this.on(TabEventType.HIDDEN, listener, enable);
     }
 
-    onBlur(listener: TabEventListener) {
-        this.addListener(TabEventType.BLUR, listener);
+    onFocus(listener: TabEventListener, enable: boolean = true) {
+        this.on(TabEventType.FOCUS, listener, enable);
     }
 
-    onUnload(listener: TabEventListener) {
-        this.addListener(TabEventType.UNLOAD, listener);
+    onBlur(listener: TabEventListener, enable: boolean = true) {
+        this.on(TabEventType.BLUR, listener, enable);
     }
 
-    onSleep(listener: TabEventListener) {
-        this.addListener(TabEventType.SLEEP, listener);
+    onUnload(listener: TabEventListener, enable: boolean = true) {
+        this.on(TabEventType.UNLOAD, listener, enable);
     }
 
-    onWakeup(listener: TabEventListener) {
-        this.addListener(TabEventType.WAKEUP, listener);
+    onSleep(listener: TabEventListener, enable: boolean = true) {
+        this.on(TabEventType.SLEEP, listener, enable);
+    }
+
+    onWakeup(listener: TabEventListener, enable: boolean = true) {
+        this.on(TabEventType.WAKEUP, listener, enable);
+    }
+
+    on(type: TabEventType, listener: TabEventListener, enable: boolean = true) : void {
+        if (enable) {
+            this.addListener(type, listener);
+        } else {
+            this.removeListener(type, listener);
+        }
     }
 
     addListener(type: TabEventType, listener: TabEventListener) : void {

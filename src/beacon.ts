@@ -263,18 +263,18 @@ export type PageSnapshotCaptured = {
 export type PageLoaded = {
     type: PayloadType.PAGE_LOADED
     title: string
-    description: string
     lastModified: number
 }
 
 export type PageOpened = {
     type: PayloadType.PAGE_OPENED
+    referrer: string
     //ip: string
     //userAgent: string
     //preferredLanguages: string
 }
 
-enum PageVisibility {
+export enum PageVisibility {
     VISIBLE,
     HIDDEN
 }
@@ -327,6 +327,7 @@ export type OnsitePayload =
     PageChanged |
     PageSnapshotCaptured |
     PageOpened |
+    PageLoaded |
     PageVisibilityChanged |
     TabOpened |
     TouchEnded |

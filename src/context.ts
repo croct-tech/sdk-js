@@ -62,7 +62,7 @@ export class Context {
         return new Context(tab, tokenStorages[tokenScope]())
     }
 
-    getCurrentTab() : Tab {
+    getTab() : Tab {
         return this.tab;
     }
 

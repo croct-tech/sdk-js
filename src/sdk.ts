@@ -71,7 +71,7 @@ export default class Sdk {
         logger.info('Croct SDK installed');
 
         const context = this.getContext();
-        const tab = context.getCurrentTab();
+        const tab = context.getTab();
 
         logger.info('Context initialized');
         logger.log(`Token scope: ${this.config.tokenScope}`);
@@ -106,7 +106,7 @@ export default class Sdk {
 
     private createTracker() : Tracker {
         const context = this.getContext();
-        const tab = context.getCurrentTab();
+        const tab = context.getTab();
 
         return new Tracker(
             this.getContext(),
