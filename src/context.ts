@@ -1,5 +1,8 @@
-import {InMemoryTokenStorage, ReplicatedTokenStorage, Token, TokenScope, TokenStorage, WebTokenStorage} from "./token";
-import {Tab} from "./tab";
+import {Token, TokenStorage} from './token';
+import {Tab} from './tab';
+import {PersistentStorage} from './tokenStorage/persistentStorage';
+import {ReplicatedStorage} from './tokenStorage/replicatedStorage';
+import {InMemoryStorage} from './tokenStorage/inMemoryStorage';
 
 function uuid() {
     let uuid = '';
@@ -8,7 +11,7 @@ function uuid() {
         const random = Math.random() * 16 | 0;
 
         if (i == 8 || i == 12 || i == 16 || i == 20) {
-            uuid += "-";
+            uuid += '-';
         }
 
         uuid += (i == 12 ? 4 : (i == 16 ? (random & 3 | 8) : random)).toString(16);
@@ -16,6 +19,8 @@ function uuid() {
 
     return uuid;
 }
+
+export type TokenScope = 'isolated' | 'global' | 'contextual';
 
 export class Context {
     private readonly tab: Tab;
@@ -26,55 +31,51 @@ export class Context {
         this.tokenStorage = tokenStorage;
     }
 
-    static initialize(tabStorage : Storage, globalStorage: Storage, tokenScope: TokenScope) {
-        const tabId : string | null = tabStorage.getItem('tab');
+    static initialize(tabStorage: Storage, globalStorage: Storage, tokenScope: TokenScope) {
+        const tabId: string | null = tabStorage.getItem('tab');
         const tab = new Tab(tabId || uuid(), tabId === null);
 
         tabStorage.removeItem('tab');
 
-        tab.onUnload(() => {
-            tabStorage.setItem('tab', tab.getId())
-        });
+        tab.addListener('unload', () => tabStorage.setItem('tab', tab.id));
 
-        const tokenStorages: {[key in TokenScope]: {(): TokenStorage}} = {
-            [TokenScope.ISOLATED]: () => {
-                return new InMemoryTokenStorage();
+        const tokenStorages: { [key in TokenScope]: { (): TokenStorage } } = {
+            isolated: () => {
+                return new InMemoryStorage();
             },
-            [TokenScope.GLOBAL]: () => {
-                return new WebTokenStorage(globalStorage);
+            global: () => {
+                return new PersistentStorage(globalStorage);
             },
-            [TokenScope.CONTEXTUAL]: () => {
-                const primaryStorage = new WebTokenStorage(tabStorage);
-                const secondaryStorage = new WebTokenStorage(globalStorage);
+            contextual: () => {
+                const primaryStorage = new PersistentStorage(tabStorage);
+                const secondaryStorage = new PersistentStorage(globalStorage);
 
-                if (tab.isNew()) {
-                    primaryStorage.setToken(secondaryStorage.getToken())
+                if (tab.isNew) {
+                    primaryStorage.setToken(secondaryStorage.getToken());
                 }
 
-                tab.onVisible(() => {
-                    secondaryStorage.setToken(primaryStorage.getToken());
+                tab.addListener('visibility', event => {
+                    if (event.detail.isVisible) {
+                        secondaryStorage.setToken(primaryStorage.getToken());
+                    }
                 });
 
-                return new ReplicatedTokenStorage(primaryStorage, secondaryStorage);
-            }
+                return new ReplicatedStorage(primaryStorage, secondaryStorage);
+            },
         };
 
-        return new Context(tab, tokenStorages[tokenScope]())
+        return new Context(tab, tokenStorages[tokenScope]());
     }
 
-    getTab() : Tab {
+    getTab(): Tab {
         return this.tab;
     }
 
-    getToken() : Token | null {
+    getToken(): Token | null {
         return this.tokenStorage.getToken();
     }
 
-    setToken(token: Token | null) : void {
+    setToken(token: Token | null): void {
         this.tokenStorage.setToken(token);
-    }
-
-    dispose() {
-        this.tab.sleep();
     }
 }

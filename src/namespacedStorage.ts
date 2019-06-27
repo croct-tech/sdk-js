@@ -41,7 +41,7 @@ export class NamespacedStorage implements Storage {
         this.storage.setItem(this.getPrefixedKey(key), value);
     }
 
-    private getKeys() : string[] {
+    private getKeys(): string[] {
         const keys = [];
         const prefix = this.getPrefix();
 
@@ -56,11 +56,11 @@ export class NamespacedStorage implements Storage {
         return keys;
     }
 
-    private getPrefixedKey(key : string) {
+    private getPrefixedKey(key: string) {
         return this.getPrefix() + key;
     }
 
     private getPrefix() {
-        return this.namespace + '.'
+        return this.namespace + '.';
     }
 }

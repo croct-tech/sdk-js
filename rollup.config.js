@@ -11,7 +11,7 @@ export default {
         file: 'dist/croct-sdk.js',
         name: 'croct',
         format: 'iife',
-        sourcemap: true,
+        sourceMap: true,
     },
     treeshake: {
         propertyReadSideEffects: false
@@ -26,7 +26,7 @@ export default {
                 'createCommonjsModule' : '/*@__PURE__*/ createCommonjsModule',
             },
         }),
-        uglify({
+        /*uglify({
             compress: {
                 unused: true,
                 dead_code: true,
@@ -36,6 +36,6 @@ export default {
                     regex: /rrweb/i
                 }
             }
-        })
+        })*/
     ]
 };

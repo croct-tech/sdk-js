@@ -8,12 +8,9 @@
     "strictNullChecks": true,
     "removeComments": true,
     "sourceMap": true,
-    "rootDir": "src",
     "outDir": "dist",
     "downlevelIteration": true,
     "lib": ["es6", "dom", "dom.iterable"]
   },
-  "include": [
-    "src"
-  ]
+  "exclude": ["node_modules", "dist"]
 }

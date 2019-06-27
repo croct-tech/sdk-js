@@ -34,7 +34,7 @@ import {
     removedNodeMutation as RrwebRemovedNodeMutation,
     scrollData as RrwebMouseScrollData,
     textMutation as RrwebTextMutation,
-    viewportResizeData as RrwebViewportResizeData
+    viewportResizeData as RrwebViewportResizeData,
 } from 'rrweb/typings/types';
 
 import {
@@ -47,12 +47,13 @@ import {
     NodeAddition,
     NodeRemoval,
     NodeType,
-    OnsitePayload,
+    OnsitePayload, PageVisibility,
     PayloadType,
-    TextChange
-} from "./beacon";
+    TextChange,
+} from './beacon';
 
-import {Logger} from "./logging";
+import {Logger} from './logger';
+import {NullLogger} from './logger/nullLogger';
 
 type RecorderListener = {
     (event: RecorderEvent): void
@@ -65,18 +66,18 @@ export type RecorderEvent = {
 
 type StopCallback = StopRecorderCallback;
 
-export default class Recorder {
+export class Recorder {
     private stopCallback?: StopCallback;
     private pendingEvents: RrwebEvent[] = [];
     private listeners: RecorderListener[] = [];
     private logger: Logger;
     private version: number = 0;
 
-    constructor(logger: Logger) {
-        this.logger = logger;
+    constructor(logger?: Logger) {
+        this.logger = logger || new NullLogger();
     }
 
-    isRecording() : boolean {
+    isRecording(): boolean {
         return this.stopCallback !== undefined;
     }
 
@@ -85,8 +86,10 @@ export default class Recorder {
             return;
         }
 
+        this.logger.info('Starting recorder...');
+
         const stopRecording: StopCallback | undefined = record({
-            emit: this.getEmitter()
+            emit: this.getEmitter(),
         });
 
         if (!stopRecording) {
@@ -99,7 +102,7 @@ export default class Recorder {
 
         this.listen('submit', this.handleSubmitEvent.bind(this), true);
 
-        this.logger.info('Recording started');
+        this.logger.info('Recorder started');
     }
 
     stop() {
@@ -107,19 +110,21 @@ export default class Recorder {
             return;
         }
 
+        this.logger.info('Stopping recorder...');
+
         this.stopCallback();
         this.pendingEvents = [];
 
         delete this.stopCallback;
 
-        this.logger.info('Recording stopped');
+        this.logger.info('Recorder stopped');
     }
 
-    registerListener(listener: RecorderListener) : void {
+    addListener(listener: RecorderListener): void {
         this.listeners.push(listener);
     }
 
-    removeListener(listener: RecorderListener) : void {
+    removeListener(listener: RecorderListener): void {
         const index = this.listeners.indexOf(listener);
 
         if (index >= 0) {
@@ -127,14 +132,14 @@ export default class Recorder {
         }
     }
 
-    private getEmitter() : {(event: RrwebEvent) : void} {
+    private getEmitter(): { (event: RrwebEvent): void } {
         let emulatedEvents: RrwebEvent[] = [];
 
         if (this.version === 0 && document.readyState !== 'loading') {
             emulatedEvents.push({
                 type: RrwebEventType.DomContentLoaded,
                 timestamp: Date.now(),
-                data: {}
+                data: {},
             });
         }
 
@@ -148,7 +153,7 @@ export default class Recorder {
         };
     }
 
-    private listen(event: string, listener: EventListener, capture: boolean = false) : void {
+    private listen(event: string, listener: EventListener, capture: boolean = false): void {
         window.addEventListener(event, listener, capture);
 
         this.registerStopCallback(() => {
@@ -170,28 +175,28 @@ export default class Recorder {
                 currentCallback();
             }
 
-            callback()
+            callback();
         };
     }
 
-    private emit(event: RecorderEvent) : void {
+    private emit(event: RecorderEvent): void {
         for (let listener of this.listeners) {
             listener(event);
         }
     }
 
-    private handleRrwebEvent(event: RrwebEvent) : void {
+    private handleRrwebEvent(event: RrwebEvent): void {
         const payload = this.createPayload(event);
 
         if (payload !== null) {
             this.emit({
                 timestamp: event.timestamp,
-                payload: payload
-            })
+                payload: payload,
+            });
         }
     }
 
-    private handleSubmitEvent(event: Event) : void {
+    private handleSubmitEvent(event: Event): void {
         const form = event.target as HTMLFormElement;
 
         this.emit({
@@ -202,11 +207,11 @@ export default class Recorder {
                 formData: this.extractFormData(form),
                 formName: form.name,
                 formId: form.id,
-            }
+            },
         });
     }
 
-    private extractFormData(form: HTMLFormElement) : FormData {
+    private extractFormData(form: HTMLFormElement): FormData {
         const data: FormData = {};
 
         for (let element of form.elements) {
@@ -240,7 +245,7 @@ export default class Recorder {
                         data[element.name] = {
                             type: FieldType.FILE,
                             nodeId: mirror.getId((element as Node) as RrwebINode),
-                            files: files
+                            files: files,
                         };
                     }
                     break;
@@ -259,7 +264,7 @@ export default class Recorder {
                         data[element.name] = {
                             type: FieldType.SELECT,
                             nodeId: mirror.getId((element as Node) as RrwebINode),
-                            options: options
+                            options: options,
                         };
                     }
                     break;
@@ -270,7 +275,7 @@ export default class Recorder {
                         nodeId: mirror.getId((element as Node) as RrwebINode),
                         // normalize linefeeds for textareas
                         // https://infra.spec.whatwg.org/#normalize-newlines
-                        value: element.value.replace(/\r\n|\r/g, '\n')
+                        value: element.value.replace(/\r\n|\r/g, '\n'),
                     };
                     break;
 
@@ -280,7 +285,7 @@ export default class Recorder {
                         data[element.name] = {
                             type: FieldType.INPUT,
                             nodeId: mirror.getId((element as Node) as RrwebINode),
-                            value: element.value
+                            value: element.value,
                         };
                     }
                     break;
@@ -289,7 +294,7 @@ export default class Recorder {
                     data[element.name] = {
                         type: FieldType.INPUT,
                         nodeId: mirror.getId((element as Node) as RrwebINode),
-                        value: element.value
+                        value: element.value,
                     };
                     break;
             }
@@ -298,7 +303,7 @@ export default class Recorder {
         return data;
     }
 
-    private createPayload(event: RrwebEvent) : OnsitePayload | null {
+    private createPayload(event: RrwebEvent): OnsitePayload | null {
         switch (event.type) {
             case RrwebEventType.DomContentLoaded:
                 return {
@@ -326,7 +331,7 @@ export default class Recorder {
                         x: initialOffset.left,
                         y: initialOffset.top,
                     },
-                    content: this.createNode(node)
+                    content: this.createNode(node),
                 };
 
             case RrwebEventType.IncrementalSnapshot:
@@ -339,7 +344,7 @@ export default class Recorder {
         }
     }
 
-    private createIncrementalPayload(data: RrwebIncrementalData) : OnsitePayload {
+    private createIncrementalPayload(data: RrwebIncrementalData): OnsitePayload {
         switch (data.source) {
             case RrwebIncrementalSource.Mutation:
                 const mutation = data as RrwebMutationData;
@@ -357,14 +362,14 @@ export default class Recorder {
                 return {
                     type: PayloadType.MOUSE_MOVED,
                     offsets: mouseMove.positions.map(
-                        (position) : MouseOffset => ({
+                        (position): MouseOffset => ({
                             nodeId: position.id,
                             timeOffset: position.timeOffset,
                             point: {
                                 x: position.x,
                                 y: position.y,
-                            }
-                        })
+                            },
+                        }),
                     ),
                 };
 
@@ -380,7 +385,7 @@ export default class Recorder {
                     point: {
                         x: mouseScroll.x,
                         y: mouseScroll.y,
-                    }
+                    },
                 };
 
             case RrwebIncrementalSource.ViewportResize:
@@ -391,7 +396,7 @@ export default class Recorder {
                     viewportSize: {
                         width: viewportResize.width,
                         height: viewportResize.height,
-                    }
+                    },
                 };
 
             case RrwebIncrementalSource.Input:
@@ -401,12 +406,12 @@ export default class Recorder {
                     type: PayloadType.INPUT_CHANGED,
                     nodeId: input.id,
                     checked: input.isChecked,
-                    value: input.text
+                    value: input.text,
                 };
         }
     }
 
-    private createMouseInteractionPayload(data: RrwebMouseInteractionData) : OnsitePayload {
+    private createMouseInteractionPayload(data: RrwebMouseInteractionData): OnsitePayload {
         switch (data.type) {
             case RrwebMouseInteractions.MouseUp:
                 return {
@@ -414,8 +419,8 @@ export default class Recorder {
                     nodeId: data.id,
                     point: {
                         x: data.x,
-                        y: data.y
-                    }
+                        y: data.y,
+                    },
                 };
 
             case RrwebMouseInteractions.MouseDown:
@@ -424,8 +429,8 @@ export default class Recorder {
                     nodeId: data.id,
                     point: {
                         x: data.x,
-                        y: data.y
-                    }
+                        y: data.y,
+                    },
                 };
 
             case RrwebMouseInteractions.Click:
@@ -434,8 +439,8 @@ export default class Recorder {
                     nodeId: data.id,
                     point: {
                         x: data.x,
-                        y: data.y
-                    }
+                        y: data.y,
+                    },
                 };
 
             case RrwebMouseInteractions.ContextMenu:
@@ -444,8 +449,8 @@ export default class Recorder {
                     nodeId: data.id,
                     point: {
                         x: data.x,
-                        y: data.y
-                    }
+                        y: data.y,
+                    },
                 };
 
             case RrwebMouseInteractions.DblClick:
@@ -454,8 +459,8 @@ export default class Recorder {
                     nodeId: data.id,
                     point: {
                         x: data.x,
-                        y: data.y
-                    }
+                        y: data.y,
+                    },
                 };
 
             case RrwebMouseInteractions.Focus:
@@ -476,18 +481,19 @@ export default class Recorder {
                     nodeId: data.id,
                     point: {
                         x: data.x,
-                        y: data.y
-                    }
+                        y: data.y,
+                    },
                 };
 
-            case RrwebMouseInteractions.TouchMove:
+            case RrwebMouseInteractions.TouchMove_Departed:
+                // @todo fix it
                 return {
                     type: PayloadType.TOUCH_MOVED,
                     nodeId: data.id,
                     point: {
                         x: data.x,
-                        y: data.y
-                    }
+                        y: data.y,
+                    },
                 };
 
             case RrwebMouseInteractions.TouchEnd:
@@ -496,17 +502,17 @@ export default class Recorder {
                     nodeId: data.id,
                     point: {
                         x: data.x,
-                        y: data.y
-                    }
+                        y: data.y,
+                    },
                 };
         }
     }
 
-    private createNodeAdditions(mutations: RrwebAddedNodeMutation[]) : NodeAddition[] {
-        const previous: {[key: number]: number} = {};
-        const next: {[key: number]: number} = {};
+    private createNodeAdditions(mutations: RrwebAddedNodeMutation[]): NodeAddition[] {
+        const previous: { [key: number]: number } = {};
+        const next: { [key: number]: number } = {};
 
-        for (let mutation of mutations) {
+        for (const mutation of mutations) {
             if (mutation.previousId != null && mutation.previousId >= 0) {
                 previous[mutation.previousId] = mutation.node.id;
             }
@@ -516,9 +522,9 @@ export default class Recorder {
             }
         }
 
-        let additions: NodeAddition[] = [];
+        const additions: NodeAddition[] = [];
 
-        for (let mutation of mutations) {
+        for (const mutation of mutations) {
             let {previousId, nextId} = mutation;
 
             if (previousId !== null && previousId < 0) {
@@ -534,40 +540,40 @@ export default class Recorder {
                 nextId: nextId,
                 previousId: previousId,
                 node: this.createNode(mutation.node),
-            })
+            });
         }
 
         return additions;
     }
 
-    private createNodeRemovals(mutations: RrwebRemovedNodeMutation[]) : NodeRemoval[] {
+    private createNodeRemovals(mutations: RrwebRemovedNodeMutation[]): NodeRemoval[] {
         return mutations.map(
-            (mutation) : NodeRemoval => ({
+            (mutation): NodeRemoval => ({
                 nodeId: mutation.id,
-                parentId: mutation.parentId
-            })
+                parentId: mutation.parentId,
+            }),
         );
     }
 
-    private createTextChanges(mutations: RrwebTextMutation[]) : TextChange[] {
+    private createTextChanges(mutations: RrwebTextMutation[]): TextChange[] {
         return mutations.map(
-            (mutation) : TextChange => ({
+            (mutation): TextChange => ({
                 nodeId: mutation.id,
-                value: mutation.value
-            })
+                value: mutation.value,
+            }),
         );
     }
 
-    private createAttributeChanges(mutations: RrwebAttributeMutation[]) : AttributeChange[] {
+    private createAttributeChanges(mutations: RrwebAttributeMutation[]): AttributeChange[] {
         return mutations.map(
-            (mutation) : AttributeChange => ({
+            (mutation): AttributeChange => ({
                 nodeId: mutation.id,
-                attributes: mutation.attributes
-            })
+                attributes: mutation.attributes,
+            }),
         );
     }
 
-    private createNode(node: RrwebNode) : NodeSnapshot {
+    private createNode(node: RrwebNode): NodeSnapshot {
         switch (node.type) {
             case RrwebNodeType.Document:
                 const documentNode = node as RrwebDocumentNode;
@@ -576,7 +582,7 @@ export default class Recorder {
                     type: NodeType.DOCUMENT,
                     id: node.id,
                     children: documentNode.childNodes.map(
-                        (child) => this.createNode(child)
+                        (child) => this.createNode(child),
                     ),
                 };
 
@@ -601,7 +607,7 @@ export default class Recorder {
                     tagName: elementNode.tagName,
                     attributes: elementNode.attributes,
                     children: elementNode.childNodes.map(
-                        (child) => this.createNode(child)
+                        (child) => this.createNode(child),
                     ),
                 };
 
@@ -611,7 +617,7 @@ export default class Recorder {
                 return {
                     type: NodeType.TEXT,
                     id: node.id,
-                    value: textNode.textContent
+                    value: textNode.textContent,
                 };
 
             case RrwebNodeType.CDATA:
@@ -620,7 +626,7 @@ export default class Recorder {
                 return {
                     type: NodeType.CDATA,
                     id: node.id,
-                    value: cdataNode.textContent
+                    value: cdataNode.textContent,
                 };
 
             case RrwebNodeType.Comment:
@@ -629,7 +635,7 @@ export default class Recorder {
                 return {
                     type: NodeType.COMMENT,
                     id: node.id,
-                    value: commentNode.textContent
+                    value: commentNode.textContent,
                 };
         }
     }

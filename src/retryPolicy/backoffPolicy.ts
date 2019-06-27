@@ -1,35 +1,6 @@
-export interface RetryPolicy<T> {
-    shouldRetry(beacon: T, attempt: number, error: Error) : boolean;
-    getDelay(attempt: number) : number;
-}
+import {RetryPolicy} from '../retryPolicy';
 
-export class FixedRetryPolicy<T> implements RetryPolicy<T> {
-    private readonly maxAttempts: number;
-    private readonly delay: number;
-
-    constructor(delay: number, maxAttempts: number = Infinity) {
-        if (delay < 0) {
-            throw new Error('Delay must be non-negative');
-        }
-
-        if (maxAttempts < 0) {
-            throw new Error('Max attempts must be non-negative');
-        }
-
-        this.maxAttempts = maxAttempts;
-        this.delay = delay;
-    }
-
-    getDelay(attempt: number): number {
-        return this.delay;
-    }
-
-    shouldRetry(beacon: T, attempt: number, error: Error): boolean {
-        return attempt < this.maxAttempts;
-    }
-}
-
-type BackoffPolicyOptions = {
+type Options = {
     minRetryDelay: number,  // min retry delay in ms (used in exp. backoff calcs)
     maxRetryDelay: number,  // max retry delay in ms (used in exp. backoff calcs)
     backoffFactor: number,  // exponential backoff factor (attempts^n)
@@ -44,13 +15,13 @@ export class BackoffPolicy<T> implements RetryPolicy<T> {
     private readonly backoffJitter: number = 1;
     private readonly maxAttempts: number = Infinity;
 
-    constructor(options: Partial<BackoffPolicyOptions> = {}) {
+    constructor(options: Partial<Options> = {}) {
         let {
             minRetryDelay = this.minRetryDelay,
             maxRetryDelay = this.maxRetryDelay,
             backoffFactor = this.backoffFactor,
             backoffJitter = this.backoffJitter,
-            maxAttempts = this.maxAttempts
+            maxAttempts = this.maxAttempts,
         } = options;
 
         if (minRetryDelay < 0) {
@@ -80,6 +51,11 @@ export class BackoffPolicy<T> implements RetryPolicy<T> {
         this.maxAttempts = maxAttempts;
     }
 
+    /**
+     * Full Jitter algorithm
+     *
+     * Credits: https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+     */
     getDelay(attempt: number): number {
         let delay = Math.min(
             this.maxRetryDelay,
@@ -87,13 +63,16 @@ export class BackoffPolicy<T> implements RetryPolicy<T> {
         );
 
         if (this.backoffJitter > 0) {
-            delay += Math.random() * delay;
+            delay = Math.random() * (delay + 1)
         }
 
-        return Number(delay.toPrecision(1));
+        // Removing any fractional digits
+        delay -= delay % 1;
+
+        return delay;
     }
 
-    shouldRetry(beacon: T, attempt: number, error: Error): boolean {
+    shouldRetry(attempt: number, subject?: T, failure?: any): boolean {
         return attempt < this.maxAttempts;
     }
 }

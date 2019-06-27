@@ -1,4 +1,4 @@
-const PREFIX : string = (() => {
+const PREFIX: string = (() => {
     for (let prefix of ['o', 'moz', 'ms', 'webkit']) {
         if ((prefix + 'Hidden') in document) {
             return prefix;
@@ -8,216 +8,125 @@ const PREFIX : string = (() => {
     return '';
 })();
 
-const VISIBILITY_EVENT : string = (PREFIX + 'visibilitychange');
-const HIDDEN_PROPERTY : keyof Document = (PREFIX === '' ? 'hidden' : PREFIX + 'Hidden') as keyof Document;
+const VISIBILITY_EVENT: string = (PREFIX + 'visibilitychange');
+const HIDDEN_PROPERTY: keyof Document = (PREFIX === '' ? 'hidden' : PREFIX + 'Hidden') as keyof Document;
 
-export interface TabEventListener {
-    (tab: Tab): void;
+export type TabEvent = CustomEvent<Tab>;
+
+type TabEventListener = {
+    (event: TabEvent): void;
 }
 
-export enum TabEventType {
-    FOCUS = 'active',
-    BLUR = 'inactive',
-    VISIBLE = 'visible',
-    HIDDEN = 'hidden',
-    UNLOAD = 'unload',
-    WAKEUP = 'wakeup',
-    SLEEP = 'sleep',
-}
+type TabEventType = 'focus' | 'blur' | 'unload' | 'visibility' | 'urlChange';
 
-interface EventHandler {
-    register() : void;
-    unregister() : void;
-}
+const EventMap: { [key: string]: TabEventType } = {
+    focus: 'focus',
+    blur: 'blur',
+    beforeunload: 'unload',
+    ovisibilitychange: 'visibility',
+    mozvisibilitychange: 'visibility',
+    msvisibilitychange: 'visibility',
+    webkitvisibilitychange: 'visibility',
+};
 
 export class Tab {
-    private readonly id : string;
-    private readonly newTab : boolean;
-    private sleeping : boolean = true;
-    private readonly handlers: EventHandler[] = Tab.getHandlers(this);
-    private readonly listeners: {[type in TabEventType]: TabEventListener[]} = {
-        [TabEventType.FOCUS]: [],
-        [TabEventType.BLUR]: [],
-        [TabEventType.VISIBLE]: [],
-        [TabEventType.HIDDEN]: [],
-        [TabEventType.UNLOAD]: [],
-        [TabEventType.WAKEUP]: [],
-        [TabEventType.SLEEP]: [],
-    };
+    public readonly id: string;
+    public readonly isNew: boolean;
+    private readonly listeners: Partial<{ [key in TabEventType]: TabEventListener[] }> = {};
 
     constructor(id: string, isNew: boolean) {
         this.id = id;
-        this.newTab = isNew;
+        this.isNew = isNew;
 
-        this.wakeup();
+        this.initialize();
     }
 
-    public wakeup() : void {
-        if (!this.sleeping) {
-            return;
-        }
+    private initialize(): void {
+        const listener: EventListener = event => {
+            this.emit(EventMap[event.type]);
+        };
 
-        for (const handler of this.handlers) {
-            handler.register();
-        }
+        window.addEventListener('focus', listener, true);
+        window.addEventListener('blur', listener, true);
+        window.addEventListener('beforeunload', listener, true);
+        document.addEventListener(VISIBILITY_EVENT, listener, true);
 
-        this.sleeping = false;
-
-        this.emit(TabEventType.WAKEUP);
+        Tab.addUrlChangeListener(() => this.emit('urlChange'));
     }
 
-    public sleep() {
-        if (this.sleeping) {
-            return;
-        }
-
-        for (const handler of this.handlers) {
-            handler.unregister();
-        }
-
-        this.sleeping = true;
-
-        this.emit(TabEventType.SLEEP);
+    get location(): Location {
+        return window.location;
     }
 
-    getId() : string {
-        return this.id;
-    }
-
-    isSleeping() : boolean {
-        return this.sleeping;
-    }
-
-    isNew() : boolean {
-        return this.newTab;
-    }
-
-    getUrl() : string {
-        return window.location.href;
-    }
-
-    getReferrer() : string {
+    get referrer(): string {
         return document.referrer;
     }
 
-    isVisible() : boolean {
-        return !this.isHidden();
+    get isVisible(): boolean {
+        return !document[HIDDEN_PROPERTY];
     }
 
-    isHidden() : boolean {
-        return document[HIDDEN_PROPERTY] as boolean;
+    addListener(type: TabEventType, listener: TabEventListener) {
+        const listeners = this.listeners[type] || [];
+
+        listeners.push(listener);
+
+        this.listeners[type] = listeners;
     }
 
-    private emit(type: TabEventType) {
-        for (const listener of this.listeners[type]) {
-            listener(this);
-        }
-    }
-
-    onVisibilityChange(listener: TabEventListener, enable: boolean = true) {
-        this.onVisible(listener, enable);
-        this.onHidden(listener, enable);
-    }
-
-    onVisible(listener: TabEventListener, enable: boolean = true) {
-        this.on(TabEventType.VISIBLE, listener, enable);
-    }
-
-    onHidden(listener: TabEventListener, enable: boolean = true) {
-        this.on(TabEventType.HIDDEN, listener, enable);
-    }
-
-    onFocus(listener: TabEventListener, enable: boolean = true) {
-        this.on(TabEventType.FOCUS, listener, enable);
-    }
-
-    onBlur(listener: TabEventListener, enable: boolean = true) {
-        this.on(TabEventType.BLUR, listener, enable);
-    }
-
-    onUnload(listener: TabEventListener, enable: boolean = true) {
-        this.on(TabEventType.UNLOAD, listener, enable);
-    }
-
-    onSleep(listener: TabEventListener, enable: boolean = true) {
-        this.on(TabEventType.SLEEP, listener, enable);
-    }
-
-    onWakeup(listener: TabEventListener, enable: boolean = true) {
-        this.on(TabEventType.WAKEUP, listener, enable);
-    }
-
-    on(type: TabEventType, listener: TabEventListener, enable: boolean = true) : void {
-        if (enable) {
-            this.addListener(type, listener);
-        } else {
-            this.removeListener(type, listener);
-        }
-    }
-
-    addListener(type: TabEventType, listener: TabEventListener) : void {
-        this.listeners[type].push(listener);
-    }
-
-    removeListener(type: TabEventType, listener: TabEventListener) : void {
+    removeListener(type: TabEventType, listener: TabEventListener) {
         const listeners = this.listeners[type];
+
+        if (!listeners) {
+            return;
+        }
+
         const index = listeners.indexOf(listener);
 
-        if (index > -1) {
+        if (index >= 0) {
             listeners.splice(index, 1);
         }
     }
 
-    private static getHandlers(tab: Tab) : EventHandler[] {
-        return [
-            <EventHandler> {
-                emmit(): void {
-                    tab.emit(TabEventType.UNLOAD);
-                },
-                register() : void {
-                    window.addEventListener('beforeunload', this.emmit, true);
-                },
-                unregister() {
-                    window.removeEventListener('beforeunload', this.emmit, true);
-                }
-            },
-            <EventHandler> {
-                emmit(): void {
-                    tab.emit(TabEventType.FOCUS);
-                },
-                register() : void {
-                    window.addEventListener('focus', this.emmit, true);
-                },
-                unregister() {
-                    window.removeEventListener('focus', this.emmit, true);
-                }
-            },
-            <EventHandler> {
-                emmit(): void {
-                    tab.emit(TabEventType.BLUR);
-                },
-                register() : void {
-                    window.addEventListener('blur', this.emmit, true);
-                },
-                unregister() {
-                    window.removeEventListener('blur', this.emmit, true);
-                }
-            },
-            <EventHandler> {
-                emmit(): void {
-                    tab.emit(
-                        tab.isVisible() ?
-                            TabEventType.VISIBLE :
-                            TabEventType.HIDDEN
-                    );
-                },
-                register() : void {
-                    document.addEventListener(VISIBILITY_EVENT, this.emmit, true);
-                },
-                unregister() {
-                    document.removeEventListener(VISIBILITY_EVENT, this.emmit, true);
-                }
+    private emit(type: TabEventType) {
+        for (const listener of this.listeners[type] || []) {
+            listener(new CustomEvent(type, {detail: this}));
+        }
+    }
+
+    private static addUrlChangeListener(listener: {(): void}) : void {
+        let url = window.location.href;
+
+        const updateUrl = function() {
+            const currentUrl = window.location.href;
+
+            if (url !== currentUrl) {
+                listener();
+
+                url = currentUrl;
             }
-        ];
+        };
+
+        const pushState = window.history.pushState;
+
+        window.history.pushState = function() : any {
+            const result = pushState.apply(window.history, arguments);
+
+            updateUrl();
+
+            return result;
+        };
+
+        const replaceState = window.history.replaceState;
+
+        window.history.replaceState = function() : any {
+            const result = replaceState.apply(window.history, arguments);
+
+            updateUrl();
+
+            return result
+        };
+
+        window.addEventListener('popstate', updateUrl, true);
     }
 }

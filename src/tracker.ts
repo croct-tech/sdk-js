@@ -1,48 +1,45 @@
-import {Logger} from "./logging";
-import {Token} from "./token";
-import {Context} from "./context";
-import Recorder, {RecorderEvent} from "./recorder";
-import {Beacon, OnsitePayload, PageVisibility, PayloadType} from "./beacon";
-import {Tab, TabEventListener} from "./tab";
-import {BeaconPromise, BeaconTransport} from "./transport";
-import {BeaconQueue} from "./queue";
+import {Logger} from './logger';
+import {Context} from './context';
+import {Recorder} from './recorder';
+import {Beacon, OnsitePayload, PageVisibility, PayloadType} from './beacon';
+import {Tab, TabEvent} from './tab';
+import {OutputChannel} from './channel';
+import {NullLogger} from './logger/nullLogger';
+import {Token} from './token';
 
-class Tracker {
+type Options = {
+    inactivityInterval?: number
+}
+
+type Configuration = Options & {
+    context: Context
+    channel: OutputChannel<Beacon>,
+    logger?: Logger
+}
+
+export class Tracker {
     private readonly context: Context;
-    private readonly transport: BeaconTransport;
-    private readonly queue: BeaconQueue;
-    private readonly logger: Logger;
+    private readonly channel: OutputChannel<Beacon>;
     private readonly recorder: Recorder;
-    private readonly maxQueueLength: number;
-    private readonly underrunThreshold: number;
+    private readonly logger: Logger;
+    private readonly options: Required<Options>;
     private initialized: boolean = false;
     private enabled: boolean = false;
-    private promise: BeaconPromise | undefined;
+    private suspended: boolean = false;
+    private inactivityTimer: number;
 
-    private readonly tabVisibilityListener: TabEventListener = (tab) => {
-        this.emmit({
-            type: PayloadType.PAGE_VISIBILITY_CHANGED,
-            visibility: tab.isVisible() ?
-                PageVisibility.VISIBLE :
-                PageVisibility.HIDDEN
-        });
-    };
-
-    constructor(
-        context: Context,
-        transport: BeaconTransport,
-        queue: BeaconQueue,
-        maxQueueLength: number,
-        underrunThreshold: number,
-        logger: Logger
-    ) {
+    constructor({context, channel, logger, ...options}: Configuration) {
         this.context = context;
-        this.transport = transport;
-        this.queue = queue;
-        this.maxQueueLength = maxQueueLength;
-        this.underrunThreshold = underrunThreshold;
-        this.logger = logger;
-        this.recorder = new Recorder(logger);
+        this.channel = channel;
+        this.recorder = new Recorder(this.logger);
+        this.logger = logger || new NullLogger();
+        this.options = {
+            inactivityInterval: 30 * 1000,
+            ...options
+        };
+
+        this.trackTabVisibility = this.trackTabVisibility.bind(this);
+        this.trackUrlChange = this.trackUrlChange.bind(this);
     }
 
     isEnabled() {
@@ -50,59 +47,84 @@ class Tracker {
     }
 
     enable() {
-        if (this.isEnabled()) {
+        if (this.enabled) {
             return;
         }
 
-        this.enabled = true;
-
         this.logger.log('Tracker enabled');
 
+        this.enabled = true;
+
+        if (this.suspended) {
+            return;
+        }
+
         if (!this.initialized) {
-            this.initialize();
             this.initialized = true;
+            this.initialize();
         }
 
         this.recorder.start();
 
-        const tab: Tab = this.context.getTab();
+        this.startInactivityTimer();
 
-        tab.onVisibilityChange(this.tabVisibilityListener, true);
+        const tab = this.context.getTab();
 
-        this.flush();
+        tab.addListener('urlChange', this.trackUrlChange);
+        tab.addListener('visibility', this.trackTabVisibility);
     }
 
     disable() {
-        if (!this.isEnabled()) {
+        if (!this.enabled) {
             return;
         }
 
+        this.logger.log('Tracker disabled');
+
         this.enabled = false;
+
+        if (this.suspended) {
+            return;
+        }
 
         this.recorder.stop();
 
-        const tab: Tab = this.context.getTab();
+        this.stopInactivityTimer();
 
-        tab.onVisibilityChange(this.tabVisibilityListener, false);
+        const tab = this.context.getTab();
 
-        this.logger.log('Tracker disabled');
+        tab.removeListener('urlChange', this.trackUrlChange);
+        tab.removeListener('visibility', this.trackTabVisibility);
     }
 
-    private initialize() : void {
-        const tab: Tab = this.context.getTab();
-
-        if (tab.isNew()) {
-            this.emmit({
-                type: PayloadType.TAB_OPENED,
-            });
+    suspend() {
+        if (this.suspended) {
+            return;
         }
 
-        this.emmit({
-            type: PayloadType.PAGE_OPENED,
-            referrer: tab.getReferrer()
-        });
+        this.logger.log('Tracker suspended');
 
-        this.recorder.registerListener((event) => this.handle(event));
+        if (this.enabled) {
+            this.disable();
+            this.enabled = true;
+        }
+
+        this.suspended = true;
+    }
+
+    unsuspend() {
+        if (!this.suspended) {
+            return;
+        }
+
+        this.logger.log('Tracker unsuspended');
+
+        this.suspended = false;
+
+        if (this.enabled) {
+            this.enabled = false;
+            this.enable();
+        }
     }
 
     identify(userId: string) {
@@ -121,86 +143,85 @@ class Tracker {
         this.context.setToken(null);
     }
 
-    hasToken() : boolean {
+    hasToken(): boolean {
         return this.getToken() !== null;
     }
 
-    getToken() : Token | null {
+    getToken(): Token | null {
         return this.context.getToken();
     }
 
-    private handle(event: RecorderEvent) : void {
+    private initialize(): void {
+        const tab: Tab = this.context.getTab();
+
+        if (tab.isNew) {
+            this.track({
+                type: PayloadType.TAB_OPENED,
+            });
+        }
+
+        this.track({
+            type: PayloadType.PAGE_OPENED,
+            referrer: tab.referrer,
+        });
+
+        this.recorder.addListener(event => {
+            this.track(event.payload, event.timestamp);
+        });
+    }
+
+    private trackUrlChange() : void {
+        this.track({type: PayloadType.URL_CHANGED});
+    }
+
+    private trackTabVisibility(event: TabEvent) : void {
+        this.track({
+            type: PayloadType.PAGE_VISIBILITY_CHANGED,
+            visibility: event.detail.isVisible ?
+                PageVisibility.VISIBLE :
+                PageVisibility.HIDDEN,
+        });
+    }
+
+    private trackInactivity() : void {
+        this.track({type: PayloadType.NOTHING_CHANGED});
+    }
+
+    private stopInactivityTimer() : void {
+        window.clearInterval(this.inactivityTimer);
+
+        delete this.inactivityTimer;
+    }
+
+    private startInactivityTimer() : void {
+        this.inactivityTimer = window.setInterval(
+            this.trackInactivity.bind(this),
+            this.options.inactivityInterval
+        );
+    }
+
+    track(payload: OnsitePayload, timestamp: number = Date.now()): void {
+        this.stopInactivityTimer();
+
+        this.logger.info(`Sending beacon "${payload.type}"`);
+
         const tab = this.context.getTab();
 
-        this.send({
+        const promise = this.channel.publish({
             userToken: this.context.getToken(),
-            timestamp: event.timestamp,
+            timestamp: timestamp,
             payload: {
-                tabId: tab.getId(),
-                url: tab.getUrl(),
-                ...event.payload
-            }
+                ...payload,
+                tabId: tab.id,
+                url: tab.location.href,
+            },
         });
-    }
 
-    private emmit(payload: OnsitePayload) : void {
-        const tab = this.context.getTab();
-
-        this.send({
-            userToken: this.context.getToken(),
-            timestamp: Date.now(),
-            payload: {
-                tabId: tab.getId(),
-                url: tab.getUrl(),
-                ...payload
-            }
+        promise.catch(() => {
+            this.logger.info(`Failed to send beacon "${payload.type}"`);
         });
-    }
 
-    private send(beacon: Beacon) : void {
-        this.enqueue(beacon);
-        this.flush();
-    }
-
-    private enqueue(beacon: Beacon) : void {
-        if (this.queue.length() >= this.maxQueueLength) {
-            this.recorder.stop();
-
-            return;
-        }
-
-        this.queue.push(beacon);
-    }
-
-    private dequeue() : void {
-        this.queue.shift();
-
-        const minCapacity = this.maxQueueLength * this.underrunThreshold;
-
-        if (this.isEnabled() && this.queue.length() <= minCapacity) {
-            this.recorder.start();
-        }
-    }
-
-    private flush() : void {
-        if (this.promise) {
-            return;
-        }
-
-        const beacon = this.queue.peek();
-
-        if (beacon === null) {
-            return;
-        }
-
-        this.promise = this.transport.send(beacon);
-
-        this.promise.finally(() => {
-            delete this.promise;
-
-            this.dequeue();
-            this.flush();
-        });
+        this.startInactivityTimer();
     }
 }
 

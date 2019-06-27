@@ -6,6 +6,8 @@
     <script type="text/javascript" src="croct-sdk.js"></script>
 </head>
 <body>
+<img src="image.php" />
+
 <a href="index.html">Link</a>
 
 <div id="id"></div>
@@ -20,6 +22,11 @@
 
 
 <form>
+    <input type="button" id="pop1" value="Pop state 1">
+    <input type="button" id="pop2" value="Pop state 2">
+    <input type="button" id="pop3" value="Pop state 3">
+    <a href="#hello">Go to hello</a>
+
     <input name="checkbox-element" type="checkbox" id="checkbox" value="bar" />
     <input name="file-element1" type="file" value="file1" />
     <input name="file-element2" type="file" value="file2" />
@@ -32,20 +39,32 @@
     </select>
 
     <input type="submit" />
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <div id="hello">Hello world!</div>
 </form>
 
 <script>
 
-    croct.install({apiKey: '31c19e96-3ff2-4475-a20a-9ada44d9e1b9', debug: true});
+    croct.enable({debug: true});
     //croct.user.login('marcos');
-    croct.tracker.enable();
 
-    document.getElementById('enabled').onchange = function() {
-        if (this.checked) {
-            croct.tracker.enable();
-        } else {
-            croct.tracker.disable();
-        }
+    document.getElementById('pop1').onclick = function() {
+        history.pushState({page: 1}, "title 1", "?page=1");
+    };
+
+    document.getElementById('pop2').onclick = function() {
+        history.pushState({page: 2}, "title 2", "?page=2");
+    };
+
+    document.getElementById('pop3').onclick = function() {
+        history.replaceState({page: 3}, "title 3", "?page=3");
     };
 
     document.getElementById('login').onclick = function() {

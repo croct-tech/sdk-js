@@ -1,4 +1,4 @@
-import {Token} from "./token";
+import {Token} from './token';
 
 export enum PayloadType {
     CONTEXT_MENU_OPENED = 'contextMenuOpened',
@@ -15,6 +15,7 @@ export enum PayloadType {
     NOTHING_CHANGED = 'nothingChanged',
     PAGE_CHANGED = 'pageChanged',
     PAGE_LOADED = 'pageLoaded',
+    URL_CHANGED = 'urlChanged',
     PAGE_SNAPSHOT_CAPTURED = 'pageSnapshotCaptured',
     PAGE_OPENED = 'pageOpened',
     PAGE_VISIBILITY_CHANGED = 'pageVisibilityChanged',
@@ -23,6 +24,7 @@ export enum PayloadType {
     TOUCH_MOVED = 'touchMoved',
     TOUCH_STARTED = 'touchStarted',
     VIEWPORT_RESIZED = 'viewportResized',
+    USER_PROFILE_CHANGED = 'userProfileChanged',
 }
 
 type Point = {
@@ -100,7 +102,7 @@ export type FieldValue =
     TextareaValue |
     SelectValue |
     FileValue
-;
+    ;
 
 export type FormData = {
     [key: string]: FieldValue
@@ -220,7 +222,7 @@ export type Node =
     DocumentTypeNode |
     ElementNode |
     TextNode
-;
+    ;
 
 export type NodeAddition = {
     parentId: number
@@ -236,7 +238,7 @@ export type NodeRemoval = {
 
 export type AttributeChange = {
     nodeId: number
-    attributes: {[key: string]: string | null}
+    attributes: { [key: string]: string | null }
 }
 
 export type TextChange = {
@@ -311,6 +313,27 @@ export type ViewportResized = {
     viewportSize: Dimension
 }
 
+export type UrlChanged = {
+    type: PayloadType.URL_CHANGED
+}
+
+type PrimitiveAttribute = string | number | boolean | null;
+type CustomAttribute = PrimitiveAttribute | PrimitiveAttribute[];
+
+export type ProfileChange = {
+    email?: string | null
+    firstName?: string | null
+    gender?: 'neutral' | 'male' | 'female'
+    custom?: {
+        [key: string]: CustomAttribute
+    }
+}
+
+export type UserProfileChanged = {
+    type: PayloadType.USER_PROFILE_CHANGED
+    attributes: ProfileChange
+}
+
 export type OnsitePayload =
     ContextMenuOpened |
     ElementFocused |
@@ -333,15 +356,15 @@ export type OnsitePayload =
     TouchEnded |
     TouchMoved |
     TouchStarted |
-    ViewportResized
+    ViewportResized |
+    UrlChanged |
+    UserProfileChanged
 ;
 
-type OnsiteBeaconPayload = OnsitePayload & {
+type BeaconPayload = OnsitePayload & {
     tabId: string
     url: string
 }
-
-export type BeaconPayload = OnsiteBeaconPayload
 
 export type Beacon = {
     userToken: Token | null

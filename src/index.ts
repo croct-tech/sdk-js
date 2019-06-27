@@ -1,66 +1,44 @@
-import Sdk from "./sdk";
-import {Token, TokenScope} from "./token";
-import {Md5} from "md5-typescript";
-
-
-
+import Sdk from './sdk';
+import {Token} from './token';
+import {validate as validateUserAttributes} from './validation/userAttributes';
+import {validate as validateInitializationOptions} from './validation/initializationOptions';
+import {format} from './validation';
+import {PayloadType} from './beacon';
 
 export default {
-    uuid: function(value: string) {
-        const hash = Md5.init(value);
+    enable(options: any = {}): void {
+        const violation = validateInitializationOptions(options);
 
-        return [hash.slice(0, 8), hash.slice(8, 12), hash.slice(12, 16), hash.slice(16, 20), hash.slice(20)].join('-');
+        if (violation !== null) {
+            throw new Error(format(violation));
+        }
 
+        const {track = true, ...sdkOptions} = options;
+
+        Sdk.install(sdkOptions);
+
+        if (track) {
+            Sdk.tracker.enable();
+        }
     },
-    install(config: any) : void {
-        if (typeof config !== 'object') {
-            throw new Error('The configuration must a key-value map.')
-        }
-
-        let {
-            apiKey,
-            storageNamespace,
-            tokenScope,
-            debug,
-        } = config;
-
-        if (typeof apiKey !== 'string' || config.apiKey === '') {
-            throw new Error('The API key must be a non-empty string.');
-        }
-
-        if (storageNamespace !== undefined && typeof storageNamespace !== 'string') {
-            throw new Error('The option "storageNamespace" must be a non-empty string.');
-        }
-
-        if (tokenScope !== undefined && !Object.values(TokenScope).includes(tokenScope)) {
-            throw new Error('The option "tokenScope" is invalid.');
-        }
-
-        if (tokenScope !== undefined && typeof debug !== 'boolean') {
-            throw new Error('The option "debug" must be true or false.');
-        }
-
-        Sdk.install(config);
-    },
-    uninstall() : void {
+    disable(): void {
         Sdk.uninstall();
     },
-
     tracker: {
-        enable: () => {
+        enable(): void {
             Sdk.tracker.enable();
         },
 
-        disable: () => {
+        disable(): void {
             Sdk.tracker.disable();
-        }
+        },
     },
     user: {
-        isLogged: () : boolean => {
+        isLogged: (): boolean => {
             return Sdk.tracker.hasToken();
         },
 
-        getToken: () : Token | null => {
+        getToken: (): Token | null => {
             return Sdk.tracker.getToken();
         },
 
@@ -72,8 +50,36 @@ export default {
             Sdk.tracker.identify(userId);
         },
 
-        logout() : void {
+        logout(): void {
             Sdk.tracker.anonymize();
-        }
-    }
+        },
+
+        setAttributes(attributes: any): void {
+            const violation = validateUserAttributes(attributes);
+
+            if (violation !== null) {
+                throw new Error(format(violation));
+            }
+
+            if (Object.keys(attributes).length === 0) {
+                // The list is empty, there is nothing to do...
+                return;
+            }
+
+            attributes = {...attributes};
+
+            if (attributes.firstName === '') {
+                delete attributes.firstName;
+            }
+
+            if (attributes.custom && Object.keys(attributes.custom).length === 0) {
+                delete attributes.custom;
+            }
+
+            Sdk.tracker.track({
+                type: PayloadType.USER_PROFILE_CHANGED,
+                attributes: attributes
+            });
+        },
+    },
 };
