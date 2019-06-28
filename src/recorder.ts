@@ -305,7 +305,6 @@ export class Recorder {
             case RrwebEventType.DomContentLoaded:
                 return {
                     type: 'pageLoaded',
-                    url: document.URL,
                     title: document.title,
                     lastModified: Date.parse(document.lastModified),
                 };

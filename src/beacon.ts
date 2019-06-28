@@ -244,7 +244,6 @@ export type PageSnapshotCaptured = BasePayload<'pageSnapshotCaptured'> & {
 }
 
 export type PageLoaded = BasePayload<'pageLoaded'> & {
-    url: string
     title: string
     lastModified: number
 }
@@ -260,9 +259,7 @@ export type PageVisibilityChanged = BasePayload<'pageVisibilityChanged'> & {
     visibility: 'visible' | 'hidden'
 }
 
-export type TabOpened = BasePayload<'tabOpened'> & {
-    tabId: string
-};
+export type TabOpened = BasePayload<'tabOpened'>;
 
 export type TouchEnded = BasePayload<'touchEnded'> & {
     nodeId: number
@@ -283,9 +280,7 @@ export type ViewportResized = BasePayload<'viewportResized'> & {
     viewportSize: Dimension
 }
 
-export type UrlChanged = BasePayload<'urlChanged'> & {
-    url: string
-};
+export type UrlChanged = BasePayload<'urlChanged'>;
 
 type PrimitiveAttribute = string | number | boolean | null;
 type CustomAttribute = PrimitiveAttribute | PrimitiveAttribute[];
