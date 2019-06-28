@@ -39,16 +39,13 @@ import {
 
 import {
     AttributeChange,
-    FieldType,
     FileMetadata,
     FormData,
     MouseOffset,
     Node as NodeSnapshot,
     NodeAddition,
     NodeRemoval,
-    NodeType,
-    OnsitePayload, PageVisibility,
-    PayloadType,
+    PartialPayload,
     TextChange,
 } from './beacon';
 
@@ -61,7 +58,7 @@ type RecorderListener = {
 
 export type RecorderEvent = {
     timestamp: number
-    payload: OnsitePayload,
+    payload: PartialPayload,
 }
 
 type StopCallback = StopRecorderCallback;
@@ -202,7 +199,7 @@ export class Recorder {
         this.emit({
             timestamp: Date.now(),
             payload: {
-                type: PayloadType.FORM_SUBMITTED,
+                type: 'formSubmitted',
                 nodeId: mirror.getId(event.target as RrwebINode),
                 formData: this.extractFormData(form),
                 formName: form.name,
@@ -243,7 +240,7 @@ export class Recorder {
 
                     if (files.length > 0) {
                         data[element.name] = {
-                            type: FieldType.FILE,
+                            type: 'file',
                             nodeId: mirror.getId((element as Node) as RrwebINode),
                             files: files,
                         };
@@ -262,7 +259,7 @@ export class Recorder {
 
                     if (options.length > 0) {
                         data[element.name] = {
-                            type: FieldType.SELECT,
+                            type: 'select',
                             nodeId: mirror.getId((element as Node) as RrwebINode),
                             options: options,
                         };
@@ -271,7 +268,7 @@ export class Recorder {
 
                 case 'textarea':
                     data[element.name] = {
-                        type: FieldType.TEXTAREA,
+                        type: 'textarea',
                         nodeId: mirror.getId((element as Node) as RrwebINode),
                         // normalize linefeeds for textareas
                         // https://infra.spec.whatwg.org/#normalize-newlines
@@ -283,7 +280,7 @@ export class Recorder {
                 case 'radio':
                     if ((element as HTMLInputElement).checked) {
                         data[element.name] = {
-                            type: FieldType.INPUT,
+                            type: 'input',
                             nodeId: mirror.getId((element as Node) as RrwebINode),
                             value: element.value,
                         };
@@ -292,7 +289,7 @@ export class Recorder {
 
                 default:
                     data[element.name] = {
-                        type: FieldType.INPUT,
+                        type: 'input',
                         nodeId: mirror.getId((element as Node) as RrwebINode),
                         value: element.value,
                     };
@@ -303,11 +300,12 @@ export class Recorder {
         return data;
     }
 
-    private createPayload(event: RrwebEvent): OnsitePayload | null {
+    private createPayload(event: RrwebEvent): PartialPayload | null {
         switch (event.type) {
             case RrwebEventType.DomContentLoaded:
                 return {
-                    type: PayloadType.PAGE_LOADED,
+                    type: 'pageLoaded',
+                    url: document.URL,
                     title: document.title,
                     lastModified: Date.parse(document.lastModified),
                 };
@@ -321,7 +319,7 @@ export class Recorder {
                 const {node, initialOffset} = (event as RrwebFullSnapshotEvent).data;
 
                 return {
-                    type: PayloadType.PAGE_SNAPSHOT_CAPTURED,
+                    type: 'pageSnapshotCaptured',
                     version: this.version++,
                     viewportSize: {
                         width: meta.width,
@@ -344,13 +342,13 @@ export class Recorder {
         }
     }
 
-    private createIncrementalPayload(data: RrwebIncrementalData): OnsitePayload {
+    private createIncrementalPayload(data: RrwebIncrementalData): PartialPayload {
         switch (data.source) {
             case RrwebIncrementalSource.Mutation:
                 const mutation = data as RrwebMutationData;
 
                 return {
-                    type: PayloadType.PAGE_CHANGED,
+                    type: 'pageChanged',
                     nodesAdded: this.createNodeAdditions(mutation.adds),
                     nodesRemoved: this.createNodeRemovals(mutation.removes),
                     attributesChanged: this.createAttributeChanges(mutation.attributes),
@@ -360,7 +358,7 @@ export class Recorder {
                 const mouseMove = data as RrwebMouseMoveData;
 
                 return {
-                    type: PayloadType.MOUSE_MOVED,
+                    type: 'mouseMoved',
                     offsets: mouseMove.positions.map(
                         (position): MouseOffset => ({
                             nodeId: position.id,
@@ -380,7 +378,7 @@ export class Recorder {
                 const mouseScroll = data as RrwebMouseScrollData;
 
                 return {
-                    type: PayloadType.ELEMENT_SCROLLED,
+                    type: 'elementScrolled',
                     nodeId: mouseScroll.id,
                     point: {
                         x: mouseScroll.x,
@@ -392,7 +390,7 @@ export class Recorder {
                 const viewportResize = data as RrwebViewportResizeData;
 
                 return {
-                    type: PayloadType.VIEWPORT_RESIZED,
+                    type: 'viewportResized',
                     viewportSize: {
                         width: viewportResize.width,
                         height: viewportResize.height,
@@ -403,7 +401,7 @@ export class Recorder {
                 const input = data as RrwebInputData;
 
                 return {
-                    type: PayloadType.INPUT_CHANGED,
+                    type: 'inputChanged',
                     nodeId: input.id,
                     checked: input.isChecked,
                     value: input.text,
@@ -411,11 +409,11 @@ export class Recorder {
         }
     }
 
-    private createMouseInteractionPayload(data: RrwebMouseInteractionData): OnsitePayload {
+    private createMouseInteractionPayload(data: RrwebMouseInteractionData): PartialPayload {
         switch (data.type) {
             case RrwebMouseInteractions.MouseUp:
                 return {
-                    type: PayloadType.MOUSE_RELEASED,
+                    type: 'mouseReleased',
                     nodeId: data.id,
                     point: {
                         x: data.x,
@@ -425,7 +423,7 @@ export class Recorder {
 
             case RrwebMouseInteractions.MouseDown:
                 return {
-                    type: PayloadType.MOUSE_PRESSED,
+                    type: 'mousePressed',
                     nodeId: data.id,
                     point: {
                         x: data.x,
@@ -435,7 +433,7 @@ export class Recorder {
 
             case RrwebMouseInteractions.Click:
                 return {
-                    type: PayloadType.MOUSE_CLICKED,
+                    type: 'mouseClicked',
                     nodeId: data.id,
                     point: {
                         x: data.x,
@@ -445,7 +443,7 @@ export class Recorder {
 
             case RrwebMouseInteractions.ContextMenu:
                 return {
-                    type: PayloadType.CONTEXT_MENU_OPENED,
+                    type: 'contextMenuOpened',
                     nodeId: data.id,
                     point: {
                         x: data.x,
@@ -455,7 +453,7 @@ export class Recorder {
 
             case RrwebMouseInteractions.DblClick:
                 return {
-                    type: PayloadType.MOUSE_DOUBLE_CLICKED,
+                    type: 'mouseDoubleClicked',
                     nodeId: data.id,
                     point: {
                         x: data.x,
@@ -465,19 +463,19 @@ export class Recorder {
 
             case RrwebMouseInteractions.Focus:
                 return {
-                    type: PayloadType.ELEMENT_FOCUSED,
+                    type: 'elementFocused',
                     nodeId: data.id,
                 };
 
             case RrwebMouseInteractions.Blur:
                 return {
-                    type: PayloadType.ELEMENT_UNFOCUSED,
+                    type: 'elementUnfocused',
                     nodeId: data.id,
                 };
 
             case RrwebMouseInteractions.TouchStart:
                 return {
-                    type: PayloadType.TOUCH_STARTED,
+                    type: 'touchStarted',
                     nodeId: data.id,
                     point: {
                         x: data.x,
@@ -488,7 +486,7 @@ export class Recorder {
             case RrwebMouseInteractions.TouchMove_Departed:
                 // @todo fix it
                 return {
-                    type: PayloadType.TOUCH_MOVED,
+                    type: 'touchMoved',
                     nodeId: data.id,
                     point: {
                         x: data.x,
@@ -498,7 +496,7 @@ export class Recorder {
 
             case RrwebMouseInteractions.TouchEnd:
                 return {
-                    type: PayloadType.TOUCH_ENDED,
+                    type: 'touchEnded',
                     nodeId: data.id,
                     point: {
                         x: data.x,
@@ -579,7 +577,7 @@ export class Recorder {
                 const documentNode = node as RrwebDocumentNode;
 
                 return {
-                    type: NodeType.DOCUMENT,
+                    type: 'document',
                     id: node.id,
                     children: documentNode.childNodes.map(
                         (child) => this.createNode(child),
@@ -591,7 +589,7 @@ export class Recorder {
                 const documentTypeNode = node as RrwebDocumentTypeNode;
 
                 return {
-                    type: NodeType.DOCUMENT_TYPE,
+                    type: 'documentType',
                     id: node.id,
                     name: documentTypeNode.name,
                     publicId: documentTypeNode.publicId,
@@ -602,7 +600,7 @@ export class Recorder {
                 const elementNode = node as RrwebElementNode;
 
                 return {
-                    type: NodeType.ELEMENT,
+                    type: 'element',
                     id: node.id,
                     tagName: elementNode.tagName,
                     attributes: elementNode.attributes,
@@ -615,7 +613,7 @@ export class Recorder {
                 const textNode = node as RrwebTextNode;
 
                 return {
-                    type: NodeType.TEXT,
+                    type: 'text',
                     id: node.id,
                     value: textNode.textContent,
                 };
@@ -624,7 +622,7 @@ export class Recorder {
                 const cdataNode = node as RrwebCdataNode;
 
                 return {
-                    type: NodeType.CDATA,
+                    type: 'cdata',
                     id: node.id,
                     value: cdataNode.textContent,
                 };
@@ -633,7 +631,7 @@ export class Recorder {
                 const commentNode = node as RrwebCommentNode;
 
                 return {
-                    type: NodeType.COMMENT,
+                    type: 'comment',
                     id: node.id,
                     value: commentNode.textContent,
                 };

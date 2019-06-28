@@ -1,7 +1,7 @@
 import {Logger} from './logger';
 import {Context} from './context';
 import {Recorder} from './recorder';
-import {Beacon, OnsitePayload, PageVisibility, PayloadType} from './beacon';
+import {Beacon, PartialPayload, Payload} from './beacon';
 import {Tab, TabEvent} from './tab';
 import {OutputChannel} from './channel';
 import {NullLogger} from './logger/nullLogger';
@@ -156,12 +156,12 @@ export class Tracker {
 
         if (tab.isNew) {
             this.track({
-                type: PayloadType.TAB_OPENED,
+                type: 'tabOpened',
             });
         }
 
         this.track({
-            type: PayloadType.PAGE_OPENED,
+            type: 'pageOpened',
             referrer: tab.referrer,
         });
 
@@ -171,20 +171,18 @@ export class Tracker {
     }
 
     private trackUrlChange() : void {
-        this.track({type: PayloadType.URL_CHANGED});
+        this.track({type: 'urlChanged'});
     }
 
     private trackTabVisibility(event: TabEvent) : void {
         this.track({
-            type: PayloadType.PAGE_VISIBILITY_CHANGED,
-            visibility: event.detail.isVisible ?
-                PageVisibility.VISIBLE :
-                PageVisibility.HIDDEN,
+            type: 'pageVisibilityChanged',
+            visibility: event.detail.isVisible ? 'visible' : 'hidden'
         });
     }
 
     private trackInactivity() : void {
-        this.track({type: PayloadType.NOTHING_CHANGED});
+        this.track({type: 'nothingChanged'});
     }
 
     private stopInactivityTimer() : void {
@@ -200,7 +198,7 @@ export class Tracker {
         );
     }
 
-    track(payload: OnsitePayload, timestamp: number = Date.now()): void {
+    track(payload: PartialPayload, timestamp: number = Date.now()): void {
         this.stopInactivityTimer();
 
         this.logger.info(`Tracked beacon "${payload.type}"`);
@@ -211,9 +209,9 @@ export class Tracker {
             userToken: this.context.getToken(),
             timestamp: timestamp,
             payload: {
-                ...payload,
                 tabId: tab.id,
                 url: tab.location.href,
+                ...payload,
             },
         });
 

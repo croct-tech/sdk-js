@@ -3,7 +3,6 @@ import {Token} from './token';
 import {validate as validateUserAttributes} from './validation/userAttributes';
 import {validate as validateInitializationOptions} from './validation/initializationOptions';
 import {format} from './validation';
-import {PayloadType} from './beacon';
 
 export default {
     enable(options: any = {}): void {
@@ -77,7 +76,7 @@ export default {
             }
 
             Sdk.tracker.track({
-                type: PayloadType.USER_PROFILE_CHANGED,
+                type: 'userProfileChanged',
                 attributes: attributes
             });
         },

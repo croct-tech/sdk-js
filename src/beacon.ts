@@ -1,43 +1,35 @@
 import {Token} from './token';
 
-export enum PayloadType {
-    CONTEXT_MENU_OPENED = 'contextMenuOpened',
-    ELEMENT_FOCUSED = 'elementFocused',
-    ELEMENT_SCROLLED = 'elementScrolled',
-    ELEMENT_UNFOCUSED = 'elementUnfocused',
-    FORM_SUBMITTED = 'formSubmitted',
-    INPUT_CHANGED = 'inputChanged',
-    MOUSE_CLICKED = 'mouseClicked',
-    MOUSE_DOUBLE_CLICKED = 'mouseDoubleClicked',
-    MOUSE_MOVED = 'mouseMoved',
-    MOUSE_PRESSED = 'mousePressed',
-    MOUSE_RELEASED = 'mouseReleased',
-    NOTHING_CHANGED = 'nothingChanged',
-    PAGE_CHANGED = 'pageChanged',
-    PAGE_LOADED = 'pageLoaded',
-    URL_CHANGED = 'urlChanged',
-    PAGE_SNAPSHOT_CAPTURED = 'pageSnapshotCaptured',
-    PAGE_OPENED = 'pageOpened',
-    PAGE_VISIBILITY_CHANGED = 'pageVisibilityChanged',
-    TAB_OPENED = 'tabOpened',
-    TOUCH_ENDED = 'touchEnded',
-    TOUCH_MOVED = 'touchMoved',
-    TOUCH_STARTED = 'touchStarted',
-    VIEWPORT_RESIZED = 'viewportResized',
-    USER_PROFILE_CHANGED = 'userProfileChanged',
-}
-
-type EventType =
+type PayloadType =
     'contextMenuOpened' |
-    'elementFocused'
+    'elementFocused' |
+    'elementScrolled' |
+    'elementUnfocused' |
+    'formSubmitted' |
+    'inputChanged' |
+    'mouseClicked' |
+    'mouseDoubleClicked' |
+    'mouseMoved' |
+    'mousePressed' |
+    'mouseReleased' |
+    'nothingChanged' |
+    'pageChanged' |
+    'pageLoaded' |
+    'pageSnapshotCaptured' |
+    'pageOpened' |
+    'pageVisibilityChanged' |
+    'tabOpened' |
+    'touchEnded' |
+    'touchMoved' |
+    'touchStarted' |
+    'viewportResized' |
+    'urlChanged' |
+    'userProfileChanged'
 ;
 
-type Event<T extends EventType> = {
+type BasePayload<T extends PayloadType> = {
     type: T
-    tabId: string
-    url: string
 }
-
 
 type Point = {
     x: number
@@ -49,42 +41,41 @@ type Dimension = {
     width: number
 }
 
-export type ContextMenuOpened = Event<'contextMenuOpened'> & {
+export type ContextMenuOpened = BasePayload<'contextMenuOpened'> & {
     nodeId: number
     point: Point
 }
 
-export type ElementFocused = {
-    type: PayloadType.ELEMENT_FOCUSED
+export type ElementFocused = BasePayload<'elementFocused'> & {
     nodeId: number
 }
 
-export type ElementScrolled = {
-    type: PayloadType.ELEMENT_SCROLLED
+export type ElementScrolled = BasePayload<'elementScrolled'> & {
     nodeId: number
     point: Point
 }
 
-export type ElementUnfocused = {
-    type: PayloadType.ELEMENT_UNFOCUSED
+export type ElementUnfocused = BasePayload<'elementUnfocused'> & {
     nodeId: number
 }
 
-export enum FieldType {
-    INPUT = 'input',
-    SELECT = 'select',
-    FILE = 'file',
-    TEXTAREA = 'textarea',
+type FieldType =
+    'input' |
+    'select' |
+    'file' |
+    'textarea'
+;
+
+type BaseFieldValue<T extends FieldType> = {
+    type: T
 }
 
-export type InputValue = {
-    type: FieldType.INPUT,
+export type InputValue = BaseFieldValue<'input'> & {
     nodeId: number,
     value: string,
 }
 
-export type SelectValue = {
-    type: FieldType.SELECT,
+export type SelectValue = BaseFieldValue<'select'> & {
     nodeId: number,
     options: string[],
 }
@@ -96,14 +87,12 @@ export type FileMetadata = {
     lastModified: number
 }
 
-export type FileValue = {
-    type: FieldType.FILE,
+export type FileValue = BaseFieldValue<'file'> & {
     nodeId: number,
     files: FileMetadata[],
 }
 
-export type TextareaValue = {
-    type: FieldType.TEXTAREA,
+export type TextareaValue = BaseFieldValue<'textarea'> & {
     nodeId: number,
     value: string,
 }
@@ -113,35 +102,30 @@ export type FieldValue =
     TextareaValue |
     SelectValue |
     FileValue
-    ;
+;
 
 export type FormData = {
     [key: string]: FieldValue
 }
 
-export type FormSubmitted = {
-    type: PayloadType.FORM_SUBMITTED
+export type FormSubmitted = BasePayload<'formSubmitted'> & {
     nodeId: number
     formId?: string
     formName?: string
     formData: FormData
 }
 
-export type InputChanged = {
-    type: PayloadType.INPUT_CHANGED
+export type InputChanged = BasePayload<'inputChanged'> & {
     nodeId: number
     value: string
     checked: boolean
 }
-
-export type MouseClicked = {
-    type: PayloadType.MOUSE_CLICKED
+export type MouseClicked = BasePayload<'mouseClicked'> & {
     nodeId: number
     point: Point
 }
 
-export type MouseDoubleClicked = {
-    type: PayloadType.MOUSE_DOUBLE_CLICKED
+export type MouseDoubleClicked = BasePayload<'mouseDoubleClicked'> & {
     nodeId: number
     point: Point
 }
@@ -152,63 +136,53 @@ export type MouseOffset = {
     timeOffset: number
 }
 
-export type MouseMoved = {
-    type: PayloadType.MOUSE_MOVED
+export type MouseMoved = BasePayload<'mouseMoved'> & {
     offsets: MouseOffset[]
 }
 
-export type MousePressed = {
-    type: PayloadType.MOUSE_PRESSED
+export type MousePressed = BasePayload<'mousePressed'> & {
     nodeId: number
     point: Point
 }
 
-export type MouseReleased = {
-    type: PayloadType.MOUSE_RELEASED
+export type MouseReleased = BasePayload<'mouseReleased'> & {
     nodeId: number
     point: Point
 }
 
-export type NothingChanged = {
-    type: PayloadType.NOTHING_CHANGED
-}
+export type NothingChanged = BasePayload<'nothingChanged'>;
 
-export enum NodeType {
-    DOCUMENT = 'document',
-    DOCUMENT_TYPE = 'documentType',
-    ELEMENT = 'element',
-    CDATA = 'cdata',
-    COMMENT = 'comment',
-    TEXT = 'text',
-}
+type NodeType =
+    'document' |
+    'documentType' |
+    'element' |
+    'cdata' |
+    'comment' |
+    'text'
+;
 
-export type CdataNode = {
-    type: NodeType.CDATA
+type BaseNode<T extends NodeType> = {
+    type: T,
     id: number
+}
+
+export type CdataNode = BaseNode<'cdata'> & {
     value: string
 }
 
-export type CommentNode = {
-    type: NodeType.COMMENT
-    id: number
+export type CommentNode = BaseNode<'comment'> & {
     value: string
 }
 
-export type TextNode = {
-    type: NodeType.TEXT
-    id: number
+export type TextNode = BaseNode<'text'> & {
     value: string
 }
 
-export type DocumentNode = {
-    type: NodeType.DOCUMENT
-    id: number
+export type DocumentNode = BaseNode<'document'> & {
     children: Node[]
 }
 
-export type DocumentTypeNode = {
-    type: NodeType.DOCUMENT_TYPE
-    id: number
+export type DocumentTypeNode = BaseNode<'documentType'> & {
     name: string
     publicId: string
     systemId: string
@@ -218,9 +192,7 @@ export declare type attributes = {
     [key: string]: string | boolean;
 };
 
-export type ElementNode = {
-    type: NodeType.ELEMENT
-    id: number
+export type ElementNode = BaseNode<'element'> & {
     tagName: string
     attributes: attributes
     children: Node[]
@@ -257,76 +229,63 @@ export type TextChange = {
     value: string | null
 }
 
-export type PageChanged = {
-    type: PayloadType.PAGE_CHANGED
+export type PageChanged = BasePayload<'pageChanged'> & {
     nodesAdded: NodeAddition[]
     nodesRemoved: NodeRemoval[]
     attributesChanged: AttributeChange[]
     textsChanged: TextChange[]
 }
 
-export type PageSnapshotCaptured = {
-    type: PayloadType.PAGE_SNAPSHOT_CAPTURED
+export type PageSnapshotCaptured = BasePayload<'pageSnapshotCaptured'> & {
     viewportSize: Dimension
     scrollOffset: Point
     content: Node
     version: number
 }
 
-export type PageLoaded = {
-    type: PayloadType.PAGE_LOADED
+export type PageLoaded = BasePayload<'pageLoaded'> & {
+    url: string
     title: string
     lastModified: number
 }
 
-export type PageOpened = {
-    type: PayloadType.PAGE_OPENED
+export type PageOpened = BasePayload<'pageOpened'> & {
     referrer: string
     //ip: string
     //userAgent: string
     //preferredLanguages: string
 }
 
-export enum PageVisibility {
-    VISIBLE,
-    HIDDEN
+export type PageVisibilityChanged = BasePayload<'pageVisibilityChanged'> & {
+    visibility: 'visible' | 'hidden'
 }
 
-export type PageVisibilityChanged = {
-    type: PayloadType.PAGE_VISIBILITY_CHANGED
-    visibility: PageVisibility
-}
+export type TabOpened = BasePayload<'tabOpened'> & {
+    tabId: string
+};
 
-export type TabOpened = {
-    type: PayloadType.TAB_OPENED
-}
-
-export type TouchEnded = {
-    type: PayloadType.TOUCH_ENDED
+export type TouchEnded = BasePayload<'touchEnded'> & {
     nodeId: number
     point: Point
 }
 
-export type TouchMoved = {
-    type: PayloadType.TOUCH_MOVED
+export type TouchMoved = BasePayload<'touchMoved'> & {
     nodeId: number
     point: Point
 }
 
-export type TouchStarted = {
-    type: PayloadType.TOUCH_STARTED
+export type TouchStarted = BasePayload<'touchStarted'> & {
     nodeId: number
     point: Point
 }
 
-export type ViewportResized = {
-    type: PayloadType.VIEWPORT_RESIZED
+export type ViewportResized = BasePayload<'viewportResized'> & {
     viewportSize: Dimension
 }
 
-export type UrlChanged = {
-    type: PayloadType.URL_CHANGED
-}
+export type UrlChanged = BasePayload<'urlChanged'> & {
+    url: string
+};
 
 type PrimitiveAttribute = string | number | boolean | null;
 type CustomAttribute = PrimitiveAttribute | PrimitiveAttribute[];
@@ -340,12 +299,11 @@ export type ProfileChange = {
     }
 }
 
-export type UserProfileChanged = {
-    type: PayloadType.USER_PROFILE_CHANGED
+export type UserProfileChanged = BasePayload<'userProfileChanged'> & {
     attributes: ProfileChange
 }
 
-export type Payload =
+export type PartialPayload =
     ContextMenuOpened |
     ElementFocused |
     ElementScrolled |
@@ -371,6 +329,11 @@ export type Payload =
     UrlChanged |
     UserProfileChanged
 ;
+
+export type Payload = PartialPayload & {
+    tabId: string
+    url: string
+};
 
 export type Beacon = {
     userToken: Token | null
