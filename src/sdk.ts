@@ -133,7 +133,7 @@ export default class Sdk {
     private createTracker() : Tracker {
         const tracker = new Tracker({
             context: this.getContext(),
-            logger: this.getLogger('TrackingService'),
+            logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
         });
 

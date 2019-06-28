@@ -27,6 +27,18 @@ export enum PayloadType {
     USER_PROFILE_CHANGED = 'userProfileChanged',
 }
 
+type EventType =
+    'contextMenuOpened' |
+    'elementFocused'
+;
+
+type Event<T extends EventType> = {
+    type: T
+    tabId: string
+    url: string
+}
+
+
 type Point = {
     x: number
     y: number
@@ -37,8 +49,7 @@ type Dimension = {
     width: number
 }
 
-export type ContextMenuOpened = {
-    type: PayloadType.CONTEXT_MENU_OPENED
+export type ContextMenuOpened = Event<'contextMenuOpened'> & {
     nodeId: number
     point: Point
 }
@@ -334,7 +345,7 @@ export type UserProfileChanged = {
     attributes: ProfileChange
 }
 
-export type OnsitePayload =
+export type Payload =
     ContextMenuOpened |
     ElementFocused |
     ElementScrolled |
@@ -361,13 +372,8 @@ export type OnsitePayload =
     UserProfileChanged
 ;
 
-type BeaconPayload = OnsitePayload & {
-    tabId: string
-    url: string
-}
-
 export type Beacon = {
     userToken: Token | null
     timestamp: number
-    payload: BeaconPayload
+    payload: Payload
 }

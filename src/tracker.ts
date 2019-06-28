@@ -203,7 +203,7 @@ export class Tracker {
     track(payload: OnsitePayload, timestamp: number = Date.now()): void {
         this.stopInactivityTimer();
 
-        this.logger.info(`Sending beacon "${payload.type}"`);
+        this.logger.info(`Tracked beacon "${payload.type}"`);
 
         const tab = this.context.getTab();
 
@@ -217,9 +217,10 @@ export class Tracker {
             },
         });
 
-        promise.catch(() => {
-            this.logger.info(`Failed to send beacon "${payload.type}"`);
-        });
+        promise.then(
+            () => this.logger.info(`Sent beacon "${payload.type}"`),
+            () => this.logger.info(`Failed to send beacon "${payload.type}"`)
+        );
 
         this.startInactivityTimer();
     }
