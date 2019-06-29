@@ -295,7 +295,7 @@ export type ProfileChange = {
 }
 
 export type UserProfileChanged = BasePayload<'userProfileChanged'> & {
-    attributes: ProfileChange
+    changes: ProfileChange
 }
 
 export type PartialPayload =

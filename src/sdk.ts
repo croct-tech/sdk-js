@@ -11,7 +11,7 @@ import {Beacon} from './beacon';
 import {SocketChannel} from './channel/socketChannel';
 import {CodecChannel} from './channel/codecChannel';
 import {PersistentQueue} from './queue/persistentQueue';
-import {GuaranteedChannel, timestamp} from './channel/guaranteedChannel';
+import {GuaranteedChannel, TimeStamper} from './channel/guaranteedChannel';
 import {jsonEncode, utf8Decode, utf8Encode} from './transformer';
 import {Command} from './command';
 import {QueuedChannel} from './channel/queuedChannel';
@@ -201,7 +201,7 @@ export default class Sdk {
                         envelope => jsonEncode(envelope).then(utf8Encode),
                         utf8Decode,
                     ),
-                    stamper: timestamp,
+                    stamper: new TimeStamper(),
                     ackTimeout: 5000,
                     logger: logger,
                 }),

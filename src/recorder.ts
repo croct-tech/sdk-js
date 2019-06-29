@@ -111,6 +111,7 @@ export class Recorder {
 
         this.stopCallback();
         this.pendingEvents = [];
+        this.version++;
 
         delete this.stopCallback;
 
@@ -319,7 +320,7 @@ export class Recorder {
 
                 return {
                     type: 'pageSnapshotCaptured',
-                    version: this.version++,
+                    version: this.version,
                     viewportSize: {
                         width: meta.width,
                         height: meta.height,

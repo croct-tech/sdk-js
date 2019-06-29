@@ -1,7 +1,7 @@
 import {Logger} from './logger';
 import {Context} from './context';
 import {Recorder} from './recorder';
-import {Beacon, PartialPayload, Payload} from './beacon';
+import {Beacon, PartialPayload} from './beacon';
 import {Tab, TabEvent} from './tab';
 import {OutputChannel} from './channel';
 import {NullLogger} from './logger/nullLogger';
@@ -31,8 +31,8 @@ export class Tracker {
     constructor({context, channel, logger, ...options}: Configuration) {
         this.context = context;
         this.channel = channel;
-        this.recorder = new Recorder(this.logger);
         this.logger = logger || new NullLogger();
+        this.recorder = new Recorder(this.logger);
         this.options = {
             inactivityInterval: 30 * 1000,
             ...options
@@ -40,6 +40,7 @@ export class Tracker {
 
         this.trackTabVisibility = this.trackTabVisibility.bind(this);
         this.trackUrlChange = this.trackUrlChange.bind(this);
+        this.trackInactivity = this.trackInactivity.bind(this);
     }
 
     isEnabled() {
@@ -59,14 +60,14 @@ export class Tracker {
             return;
         }
 
+        this.startInactivityTimer();
+
         if (!this.initialized) {
             this.initialized = true;
             this.initialize();
         }
 
         this.recorder.start();
-
-        this.startInactivityTimer();
 
         const tab = this.context.getTab();
 
@@ -89,12 +90,12 @@ export class Tracker {
 
         this.recorder.stop();
 
-        this.stopInactivityTimer();
-
         const tab = this.context.getTab();
 
         tab.removeListener('urlChange', this.trackUrlChange);
         tab.removeListener('visibility', this.trackTabVisibility);
+
+        this.stopInactivityTimer();
     }
 
     suspend() {
@@ -188,18 +189,30 @@ export class Tracker {
     private stopInactivityTimer() : void {
         window.clearInterval(this.inactivityTimer);
 
-        delete this.inactivityTimer;
+        const a = delete this.inactivityTimer;
     }
 
     private startInactivityTimer() : void {
+        this.stopInactivityTimer();
+
+        if (this.suspended) {
+            return;
+        }
+
         this.inactivityTimer = window.setInterval(
-            this.trackInactivity.bind(this),
+            this.trackInactivity,
             this.options.inactivityInterval
         );
     }
 
     track(payload: PartialPayload, timestamp: number = Date.now()): void {
         this.stopInactivityTimer();
+
+        if (this.suspended) {
+            this.logger.info(`Tracker is suspended, ignoring beacon "${payload.type}"`);
+
+            return;
+        }
 
         this.logger.info(`Tracked beacon "${payload.type}"`);
 
