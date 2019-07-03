@@ -11,7 +11,7 @@ class Compressor {
     private readonly bitsPerChar: number;
     private position: number = 0;
     private value: number = 0;
-    public data: string = "";
+    public data: string = '';
 
     private constructor(bitsPerChar: number) {
         this.bitsPerChar = bitsPerChar;
@@ -19,23 +19,23 @@ class Compressor {
 
     static compress(input: string | null, bitsPerChar: number): string {
         if (input === null) {
-            return "";
+            return '';
         }
 
-        const writer = new Compressor(bitsPerChar);
+        const compressor = new Compressor(bitsPerChar);
 
         let numBitsMask = 0b100;
 
-        if (input.length === 0) {
-            return writer.finish(numBitsMask);
+        if (input === '') {
+            return compressor.finish(numBitsMask);
         }
 
         let code = input.charCodeAt(0);
         let value = code < 256 ? 0 : 1;
         let dictSize = 3;
 
-        writer.writeBit(value, numBitsMask);
-        writer.writeBit(code, value !== 0 ? 0b10000000000000000 : 0b100000000);
+        compressor.write(value, numBitsMask);
+        compressor.write(code, value !== 0 ? 0b10000000000000000 : 0b100000000);
 
         let node = new Trie(3);
         let isNewNode = true;
@@ -56,7 +56,7 @@ class Compressor {
 
             if (!isNewNode) {
                 value = node.value;
-                writer.writeBit(value, numBitsMask);
+                compressor.write(value, numBitsMask);
             }
 
             isNewNode = false;
@@ -68,8 +68,8 @@ class Compressor {
 
                 value = code < 256 ? 0 : 1;
 
-                writer.writeBit(value, numBitsMask);
-                writer.writeBit(code, value !== 0 ? 0b10000000000000000 : 0b100000000);
+                compressor.write(value, numBitsMask);
+                compressor.write(code, value !== 0 ? 0b10000000000000000 : 0b100000000);
 
                 dictionary[code] = new Trie(dictSize);
 
@@ -86,7 +86,7 @@ class Compressor {
         }
 
         if (!isNewNode) {
-            writer.writeBit(node.value, numBitsMask);
+            compressor.write(node.value, numBitsMask);
         }
 
         if (!dictionary[code]) {
@@ -96,18 +96,18 @@ class Compressor {
 
             value = code < 256 ? 0 : 1;
 
-            writer.writeBit(value, numBitsMask);
-            writer.writeBit(code, 0b100000000 << value);
+            compressor.write(value, numBitsMask);
+            compressor.write(code, 0b100000000 << value);
         }
 
         if (++dictSize >= numBitsMask) {
             numBitsMask <<= 1;
         }
 
-        return writer.finish(numBitsMask);
+        return compressor.finish(numBitsMask);
     }
 
-    writeBit(value: number, numBitsMask: number) {
+    write(value: number, numBitsMask: number) {
         for (let i = 0; (numBitsMask >>= 1) !== 0; i++) {
             this.value = (value >> i & 1) | (this.value << 1);
 
@@ -120,7 +120,7 @@ class Compressor {
     }
 
     finish(numBitsMask: number) {
-        this.writeBit(2, numBitsMask);
+        this.write(2, numBitsMask);
 
         this.value <<= this.bitsPerChar - this.position;
         this.data += String.fromCharCode(this.value);
@@ -152,15 +152,15 @@ class Decompressor {
             return null;
         }
 
-        const reader: Decompressor = new Decompressor(input, resetBits);
+        const decompressor: Decompressor = new Decompressor(input, resetBits);
 
-        let bits = reader.readBits(2);
+        let bits = decompressor.read(2);
 
         if (bits === 2) {
-            return "";
+            return '';
         }
 
-        bits = reader.readBits(bits * 8 + 8);
+        bits = decompressor.read(bits * 8 + 8);
 
         let phrase = String.fromCharCode(bits);
         const dictionary: string[] = ['', '', '', phrase];
@@ -170,15 +170,15 @@ class Decompressor {
         let index = dictionary.length;
         let numBits = 3;
 
-        while (!reader.isEof()) {
-            bits = reader.readBits(numBits);
+        while (!decompressor.isEof()) {
+            bits = decompressor.read(numBits);
 
             if (bits === 2) {
                 return result;
             }
 
             if (bits < 2) {
-                bits = reader.readBits(8 + 8 * bits);
+                bits = decompressor.read(8 + 8 * bits);
 
                 dictionary[index] = String.fromCharCode(bits);
 
@@ -214,7 +214,7 @@ class Decompressor {
         return this.index > this.input.length;
     }
 
-    readBits(maxPower: number): number {
+    read(maxPower: number): number {
         let power: number = 0;
         let bits: number = 0;
 
