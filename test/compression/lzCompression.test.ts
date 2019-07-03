@@ -56,7 +56,7 @@ test('should compress and decompress all printable UTF-16 characters', () => {
 
     let decompressed: string | null = decompress(compressed);
 
-    expect(decompressed).toBe(testString);
+    expect(decompressed).toEqual(testString);
 });
 
 test('should compress and decompress a long string', () => {
@@ -74,5 +74,5 @@ test('should compress and decompress a long string', () => {
 
     let decompressed: string | null = decompress(compressed);
 
-    expect(decompressed).toBe(testString);
+    expect(decompressed).toEqual(testString);
 });
