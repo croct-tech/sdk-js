@@ -65,7 +65,7 @@ export function pack(data : JsonValue) : JsonValue {
             const encoded: JsonPackedObject = [schemaIndex];
 
             for (let i = 0; i < schemaLength; i++) {
-                encoded[i] = encode(value[schemaKeys[i]]);
+                encoded[i + 1] = encode(value[schemaKeys[i]]);
             }
 
             return encoded;
