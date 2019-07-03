@@ -3,14 +3,18 @@ import {DuplexChannel, OutputChannel} from '../channel';
 import {NullLogger} from '../logger/nullLogger';
 import {formatCause} from '../error';
 
-export type Stamper<M, S> = {
-    (message: M): S
+export type MessageStamper<M, S> = {
+    generate(message: M): S
 }
 
-export const timestamp: Stamper<any, string> = () => String(Date.now());
+export class TimeStamper implements MessageStamper<any, string> {
+    generate(message: any) : string {
+        return String(Date.now());
+    }
+}
 
 export type Envelope<M, S> = {
-    stamp: S
+    id: S
     message: M
 }
 
@@ -20,13 +24,13 @@ type Options = {
 
 type Configuration<M, S> = Partial<Options> & {
     channel: DuplexChannel<S, Envelope<M, S>>
-    stamper: Stamper<M, S>
+    stamper: MessageStamper<M, S>
     logger?: Logger
 }
 
 export class GuaranteedChannel<M, S> implements OutputChannel<M> {
     private readonly channel: DuplexChannel<S, Envelope<M, S>>;
-    private readonly stamper: Stamper<M, S>;
+    private readonly stamper: MessageStamper<M, S>;
     private readonly logger: Logger;
     private readonly options: Options;
 
@@ -42,18 +46,18 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
 
     publish(message: M): Promise<void> {
         return new Promise((resolve, reject): void => {
-            const stamp = this.stamper(message);
+            const id = this.stamper.generate(message);
 
             let timeoutTimer: number;
             let confirmed = false;
 
             const acknowledge = (response: any): void => {
-                if (response === stamp) {
+                if (response === id) {
                     confirmed = true;
 
                     window.clearTimeout(timeoutTimer);
 
-                    this.logger.info(`Delivery confirmed #${stamp}`);
+                    this.logger.info(`Delivery confirmed #${id}`);
 
                     this.channel.unsubscribe(acknowledge);
 
@@ -66,7 +70,7 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
             const abort = (error: any) => {
                 window.clearTimeout(timeoutTimer);
 
-                this.logger.info(`Failed to send message #${stamp}: ${formatCause(error)}`);
+                this.logger.info(`Failed to send message #${id}: ${formatCause(error)}`);
 
                 this.channel.unsubscribe(acknowledge);
 
@@ -78,7 +82,7 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
                     return;
                 }
 
-                this.logger.info(`Waiting confirmation #${stamp}...`);
+                this.logger.info(`Waiting confirmation #${id}...`);
 
                 timeoutTimer = window.setTimeout(
                     () => abort(new Error('Maximum confirmation time reached')),
@@ -86,10 +90,10 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
                 );
             };
 
-            this.logger.info(`Sending message #${stamp}...`);
+            this.logger.info(`Sending message #${id}...`);
 
             this.channel
-                .publish({stamp: stamp, message: message})
+                .publish({id: id, message: message})
                 .then(wait, abort);
         });
     }

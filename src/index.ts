@@ -65,19 +65,19 @@ export default {
                 return;
             }
 
-            attributes = {...attributes};
+            const changes = {...attributes};
 
-            if (attributes.firstName === '') {
-                delete attributes.firstName;
+            if (changes.firstName === '') {
+                delete changes.firstName;
             }
 
-            if (attributes.custom && Object.keys(attributes.custom).length === 0) {
-                delete attributes.custom;
+            if (changes.custom && Object.keys(changes.custom).length === 0) {
+                delete changes.custom;
             }
 
             Sdk.tracker.track({
                 type: 'userProfileChanged',
-                attributes: attributes
+                changes: changes
             });
         },
     },
