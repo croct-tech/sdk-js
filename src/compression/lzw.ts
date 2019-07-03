@@ -45,7 +45,8 @@ class Compressor {
 
         for (let i = 0, length = input.length; i < length; i++) {
             code = input.charCodeAt(i);
-            let nextNode: Trie = node.children[code];
+
+            const nextNode = node.children[code];
 
             if (nextNode) {
                 node = nextNode;
@@ -195,7 +196,7 @@ class Decompressor {
                 dictionary[bits] :
                 phrase + phrase.charAt(0);
 
-            result.concat(entry);
+            result += entry;
 
             dictionary[index++] = phrase + entry.charAt(0);
 
@@ -206,7 +207,7 @@ class Decompressor {
             }
         }
 
-        return "";
+        return '';
     }
 
     isEof(): boolean {
