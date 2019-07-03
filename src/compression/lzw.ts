@@ -17,7 +17,7 @@ class Compressor {
         this.bitsPerChar = bitsPerChar;
     }
 
-    static compress(input: string, bitsPerChar: number): string {
+    static compress(input: string | null, bitsPerChar: number): string {
         if (input === null) {
             return "";
         }
@@ -142,7 +142,15 @@ class Decompressor {
         this.position = resetBits;
     }
 
-    static decompress(input: string, resetBits: number): string | null {
+    static decompress(input: string | null, resetBits: number): string | null {
+        if (input === null) {
+            return '';
+        }
+
+        if (input === '') {
+            return null;
+        }
+
         const reader: Decompressor = new Decompressor(input, resetBits);
 
         let bits = reader.readBits(2);
@@ -154,10 +162,8 @@ class Decompressor {
         bits = reader.readBits(bits * 8 + 8);
 
         let phrase = String.fromCharCode(bits);
-        const dictionary: string[] = ["", "", "", phrase];
-        let result = "";
-
-        result += phrase;
+        const dictionary: string[] = ['', '', '', phrase];
+        let result = phrase;
 
         let enlargeIn = 4;
         let index = dictionary.length;
@@ -224,18 +230,10 @@ class Decompressor {
     }
 }
 
-export function compress(input: string): string {
+export function compress(input: string | null): string {
     return Compressor.compress(input, 16);
 }
 
-export function decompress(input: string): string | null {
-    if (input === null) {
-        return "";
-    }
-
-    if (input === "") {
-        return null;
-    }
-
+export function decompress(input: string | null): string | null {
     return Decompressor.decompress(input, 16);
 }
