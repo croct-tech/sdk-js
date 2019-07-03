@@ -43,7 +43,7 @@ class Compressor {
 
         dictionary[code] = node;
 
-        for (let i = 0, length = input.length; i < length; i++) {
+        for (let i = 1, length = input.length; i < length; i++) {
             code = input.charCodeAt(i);
 
             const nextNode = node.children[code];
