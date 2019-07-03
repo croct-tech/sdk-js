@@ -13,3 +13,9 @@ export const utf8Encode: Transformer<string, ArrayBufferLike> = value => {
 export const utf8Decode: Transformer<ArrayBufferLike, string> = value => {
     return Promise.resolve(String.fromCharCode.apply(null, new Uint8Array(value)));
 };
+
+
+export const jsonToU: Transformer<ArrayBufferLike, string> = value => {
+    return Promise.resolve(String.fromCharCode.apply(null, new Uint8Array(value)));
+};
+
