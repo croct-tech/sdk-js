@@ -64,8 +64,8 @@ export function pack(data : JsonValue) : JsonValue {
             // known schema
             const encoded: JsonPackedObject = [schemaIndex];
 
-            for (let i = 0; i < schemaLength; i++) {
-                encoded[i + 1] = encode(value[schemaKeys[i]]);
+            for (let key of schemaKeys) {
+                encoded.push(encode(value[key]));
             }
 
             return encoded;
@@ -76,7 +76,7 @@ export function pack(data : JsonValue) : JsonValue {
 
         const encoded: JsonObject = {};
 
-        for (let i = 0, key = schemaKeys[i]; i < schemaLength; key = schemaKeys[i++]) {
+        for (let key of schemaKeys) {
             encoded[key] = encode(value[key]);
         }
 
@@ -101,10 +101,6 @@ export function unpack(data: JsonValue) : JsonValue {
             return decodePrototypeObject(value);
         }
 
-        if (value.length === 0) {
-            return [];
-        }
-
         if (isPackedObject(value)) {
             return decodeObject(value);
         }
@@ -114,6 +110,11 @@ export function unpack(data: JsonValue) : JsonValue {
 
     function decodeArray(value: JsonArray) : JsonArray {
         const length = value.length;
+
+        if (length === 0) {
+            return [];
+        }
+
         let decoded: JsonValue[] = [];
 
         for (let i = (value[0] === 0 ? 1 : 0); i < length; i++) {
@@ -136,11 +137,11 @@ export function unpack(data: JsonValue) : JsonValue {
         const schemaLength = schemaKeys.length;
         const total = (value.length - 1) / schemaLength;
 
-        if (total === 0) {
+        if (total <= 1) {
             const object: {[key: string]: JsonValue} = {};
 
-            for (let i = 0, key = schemaKeys[i]; i < schemaLength; key = schemaKeys[i++]) {
-                object[key] = decode(value[i]);
+            for (let i = 0; i < schemaLength; i++) {
+                object[schemaKeys[i]] = decode(value[i + 1]);
             }
 
             return object;
@@ -152,8 +153,8 @@ export function unpack(data: JsonValue) : JsonValue {
         for (let i = 0; i < total; i++) {
             const object: {[key: string]: JsonValue} = {};
 
-            for (let j = 0, key = schemaKeys[j]; j < schemaLength; key = schemaKeys[j++]) {
-                object[key] = decode(value[i * schemaLength + j]);
+            for (let j = 0; j < schemaLength; j++) {
+                object[schemaKeys[j]] = decode(value[i * schemaLength + j + 1]);
             }
 
             collection.push(object);
@@ -174,7 +175,7 @@ export function unpack(data: JsonValue) : JsonValue {
 
         const object: JsonObject = {};
 
-        for (let i = 0, key = schemaKeys[i]; i < schemaLength; key = schemaKeys[i++]) {
+        for (let key of schemaKeys) {
             object[key] = decode(value[key]);
         }
 
