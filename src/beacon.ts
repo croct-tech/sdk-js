@@ -1,5 +1,3 @@
-import {Token} from './token';
-
 type PayloadType =
     'contextMenuOpened' |
     'elementFocused' |
@@ -330,8 +328,13 @@ export type Payload = PartialPayload & {
     url: string
 };
 
+export type UserToken = {
+    readonly value: string;
+    readonly timestamp: number;
+}
+
 export type Beacon = {
-    userToken: Token | null
+    userToken: UserToken | null
     timestamp: number
     payload: Payload
 }

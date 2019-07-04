@@ -12,13 +12,14 @@ import {SocketChannel} from './channel/socketChannel';
 import {CodecChannel} from './channel/codecChannel';
 import {PersistentQueue} from './queue/persistentQueue';
 import {GuaranteedChannel, TimeStamper} from './channel/guaranteedChannel';
-import {jsonEncode, utf8Decode, utf8Encode} from './transformer';
+import {compressJson} from './transformer';
 import {Command} from './command';
 import {QueuedChannel} from './channel/queuedChannel';
 import {FaultTolerantChannel} from './channel/faultTolerantChannel';
 import {MonitoredQueue} from './queue/monitoredQueue';
 import queue from 'jest-websocket-mock/lib/queue';
 import {CapacityRestrictedQueue} from './queue/capacityRestrictedQueue';
+import {EncodedChannel} from './channel/encodedChannel';
 
 export type Options = {
     storageNamespace?: string;
@@ -36,7 +37,7 @@ export default class Sdk {
     private tracker: Tracker;
     private beaconChannel: OutputChannel<Beacon>;
     private commandChannel: OutputChannel<Command>;
-    private beaconQueue: MonitoredQueue<Beacon>;
+    private beaconQueue: MonitoredQueue<string>;
 
     private constructor(options: Options) {
         this.options = {
@@ -188,32 +189,34 @@ export default class Sdk {
     private createBeaconChannel(): OutputChannel<Beacon> {
         const logger = this.getLogger('BeaconChannel');
 
-        return new QueuedChannel(
-            new FaultTolerantChannel({
-                channel: new GuaranteedChannel<Beacon, string>({
-                    channel: new CodecChannel(
-                        new SocketChannel<ArrayBuffer, ArrayBuffer>({
-                            url: `ws://localhost:8443/track/11c7f7c7-5e6c-48f6-a74f-7eb852c749f2`,
-                            retryPolicy: new BackoffPolicy(),
-                            logger: logger,
-                            binaryType: 'arraybuffer'
-                        }),
-                        envelope => jsonEncode(envelope).then(utf8Encode),
-                        utf8Decode,
-                    ),
-                    stamper: new TimeStamper(),
-                    ackTimeout: 5000,
+        return new EncodedChannel<Beacon, string>(
+            new QueuedChannel(
+                new FaultTolerantChannel({
+                    channel: new GuaranteedChannel({
+                        channel: new CodecChannel(
+                            new SocketChannel({
+                                url: `ws://localhost:8443/track/11c7f7c7-5e6c-48f6-a74f-7eb852c749f2`,
+                                retryPolicy: new BackoffPolicy(),
+                                logger: logger
+                            }),
+                            evenlope => Promise.resolve(`${evenlope.id}|${evenlope.message}`),
+                            receipt => Promise.resolve(receipt)
+                        ),
+                        stamper: new TimeStamper(),
+                        ackTimeout: 5000,
+                        logger: logger,
+                    }),
+                    retryPolicy: new BackoffPolicy(),
                     logger: logger,
                 }),
-                retryPolicy: new BackoffPolicy(),
-                logger: logger,
-            }),
-            this.getBeaconQueue(),
-            logger,
-        )
+                this.getBeaconQueue(),
+                logger,
+            ),
+            compressJson
+        );
     }
 
-    private getBeaconQueue() : MonitoredQueue<Beacon> {
+    private getBeaconQueue() : MonitoredQueue<string> {
         if (!this.beaconQueue) {
             this.beaconQueue = this.createBeaconQueue();
         }
@@ -221,11 +224,11 @@ export default class Sdk {
         return this.beaconQueue;
     }
 
-    private createBeaconQueue() : MonitoredQueue<Beacon> {
+    private createBeaconQueue() : MonitoredQueue<string> {
         const context = this.getContext();
         const tab = context.getTab();
 
-        return new MonitoredQueue<Beacon>(
+        return new MonitoredQueue<string>(
             new CapacityRestrictedQueue(
                 new PersistentQueue(
                     this.getTabStorage('queue'),

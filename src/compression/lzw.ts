@@ -7,22 +7,28 @@ class Trie {
     }
 }
 
+export type Encoding = {
+    (code: number): number
+}
+
 class Compressor {
     private readonly bitsPerChar: number;
+    private readonly encode: Encoding;
     private position: number = 0;
     private value: number = 0;
-    public data: string = '';
+    private data: string = '';
 
-    private constructor(bitsPerChar: number) {
+    private constructor(bitsPerChar: number, encoding: Encoding) {
         this.bitsPerChar = bitsPerChar;
+        this.encode = encoding;
     }
 
-    static compress(input: string | null, bitsPerChar: number): string {
+    static compress(input: string | null, bitsPerChar: number, encoding: Encoding): string {
         if (input === null) {
             return '';
         }
 
-        const compressor = new Compressor(bitsPerChar);
+        const compressor = new Compressor(bitsPerChar, encoding);
 
         let numBitsMask = 0b100;
 
@@ -113,7 +119,7 @@ class Compressor {
 
             if (++this.position === this.bitsPerChar) {
                 this.position = 0;
-                this.data += String.fromCharCode(this.value);
+                this.data += String.fromCharCode(this.encode(this.value));
                 this.value = 0;
             }
         }
@@ -123,7 +129,7 @@ class Compressor {
         this.write(2, numBitsMask);
 
         this.value <<= this.bitsPerChar - this.position;
-        this.data += String.fromCharCode(this.value);
+        this.data += String.fromCharCode(this.encode(this.value));
 
         return this.data;
     }
@@ -131,19 +137,21 @@ class Compressor {
 
 class Decompressor {
     private readonly input: string;
-    private readonly resetBits: number;
+    private readonly bitsPerChar: number;
+    private readonly decode: Encoding;
     private value: number;
     private position: number;
     private index: number = 1;
 
-    private constructor(input: string, resetBits: number) {
+    private constructor(input: string, bitsPerChar: number, encoding: Encoding) {
         this.input = input;
-        this.resetBits = resetBits;
-        this.value = input.charCodeAt(0);
-        this.position = resetBits;
+        this.bitsPerChar = bitsPerChar;
+        this.decode = encoding;
+        this.value = this.decode(input.charCodeAt(0));
+        this.position = bitsPerChar;
     }
 
-    static decompress(input: string | null, resetBits: number): string | null {
+    static decompress(input: string | null, bitsPerChar: number, encoding: Encoding): string | null {
         if (input === null) {
             return '';
         }
@@ -152,7 +160,7 @@ class Decompressor {
             return null;
         }
 
-        const decompressor: Decompressor = new Decompressor(input, resetBits);
+        const decompressor: Decompressor = new Decompressor(input, bitsPerChar, encoding);
 
         let bits = decompressor.read(2);
 
@@ -222,8 +230,8 @@ class Decompressor {
             bits += ((this.value >> --this.position) & 1) << power++;
 
             if (this.position === 0) {
-                this.position = this.resetBits;
-                this.value = this.input.charCodeAt(this.index++);
+                this.position = this.bitsPerChar;
+                this.value = this.decode(this.input.charCodeAt(this.index++));
             }
         }
 
@@ -231,10 +239,12 @@ class Decompressor {
     }
 }
 
-export function compress(input: string | null): string {
-    return Compressor.compress(input, 16);
+const noEncoding: Encoding = code => code;
+
+export function compress(input: string | null, bitsPerChar: number = 16, encoding: Encoding = noEncoding): string {
+    return Compressor.compress(input, bitsPerChar, encoding);
 }
 
-export function decompress(input: string | null): string | null {
-    return Decompressor.decompress(input, 16);
+export function decompress(input: string | null, bitsPerChar: number = 16, encoding: Encoding = noEncoding): string | null {
+    return Decompressor.decompress(input, bitsPerChar, encoding);
 }
