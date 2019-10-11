@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "$id": "https://schema.croct.io/web/configuration.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "apiKey": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}(-[a-f0-9]{4}){4}[a-f0-9]{8}$"
+    },
+    "storageNamespace": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tokenScope": {
+      "type": "string",
+      "enum": [
+        "global",
+        "contextual",
+        "isolated"
+      ]
+    },
+    "debug": {
+      "type": "boolean"
+    },
+    "track": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "apiKey"
+  ]
+}

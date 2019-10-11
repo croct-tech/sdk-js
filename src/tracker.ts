@@ -1,6 +1,5 @@
 import {Logger} from './logger';
 import {Context} from './context';
-import {Recorder} from './recorder';
 import {Beacon, PartialPayload} from './beacon';
 import {Tab, TabEvent} from './tab';
 import {OutputChannel} from './channel';
@@ -8,7 +7,8 @@ import {NullLogger} from './logger/nullLogger';
 import {Token} from './token';
 
 type Options = {
-    inactivityInterval?: number
+    inactivityInterval?: number,
+    version: string
 }
 
 type Configuration = Options & {
@@ -20,7 +20,6 @@ type Configuration = Options & {
 export class Tracker {
     private readonly context: Context;
     private readonly channel: OutputChannel<Beacon>;
-    private readonly recorder: Recorder;
     private readonly logger: Logger;
     private readonly options: Required<Options>;
     private initialized: boolean = false;
@@ -32,7 +31,6 @@ export class Tracker {
         this.context = context;
         this.channel = channel;
         this.logger = logger || new NullLogger();
-        this.recorder = new Recorder(this.logger);
         this.options = {
             inactivityInterval: 30 * 1000,
             ...options
@@ -67,8 +65,6 @@ export class Tracker {
             this.initialize();
         }
 
-        this.recorder.start();
-
         const tab = this.context.getTab();
 
         tab.addListener('urlChange', this.trackUrlChange);
@@ -88,7 +84,6 @@ export class Tracker {
             return;
         }
 
-        this.recorder.stop();
 
         const tab = this.context.getTab();
 
@@ -128,20 +123,36 @@ export class Tracker {
         }
     }
 
-    identify(userId: string) {
+    login(userId: string) {
         if (userId === '') {
             throw new Error('The user ID cannot be empty');
         }
 
-        this.logger.log(`User identified: ${userId}`);
+        this.logger.log(`User logged in: ${userId}`);
 
         this.context.setToken(new Token(userId, Date.now()));
+
+        this.track({
+            type: 'userSignedIn',
+            token: userId
+        });
     }
 
-    anonymize() {
-        this.logger.log('User anonymized');
+    logout() {
+        const token = this.context.getToken();
+
+        if (token === null) {
+            return;
+        }
+
+        this.logger.log('User logged out');
 
         this.context.setToken(null);
+
+        this.track({
+            type: 'userSignedOut',
+            token: token.value
+        });
     }
 
     hasToken(): boolean {
@@ -165,10 +176,6 @@ export class Tracker {
             type: 'pageOpened',
             referrer: tab.referrer,
         });
-
-        this.recorder.addListener(event => {
-            this.track(event.payload, event.timestamp);
-        });
     }
 
     private trackUrlChange() : void {
@@ -189,7 +196,7 @@ export class Tracker {
     private stopInactivityTimer() : void {
         window.clearInterval(this.inactivityTimer);
 
-        const a = delete this.inactivityTimer;
+        delete this.inactivityTimer;
     }
 
     private startInactivityTimer() : void {
@@ -226,6 +233,7 @@ export class Tracker {
                 url: tab.location.href,
                 ...payload,
             },
+            version: this.options.version
         });
 
         promise.then(

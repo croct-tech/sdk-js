@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "$id": "https://schema.croct.io/web/product-details.json",
+  "type": "object",
+  "properties": {
+    "productId": {
+      "type": "string"
+    },
+    "productSku": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "variant": {
+      "type": "string"
+    },
+    "displayPrice": {
+      "type": "number"
+    },
+    "originalPrice": {
+      "type": "number"
+    },
+    "url": {
+      "type": "string"
+    },
+    "imageUrl": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "displayPrice"
+  ]
+}

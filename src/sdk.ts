@@ -13,13 +13,14 @@ import {CodecChannel} from './channel/codecChannel';
 import {PersistentQueue} from './queue/persistentQueue';
 import {GuaranteedChannel, TimeStamper} from './channel/guaranteedChannel';
 import {compressJson} from './transformer';
-import {Command} from './command';
 import {QueuedChannel} from './channel/queuedChannel';
 import {FaultTolerantChannel} from './channel/faultTolerantChannel';
 import {MonitoredQueue} from './queue/monitoredQueue';
 import queue from 'jest-websocket-mock/lib/queue';
 import {CapacityRestrictedQueue} from './queue/capacityRestrictedQueue';
 import {EncodedChannel} from './channel/encodedChannel';
+
+export const VERSION = '1.0.0';
 
 export type Options = {
     storageNamespace?: string;
@@ -36,7 +37,6 @@ export default class Sdk {
     private logger: Logger;
     private tracker: Tracker;
     private beaconChannel: OutputChannel<Beacon>;
-    private commandChannel: OutputChannel<Command>;
     private beaconQueue: MonitoredQueue<string>;
 
     private constructor(options: Options) {
@@ -114,12 +114,6 @@ export default class Sdk {
             );
         }
 
-        if (this.commandChannel) {
-            this.commandChannel.close().catch(() =>
-                logger.info('Failed to close command channel'),
-            );
-        }
-
         logger.info('Croct SDK uninstalled');
     }
 
@@ -136,6 +130,7 @@ export default class Sdk {
             context: this.getContext(),
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
+            version: VERSION
         });
 
         const queue = this.getBeaconQueue();
@@ -199,7 +194,7 @@ export default class Sdk {
                                 retryPolicy: new BackoffPolicy(),
                                 logger: logger
                             }),
-                            evenlope => Promise.resolve(`${evenlope.id}|${evenlope.message}`),
+                            evenlope => Promise.resolve(`${evenlope.id}|${Date.now()}|${evenlope.message}`),
                             receipt => Promise.resolve(receipt)
                         ),
                         stamper: new TimeStamper(),

@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "$id": "https://schema.croct.io/web/product-viewed.json",
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string"
+    },
+    "productDetails": {
+      "$ref": "https://schema.croct.io/web/product-details.json"
+    }
+  },
+  "required": [
+    "url",
+    "productDetails"
+  ]
+}

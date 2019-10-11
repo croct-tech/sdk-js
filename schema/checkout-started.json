@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "$id": "https://schema.croct.io/web/checkout-started.json",
+  "type": "object",
+  "properties": {
+    "cart": {
+      "$ref": "https://schema.croct.io/web/cart.json"
+    },
+    "orderId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "cart"
+  ]
+}

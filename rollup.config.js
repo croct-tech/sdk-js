@@ -1,8 +1,8 @@
 import resolve from 'rollup-plugin-node-resolve';
 import typescript from 'rollup-plugin-typescript2';
-import replace from 'rollup-plugin-replace';
 import tempDir from 'temp-dir';
 import { uglify } from "rollup-plugin-uglify";
+import commonjs from 'rollup-plugin-commonjs';
 
 // rollup.config.js
 export default {
@@ -18,24 +18,15 @@ export default {
     },
     plugins: [
         resolve(),
-        typescript({cacheRoot: `${tempDir}/.rpt2_cache`}),
-        replace({
-            delimiters: ['', ''],
-            values: {
-                '(function (ReplayerEvents)' : '/*@__PURE__*/ (function (ReplayerEvents)',
-                'createCommonjsModule' : '/*@__PURE__*/ createCommonjsModule',
-            },
+        commonjs({
+            include: ['node_modules/**', 'validation/**'],
         }),
-        /*uglify({
+        typescript({cacheRoot: `${tempDir}/.rpt2_cache`}),
+        uglify({
             compress: {
                 unused: true,
                 dead_code: true,
-            },
-            mangle: {
-                properties: {
-                    regex: /rrweb/i
-                }
             }
-        })*/
+        })
     ]
 };

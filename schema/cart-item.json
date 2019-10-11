@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "$id": "https://schema.croct.io/web/cart-item.json",
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "integer"
+    },
+    "productDetails": {
+      "$ref": "https://schema.croct.io/web/product-details.json"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "total": {
+      "type": "number"
+    },
+    "discount": {
+      "type": "number"
+    },
+    "coupon": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "productDetails",
+    "quantity",
+    "total"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "$id": "https://schema.croct.io/web/cart-viewed.json",
+  "type": "object",
+  "properties": {
+    "cart": {
+      "$ref": "https://schema.croct.io/web/cart.json"
+    }
+  },
+  "required": [
+    "cart"
+  ]
+}
