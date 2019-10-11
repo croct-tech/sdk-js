@@ -1,55 +1,72 @@
 {
   "$schema": "http://json-schema.org/schema#",
-  "$id": "https://schema.croct.io/web/order.json",
+  "$id": "https://schema.croct.io/sdk/web/order.json",
   "type": "object",
   "properties": {
     "cartId": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     },
     "orderId": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     },
     "currency": {
-      "type": "string"
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
     },
     "items": {
       "type": "array",
       "items": {
-        "$ref": "https://schema.croct.io/web/order-item.json"
-      }
+        "$ref": "https://schema.croct.io/sdk/web/order-item.json"
+      },
+      "minItems": 1
     },
     "subtotal": {
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "shippingPrice": {
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "taxes": {
       "type": "object",
       "additionalProperties": {
         "type": "number"
-      }
+      },
+      "minProperties": 1
     },
     "costs": {
       "type": "object",
       "additionalProperties": {
         "type": "number"
-      }
+      },
+      "minProperties": 1
     },
     "discount": {
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "total": {
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "coupon": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     },
     "paymentMethod": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     },
     "installments": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 1
     },
     "status": {
       "type": "string",

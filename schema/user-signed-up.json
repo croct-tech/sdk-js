@@ -1,19 +1,26 @@
 {
   "$schema": "http://json-schema.org/schema#",
-  "$id": "https://schema.croct.io/web/user-signed-up.json",
+  "$id": "https://schema.croct.io/sdk/web/user-signed-up.json",
   "type": "object",
   "properties": {
     "token": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
     },
     "firstName": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
     },
     "lastName": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
     },
     "birthDate": {
-      "type": "string"
+      "type": "string",
+      "format": "date"
     },
     "gender": {
       "type": "string",
@@ -24,10 +31,14 @@
       ]
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
     },
     "phone": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     }
   },
   "required": [

@@ -1,13 +1,14 @@
 {
   "$schema": "http://json-schema.org/schema#",
-  "$id": "https://schema.croct.io/web/product-viewed.json",
+  "$id": "https://schema.croct.io/sdk/web/product-viewed.json",
   "type": "object",
   "properties": {
     "url": {
-      "type": "string"
+      "type": "string",
+      "format": "url"
     },
     "productDetails": {
-      "$ref": "https://schema.croct.io/web/product-details.json"
+      "$ref": "https://schema.croct.io/sdk/web/product-details.json"
     }
   },
   "required": [

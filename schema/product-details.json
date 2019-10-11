@@ -1,37 +1,53 @@
 {
   "$schema": "http://json-schema.org/schema#",
-  "$id": "https://schema.croct.io/web/product-details.json",
+  "$id": "https://schema.croct.io/sdk/web/product-details.json",
   "type": "object",
   "properties": {
     "productId": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     },
     "productSku": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
     },
     "category": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
     },
     "brand": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
     },
     "variant": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     },
     "displayPrice": {
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "originalPrice": {
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "url": {
-      "type": "string"
+      "type": "string",
+      "format": "url"
     },
     "imageUrl": {
-      "type": "string"
+      "type": "string",
+      "format": "url"
     }
   },
   "required": [

@@ -1,21 +1,50 @@
 'use strict';
+var formats = require('ajv/lib/compile/formats')();
+var ucs2length = require('ajv/lib/compile/ucs2length');
 var validate = (function() {
   var refVal = [];
   var refVal1 = (function() {
     var refVal = [];
     return function validate(data, dataPath, parentData, parentDataProperty, rootData) {
-      'use strict'; /*# sourceURL=https://schema.croct.io/web/product-details.json */
+      'use strict'; /*# sourceURL=https://schema.croct.io/sdk/web/product-details.json */
       var vErrors = null;
       var errors = 0;
       if ((data && typeof data === "object" && !Array.isArray(data))) {
         if (true) {
           var errs__0 = errors;
           var valid1 = true;
-          if (data.productId === undefined) {
+          var data1 = data.productId;
+          if (data1 === undefined) {
             valid1 = true;
           } else {
             var errs_1 = errors;
-            if (typeof data.productId !== "string") {
+            if (typeof data1 === "string") {
+              if (ucs2length(data1) > 50) {
+                validate.errors = [{
+                  keyword: 'maxLength',
+                  dataPath: (dataPath || '') + '/productId',
+                  schemaPath: '#/properties/productId/maxLength',
+                  params: {
+                    limit: 50
+                  },
+                  message: 'should NOT be longer than 50 characters'
+                }];
+                return false;
+              } else {
+                if (ucs2length(data1) < 1) {
+                  validate.errors = [{
+                    keyword: 'minLength',
+                    dataPath: (dataPath || '') + '/productId',
+                    schemaPath: '#/properties/productId/minLength',
+                    params: {
+                      limit: 1
+                    },
+                    message: 'should NOT be shorter than 1 characters'
+                  }];
+                  return false;
+                }
+              }
+            } else {
               validate.errors = [{
                 keyword: 'type',
                 dataPath: (dataPath || '') + '/productId',
@@ -30,11 +59,38 @@ var validate = (function() {
             var valid1 = errors === errs_1;
           }
           if (valid1) {
-            if (data.productSku === undefined) {
+            var data1 = data.productSku;
+            if (data1 === undefined) {
               valid1 = true;
             } else {
               var errs_1 = errors;
-              if (typeof data.productSku !== "string") {
+              if (typeof data1 === "string") {
+                if (ucs2length(data1) > 50) {
+                  validate.errors = [{
+                    keyword: 'maxLength',
+                    dataPath: (dataPath || '') + '/productSku',
+                    schemaPath: '#/properties/productSku/maxLength',
+                    params: {
+                      limit: 50
+                    },
+                    message: 'should NOT be longer than 50 characters'
+                  }];
+                  return false;
+                } else {
+                  if (ucs2length(data1) < 1) {
+                    validate.errors = [{
+                      keyword: 'minLength',
+                      dataPath: (dataPath || '') + '/productSku',
+                      schemaPath: '#/properties/productSku/minLength',
+                      params: {
+                        limit: 1
+                      },
+                      message: 'should NOT be shorter than 1 characters'
+                    }];
+                    return false;
+                  }
+                }
+              } else {
                 validate.errors = [{
                   keyword: 'type',
                   dataPath: (dataPath || '') + '/productSku',
@@ -49,7 +105,8 @@ var validate = (function() {
               var valid1 = errors === errs_1;
             }
             if (valid1) {
-              if (data.name === undefined) {
+              var data1 = data.name;
+              if (data1 === undefined) {
                 valid1 = false;
                 validate.errors = [{
                   keyword: 'required',
@@ -63,7 +120,33 @@ var validate = (function() {
                 return false;
               } else {
                 var errs_1 = errors;
-                if (typeof data.name !== "string") {
+                if (typeof data1 === "string") {
+                  if (ucs2length(data1) > 200) {
+                    validate.errors = [{
+                      keyword: 'maxLength',
+                      dataPath: (dataPath || '') + '/name',
+                      schemaPath: '#/properties/name/maxLength',
+                      params: {
+                        limit: 200
+                      },
+                      message: 'should NOT be longer than 200 characters'
+                    }];
+                    return false;
+                  } else {
+                    if (ucs2length(data1) < 1) {
+                      validate.errors = [{
+                        keyword: 'minLength',
+                        dataPath: (dataPath || '') + '/name',
+                        schemaPath: '#/properties/name/minLength',
+                        params: {
+                          limit: 1
+                        },
+                        message: 'should NOT be shorter than 1 characters'
+                      }];
+                      return false;
+                    }
+                  }
+                } else {
                   validate.errors = [{
                     keyword: 'type',
                     dataPath: (dataPath || '') + '/name',
@@ -78,11 +161,38 @@ var validate = (function() {
                 var valid1 = errors === errs_1;
               }
               if (valid1) {
-                if (data.category === undefined) {
+                var data1 = data.category;
+                if (data1 === undefined) {
                   valid1 = true;
                 } else {
                   var errs_1 = errors;
-                  if (typeof data.category !== "string") {
+                  if (typeof data1 === "string") {
+                    if (ucs2length(data1) > 100) {
+                      validate.errors = [{
+                        keyword: 'maxLength',
+                        dataPath: (dataPath || '') + '/category',
+                        schemaPath: '#/properties/category/maxLength',
+                        params: {
+                          limit: 100
+                        },
+                        message: 'should NOT be longer than 100 characters'
+                      }];
+                      return false;
+                    } else {
+                      if (ucs2length(data1) < 1) {
+                        validate.errors = [{
+                          keyword: 'minLength',
+                          dataPath: (dataPath || '') + '/category',
+                          schemaPath: '#/properties/category/minLength',
+                          params: {
+                            limit: 1
+                          },
+                          message: 'should NOT be shorter than 1 characters'
+                        }];
+                        return false;
+                      }
+                    }
+                  } else {
                     validate.errors = [{
                       keyword: 'type',
                       dataPath: (dataPath || '') + '/category',
@@ -97,11 +207,38 @@ var validate = (function() {
                   var valid1 = errors === errs_1;
                 }
                 if (valid1) {
-                  if (data.brand === undefined) {
+                  var data1 = data.brand;
+                  if (data1 === undefined) {
                     valid1 = true;
                   } else {
                     var errs_1 = errors;
-                    if (typeof data.brand !== "string") {
+                    if (typeof data1 === "string") {
+                      if (ucs2length(data1) > 100) {
+                        validate.errors = [{
+                          keyword: 'maxLength',
+                          dataPath: (dataPath || '') + '/brand',
+                          schemaPath: '#/properties/brand/maxLength',
+                          params: {
+                            limit: 100
+                          },
+                          message: 'should NOT be longer than 100 characters'
+                        }];
+                        return false;
+                      } else {
+                        if (ucs2length(data1) < 1) {
+                          validate.errors = [{
+                            keyword: 'minLength',
+                            dataPath: (dataPath || '') + '/brand',
+                            schemaPath: '#/properties/brand/minLength',
+                            params: {
+                              limit: 1
+                            },
+                            message: 'should NOT be shorter than 1 characters'
+                          }];
+                          return false;
+                        }
+                      }
+                    } else {
                       validate.errors = [{
                         keyword: 'type',
                         dataPath: (dataPath || '') + '/brand',
@@ -116,11 +253,38 @@ var validate = (function() {
                     var valid1 = errors === errs_1;
                   }
                   if (valid1) {
-                    if (data.variant === undefined) {
+                    var data1 = data.variant;
+                    if (data1 === undefined) {
                       valid1 = true;
                     } else {
                       var errs_1 = errors;
-                      if (typeof data.variant !== "string") {
+                      if (typeof data1 === "string") {
+                        if (ucs2length(data1) > 50) {
+                          validate.errors = [{
+                            keyword: 'maxLength',
+                            dataPath: (dataPath || '') + '/variant',
+                            schemaPath: '#/properties/variant/maxLength',
+                            params: {
+                              limit: 50
+                            },
+                            message: 'should NOT be longer than 50 characters'
+                          }];
+                          return false;
+                        } else {
+                          if (ucs2length(data1) < 1) {
+                            validate.errors = [{
+                              keyword: 'minLength',
+                              dataPath: (dataPath || '') + '/variant',
+                              schemaPath: '#/properties/variant/minLength',
+                              params: {
+                                limit: 1
+                              },
+                              message: 'should NOT be shorter than 1 characters'
+                            }];
+                            return false;
+                          }
+                        }
+                      } else {
                         validate.errors = [{
                           keyword: 'type',
                           dataPath: (dataPath || '') + '/variant',
@@ -135,7 +299,8 @@ var validate = (function() {
                       var valid1 = errors === errs_1;
                     }
                     if (valid1) {
-                      if (data.displayPrice === undefined) {
+                      var data1 = data.displayPrice;
+                      if (data1 === undefined) {
                         valid1 = false;
                         validate.errors = [{
                           keyword: 'required',
@@ -149,7 +314,22 @@ var validate = (function() {
                         return false;
                       } else {
                         var errs_1 = errors;
-                        if (typeof data.displayPrice !== "number") {
+                        if (typeof data1 === "number") {
+                          if (data1 < 0 || data1 !== data1) {
+                            validate.errors = [{
+                              keyword: 'minimum',
+                              dataPath: (dataPath || '') + '/displayPrice',
+                              schemaPath: '#/properties/displayPrice/minimum',
+                              params: {
+                                comparison: '>=',
+                                limit: 0,
+                                exclusive: false
+                              },
+                              message: 'should be >= 0'
+                            }];
+                            return false;
+                          }
+                        } else {
                           validate.errors = [{
                             keyword: 'type',
                             dataPath: (dataPath || '') + '/displayPrice',
@@ -164,11 +344,27 @@ var validate = (function() {
                         var valid1 = errors === errs_1;
                       }
                       if (valid1) {
-                        if (data.originalPrice === undefined) {
+                        var data1 = data.originalPrice;
+                        if (data1 === undefined) {
                           valid1 = true;
                         } else {
                           var errs_1 = errors;
-                          if (typeof data.originalPrice !== "number") {
+                          if (typeof data1 === "number") {
+                            if (data1 < 0 || data1 !== data1) {
+                              validate.errors = [{
+                                keyword: 'minimum',
+                                dataPath: (dataPath || '') + '/originalPrice',
+                                schemaPath: '#/properties/originalPrice/minimum',
+                                params: {
+                                  comparison: '>=',
+                                  limit: 0,
+                                  exclusive: false
+                                },
+                                message: 'should be >= 0'
+                              }];
+                              return false;
+                            }
+                          } else {
                             validate.errors = [{
                               keyword: 'type',
                               dataPath: (dataPath || '') + '/originalPrice',
@@ -183,40 +379,72 @@ var validate = (function() {
                           var valid1 = errors === errs_1;
                         }
                         if (valid1) {
-                          if (data.url === undefined) {
+                          var data1 = data.url;
+                          if (data1 === undefined) {
                             valid1 = true;
                           } else {
                             var errs_1 = errors;
-                            if (typeof data.url !== "string") {
-                              validate.errors = [{
-                                keyword: 'type',
-                                dataPath: (dataPath || '') + '/url',
-                                schemaPath: '#/properties/url/type',
-                                params: {
-                                  type: 'string'
-                                },
-                                message: 'should be string'
-                              }];
-                              return false;
-                            }
-                            var valid1 = errors === errs_1;
-                          }
-                          if (valid1) {
-                            if (data.imageUrl === undefined) {
-                              valid1 = true;
-                            } else {
-                              var errs_1 = errors;
-                              if (typeof data.imageUrl !== "string") {
+                            if (errors === errs_1) {
+                              if (typeof data1 === "string") {
+                                if (!formats.url.test(data1)) {
+                                  validate.errors = [{
+                                    keyword: 'format',
+                                    dataPath: (dataPath || '') + '/url',
+                                    schemaPath: '#/properties/url/format',
+                                    params: {
+                                      format: 'url'
+                                    },
+                                    message: 'should match format "url"'
+                                  }];
+                                  return false;
+                                }
+                              } else {
                                 validate.errors = [{
                                   keyword: 'type',
-                                  dataPath: (dataPath || '') + '/imageUrl',
-                                  schemaPath: '#/properties/imageUrl/type',
+                                  dataPath: (dataPath || '') + '/url',
+                                  schemaPath: '#/properties/url/type',
                                   params: {
                                     type: 'string'
                                   },
                                   message: 'should be string'
                                 }];
                                 return false;
+                              }
+                            }
+                            var valid1 = errors === errs_1;
+                          }
+                          if (valid1) {
+                            var data1 = data.imageUrl;
+                            if (data1 === undefined) {
+                              valid1 = true;
+                            } else {
+                              var errs_1 = errors;
+                              if (errors === errs_1) {
+                                if (typeof data1 === "string") {
+                                  if (!formats.url.test(data1)) {
+                                    validate.errors = [{
+                                      keyword: 'format',
+                                      dataPath: (dataPath || '') + '/imageUrl',
+                                      schemaPath: '#/properties/imageUrl/format',
+                                      params: {
+                                        format: 'url'
+                                      },
+                                      message: 'should match format "url"'
+                                    }];
+                                    return false;
+                                  }
+                                } else {
+                                  validate.errors = [{
+                                    keyword: 'type',
+                                    dataPath: (dataPath || '') + '/imageUrl',
+                                    schemaPath: '#/properties/imageUrl/type',
+                                    params: {
+                                      type: 'string'
+                                    },
+                                    message: 'should be string'
+                                  }];
+                                  return false;
+                                }
                               }
                               var valid1 = errors === errs_1;
                             }
@@ -248,38 +476,54 @@ var validate = (function() {
   })();
   refVal1.schema = {
     "$schema": "http://json-schema.org/schema#",
-    "$id": "https://schema.croct.io/web/product-details.json",
+    "$id": "https://schema.croct.io/sdk/web/product-details.json",
     "type": "object",
     "properties": {
       "productId": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 50
       },
       "productSku": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 50
       },
       "name": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
       },
       "category": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
       },
       "brand": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
       },
       "variant": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 50
       },
       "displayPrice": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0
       },
       "originalPrice": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0
       },
       "url": {
-        "type": "string"
+        "type": "string",
+        "format": "url"
       },
       "imageUrl": {
-        "type": "string"
+        "type": "string",
+        "format": "url"
       }
     },
     "required": ["name", "displayPrice"]
@@ -287,7 +531,7 @@ var validate = (function() {
   refVal1.errors = null;
   refVal[1] = refVal1;
   return function validate(data, dataPath, parentData, parentDataProperty, rootData) {
-    'use strict'; /*# sourceURL=https://schema.croct.io/web/cart-item.json */
+    'use strict'; /*# sourceURL=https://schema.croct.io/sdk/web/cart-item.json */
     var vErrors = null;
     var errors = 0;
     if (rootData === undefined) rootData = data;
@@ -312,24 +556,40 @@ var validate = (function() {
             }];
             return false;
           }
+          if (typeof data1 === "number") {
+            if (data1 < 0 || data1 !== data1) {
+              validate.errors = [{
+                keyword: 'minimum',
+                dataPath: (dataPath || '') + '/index',
+                schemaPath: '#/properties/index/minimum',
+                params: {
+                  comparison: '>=',
+                  limit: 0,
+                  exclusive: false
+                },
+                message: 'should be >= 0'
+              }];
+              return false;
+            }
+          }
           var valid1 = errors === errs_1;
         }
         if (valid1) {
-          if (data.productDetails === undefined) {
+          if (data.product === undefined) {
             valid1 = false;
             validate.errors = [{
               keyword: 'required',
               dataPath: (dataPath || '') + "",
               schemaPath: '#/required',
               params: {
-                missingProperty: 'productDetails'
+                missingProperty: 'product'
               },
-              message: 'should have required property \'productDetails\''
+              message: 'should have required property \'product\''
             }];
             return false;
           } else {
             var errs_1 = errors;
-            if (!refVal1(data.productDetails, (dataPath || '') + '/productDetails', data, 'productDetails', rootData)) {
+            if (!refVal1(data.product, (dataPath || '') + '/product', data, 'product', rootData)) {
               if (vErrors === null) vErrors = refVal1.errors;
               else vErrors = vErrors.concat(refVal1.errors);
               errors = vErrors.length;
@@ -364,10 +624,27 @@ var validate = (function() {
                 }];
                 return false;
               }
+              if (typeof data1 === "number") {
+                if (data1 < 1 || data1 !== data1) {
+                  validate.errors = [{
+                    keyword: 'minimum',
+                    dataPath: (dataPath || '') + '/quantity',
+                    schemaPath: '#/properties/quantity/minimum',
+                    params: {
+                      comparison: '>=',
+                      limit: 1,
+                      exclusive: false
+                    },
+                    message: 'should be >= 1'
+                  }];
+                  return false;
+                }
+              }
               var valid1 = errors === errs_1;
             }
             if (valid1) {
-              if (data.total === undefined) {
+              var data1 = data.total;
+              if (data1 === undefined) {
                 valid1 = false;
                 validate.errors = [{
                   keyword: 'required',
@@ -381,7 +658,22 @@ var validate = (function() {
                 return false;
               } else {
                 var errs_1 = errors;
-                if (typeof data.total !== "number") {
+                if (typeof data1 === "number") {
+                  if (data1 < 0 || data1 !== data1) {
+                    validate.errors = [{
+                      keyword: 'minimum',
+                      dataPath: (dataPath || '') + '/total',
+                      schemaPath: '#/properties/total/minimum',
+                      params: {
+                        comparison: '>=',
+                        limit: 0,
+                        exclusive: false
+                      },
+                      message: 'should be >= 0'
+                    }];
+                    return false;
+                  }
+                } else {
                   validate.errors = [{
                     keyword: 'type',
                     dataPath: (dataPath || '') + '/total',
@@ -396,11 +688,27 @@ var validate = (function() {
                 var valid1 = errors === errs_1;
               }
               if (valid1) {
-                if (data.discount === undefined) {
+                var data1 = data.discount;
+                if (data1 === undefined) {
                   valid1 = true;
                 } else {
                   var errs_1 = errors;
-                  if (typeof data.discount !== "number") {
+                  if (typeof data1 === "number") {
+                    if (data1 < 0 || data1 !== data1) {
+                      validate.errors = [{
+                        keyword: 'minimum',
+                        dataPath: (dataPath || '') + '/discount',
+                        schemaPath: '#/properties/discount/minimum',
+                        params: {
+                          comparison: '>=',
+                          limit: 0,
+                          exclusive: false
+                        },
+                        message: 'should be >= 0'
+                      }];
+                      return false;
+                    }
+                  } else {
                     validate.errors = [{
                       keyword: 'type',
                       dataPath: (dataPath || '') + '/discount',
@@ -415,11 +723,38 @@ var validate = (function() {
                   var valid1 = errors === errs_1;
                 }
                 if (valid1) {
-                  if (data.coupon === undefined) {
+                  var data1 = data.coupon;
+                  if (data1 === undefined) {
                     valid1 = true;
                   } else {
                     var errs_1 = errors;
-                    if (typeof data.coupon !== "string") {
+                    if (typeof data1 === "string") {
+                      if (ucs2length(data1) > 50) {
+                        validate.errors = [{
+                          keyword: 'maxLength',
+                          dataPath: (dataPath || '') + '/coupon',
+                          schemaPath: '#/properties/coupon/maxLength',
+                          params: {
+                            limit: 50
+                          },
+                          message: 'should NOT be longer than 50 characters'
+                        }];
+                        return false;
+                      } else {
+                        if (ucs2length(data1) < 1) {
+                          validate.errors = [{
+                            keyword: 'minLength',
+                            dataPath: (dataPath || '') + '/coupon',
+                            schemaPath: '#/properties/coupon/minLength',
+                            params: {
+                              limit: 1
+                            },
+                            message: 'should NOT be shorter than 1 characters'
+                          }];
+                          return false;
+                        }
+                      }
+                    } else {
                       validate.errors = [{
                         keyword: 'type',
                         dataPath: (dataPath || '') + '/coupon',
@@ -457,29 +792,35 @@ var validate = (function() {
 })();
 validate.schema = {
   "$schema": "http://json-schema.org/schema#",
-  "$id": "https://schema.croct.io/web/cart-item.json",
+  "$id": "https://schema.croct.io/sdk/web/cart-item.json",
   "type": "object",
   "properties": {
     "index": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 0
     },
-    "productDetails": {
-      "$ref": "https://schema.croct.io/web/product-details.json"
+    "product": {
+      "$ref": "https://schema.croct.io/sdk/web/product-details.json"
     },
     "quantity": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 1
     },
     "total": {
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "discount": {
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "coupon": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     }
   },
-  "required": ["productDetails", "quantity", "total"]
+  "required": ["product", "quantity", "total"]
 };
 validate.errors = null;
 module.exports = validate;

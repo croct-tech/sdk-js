@@ -1,16 +1,19 @@
 'use strict';
+var formats = require('ajv/lib/compile/formats')();
+var ucs2length = require('ajv/lib/compile/ucs2length');
 var equal = require('ajv/lib/compile/equal');
 var validate = (function() {
   var refVal = [];
   return function validate(data, dataPath, parentData, parentDataProperty, rootData) {
-    'use strict'; /*# sourceURL=https://schema.croct.io/web/user-signed-up.json */
+    'use strict'; /*# sourceURL=https://schema.croct.io/sdk/web/user-signed-up.json */
     var vErrors = null;
     var errors = 0;
     if ((data && typeof data === "object" && !Array.isArray(data))) {
       if (true) {
         var errs__0 = errors;
         var valid1 = true;
-        if (data.token === undefined) {
+        var data1 = data.token;
+        if (data1 === undefined) {
           valid1 = false;
           validate.errors = [{
             keyword: 'required',
@@ -24,7 +27,33 @@ var validate = (function() {
           return false;
         } else {
           var errs_1 = errors;
-          if (typeof data.token !== "string") {
+          if (typeof data1 === "string") {
+            if (ucs2length(data1) > 100) {
+              validate.errors = [{
+                keyword: 'maxLength',
+                dataPath: (dataPath || '') + '/token',
+                schemaPath: '#/properties/token/maxLength',
+                params: {
+                  limit: 100
+                },
+                message: 'should NOT be longer than 100 characters'
+              }];
+              return false;
+            } else {
+              if (ucs2length(data1) < 1) {
+                validate.errors = [{
+                  keyword: 'minLength',
+                  dataPath: (dataPath || '') + '/token',
+                  schemaPath: '#/properties/token/minLength',
+                  params: {
+                    limit: 1
+                  },
+                  message: 'should NOT be shorter than 1 characters'
+                }];
+                return false;
+              }
+            }
+          } else {
             validate.errors = [{
               keyword: 'type',
               dataPath: (dataPath || '') + '/token',
@@ -39,11 +68,38 @@ var validate = (function() {
           var valid1 = errors === errs_1;
         }
         if (valid1) {
-          if (data.firstName === undefined) {
+          var data1 = data.firstName;
+          if (data1 === undefined) {
             valid1 = true;
           } else {
             var errs_1 = errors;
-            if (typeof data.firstName !== "string") {
+            if (typeof data1 === "string") {
+              if (ucs2length(data1) > 100) {
+                validate.errors = [{
+                  keyword: 'maxLength',
+                  dataPath: (dataPath || '') + '/firstName',
+                  schemaPath: '#/properties/firstName/maxLength',
+                  params: {
+                    limit: 100
+                  },
+                  message: 'should NOT be longer than 100 characters'
+                }];
+                return false;
+              } else {
+                if (ucs2length(data1) < 1) {
+                  validate.errors = [{
+                    keyword: 'minLength',
+                    dataPath: (dataPath || '') + '/firstName',
+                    schemaPath: '#/properties/firstName/minLength',
+                    params: {
+                      limit: 1
+                    },
+                    message: 'should NOT be shorter than 1 characters'
+                  }];
+                  return false;
+                }
+              }
+            } else {
               validate.errors = [{
                 keyword: 'type',
                 dataPath: (dataPath || '') + '/firstName',
@@ -58,11 +114,38 @@ var validate = (function() {
             var valid1 = errors === errs_1;
           }
           if (valid1) {
-            if (data.lastName === undefined) {
+            var data1 = data.lastName;
+            if (data1 === undefined) {
               valid1 = true;
             } else {
               var errs_1 = errors;
-              if (typeof data.lastName !== "string") {
+              if (typeof data1 === "string") {
+                if (ucs2length(data1) > 100) {
+                  validate.errors = [{
+                    keyword: 'maxLength',
+                    dataPath: (dataPath || '') + '/lastName',
+                    schemaPath: '#/properties/lastName/maxLength',
+                    params: {
+                      limit: 100
+                    },
+                    message: 'should NOT be longer than 100 characters'
+                  }];
+                  return false;
+                } else {
+                  if (ucs2length(data1) < 1) {
+                    validate.errors = [{
+                      keyword: 'minLength',
+                      dataPath: (dataPath || '') + '/lastName',
+                      schemaPath: '#/properties/lastName/minLength',
+                      params: {
+                        limit: 1
+                      },
+                      message: 'should NOT be shorter than 1 characters'
+                    }];
+                    return false;
+                  }
+                }
+              } else {
                 validate.errors = [{
                   keyword: 'type',
                   dataPath: (dataPath || '') + '/lastName',
@@ -77,21 +160,37 @@ var validate = (function() {
               var valid1 = errors === errs_1;
             }
             if (valid1) {
-              if (data.birthDate === undefined) {
+              var data1 = data.birthDate;
+              if (data1 === undefined) {
                 valid1 = true;
               } else {
                 var errs_1 = errors;
-                if (typeof data.birthDate !== "string") {
-                  validate.errors = [{
-                    keyword: 'type',
-                    dataPath: (dataPath || '') + '/birthDate',
-                    schemaPath: '#/properties/birthDate/type',
-                    params: {
-                      type: 'string'
-                    },
-                    message: 'should be string'
-                  }];
-                  return false;
+                if (errors === errs_1) {
+                  if (typeof data1 === "string") {
+                    if (!formats.date.test(data1)) {
+                      validate.errors = [{
+                        keyword: 'format',
+                        dataPath: (dataPath || '') + '/birthDate',
+                        schemaPath: '#/properties/birthDate/format',
+                        params: {
+                          format: 'date'
+                        },
+                        message: 'should match format "date"'
+                      }];
+                      return false;
+                    }
+                  } else {
+                    validate.errors = [{
+                      keyword: 'type',
+                      dataPath: (dataPath || '') + '/birthDate',
+                      schemaPath: '#/properties/birthDate/type',
+                      params: {
+                        type: 'string'
+                      },
+                      message: 'should be string'
+                    }];
+                    return false;
+                  }
                 }
                 var valid1 = errors === errs_1;
               }
@@ -135,11 +234,38 @@ var validate = (function() {
                   var valid1 = errors === errs_1;
                 }
                 if (valid1) {
-                  if (data.email === undefined) {
+                  var data1 = data.email;
+                  if (data1 === undefined) {
                     valid1 = true;
                   } else {
                     var errs_1 = errors;
-                    if (typeof data.email !== "string") {
+                    if (typeof data1 === "string") {
+                      if (ucs2length(data1) > 100) {
+                        validate.errors = [{
+                          keyword: 'maxLength',
+                          dataPath: (dataPath || '') + '/email',
+                          schemaPath: '#/properties/email/maxLength',
+                          params: {
+                            limit: 100
+                          },
+                          message: 'should NOT be longer than 100 characters'
+                        }];
+                        return false;
+                      } else {
+                        if (ucs2length(data1) < 1) {
+                          validate.errors = [{
+                            keyword: 'minLength',
+                            dataPath: (dataPath || '') + '/email',
+                            schemaPath: '#/properties/email/minLength',
+                            params: {
+                              limit: 1
+                            },
+                            message: 'should NOT be shorter than 1 characters'
+                          }];
+                          return false;
+                        }
+                      }
+                    } else {
                       validate.errors = [{
                         keyword: 'type',
                         dataPath: (dataPath || '') + '/email',
@@ -154,11 +280,38 @@ var validate = (function() {
                     var valid1 = errors === errs_1;
                   }
                   if (valid1) {
-                    if (data.phone === undefined) {
+                    var data1 = data.phone;
+                    if (data1 === undefined) {
                       valid1 = true;
                     } else {
                       var errs_1 = errors;
-                      if (typeof data.phone !== "string") {
+                      if (typeof data1 === "string") {
+                        if (ucs2length(data1) > 50) {
+                          validate.errors = [{
+                            keyword: 'maxLength',
+                            dataPath: (dataPath || '') + '/phone',
+                            schemaPath: '#/properties/phone/maxLength',
+                            params: {
+                              limit: 50
+                            },
+                            message: 'should NOT be longer than 50 characters'
+                          }];
+                          return false;
+                        } else {
+                          if (ucs2length(data1) < 1) {
+                            validate.errors = [{
+                              keyword: 'minLength',
+                              dataPath: (dataPath || '') + '/phone',
+                              schemaPath: '#/properties/phone/minLength',
+                              params: {
+                                limit: 1
+                              },
+                              message: 'should NOT be shorter than 1 characters'
+                            }];
+                            return false;
+                          }
+                        }
+                      } else {
                         validate.errors = [{
                           keyword: 'type',
                           dataPath: (dataPath || '') + '/phone',
@@ -197,30 +350,41 @@ var validate = (function() {
 })();
 validate.schema = {
   "$schema": "http://json-schema.org/schema#",
-  "$id": "https://schema.croct.io/web/user-signed-up.json",
+  "$id": "https://schema.croct.io/sdk/web/user-signed-up.json",
   "type": "object",
   "properties": {
     "token": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
     },
     "firstName": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
     },
     "lastName": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
     },
     "birthDate": {
-      "type": "string"
+      "type": "string",
+      "format": "date"
     },
     "gender": {
       "type": "string",
       "enum": ["male", "female", "neutral"]
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
     },
     "phone": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     }
   },
   "required": ["token"]

@@ -1,13 +1,15 @@
 {
   "$schema": "http://json-schema.org/schema#",
-  "$id": "https://schema.croct.io/web/checkout-started.json",
+  "$id": "https://schema.croct.io/sdk/web/checkout-started.json",
   "type": "object",
   "properties": {
     "cart": {
-      "$ref": "https://schema.croct.io/web/cart.json"
+      "$ref": "https://schema.croct.io/sdk/web/cart.json"
     },
     "orderId": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     }
   },
   "required": [

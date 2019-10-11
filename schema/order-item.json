@@ -1,29 +1,35 @@
 {
   "$schema": "http://json-schema.org/schema#",
-  "$id": "https://schema.croct.io/web/order-item.json",
+  "$id": "https://schema.croct.io/sdk/web/order-item.json",
   "type": "object",
   "properties": {
     "index": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 0
     },
-    "productDetails": {
-      "$ref": "https://schema.croct.io/web/product-details.json"
+    "product": {
+      "$ref": "https://schema.croct.io/sdk/web/product-details.json"
     },
     "quantity": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 1
     },
     "total": {
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "discount": {
-      "type": "number"
+      "type": "number",
+      "minimum": 0
     },
     "coupon": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     }
   },
   "required": [
-    "productDetails",
+    "product",
     "quantity",
     "total"
   ]

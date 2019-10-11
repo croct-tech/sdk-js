@@ -9,7 +9,6 @@ export type CustomPayloadType =
     'userSignedUp'
 ;
 
-
 export type PayloadType =
     CustomPayloadType |
     'pageLoaded' |

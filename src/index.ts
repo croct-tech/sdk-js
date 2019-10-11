@@ -202,7 +202,7 @@ export default {
         const validator = payloadValidators[eventType as CustomPayloadType];
 
         if (validator === undefined) {
-            throw new Error(`Unknown event type ${eventType}.`);
+            throw new Error(`Unknown event type '${eventType}'.`);
         }
 
         if (!validator(payload) && validator.errors) {

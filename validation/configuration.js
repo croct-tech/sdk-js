@@ -1,11 +1,11 @@
 'use strict';
-var ucs2length = require('ajv/lib/compile/ucs2length');
+var formats = require('ajv/lib/compile/formats')();
 var equal = require('ajv/lib/compile/equal');
 var validate = (function() {
-  var pattern0 = new RegExp('^[a-f0-9]{8}(-[a-f0-9]{4}){4}[a-f0-9]{8}$');
+  var pattern0 = new RegExp('^[a-zA-Z_][a-zA-Z0-9_]*$');
   var refVal = [];
   return function validate(data, dataPath, parentData, parentDataProperty, rootData) {
-    'use strict'; /*# sourceURL=https://schema.croct.io/web/configuration.json */
+    'use strict'; /*# sourceURL=https://schema.croct.io/sdk/web/configuration.json */
     var vErrors = null;
     var errors = 0;
     if ((data && typeof data === "object" && !Array.isArray(data))) {
@@ -45,30 +45,32 @@ var validate = (function() {
             return false;
           } else {
             var errs_1 = errors;
-            if (typeof data1 === "string") {
-              if (!pattern0.test(data1)) {
+            if (errors === errs_1) {
+              if (typeof data1 === "string") {
+                if (!formats.uuid.test(data1)) {
+                  validate.errors = [{
+                    keyword: 'format',
+                    dataPath: (dataPath || '') + '/apiKey',
+                    schemaPath: '#/properties/apiKey/format',
+                    params: {
+                      format: 'uuid'
+                    },
+                    message: 'should match format "uuid"'
+                  }];
+                  return false;
+                }
+              } else {
                 validate.errors = [{
-                  keyword: 'pattern',
+                  keyword: 'type',
                   dataPath: (dataPath || '') + '/apiKey',
-                  schemaPath: '#/properties/apiKey/pattern',
+                  schemaPath: '#/properties/apiKey/type',
                   params: {
-                    pattern: '^[a-f0-9]{8}(-[a-f0-9]{4}){4}[a-f0-9]{8}$'
+                    type: 'string'
                   },
-                  message: 'should match pattern "^[a-f0-9]{8}(-[a-f0-9]{4}){4}[a-f0-9]{8}$"'
+                  message: 'should be string'
                 }];
                 return false;
               }
-            } else {
-              validate.errors = [{
-                keyword: 'type',
-                dataPath: (dataPath || '') + '/apiKey',
-                schemaPath: '#/properties/apiKey/type',
-                params: {
-                  type: 'string'
-                },
-                message: 'should be string'
-              }];
-              return false;
             }
             var valid1 = errors === errs_1;
           }
@@ -79,15 +81,15 @@ var validate = (function() {
             } else {
               var errs_1 = errors;
               if (typeof data1 === "string") {
-                if (ucs2length(data1) < 1) {
+                if (!pattern0.test(data1)) {
                   validate.errors = [{
-                    keyword: 'minLength',
+                    keyword: 'pattern',
                     dataPath: (dataPath || '') + '/storageNamespace',
-                    schemaPath: '#/properties/storageNamespace/minLength',
+                    schemaPath: '#/properties/storageNamespace/pattern',
                     params: {
-                      limit: 1
+                      pattern: '^[a-zA-Z_][a-zA-Z0-9_]*$'
                     },
-                    message: 'should NOT be shorter than 1 characters'
+                    message: 'should match pattern "^[a-zA-Z_][a-zA-Z0-9_]*$"'
                   }];
                   return false;
                 }
@@ -206,17 +208,17 @@ var validate = (function() {
 })();
 validate.schema = {
   "$schema": "http://json-schema.org/schema#",
-  "$id": "https://schema.croct.io/web/configuration.json",
+  "$id": "https://schema.croct.io/sdk/web/configuration.json",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "apiKey": {
       "type": "string",
-      "pattern": "^[a-f0-9]{8}(-[a-f0-9]{4}){4}[a-f0-9]{8}$"
+      "format": "uuid"
     },
     "storageNamespace": {
       "type": "string",
-      "minLength": 1
+      "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
     },
     "tokenScope": {
       "type": "string",

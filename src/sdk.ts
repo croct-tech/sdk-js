@@ -22,7 +22,8 @@ import {EncodedChannel} from './channel/encodedChannel';
 
 export const VERSION = '1.0.0';
 
-export type Options = {
+export type Configuration = {
+    apiKey: string,
     storageNamespace?: string;
     tokenScope?: TokenScope;
     debug?: boolean;
@@ -30,17 +31,16 @@ export type Options = {
 
 export default class Sdk {
     private static SINGLETON: Sdk;
-    private static readonly APPLICATION_ID = Sdk.getApplicationId();
 
-    private readonly options: Required<Options>;
+    private readonly configuration: Required<Configuration>;
     private context: Context;
     private logger: Logger;
     private tracker: Tracker;
     private beaconChannel: OutputChannel<Beacon>;
     private beaconQueue: MonitoredQueue<string>;
 
-    private constructor(options: Options) {
-        this.options = {
+    private constructor(options: Configuration) {
+        this.configuration = {
             storageNamespace: 'croct',
             tokenScope: 'global',
             debug: false,
@@ -48,13 +48,6 @@ export default class Sdk {
         };
 
         this.initialize();
-    }
-
-    private static getApplicationId() : string {
-        return window.btoa(window.location.hostname)
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/, '');
     }
 
     private static get instance(): Sdk {
@@ -65,7 +58,7 @@ export default class Sdk {
         return Sdk.SINGLETON;
     }
 
-    static install(options: Options): void {
+    static install(options: Configuration): void {
         if (Sdk.SINGLETON) {
             throw new Error('The SDK is already installed');
         }
@@ -91,13 +84,13 @@ export default class Sdk {
         const logger = this.getLogger();
 
         logger.info('Croct SDK installed');
-        logger.info(`Application ID: ${Sdk.APPLICATION_ID}`);
+        logger.info(`API Key: ${this.configuration.apiKey}`);
 
         const context = this.getContext();
         const tab = context.getTab();
 
         logger.info('Context initialized');
-        logger.log(`Token scope: ${this.options.tokenScope}`);
+        logger.log(`Token scope: ${this.configuration.tokenScope}`);
         logger.log(`${tab.isNew ? 'New' : 'Current'} tab: ${tab.id}`);
     }
 
@@ -153,7 +146,7 @@ export default class Sdk {
         return Context.initialize(
             this.getTabStorage('context'),
             this.getGlobalStorage('context'),
-            this.options.tokenScope,
+            this.configuration.tokenScope,
         );
     }
 
@@ -170,7 +163,7 @@ export default class Sdk {
     }
 
     private createLogger(): Logger {
-        return this.options.debug ? new ConsoleLogger() : new NullLogger();
+        return this.configuration.debug ? new ConsoleLogger() : new NullLogger();
     }
 
     private getBeaconChannel(): OutputChannel<Beacon> {
@@ -190,7 +183,7 @@ export default class Sdk {
                     channel: new GuaranteedChannel({
                         channel: new CodecChannel(
                             new SocketChannel({
-                                url: `ws://localhost:8443/track/11c7f7c7-5e6c-48f6-a74f-7eb852c749f2`,
+                                url: `ws://localhost:8443/connect/${this.configuration.apiKey}`,
                                 retryPolicy: new BackoffPolicy(),
                                 logger: logger
                             }),
@@ -250,7 +243,7 @@ export default class Sdk {
     }
 
     private resolveStorageNamespace(namespace: string): string {
-        let prefix = this.options.storageNamespace;
+        let prefix = this.configuration.storageNamespace;
 
         if (prefix !== '') {
             prefix += '.';
