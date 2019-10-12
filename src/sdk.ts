@@ -20,8 +20,6 @@ import queue from 'jest-websocket-mock/lib/queue';
 import {CapacityRestrictedQueue} from './queue/capacityRestrictedQueue';
 import {EncodedChannel} from './channel/encodedChannel';
 
-export const VERSION = '1.0.0';
-
 export type Configuration = {
     apiKey: string,
     storageNamespace?: string;
@@ -30,6 +28,9 @@ export type Configuration = {
 }
 
 export default class Sdk {
+    private static BEACON_VERSION = '<@beaconVersion@>';
+    private static WEBSOCKET_ENDPOINT = '<@websocketEndpoint@>';
+    private static EVALUATION_ENDPOINT = '<@evaluationEndpoint@>';
     private static SINGLETON: Sdk;
 
     private readonly configuration: Required<Configuration>;
@@ -74,6 +75,16 @@ export default class Sdk {
         Sdk.SINGLETON.destroy();
 
         delete Sdk.SINGLETON;
+    }
+
+    static evaluate(expression: string) : Promise<Response> {
+        const {configuration} = Sdk.instance;
+
+        return window.fetch(Sdk.EVALUATION_ENDPOINT + '?expression=' +  encodeURIComponent(expression), {
+            headers: {
+                'Api-Key': configuration.apiKey
+            }
+        });
     }
 
     static get tracker(): Tracker {
@@ -123,7 +134,7 @@ export default class Sdk {
             context: this.getContext(),
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
-            version: VERSION
+            version: Sdk.BEACON_VERSION
         });
 
         const queue = this.getBeaconQueue();
@@ -183,7 +194,7 @@ export default class Sdk {
                     channel: new GuaranteedChannel({
                         channel: new CodecChannel(
                             new SocketChannel({
-                                url: `ws://localhost:8443/connect/${this.configuration.apiKey}`,
+                                url: Sdk.WEBSOCKET_ENDPOINT + '' + this.configuration.apiKey,
                                 retryPolicy: new BackoffPolicy(),
                                 logger: logger
                             }),

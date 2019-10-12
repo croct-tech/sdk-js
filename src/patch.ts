@@ -1,4 +1,4 @@
-import {JsonArray, JsonObject, JsonValue} from './json';
+import {isJsonArray, isJsonObject, isJsonValue, JsonArray, JsonObject, JsonValue} from './json';
 
 type OperationType =
     'add' |

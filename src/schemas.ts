@@ -1,4 +1,4 @@
-import {ArrayType, BooleanType, NumberType, ObjectType, StringType} from './validation';
+import {ArrayType, BooleanType, NumberType, ObjectType, Schema, StringType} from './validation';
 
 export const configurationSchema = new ObjectType({
     required: ['apiKey'],
@@ -21,7 +21,7 @@ export const configurationSchema = new ObjectType({
     }
 });
 
-export const productDetailSchema = new ObjectType({
+export const productDetailsSchema = new ObjectType({
     required: ['name', 'displayPrice'],
     properties: {
         productId: new StringType({
@@ -69,7 +69,7 @@ export const cartItemSchema = new ObjectType({
         index: new NumberType({
             minimum: 0
         }),
-        product: productDetailSchema,
+        product: productDetailsSchema,
         quantity: new NumberType({
             minimum: 1
         }),
@@ -134,7 +134,7 @@ export const orderItemSchema = new ObjectType({
         index: new NumberType({
             minimum: 0
         }),
-        product: productDetailSchema,
+        product: productDetailsSchema,
         quantity: new NumberType({
             minimum: 1
         }),
@@ -210,21 +210,21 @@ export const orderSchema = new ObjectType({
     }
 });
 
-export const cartModifiedSchema = new ObjectType({
+export const cartModifiedPayloadSchema = new ObjectType({
     required: ['cart'],
     properties: {
         cart: cartSchema
     }
 });
 
-export const cartViewedSchema = new ObjectType({
+export const cartViewedPayloadSchema = new ObjectType({
     required: ['cart'],
     properties: {
         cart: cartSchema
     }
 });
 
-export const checkoutStartedSchema = new ObjectType({
+export const checkoutStartedPayloadSchema = new ObjectType({
     required: ['cart'],
     properties: {
         cart: cartSchema,
@@ -235,36 +235,36 @@ export const checkoutStartedSchema = new ObjectType({
     }
 });
 
-export const orderPlacedSchema = new ObjectType({
+export const orderPlacedPayloadSchema = new ObjectType({
     required: ['order'],
     properties: {
         order: orderSchema
     }
 });
 
-export const productViewedSchema = new ObjectType({
+export const productViewedPayloadSchema = new ObjectType({
     required: ['productDetails'],
     properties: {
-        productDetails: productDetailSchema
+        productDetails: productDetailsSchema
     }
 });
 
-export const userSignedUpSchema = new ObjectType({
+export const userSignedUpPayloadSchema = new ObjectType({
     required: ['token'],
     properties: {
-        "token": new StringType({
+        token: new StringType({
             minLength: 1,
             maxLength: 100
         }),
-        "firstName": new StringType({
+        firstName: new StringType({
             minLength: 1,
             maxLength: 100
         }),
-        "lastName": new StringType({
+        lastName: new StringType({
             minLength: 1,
             maxLength: 100
         }),
-        "birthDate": new StringType({
+        birthDate: new StringType({
             format: 'date'
         }),
         gender: new StringType({
@@ -284,3 +284,12 @@ export const userSignedUpSchema = new ObjectType({
         }),
     }
 });
+
+export const payloadSchemas: {[key: string]: Schema} = {
+    userSignedUp: userSignedUpPayloadSchema,
+    productViewed: productViewedPayloadSchema,
+    cartViewed: cartViewedPayloadSchema,
+    cartModified: cartModifiedPayloadSchema,
+    checkoutStarted: checkoutStartedPayloadSchema,
+    orderPlaced: orderPlacedPayloadSchema,
+};

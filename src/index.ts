@@ -1,26 +1,14 @@
 import Sdk from './sdk';
 import {Token} from './token';
 import {isValidPointer, Operation, Patch} from './patch';
+import {configurationSchema, payloadSchemas} from './schemas';
 import {isJsonArray, isJsonObject, isJsonValue} from './json';
-import {configurationSchema} from './schemas';
-import {CustomPayloadType} from './beacon';
 
-class PatchBuilder {
+class ActiveRecord {
     private readonly operations: Operation[] = [];
 
-    constructor() {
-        this.set = this.set.bind(this);
-        this.unset = this.unset.bind(this);
-        this.add = this.add.bind(this);
-        this.combine = this.combine.bind(this);
-        this.decrement = this.decrement.bind(this);
-        this.increment = this.increment.bind(this);
-        this.merge = this.merge.bind(this);
-        this.clear = this.clear.bind(this);
-    }
-
-    set(property: any, value: any) : void {
-        if (typeof property !== 'string'|| !isValidPointer(property)) {
+    set(property: any, value: any): void {
+        if (typeof property !== 'string' || !isValidPointer(property)) {
             throw new Error(`Invalid path '${property}'.`);
         }
 
@@ -31,12 +19,12 @@ class PatchBuilder {
         this.operations.push({
             type: 'set',
             pointer: property,
-            value: value
+            value: value,
         });
     }
 
-    add(property: any, value: any) : void {
-        if (typeof property !== 'string'|| !isValidPointer(property)) {
+    add(property: any, value: any): void {
+        if (typeof property !== 'string' || !isValidPointer(property)) {
             throw new Error(`Invalid path '${property}'.`);
         }
 
@@ -47,12 +35,12 @@ class PatchBuilder {
         this.operations.push({
             type: 'add',
             pointer: property,
-            value: value
+            value: value,
         });
     }
 
-    combine(property: any, value: any) : void {
-        if (typeof property !== 'string'|| !isValidPointer(property)) {
+    combine(property: any, value: any): void {
+        if (typeof property !== 'string' || !isValidPointer(property)) {
             throw new Error(`Invalid path '${property}'.`);
         }
 
@@ -63,12 +51,12 @@ class PatchBuilder {
         this.operations.push({
             type: 'combine',
             pointer: property,
-            value: value
+            value: value,
         });
     }
 
-    merge(property: any, value: any) : void {
-        if (typeof property !== 'string'|| !isValidPointer(property)) {
+    merge(property: any, value: any): void {
+        if (typeof property !== 'string' || !isValidPointer(property)) {
             throw new Error(`Invalid path '${property}'.`);
         }
 
@@ -79,12 +67,12 @@ class PatchBuilder {
         this.operations.push({
             type: 'merge',
             pointer: property,
-            value: value
+            value: value,
         });
     }
 
-    increment(property: any, amount: any = 1) : void {
-        if (typeof property !== 'string'|| !isValidPointer(property)) {
+    increment(property: any, amount: any = 1): void {
+        if (typeof property !== 'string' || !isValidPointer(property)) {
             throw new Error(`Invalid path '${property}'.`);
         }
 
@@ -95,12 +83,12 @@ class PatchBuilder {
         this.operations.push({
             type: 'increment',
             pointer: property,
-            value: amount
+            value: amount,
         });
     }
 
-    decrement(property: any, amount: any = 1) : void {
-        if (typeof property !== 'string'|| !isValidPointer(property)) {
+    decrement(property: any, amount: any = 1): void {
+        if (typeof property !== 'string' || !isValidPointer(property)) {
             throw new Error(`Invalid path '${property}'.`);
         }
 
@@ -111,12 +99,12 @@ class PatchBuilder {
         this.operations.push({
             type: 'decrement',
             pointer: property,
-            value: amount
+            value: amount,
         });
     }
 
-    clear(property: any) : void {
-        if (typeof property !== 'string'|| !isValidPointer(property)) {
+    clear(property: any): void {
+        if (typeof property !== 'string' || !isValidPointer(property)) {
             throw new Error(`Invalid path '${property}'.`);
         }
 
@@ -126,8 +114,8 @@ class PatchBuilder {
         });
     }
 
-    unset(property: any) : void {
-        if (typeof property !== 'string'|| !isValidPointer(property)) {
+    unset(property: any): void {
+        if (typeof property !== 'string' || !isValidPointer(property)) {
             throw new Error(`Invalid path '${property}'.`);
         }
 
@@ -137,43 +125,182 @@ class PatchBuilder {
         });
     }
 
-    isEmpty() : boolean {
-        return this.operations.length === 0;
+    public reset(): void {
+        this.operations.splice(0);
     }
 
-    reset() : void {
-        this.operations.slice(0);
+    protected isDirty(): boolean {
+        return this.operations.length > 0;
     }
 
-    build(): Patch {
-        return {
-            operations: this.operations.slice(0),
+    protected buildPath(): Patch {
+        return {operations: this.operations};
+    }
+}
+
+class UserFacade extends ActiveRecord {
+    isLogged(): boolean {
+        return Sdk.tracker.hasToken();
+    }
+
+    getToken(): Token | null {
+        return Sdk.tracker.getToken();
+    }
+
+    login(userId: any): void {
+        if (typeof userId !== 'string' || userId === '') {
+            throw new Error('The user ID must be a non-empty string.');
+        }
+
+        Sdk.tracker.login(userId);
+    }
+
+    logout(): void {
+        Sdk.tracker.logout();
+    }
+
+    save(): void {
+        if (this.isDirty()) {
+            Sdk.tracker.track({
+                type: 'userProfileChanged',
+                patch: this.buildPath(),
+            });
+
+            this.reset();
         }
     }
 }
 
-const userPatch = new PatchBuilder();
-const sessionPatch = new PatchBuilder();
-const payloadValidators = {};
+class SessionFacade extends ActiveRecord {
+    save(): void {
+        if (this.isDirty()) {
+            Sdk.tracker.track({
+                type: 'sessionAttributesChanged',
+                patch: this.buildPath(),
+            });
 
-export default {
-    enable(options: any = {}): void {
-        configurationSchema.validate(options);
+            this.reset();
+        }
+    }
+}
 
-        const {track = true, ...sdkOptions} = options;
+class TrackerFacade {
+    enable(): void {
+        Sdk.tracker.enable();
+    }
+
+    disable(): void {
+        Sdk.tracker.disable();
+    }
+}
+
+type PersonalizationCallback = {
+    (target: HTMLElement | { [key: string]: HTMLElement }, result: any): void
+};
+
+type Evaluator = {
+    (expression: any, timeout?: any): Promise<any>
+};
+
+class PersonalizationBuilder {
+    private readonly expression: string;
+    private readonly evaluator: Evaluator;
+    private readonly timeout?: number;
+    private readonly elements: { [key: string]: HTMLElement } = {};
+
+    constructor(expression: string, evaluator: Evaluator, timeout?: number) {
+        this.expression = expression;
+        this.evaluator = evaluator;
+        this.timeout = timeout;
+    }
+
+    select(key: any, selector?: any): PersonalizationBuilder {
+        if (typeof key === 'object' && selector === undefined) {
+            for (const entry of Object.entries(key)) {
+                this.select(...entry);
+            }
+
+            return this;
+        }
+
+        if (typeof key !== 'string' || key.length === 0) {
+            throw new Error('The key must be a non-empty string.');
+        }
+
+        if (typeof selector !== 'string' || selector.length === 0) {
+            throw new Error('The selector must be a non-empty string.');
+        }
+
+        const element: HTMLElement | null = document.querySelector(selector);
+
+        if (element !== null) {
+            this.elements[key] = element;
+        }
+
+        return this;
+    }
+
+    apply(onFulfilled: PersonalizationCallback, onFailed?: PersonalizationCallback): PersonalizationBuilder {
+        if (typeof onFulfilled !== 'function') {
+            throw new Error('The fulfilled callback must be a function.');
+        }
+
+        if (onFailed !== undefined && typeof onFailed !== 'function') {
+            throw new Error('The failure callback must be a function.');
+        }
+
+        const visibilities: { [key: string]: string | null } = {};
+
+        for (const [key, element] of Object.entries(this.elements)) {
+            visibilities[key] = element.style.visibility;
+            element.style.visibility = 'hidden';
+        }
+
+        const promise = this.evaluator(this.expression, this.timeout);
+
+        promise.then(result => onFulfilled(this.elements, result), () => {});
+
+        if (onFailed !== undefined) {
+            promise.catch(reason => onFailed(this.elements, reason));
+        }
+
+        promise
+            .finally(() => {
+                for (const [key, element] of Object.entries(this.elements)) {
+                    element.style.visibility = visibilities[key];
+                }
+            })
+            .catch(() => {});
+
+        return this;
+    }
+}
+
+class SdkFacade {
+    public readonly user: UserFacade = new UserFacade();
+    public readonly session: SessionFacade = new SessionFacade();
+    public readonly tracker = new TrackerFacade();
+
+    enable(configuration: any = {}): void {
+        configurationSchema.validate(configuration);
+
+        const {track = true, ...sdkOptions} = configuration;
 
         Sdk.install(sdkOptions);
 
         if (track) {
             Sdk.tracker.enable();
         }
-    },
+    }
+
     disable(): void {
         Sdk.uninstall();
-        userPatch.reset();
-        sessionPatch.reset();
-    },
-    track(eventType: any, payload: any) : void {
+
+        this.user.reset();
+        this.session.reset();
+    }
+
+    track(eventType: any, payload: any): void {
         if (typeof eventType !== 'string' || eventType.length === 0) {
             throw new Error('The event type must be a non-empty string.');
         }
@@ -182,94 +309,79 @@ export default {
             throw new Error('The event payload must be an a map of key-value pairs.');
         }
 
-        /*const validator = payloadValidators[eventType as CustomPayloadType];
+        const schema = payloadSchemas[eventType];
 
-        if (validator === undefined) {
+        if (schema === undefined) {
             throw new Error(`Unknown event type '${eventType}'.`);
         }
 
-        if (!validator(payload) && validator.errors) {
-            throw new Error(formatError(validator.errors[0]));
-        }
+        schema.validate(payload);
 
         Sdk.tracker.track({
             type: eventType,
-            ...payload
-        });*/
-    },
-    tracker: {
-        enable(): void {
-            Sdk.tracker.enable();
-        },
-
-        disable(): void {
-            Sdk.tracker.disable();
-        },
-    },
-    user: {
-        isLogged: (): boolean => {
-            return Sdk.tracker.hasToken();
-        },
-
-        getToken: (): Token | null => {
-            return Sdk.tracker.getToken();
-        },
-
-        login(userId: any): void {
-            if (typeof userId !== 'string' || userId === '') {
-                throw new Error('The user ID must be a non-empty string.');
-            }
-
-            Sdk.tracker.login(userId);
-        },
-
-        logout(): void {
-            Sdk.tracker.logout();
-        },
-
-        set: userPatch.set,
-        unset: userPatch.unset,
-        add: userPatch.add,
-        combine: userPatch.combine,
-        decrement: userPatch.decrement,
-        increment: userPatch.increment,
-        merge: userPatch.merge,
-        clear: userPatch.clear,
-
-        save() : void {
-            if (userPatch.isEmpty()) {
-                return;
-            }
-
-            Sdk.tracker.track({
-                type: 'userProfileChanged',
-                patch: userPatch.build(),
-            });
-
-            userPatch.reset();
-        }
-    },
-    session: {
-        set: sessionPatch.set,
-        unset: sessionPatch.unset,
-        add: sessionPatch.add,
-        combine: sessionPatch.combine,
-        decrement: sessionPatch.decrement,
-        increment: sessionPatch.increment,
-        merge: sessionPatch.merge,
-        clear: sessionPatch.clear,
-
-        save() : void {
-            if (sessionPatch.isEmpty()) {
-                return;
-            }
-
-            Sdk.tracker.track({
-                type: 'sessionAttributesChanged',
-                patch: sessionPatch.build(),
-            });
-
-            sessionPatch.reset();
-        }
+            ...payload,
+        });
     }
-};
+
+    evaluate(expression: any, timeout?: any): Promise<any> {
+        if (typeof expression !== 'string' || expression.length === 0) {
+            throw new Error('The expression must be a non-empty string.');
+        }
+
+        if (timeout !== undefined && (typeof timeout !== 'number' || timeout <= 0)) {
+            throw new Error('The timeout must be a number greater than 0.');
+        }
+
+        return new Promise<any>((resolve, reject) => {
+            const promise = Sdk.evaluate(expression);
+
+            let timer: number;
+
+            promise
+                .then(async response => {
+                    if (!response.ok) {
+                        reject(new Error(response.statusText));
+
+                        return;
+                    }
+
+                    window.clearTimeout(timer);
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        reject(new Error(data.error));
+
+                        return;
+                    }
+
+                    resolve(data.result);
+                })
+                .catch(reason => {
+                    window.clearTimeout(timer);
+                    reject(reason);
+                });
+
+            if (timeout !== undefined) {
+                timer = window.setTimeout(
+                    () => reject(new Error('Maximum timeout exceeded before evaluation could complete.')),
+                    timeout,
+                );
+            }
+        });
+    }
+
+    personalize(expression: any, timeout: any = 300): PersonalizationBuilder {
+        if (typeof expression !== 'string' || expression.length === 0) {
+            throw new Error('The expression must be a non-empty string.');
+        }
+
+        if (typeof timeout !== 'number' || timeout <= 0) {
+            throw new Error('The timeout must be a number greater than 0.');
+        }
+
+        return new PersonalizationBuilder(expression, this.evaluate.bind(this), timeout);
+    }
+}
+
+export default new SdkFacade();

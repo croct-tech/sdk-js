@@ -6,6 +6,12 @@
     <script type="text/javascript" src="croct-sdk.js"></script>
 </head>
 <body>
+
+<h1 id="greeting">Hello everyone!</h1>
+
+<p id="subtitle">Unknown user</p>
+
+
 <img src="image.php" />
 
 <a href="index.html">Link</a>
@@ -53,7 +59,18 @@
 <script>
 
     croct.enable({apiKey: '55d21f90-1ba4-4ab8-94d3-efc5e4ba6d75', debug: true});
-    //croct.user.login('marcos');
+
+    croct.evaluate(`user's name`);
+
+    croct.personalize(`user's name`)
+        .select({
+            'greeting': '#greeting',
+            'subtitle': '#subtitle'
+        })
+        .apply(({greeting, subtitle}, result) => {
+            greeting.innerText = result;
+            subtitle.innerText = result;
+        });
 
     document.getElementById('pop1').onclick = function() {
         history.pushState({page: 1}, "title 1", "?page=1");
@@ -76,7 +93,7 @@
     };
 
     document.getElementById('show').onclick = function() {
-        let token = croct.tracker.getToken();
+        let token = croct.user.getToken();
 
         console.log(token);
 
