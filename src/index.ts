@@ -2,15 +2,7 @@ import Sdk from './sdk';
 import {Token} from './token';
 import {isValidPointer, Operation, Patch} from './patch';
 import {isJsonArray, isJsonObject, isJsonValue} from './json';
-import validateConfig from '../validation/configuration';
-import productViewedValidator from '../validation/product-viewed';
-import cartModifiedValidator from '../validation/cart-modified';
-import cartViewedValidator from '../validation/cart-viewed';
-import checkoutStartedValidator from '../validation/checkout-started';
-import orderPlacedValidator from '../validation/order-placed';
-import userSignedUpValidator from '../validation/user-signed-up';
-import {ValidateFunction} from 'ajv';
-import {formatError} from './validation';
+import {configurationSchema} from './schemas';
 import {CustomPayloadType} from './beacon';
 
 class PatchBuilder {
@@ -162,20 +154,11 @@ class PatchBuilder {
 
 const userPatch = new PatchBuilder();
 const sessionPatch = new PatchBuilder();
-const payloadValidators : {[key in CustomPayloadType]: ValidateFunction} = {
-    productViewed: productViewedValidator,
-    cartModified: cartModifiedValidator,
-    cartViewed: cartViewedValidator,
-    checkoutStarted: checkoutStartedValidator,
-    orderPlaced: orderPlacedValidator,
-    userSignedUp: userSignedUpValidator,
-};
+const payloadValidators = {};
 
 export default {
     enable(options: any = {}): void {
-        if (!validateConfig(options) && validateConfig.errors) {
-            throw new Error(formatError(validateConfig.errors[0]));
-        }
+        configurationSchema.validate(options);
 
         const {track = true, ...sdkOptions} = options;
 
@@ -199,7 +182,7 @@ export default {
             throw new Error('The event payload must be an a map of key-value pairs.');
         }
 
-        const validator = payloadValidators[eventType as CustomPayloadType];
+        /*const validator = payloadValidators[eventType as CustomPayloadType];
 
         if (validator === undefined) {
             throw new Error(`Unknown event type '${eventType}'.`);
@@ -212,7 +195,7 @@ export default {
         Sdk.tracker.track({
             type: eventType,
             ...payload
-        });
+        });*/
     },
     tracker: {
         enable(): void {
