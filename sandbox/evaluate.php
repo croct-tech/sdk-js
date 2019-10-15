@@ -1,5 +1,7 @@
 <?php
 
+usleep(100000);
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Api-Key");
 
@@ -12,6 +14,13 @@ switch ($expression) {
 
     case "random":
         echo \json_encode(['result' => rand()]);
+        break;
+
+    case "user's perfectPlan":
+        echo \json_encode(['result' => 'medium']);
+
+    case "user's teamSize":
+        echo \json_encode(['result' => 8]);
         break;
 
     default:

@@ -16,23 +16,20 @@ import {compressJson} from './transformer';
 import {QueuedChannel} from './channel/queuedChannel';
 import {FaultTolerantChannel} from './channel/faultTolerantChannel';
 import {MonitoredQueue} from './queue/monitoredQueue';
-import queue from 'jest-websocket-mock/lib/queue';
 import {CapacityRestrictedQueue} from './queue/capacityRestrictedQueue';
 import {EncodedChannel} from './channel/encodedChannel';
 
 export type Configuration = {
     apiKey: string,
-    storageNamespace?: string;
-    tokenScope?: TokenScope;
-    debug?: boolean;
+    storageNamespace: string;
+    tokenScope: TokenScope;
+    debug: boolean;
+    beaconVersion: string;
+    websocketEndpoint: string;
+    evaluationEndpoint: string
 }
 
-export default class Sdk {
-    private static BEACON_VERSION = '<@beaconVersion@>';
-    private static WEBSOCKET_ENDPOINT = '<@websocketEndpoint@>';
-    private static EVALUATION_ENDPOINT = '<@evaluationEndpoint@>';
-    private static SINGLETON: Sdk;
-
+export class Container {
     private readonly configuration: Required<Configuration>;
     private context: Context;
     private logger: Logger;
@@ -40,88 +37,15 @@ export default class Sdk {
     private beaconChannel: OutputChannel<Beacon>;
     private beaconQueue: MonitoredQueue<string>;
 
-    private constructor(options: Configuration) {
-        this.configuration = {
-            storageNamespace: 'croct',
-            tokenScope: 'global',
-            debug: false,
-            ...options,
-        };
-
-        this.initialize();
+    constructor(configuration: Configuration) {
+        this.configuration = configuration;
     }
 
-    private static get instance(): Sdk {
-        if (!Sdk.SINGLETON) {
-            throw new Error('Croct SDK is not installed');
-        }
-
-        return Sdk.SINGLETON;
+    getConfiguration() : Configuration {
+        return this.configuration;
     }
 
-    static install(options: Configuration): void {
-        if (Sdk.SINGLETON) {
-            throw new Error('The SDK is already installed');
-        }
-
-        Sdk.SINGLETON = new Sdk(options);
-    }
-
-    static uninstall(): void {
-        if (!Sdk.SINGLETON) {
-            return;
-        }
-
-        Sdk.SINGLETON.destroy();
-
-        delete Sdk.SINGLETON;
-    }
-
-    static evaluate(expression: string) : Promise<Response> {
-        const {configuration} = Sdk.instance;
-
-        return window.fetch(Sdk.EVALUATION_ENDPOINT + '?expression=' +  encodeURIComponent(expression), {
-            headers: {
-                'Api-Key': configuration.apiKey
-            }
-        });
-    }
-
-    static get tracker(): Tracker {
-        return Sdk.instance.getTracker();
-    }
-
-    private initialize(): void {
-        const logger = this.getLogger();
-
-        logger.info('Croct SDK installed');
-        logger.info(`API Key: ${this.configuration.apiKey}`);
-
-        const context = this.getContext();
-        const tab = context.getTab();
-
-        logger.info('Context initialized');
-        logger.log(`Token scope: ${this.configuration.tokenScope}`);
-        logger.log(`${tab.isNew ? 'New' : 'Current'} tab: ${tab.id}`);
-    }
-
-    private destroy(): void {
-        if (this.tracker) {
-            this.tracker.disable();
-        }
-
-        const logger = this.getLogger();
-
-        if (this.beaconChannel) {
-            this.beaconChannel.close().catch(() =>
-                logger.info('Failed to close beacon channel'),
-            );
-        }
-
-        logger.info('Croct SDK uninstalled');
-    }
-
-    private getTracker(): Tracker {
+    getTracker(): Tracker {
         if (!this.tracker) {
             this.tracker = this.createTracker();
         }
@@ -134,7 +58,7 @@ export default class Sdk {
             context: this.getContext(),
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
-            version: Sdk.BEACON_VERSION
+            version: this.configuration.beaconVersion
         });
 
         const queue = this.getBeaconQueue();
@@ -145,7 +69,7 @@ export default class Sdk {
         return tracker;
     }
 
-    private getContext(): Context {
+    getContext(): Context {
         if (!this.context) {
             this.context = this.createContext();
         }
@@ -161,7 +85,7 @@ export default class Sdk {
         );
     }
 
-    private getLogger(prefix?: string): Logger {
+    getLogger(prefix?: string): Logger {
         if (this.logger === undefined) {
             this.logger = this.createLogger();
         }
@@ -194,7 +118,7 @@ export default class Sdk {
                     channel: new GuaranteedChannel({
                         channel: new CodecChannel(
                             new SocketChannel({
-                                url: Sdk.WEBSOCKET_ENDPOINT + '' + this.configuration.apiKey,
+                                url: this.configuration.websocketEndpoint + '/' + this.configuration.apiKey,
                                 retryPolicy: new BackoffPolicy(),
                                 logger: logger
                             }),
@@ -261,5 +185,25 @@ export default class Sdk {
         }
 
         return prefix + namespace;
+    }
+
+    destroy(): void {
+        if (this.tracker) {
+            this.tracker.suspend();
+        }
+
+        const logger = this.getLogger();
+
+        if (this.beaconChannel) {
+            this.beaconChannel.close().catch(() =>
+                logger.info('Failed to close beacon channel'),
+            );
+        }
+
+        delete this.context;
+        delete this.logger;
+        delete this.tracker;
+        delete this.beaconChannel;
+        delete this.beaconQueue;
     }
 }

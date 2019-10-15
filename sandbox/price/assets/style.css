@@ -1,0 +1,318 @@
+body {
+    background: #fff;
+    font-family: 'Droid Sans', sans-serif;
+    color: #777;
+    font-weight: 400;
+    font-size: 15px;
+    letter-spacing: 0.5px
+}
+
+h1,
+h3 {
+    color: #333;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    margin: 0;
+    letter-spacing: -1px
+}
+
+p {
+    font-size: 15px;
+    color: #555;
+    line-height: 24px;
+    font-weight: 400;
+    font-family: 'Droid Sans', sans-serif;
+    letter-spacing: 0.5px
+}
+
+strong {
+    font-weight: 700
+}
+
+a {
+    color: #29d9c2
+}
+
+a {
+    outline: 0;
+    text-decoration: none
+}
+
+ul,
+li {
+    margin: 0;
+    padding: 0;
+    list-style: none
+}
+.mbr-section--relative {
+    position: relative
+}
+
+.mbr-section--bg-adapted {
+    background-attachment: scroll;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover
+}
+
+.container {
+    position: relative;
+    z-index: 77;
+    background-color: inherit
+}
+
+
+.space80 {
+    margin-bottom: 60px
+}
+
+.section-head-lite h1 {
+    text-transform: uppercase;
+    font-weight: 700;
+    margin: 0 0 15px;
+    font-size: 25px;
+    letter-spacing: 3px;
+    color: #fff
+}
+
+.section-head-lite p {
+    color: #fff;
+    opacity: 0.7
+}
+
+.btn {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 11px 28px;
+    border: none;
+    border-radius: 30px;
+    font-family: Montserrat
+}
+
+.btn.btn-primary {
+    background: #29d9c2;
+    border: 1px solid #29d9c2;
+    color: #fff
+}
+
+.pricing {
+    padding: 100px 0
+}
+
+.popular {
+    display: none;
+    padding-top: 0!important;
+    margin-left: 15px;
+    margin-right: 15px;
+    background: #222;
+    height: 40px;
+    line-height: 40px;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: -40px;
+    color: rgb(255, 255, 255);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 3px 3px 0 0;
+    font-family: Montserrat
+}
+
+.pricing__item {
+    margin: 0;
+    padding: 40px 40px 40px;
+    text-align: left;
+    color: #000;
+    background: #fff;
+    position: relative;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05);
+    border: none;
+    border-radius: 3px
+}
+
+.pricing__item__popular {
+    border-radius: 0 0 3px 3px
+}
+
+.pricing__title {
+    font-size: 20px;
+    margin: 0px 0px 10px;
+    color: #29d9c2;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700
+}
+
+.pricing__price {
+    font-size: 65px;
+    font-weight: 700;
+    padding: 10px 0 20px;
+    color: #000;
+    font-family: Montserrat
+}
+
+.pricing__currency {
+    font-size: 25px;
+    vertical-align: super;
+    color: #000
+}
+
+.pricing__period {
+    font-size: 15px;
+    color: #000;
+    display: inline-block;
+}
+
+.pricing__sentence {
+    padding: 0 0 0.5em;
+    margin: 0;
+    color: #000
+}
+
+.pricing__feature-list {
+    font-size: 0.95em;
+    margin: 0;
+    padding: 0 0 2.5em;
+    list-style: none;
+    color: #666
+}
+
+.pricing__feature {
+    position: relative;
+    display: block;
+    padding: 0px 0px 5px 20px;
+    line-height: 1.5
+}
+
+.pricing__feature::before {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 2px;
+    background: #000;
+    opacity: 0.2;
+    left: 0;
+    top: 50%;
+    margin: -2px 0 0 0
+}
+
+.pricing__item .btn {
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    color: #fff
+}
+
+.pricing .container {
+    max-width: 1000px
+}
+
+@media only screen and (min-width:768px) and (max-width:992px) {
+    .container {
+        width: 100%;
+        max-width: 800px
+    }
+    .pricing__price {
+        padding: 35px 0 30px;
+        line-height: 20px
+    }
+    .pricing__item {
+        margin: 0;
+        padding: 30px 30px 30px
+    }
+}
+
+@media only screen and (min-width:280px) and (max-width:767px) {
+    .pricing__item {
+        margin: 0 0 47px;
+        padding: 30px 30px 30px
+    }
+}
+
+.price-styles.recommended > .popular {
+    display: block;
+}
+
+@media (max-width:767px) {
+    .price-styles {
+        display: block;
+        max-width: 360px;
+        margin: 0 auto
+    }
+}
+
+.price-four-el {
+    padding: 40px 15px 15px 15px
+}
+
+.price-four-el h3 {
+    text-align: center
+}
+
+@media (min-width:767px) {
+    .pricing__price {
+        line-height: 35px;
+        font-size: 50px
+    }
+    .pricing__title {
+        font-size: 16px
+    }
+    .pricing__item p {
+        font-size: 12px;
+        line-height: 20px
+    }
+    .pricing__item a.btn {
+        padding-left: 5px;
+        padding-right: 5px
+    }
+}
+
+@media (max-width:991px) {
+    .pricing__price {
+        line-height: 35px;
+        font-size: 50px
+    }
+    .pricing__title {
+        font-size: 16px
+    }
+    .pricing__item p {
+        font-size: 12px;
+        line-height: 20px
+    }
+    .pricing__item a.btn {
+        padding-left: 5px;
+        padding-right: 5px
+    }
+}
+
+.btn-primary {
+    color: #ffffff!important
+}
+
+.btn.btn-primary {
+    background-color: #4caf50;
+    border-color: #4caf50
+}
+
+a {
+    color: #4caf50
+}
+
+.mbr-primary-color {
+    color: #4caf50!important
+}
+
+.mbr-title-font {
+    font-family: 'Lato', sans-serif!important
+}
+
+.mbr-text-font,
+p {
+    font-family: 'Open Sans', sans-serif!important
+}

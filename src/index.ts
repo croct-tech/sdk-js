@@ -1,8 +1,147 @@
-import Sdk from './sdk';
-import {Token} from './token';
+import {Container} from './container';
+import {configurationSchema} from './schemas';
+import Tracker from './tracker';
+import {TokenScope} from './context';
 import {isValidPointer, Operation, Patch} from './patch';
-import {configurationSchema, payloadSchemas} from './schemas';
 import {isJsonArray, isJsonObject, isJsonValue} from './json';
+import {Token} from './token';
+
+class Sdk {
+    private installation: Container;
+
+    get tracker() : TrackerFacade {
+        return new TrackerFacade(this.container.getTracker());
+    }
+
+    get user() : UserFacade {
+        return new UserFacade(this.container.getTracker());
+    }
+
+    get session() : SessionFacade {
+        return new SessionFacade(this.container.getTracker());
+    }
+
+    private get container(): Container {
+        if (!this.installation) {
+            throw new Error('Croct SDK is not enabled');
+        }
+
+        return this.installation;
+    }
+
+    enable(configuration: Configuration): void {
+        if (this.installation) {
+            throw new Error('The SDK is already installed');
+        }
+
+        configurationSchema.validate(configuration);
+
+        const {track = true, ...containerConfiguration} = configuration;
+
+        this.installation = new Container({
+            storageNamespace: 'croct',
+            tokenScope: 'global',
+            debug: false,
+            ...containerConfiguration,
+            beaconVersion: '<@beaconVersion@>',
+            websocketEndpoint: '<@websocketEndpoint@>',
+            evaluationEndpoint: '<@evaluationEndpoint@>'
+        });
+
+        const logger = this.container.getLogger();
+        const {apiKey, tokenScope} = this.container.getConfiguration();
+
+        logger.info('Croct SDK enabled');
+        logger.info(`API Key: ${apiKey}`);
+
+        const context = this.container.getContext();
+        const tab = context.getTab();
+
+        logger.info('Context initialized');
+        logger.log(`Token scope: ${tokenScope}`);
+        logger.log(`${tab.isNew ? 'New' : 'Current'} tab: ${tab.id}`);
+
+        if (track) {
+            this.tracker.enable();
+        }
+    }
+
+    disable(): void {
+        const logger = this.container.getLogger();
+
+        this.container.destroy();
+
+        delete this.installation;
+
+        logger.info('Croct SDK disabled');
+    }
+
+    personalize(expression: any, timeout: any = 300): PersonalizationBuilder {
+        if (typeof expression !== 'string' || expression.length === 0) {
+            throw new Error('The expression must be a non-empty string.');
+        }
+
+        if (typeof timeout !== 'number' || timeout <= 0) {
+            throw new Error('The timeout must be a number greater than 0.');
+        }
+
+        return new PersonalizationBuilder(expression, this.evaluate.bind(this), timeout);
+    }
+
+    evaluate(expression: any, timeout?: any): Promise<any> {
+        if (typeof expression !== 'string' || expression.length === 0) {
+            throw new Error('The expression must be a non-empty string.');
+        }
+
+        if (timeout !== undefined && (typeof timeout !== 'number' || timeout <= 0)) {
+            throw new Error('The timeout must be a number greater than 0.');
+        }
+
+        const {apiKey, evaluationEndpoint} = this.container.getConfiguration();
+
+        return new Promise<any>((resolve, reject) => {
+            const promise = window.fetch(`${evaluationEndpoint}?expression=${encodeURIComponent(expression)}`, {
+                headers: {
+                    'Api-Key': apiKey
+                }
+            });
+
+            promise
+                .then(async response => {
+                    if (timeout !== undefined) {
+                        window.setTimeout(() => {
+                            reject(new Error('Maximum timeout exceeded before evaluation could complete.'));
+                        }, timeout);
+                    }
+
+                    if (!response.ok) {
+                        reject(new Error(response.statusText));
+
+                        return;
+                    }
+
+                    response.json().then(data => {
+                        if (data.error) {
+                            reject(new Error(data.error));
+
+                            return;
+                        }
+
+                        resolve(data.result);
+                    });
+                })
+                .catch(reason => reject(reason));
+        });
+    }
+}
+
+type Configuration = {
+    apiKey: string;
+    storageNamespace?: string;
+    tokenScope?: TokenScope;
+    track?: boolean;
+    debug?: boolean;
+}
 
 class ActiveRecord {
     private readonly operations: Operation[] = [];
@@ -139,12 +278,20 @@ class ActiveRecord {
 }
 
 class UserFacade extends ActiveRecord {
+    private readonly tracker: Tracker;
+
+    constructor(tracker: Tracker) {
+        super();
+
+        this.tracker = tracker;
+    }
+
     isLogged(): boolean {
-        return Sdk.tracker.hasToken();
+        return this.tracker.hasToken();
     }
 
     getToken(): Token | null {
-        return Sdk.tracker.getToken();
+        return this.tracker.getToken();
     }
 
     login(userId: any): void {
@@ -152,16 +299,16 @@ class UserFacade extends ActiveRecord {
             throw new Error('The user ID must be a non-empty string.');
         }
 
-        Sdk.tracker.login(userId);
+        this.tracker.login(userId);
     }
 
     logout(): void {
-        Sdk.tracker.logout();
+        this.tracker.logout();
     }
 
     save(): void {
         if (this.isDirty()) {
-            Sdk.tracker.track({
+            this.tracker.track({
                 type: 'userProfileChanged',
                 patch: this.buildPath(),
             });
@@ -172,9 +319,17 @@ class UserFacade extends ActiveRecord {
 }
 
 class SessionFacade extends ActiveRecord {
+    private readonly tracker: Tracker;
+
+    constructor(tracker: Tracker) {
+        super();
+
+        this.tracker = tracker;
+    }
+
     save(): void {
         if (this.isDirty()) {
-            Sdk.tracker.track({
+            this.tracker.track({
                 type: 'sessionAttributesChanged',
                 patch: this.buildPath(),
             });
@@ -185,28 +340,42 @@ class SessionFacade extends ActiveRecord {
 }
 
 class TrackerFacade {
+    private readonly tracker: Tracker;
+
+    constructor(tracker: Tracker) {
+        this.tracker = tracker;
+    }
+
     enable(): void {
-        Sdk.tracker.enable();
+        this.tracker.enable();
     }
 
     disable(): void {
-        Sdk.tracker.disable();
+        this.tracker.disable();
     }
 }
 
+type TargetCallback = {
+    (target: ElementMap): void
+};
+
 type PersonalizationCallback = {
-    (target: HTMLElement | { [key: string]: HTMLElement }, result: any): void
+    (target: ElementMap, result: any): void
 };
 
 type Evaluator = {
     (expression: any, timeout?: any): Promise<any>
-};
+}
+
+type ElementMap = {[key: string]: HTMLElement};
 
 class PersonalizationBuilder {
     private readonly expression: string;
     private readonly evaluator: Evaluator;
     private readonly timeout?: number;
-    private readonly elements: { [key: string]: HTMLElement } = {};
+    private readonly elements: ElementMap = {};
+    private beforeCallback: TargetCallback;
+    private afterCallback: TargetCallback;
 
     constructor(expression: string, evaluator: Evaluator, timeout?: number) {
         this.expression = expression;
@@ -240,7 +409,38 @@ class PersonalizationBuilder {
         return this;
     }
 
-    apply(onFulfilled: PersonalizationCallback, onFailed?: PersonalizationCallback): PersonalizationBuilder {
+    hideBefore() : PersonalizationBuilder {
+        const visibilities: { [key: string]: string | null } = {};
+
+        this.before(elements => {
+            for (const [key, element] of Object.entries(elements)) {
+                visibilities[key] = element.style.visibility;
+                element.style.visibility = 'hidden';
+            }
+        });
+
+        this.after(() => {
+            for (const [key, element] of Object.entries(this.elements)) {
+                element.style.visibility = visibilities[key];
+            }
+        });
+
+        return this;
+    }
+
+    before(callback: TargetCallback) : PersonalizationBuilder {
+        this.beforeCallback = callback;
+
+        return this;
+    }
+
+    after(callback: TargetCallback) : PersonalizationBuilder {
+        this.afterCallback = callback;
+
+        return this;
+    }
+
+    apply(onFulfilled: PersonalizationCallback, onFailed?: PersonalizationCallback): Promise<any> {
         if (typeof onFulfilled !== 'function') {
             throw new Error('The fulfilled callback must be a function.');
         }
@@ -249,11 +449,8 @@ class PersonalizationBuilder {
             throw new Error('The failure callback must be a function.');
         }
 
-        const visibilities: { [key: string]: string | null } = {};
-
-        for (const [key, element] of Object.entries(this.elements)) {
-            visibilities[key] = element.style.visibility;
-            element.style.visibility = 'hidden';
+        if (this.beforeCallback) {
+            this.beforeCallback({...this.elements});
         }
 
         const promise = this.evaluator(this.expression, this.timeout);
@@ -266,122 +463,14 @@ class PersonalizationBuilder {
 
         promise
             .finally(() => {
-                for (const [key, element] of Object.entries(this.elements)) {
-                    element.style.visibility = visibilities[key];
+                if (this.afterCallback) {
+                    this.afterCallback({...this.elements});
                 }
             })
             .catch(() => {});
 
-        return this;
+        return promise;
     }
 }
 
-class SdkFacade {
-    public readonly user: UserFacade = new UserFacade();
-    public readonly session: SessionFacade = new SessionFacade();
-    public readonly tracker = new TrackerFacade();
-
-    enable(configuration: any = {}): void {
-        configurationSchema.validate(configuration);
-
-        const {track = true, ...sdkOptions} = configuration;
-
-        Sdk.install(sdkOptions);
-
-        if (track) {
-            Sdk.tracker.enable();
-        }
-    }
-
-    disable(): void {
-        Sdk.uninstall();
-
-        this.user.reset();
-        this.session.reset();
-    }
-
-    track(eventType: any, payload: any): void {
-        if (typeof eventType !== 'string' || eventType.length === 0) {
-            throw new Error('The event type must be a non-empty string.');
-        }
-
-        if (payload === null || typeof payload !== 'object') {
-            throw new Error('The event payload must be an a map of key-value pairs.');
-        }
-
-        const schema = payloadSchemas[eventType];
-
-        if (schema === undefined) {
-            throw new Error(`Unknown event type '${eventType}'.`);
-        }
-
-        schema.validate(payload);
-
-        Sdk.tracker.track({
-            type: eventType,
-            ...payload,
-        });
-    }
-
-    evaluate(expression: any, timeout?: any): Promise<any> {
-        if (typeof expression !== 'string' || expression.length === 0) {
-            throw new Error('The expression must be a non-empty string.');
-        }
-
-        if (timeout !== undefined && (typeof timeout !== 'number' || timeout <= 0)) {
-            throw new Error('The timeout must be a number greater than 0.');
-        }
-
-        return new Promise<any>((resolve, reject) => {
-            const promise = Sdk.evaluate(expression);
-
-            let timer: number;
-
-            promise
-                .then(async response => {
-                    if (!response.ok) {
-                        reject(new Error(response.statusText));
-
-                        return;
-                    }
-
-                    window.clearTimeout(timer);
-
-                    const data = await response.json();
-
-                    if (data.error) {
-                        reject(new Error(data.error));
-
-                        return;
-                    }
-
-                    resolve(data.result);
-                })
-                .catch(reason => {
-                    window.clearTimeout(timer);
-                    reject(reason);
-                });
-
-            if (timeout !== undefined) {
-                timer = window.setTimeout(
-                    () => reject(new Error('Maximum timeout exceeded before evaluation could complete.')),
-                    timeout,
-                );
-            }
-        });
-    }
-
-    personalize(expression: any, timeout: any = 300): PersonalizationBuilder {
-        if (typeof expression !== 'string' || expression.length === 0) {
-            throw new Error('The expression must be a non-empty string.');
-        }
-
-        if (typeof timeout !== 'number' || timeout <= 0) {
-            throw new Error('The timeout must be a number greater than 0.');
-        }
-
-        return new PersonalizationBuilder(expression, this.evaluate.bind(this), timeout);
-    }
-}
-
-export default new SdkFacade();
+export default new Sdk();
