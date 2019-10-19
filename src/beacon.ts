@@ -54,13 +54,8 @@ export type SessionAttributesChanged = BasePayload<'sessionAttributesChanged'> &
     patch: Patch
 }
 
-export type UserSignedIn = BasePayload<'userSignedIn'> & {
-    token: string
-}
-
-export type UserSignedOut = BasePayload<'userSignedOut'> & {
-    token: string
-}
+export type UserSignedIn = BasePayload<'userSignedIn'>;
+export type UserSignedOut = BasePayload<'userSignedOut'>;
 
 export type PartialPayload =
     PageOpened |

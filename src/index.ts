@@ -5,6 +5,8 @@ import {TokenScope} from './context';
 import {isValidPointer, Operation, Patch} from './patch';
 import {isJsonArray, isJsonObject, isJsonValue} from './json';
 import {Token} from './token';
+import {base64UrlEncode} from './base64Url';
+
 
 class Sdk {
     private installation: Container;
@@ -294,12 +296,34 @@ class UserFacade extends ActiveRecord {
         return this.tracker.getToken();
     }
 
-    login(userId: any): void {
-        if (typeof userId !== 'string' || userId === '') {
-            throw new Error('The user ID must be a non-empty string.');
+    login(userId: any, lifetime: any = 31536000): void {
+        if (typeof userId !== 'string') {
+            throw new Error('The token must be of type string.');
         }
 
-        this.tracker.login(userId);
+        if (typeof lifetime !== 'number' || lifetime <= 0) {
+            throw new Error('The expiration must be greater than zero.');
+        }
+
+        const now = Math.floor(Date.now() / 1000);
+        const headers = base64UrlEncode(JSON.stringify({typ: 'JWT', alg: 'none'}));
+        const claims = base64UrlEncode(JSON.stringify({
+            iss: 'http://' + window.location.hostname,
+            aud : 'http://croct.com',
+            iat: now,
+            exp: now + lifetime,
+            sub: userId
+        }));
+
+        this.setToken(`${headers}.${claims}.`);
+    }
+
+    setToken(token: any): void {
+        if (typeof token !== 'string') {
+            throw new Error('The token must be a string.');
+        }
+
+        this.tracker.login(token);
     }
 
     logout(): void {

@@ -123,19 +123,16 @@ export class Tracker {
         }
     }
 
-    login(userId: string) {
-        if (userId === '') {
-            throw new Error('The user ID cannot be empty');
+    login(token: string) {
+        if (token === '' || !/^[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)?$/.test(token)) {
+            throw new Error('The token must be a valid Json Web Token.');
         }
 
-        this.logger.log(`User logged in: ${userId}`);
+        this.logger.log(`User signed in`);
 
-        this.context.setToken(new Token(userId, Date.now()));
+        this.context.setToken(new Token(token, Date.now()));
 
-        this.track({
-            type: 'userSignedIn',
-            token: userId
-        });
+        this.track({type: 'userSignedIn'});
     }
 
     logout() {
@@ -145,14 +142,11 @@ export class Tracker {
             return;
         }
 
-        this.logger.log('User logged out');
+        this.logger.log('User signed out');
 
         this.context.setToken(null);
 
-        this.track({
-            type: 'userSignedOut',
-            token: token.value
-        });
+        this.track({type: 'userSignedOut'});
     }
 
     hasToken(): boolean {
