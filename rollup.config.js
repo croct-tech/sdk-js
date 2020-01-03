@@ -6,10 +6,11 @@ import {uglify} from "rollup-plugin-uglify";
 
 // rollup.config.js
 export default commandLineArgs => {
+    let minify = process.env.minify || false;
     return {
         input: 'src/index.ts',
         output: {
-            file: 'dist/croct-sdk.js',
+            file: minify ? 'dist/croct-sdk.min.js' : 'dist/croct-sdk.js',
             name: 'croct',
             format: 'iife',
             sourcemap: true,
@@ -26,12 +27,13 @@ export default commandLineArgs => {
                 evaluationEndpoint: commandLineArgs['config-evaluation-endpoint'] || 'http://localhost:8000',
             }),
             typescript({cacheRoot: `${tempDir}/.rpt2_cache`}),
-            /*uglify({
-                compress: {
-                    unused: true,
-                    dead_code: true,
-                }
-            })*/
+            minify ?
+                uglify({
+                    compress: {
+                        unused: true,
+                        dead_code: true,
+                    }
+                }) : {},
         ]
     };
 };

@@ -14,8 +14,10 @@
   },
   "homepage": "https://github.com/croctools/sdk-js#readme",
   "scripts": {
-    "test": "jest -c jest.config.json",
-    "generate-validators": "ajv compile -s schema/configuration.json -o validation/configuration.js\n"
+    "test": "jest -c jest.config.js",
+    "generate-validators": "ajv compile -s schema/configuration.json -o validation/configuration.js\n",
+    "rollup": "rollup -c rollup.config.js",
+    "rollup-min": "rollup -c rollup.config.js --environment minify"
   },
   "dependencies": {},
   "devDependencies": {
