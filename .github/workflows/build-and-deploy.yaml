@@ -8,7 +8,7 @@ env:
   GITHUB_SHA: ${{ github.sha }}
 
 jobs:
-  run:
+  build:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
@@ -28,9 +28,23 @@ jobs:
 
       - name: Build bundles
         run: |-
-          npm rollup
-          npm rollup-min
+          npm run rollup
+          npm run rollup-min
 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: bundle
+          path: dist
+
+  deploy:
+    runs-on: ubuntu-18.04
+    needs:
+      - build
+    steps:
+      - uses: actions/download-artifact@v1
+        with:
+          name: bundle
       - name: Authenticate to GCP
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
