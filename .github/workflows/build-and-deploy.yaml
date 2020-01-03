@@ -1,0 +1,40 @@
+name: Build and deploy
+
+on: [push]
+
+env:
+  GCLOUD_PROJECT: ${{ secrets.GCLOUD_PROJECT }}
+  GCLOUD_BUCKET: ${{ secrets.GCLOUD_BUCKET }}
+  GITHUB_SHA: ${{ github.sha }}
+
+jobs:
+  run:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: node_modules
+      - name: Install dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Build bundles
+        run: |-
+          npm rollup
+          npm rollup-min
+
+      - name: Authenticate to GCP
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: 274.0.0
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+      - name: Deploy to GCS
+        run: gsutil -m cp dist/*js "gs://${GCLOUD_BUCKET}/$(basename ${GITHUB_REF})/"
