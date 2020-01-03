@@ -10,7 +10,17 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12
-      - run: npm ci
+
+      - name: Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: node_modules
+      - name: Install dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: npm ci
+
       - run: npm tsValidate
 
 
@@ -21,7 +31,17 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12
-      - run: npm ci
+
+      - name: Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: node_modules
+      - name: Install dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: npm ci
+
       - run: npm audit
 
 
@@ -32,5 +52,15 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12
-      - run: npm ci
+
+      - name: Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: node_modules
+      - name: Install dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: npm ci
+
       - run: npm test
