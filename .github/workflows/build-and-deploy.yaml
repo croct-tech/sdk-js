@@ -45,6 +45,7 @@ jobs:
       - uses: actions/download-artifact@v1
         with:
           name: bundle
+          path: dist
       - name: Authenticate to GCP
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
