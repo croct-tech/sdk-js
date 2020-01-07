@@ -1,6 +1,8 @@
 name: Build and deploy
 
-on: [push]
+on:
+  push:
+  create:
 
 env:
   GCLOUD_PROJECT: ${{ secrets.GCLOUD_PROJECT }}

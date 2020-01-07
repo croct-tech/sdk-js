@@ -1,0 +1,21 @@
+name: Delete assets from deleted branches
+
+on:
+  delete:
+
+env:
+  GCLOUD_PROJECT: ${{ secrets.GCLOUD_PROJECT }}
+  GCLOUD_BUCKET: ${{ secrets.GCLOUD_BUCKET }}
+  GITHUB_SHA: ${{ github.sha }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Authenticate to GCP
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: 274.0.0
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+      - name: Delete from GCS
+        run: gsutil -m rm "gs://${GCLOUD_BUCKET}/$(basename ${GITHUB_REF})/**"
