@@ -51,4 +51,4 @@ jobs:
           version: 274.0.0
           service_account_key: ${{ secrets.GCP_SA_KEY }}
       - name: Deploy to GCS
-        run: gsutil -m cp dist/*js "gs://${GCLOUD_BUCKET}/$(basename ${GITHUB_REF})/"
+        run: gsutil -m cp -a public-read -Z dist/** "gs://${GCLOUD_BUCKET}/$(basename ${GITHUB_REF})/"
