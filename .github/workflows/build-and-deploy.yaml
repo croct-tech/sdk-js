@@ -10,7 +10,7 @@ env:
   GITHUB_SHA: ${{ github.sha }}
 
 jobs:
-  build:
+  run:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
@@ -39,15 +39,6 @@ jobs:
           name: bundle
           path: dist
 
-  deploy:
-    runs-on: ubuntu-18.04
-    needs:
-      - build
-    steps:
-      - uses: actions/download-artifact@v1
-        with:
-          name: bundle
-          path: dist
       - name: Authenticate to GCP
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
