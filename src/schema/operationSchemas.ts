@@ -5,7 +5,7 @@ import {JsonArrayType, JsonObjectType, JsonType} from '../validation/jsonType';
 import UnionType from '../validation/unionType';
 
 const pointer = new StringType({
-    pattern: /^([a-zA-Z_]\w*|\[\d+])(\.[a-zA-Z_]\w*|\[\d+])*$/,
+    format: 'pointer',
 });
 
 export const addOperation = new ObjectType({

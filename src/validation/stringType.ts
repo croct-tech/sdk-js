@@ -5,6 +5,9 @@ interface Format {
 }
 
 const FORMAT: {[key: string]: Format} = {
+    pointer: function identifier(value: string): boolean {
+        return /^([a-zA-Z_]\w*|\[\d+])(\.[a-zA-Z_]\w*|\[\d+])*$/.test(value);
+    },
     identifier: function identifier(value: string): boolean {
         return /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(value);
     },

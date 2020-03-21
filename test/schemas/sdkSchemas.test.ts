@@ -22,12 +22,6 @@ describe('The event metadata schema', () => {
     test.each([
         [
             {
-                '': 'foo',
-            },
-            'Expected at least 1 character at path \'/\', actual 0.',
-        ],
-        [
-            {
                 '@foo': 'foo',
             },
             'Invalid identifier format at path \'/@foo\'.',

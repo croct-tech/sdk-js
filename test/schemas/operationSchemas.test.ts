@@ -21,21 +21,21 @@ describe('An operation schema', () => {
         ],
         [
             {
-                path: 'foo.bar',
+                path: 'foo',
                 value: ['bar'],
             },
             addOperation,
         ],
         [
             {
-                path: '[0]',
+                path: 'foo',
                 value: {foo: 'bar'},
             },
             addOperation,
         ],
         [
             {
-                path: 'foo[0]',
+                path: 'foo',
                 value: 'bar',
             },
             setOperation,
@@ -126,68 +126,6 @@ describe('An operation schema', () => {
     test.each([
         [
             {
-                path: 123,
-                value: 'bar',
-            },
-            addOperation,
-            'Expected value of type string at path \'/path\', actual integer.',
-        ],
-        [
-            {
-                path: 'foo.',
-                value: 'bar',
-            },
-            setOperation,
-            'Invalid format at path \'/path\'.',
-        ],
-        [
-            {
-                path: '.',
-                value: 'bar',
-            },
-            combineOperation,
-            'Invalid format at path \'/path\'.',
-        ],
-        [
-            {
-                path: '.bar',
-                value: ['bar'],
-            },
-            mergeOperation,
-            'Invalid format at path \'/path\'.',
-        ],
-        [
-            {
-                path: '[]',
-                value: 1,
-            },
-            incrementOperation,
-            'Invalid format at path \'/path\'.',
-        ],
-        [
-            {
-                path: '[0',
-                value: 2,
-            },
-            decrementOperation,
-            'Invalid format at path \'/path\'.',
-        ],
-        [
-            {
-                path: '0]',
-            },
-            unsetOperation,
-            'Invalid format at path \'/path\'.',
-        ],
-        [
-            {
-                path: '@#$',
-            },
-            clearOperation,
-            'Invalid format at path \'/path\'.',
-        ],
-        [
-            {
                 path: 'foo',
                 value: /not-a-json-value/,
             },
@@ -234,11 +172,7 @@ describe('An operation schema', () => {
             decrementOperation,
             'Expected value of type number at path \'/value\', actual string.',
         ],
-    ])('should not allow %s', (
-        value: object,
-        schema: TypeSchema,
-        message: string,
-    ) => {
+    ])('should not allow %s', (value: object, schema: TypeSchema, message: string) => {
         function validate(): void {
             schema.validate(value);
         }

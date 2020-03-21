@@ -16,39 +16,6 @@ class TestRecord extends ActiveRecord<any> {
 }
 
 describe('An active record', () => {
-    test.each([
-        [(): void => {
-            new TestRecord().set('foo.', {});
-        }],
-        [(): void => {
-            new TestRecord().add('foo.', {});
-        }],
-        [(): void => {
-            new TestRecord().add('foo.', {});
-        }],
-        [(): void => {
-            new TestRecord().combine('foo.', {});
-        }],
-        [(): void => {
-            new TestRecord().merge('foo.', {});
-        }],
-        [(): void => {
-            new TestRecord().increment('foo.', 1);
-        }],
-        [(): void => {
-            new TestRecord().decrement('foo.', 2);
-        }],
-        [(): void => {
-            new TestRecord().clear('foo.');
-        }],
-        [(): void => {
-            new TestRecord().unset('foo.');
-        }],
-    ])('should not allow invalid paths', (operation: () => void) => {
-        expect(operation).toThrow(Error);
-        expect(operation).toThrow("Invalid format at path '/path'.");
-    });
-
     test('should build a patch', () => {
         const record = new TestRecord()
             .set('a', '1')
