@@ -19,28 +19,34 @@ describe('A JSON array type', () => {
     });
 
     test.each([
-        [['foo', 'bar']],
-        [['foo', {bar: 1}]],
-    ])('should allow %s', (value: any) => {
+        [['foo', 'bar'], new JsonArrayType()],
+        [['foo', {bar: 1}], new JsonArrayType()],
+        [['foo', 'bar', 'baz'], new JsonArrayType({items: new JsonPrimitiveType()})],
+    ])('should allow %s', (value: any, schema: JsonArrayType) => {
         function validate(): void {
-            new JsonArrayType().validate(value);
+            schema.validate(value);
         }
 
         expect(validate).not.toThrowError(Error);
     });
 
     test.each([
-        [null, 'Expected a JSON array at path \'/\', actual null.'],
-        ['foo', 'Expected a JSON array at path \'/\', actual string.'],
-        [true, 'Expected a JSON array at path \'/\', actual boolean.'],
-        [1, 'Expected a JSON array at path \'/\', actual integer.'],
-        [1.23, 'Expected a JSON array at path \'/\', actual number.'],
-        [new Object('foo'), 'Expected a JSON array at path \'/\', actual String.'],
-        [{foo: 1}, 'Expected a JSON array at path \'/\', actual Object.'],
-        [{bar: 2}, 'Expected a JSON array at path \'/\', actual Object.'],
-    ])('should not allow %s', (value: any, message: string) => {
+        [null, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual null'],
+        ['foo', new JsonArrayType(), 'Expected a JSON array at path \'/\', actual string'],
+        [true, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual boolean'],
+        [1, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual integer'],
+        [1.23, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual number'],
+        [new Object('foo'), new JsonArrayType(), 'Expected a JSON array at path \'/\', actual String'],
+        [{foo: 1}, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual Object'],
+        [{bar: 2}, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual Object'],
+        [
+            ['foo', {bar: 1}],
+            new JsonArrayType({items: new JsonPrimitiveType()}),
+            'Expected a JSON primitive at path \'/1\', actual Object.',
+        ],
+    ])('should not allow %s', (value: any, schema: JsonArrayType, message: string) => {
         function validate(): void {
-            new JsonArrayType().validate(value);
+            schema.validate(value);
         }
 
         expect(validate).toThrow(Error);
@@ -67,28 +73,34 @@ describe('A JSON object type', () => {
     });
 
     test.each([
-        [{foo: 1}],
-        [{bar: 2}],
-    ])('should allow %s', (value: any) => {
+        [{foo: 1}, new JsonObjectType()],
+        [{bar: 2}, new JsonObjectType()],
+        [{bar: 2}, new JsonObjectType({properties: new JsonPrimitiveType()})],
+    ])('should allow %s', (value: any, schema: JsonObjectType) => {
         function validate(): void {
-            new JsonObjectType().validate(value);
+            schema.validate(value);
         }
 
         expect(validate).not.toThrowError(Error);
     });
 
     test.each([
-        [null, 'Expected a JSON object at path \'/\', actual null.'],
-        ['foo', 'Expected a JSON object at path \'/\', actual string.'],
-        [true, 'Expected a JSON object at path \'/\', actual boolean.'],
-        [1, 'Expected a JSON object at path \'/\', actual integer.'],
-        [1.23, 'Expected a JSON object at path \'/\', actual number.'],
-        [['foo', 'bar'], 'Expected a JSON object at path \'/\', actual array.'],
-        [['foo', {bar: 1}], 'Expected a JSON object at path \'/\', actual array.'],
-        [new Object('foo'), 'Expected a JSON object at path \'/\', actual String.'],
-    ])('should not allow %s', (value: any, message: string) => {
+        [null, new JsonObjectType(), 'Expected a JSON object at path \'/\', actual null.'],
+        ['foo', new JsonObjectType(), 'Expected a JSON object at path \'/\', actual string.'],
+        [true, new JsonObjectType(), 'Expected a JSON object at path \'/\', actual boolean.'],
+        [1, new JsonObjectType(), 'Expected a JSON object at path \'/\', actual integer.'],
+        [1.23, new JsonObjectType(), 'Expected a JSON object at path \'/\', actual number.'],
+        [['foo', 'bar'], new JsonObjectType(), 'Expected a JSON object at path \'/\', actual array.'],
+        [['foo', {bar: 1}], new JsonObjectType(), 'Expected a JSON object at path \'/\', actual array.'],
+        [new Object('foo'), new JsonObjectType(), 'Expected a JSON object at path \'/\', actual String.'],
+        [
+            {foo: ['bar']},
+            new JsonObjectType({properties: new JsonPrimitiveType()}),
+            'Expected a JSON primitive at path \'/foo\', actual array.',
+        ],
+    ])('should not allow %s', (value: any, schema: JsonObjectType, message: string) => {
         function validate(): void {
-            expect((): void => new JsonObjectType().validate(value)).not.toThrowError(Error);
+            schema.validate(value);
         }
 
         expect(validate).toThrow(Error);
