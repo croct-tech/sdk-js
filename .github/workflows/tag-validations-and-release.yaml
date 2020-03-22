@@ -1,11 +1,11 @@
 name: Validate Tag
 
 on:
-  create:
+  push:
     tags:
-      - '*'
-    branch-ignore:
-      - '*'
+      - '**'
+    branches-ignore:
+      - '**'
 
 env:
   BOOTSTRAP_ENDPOINT: https://main.test.croct.tech/client/web/bootstrap

@@ -3,9 +3,9 @@ name: Validations
 on:
   push:
     branches:
-      - '*'
+      - '**'
     tags-ignore:
-      - '*'
+      - '**'
 
 jobs:
   security-checks:
