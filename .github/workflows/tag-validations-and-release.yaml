@@ -113,12 +113,14 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           github-repository: ${{ github.repository }}
+      - name: Update copyright
+        run: sed -i -E "s~© [0-9]{4}\-[0-9]{4}~© 2015\-$(date '+%Y')~" -i README.md
       - uses: autosuite/autocommit@master
         with:
           name: Croct Bot
           email: bot@croct.com
           commit-message: |-
-            Update changelog to include changes since last version
+            Update docs to reflect changes since last version
       - uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
