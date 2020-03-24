@@ -1,7 +1,7 @@
 ---
 name: "🚀 Feature request"
 about: "I have a suggestion (and may want to implement it 🙂)!"
-labels: 'feature-request'
+labels: feature-request
 ---
 
 **Is your feature request related to a problem? Please describe.**
