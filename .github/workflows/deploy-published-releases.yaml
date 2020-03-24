@@ -32,12 +32,12 @@ jobs:
 
       - name: Build bundles
         run: |-
-          node_modules/.bin/rollup -c rollup.config.js \
+          sed -i -e "s~\"version\": \"0.0.0-dev\"~\"version\": \"${GITHUB_REF##*/}\"~" package.json
+          npx rollup -c rollup.config.js \
             --config-bootstrap-endpoint ${BOOTSTRAP_ENDPOINT} \
             --config-tracker-endpoint ${TRACKER_ENDPOINT} \
             --config-evaluation-endpoint ${EVALUATION_ENDPOINT}
           rm -r build/declarations
-          sed -i -e "s~\"version\": \"0.0.0-dev\"~\"version\": \"${GITHUB_REF##*/}\"~" package.json
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
