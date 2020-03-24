@@ -47,7 +47,9 @@ export default class QueuedChannel<T> implements OutputChannel<T> {
 
         this.enqueue(message);
 
-        return this.pending.then(() => this.channel.publish(message).then(this.dequeue.bind(this)));
+        this.pending = this.pending.then(() => this.channel.publish(message).then(this.dequeue.bind(this)));
+
+        return this.pending;
     }
 
     private enqueue(message: T): void {

@@ -48,6 +48,40 @@ describe('A queued channel', () => {
         expect(outputChannel.publish).not.toHaveBeenCalled();
     });
 
+    test('should publish messages in order', async () => {
+        const pending: {(): void}[] = [];
+
+        const outputChannel: OutputChannel<string> = {
+            close: jest.fn().mockResolvedValue(undefined),
+            publish: jest.fn(() => new Promise(resolve => pending.push(resolve))),
+        };
+        const channel = new QueuedChannel(outputChannel, new InMemoryQueue());
+
+        const firstPromise = channel.publish('foo');
+        const secondPromise = channel.publish('bar');
+
+        // Wait a few milliseconds to ensure that both messages
+        // would have been delivered if they were not correctly queued
+        await new Promise(resolve => window.setTimeout(resolve, 30));
+
+        expect(outputChannel.publish).toHaveBeenCalledWith('foo');
+        expect(outputChannel.publish).not.toHaveBeenCalledWith('bar');
+
+        expect(pending).toHaveLength(1);
+
+        pending[0]();
+
+        await expect(firstPromise).resolves.toBeUndefined();
+
+        expect(outputChannel.publish).toHaveBeenCalledWith('bar');
+
+        expect(pending).toHaveLength(2);
+
+        pending[1]();
+
+        await expect(secondPromise).resolves.toBeUndefined();
+    });
+
     test('should fail to flush messages if the channel is closed', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
