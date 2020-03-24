@@ -117,7 +117,7 @@ jobs:
             Update docs to reflect changes since last version
       - uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.BOT_TOKEN }}
 
       - name: Release
         uses: docker://antonyurchenko/git-release:v3
