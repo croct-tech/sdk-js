@@ -1,17 +1,20 @@
 ---
-name: "🚀 Feature request"
-about: "I have a suggestion (and may want to implement it 🙂)!"
-labels: feature-request
+name: "✨ Feature request"
+about: "Suggest an idea for this project"
+labels: enhancement
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## ✨ Feature request
+Please provide a brief explanation of the feature.
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+### Motivation
+Please share the motivation for the new feature, and what problem it is solving.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+### Example
+If the proposal involves a new or changed API, please include a basic code example.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+### Alternatives
+Please describe the alternative solutions or features you've considered.
+
+### Additional context
+Please provide any other context or screenshots about the feature request here.
