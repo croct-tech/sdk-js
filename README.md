@@ -3,7 +3,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/c44df78a3ed891af11bb/maintainability)](https://codeclimate.com/repos/5e7251b3172af05fe9000e27/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c44df78a3ed891af11bb/test_coverage)](https://codeclimate.com/repos/5e7251b3172af05fe9000e27/test_coverage)
 
-
+aaaaasdasd
 The official Croct SDK for JavaScript, available for browsers and mobile devices.
 
 # Copyright Notice
