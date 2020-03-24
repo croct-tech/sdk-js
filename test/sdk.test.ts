@@ -5,7 +5,7 @@ import NullLogger from '../src/logger/nullLogger';
 import Token from '../src/token';
 import TabEventEmulator from './utils/tabEventEmulator';
 import Logger from '../src/logger';
-import {NothingChanged} from '../src/event';
+import {BeaconPayload, NothingChanged} from '../src/event';
 import {VERSION} from '../src';
 
 jest.mock('../src/constants', () => ({
@@ -237,6 +237,74 @@ describe('A SDK', () => {
         }));
     });
 
+    test('should ensure that events are delivered one at a time and in order', async () => {
+        fetchMock.mock({
+            method: 'HEAD',
+            matcher: configuration.bootstrapEndpointUrl,
+            response: '',
+        });
+
+        const server = new WS(`${configuration.trackerEndpointUrl}/${configuration.appId}`, {jsonProtocol: true});
+        const receiptIds: string[] = [];
+
+        server.on('connection', socket => {
+            socket.on('message', message => {
+                const {receiptId} = JSON.parse(message as unknown as string);
+
+                receiptIds.push(receiptId);
+            });
+        });
+
+        const sdk = Sdk.init(configuration);
+
+        const firstEvent: BeaconPayload = {
+            type: 'nothingChanged',
+            sinceTime: Date.now() + 1,
+        };
+
+        const firstPromise = sdk.tracker.track(firstEvent);
+
+        const secondEvent: BeaconPayload = {
+            type: 'nothingChanged',
+            sinceTime: Date.now() + 1,
+        };
+
+        const secondPromise = sdk.tracker.track(secondEvent);
+
+        await expect(server).toReceiveMessage(
+            expect.objectContaining({
+                payload: firstEvent,
+            }),
+        );
+
+        // Wait a few milliseconds more to ensure no other message was sent
+        await new Promise(resolve => window.setTimeout(resolve, 30));
+
+        expect(receiptIds.length).toBe(1);
+
+        server.send({
+            receiptId: receiptIds[0],
+            violations: [],
+        });
+
+        await expect(firstPromise).resolves.toBe(firstEvent);
+
+        await expect(server).toReceiveMessage(
+            expect.objectContaining({
+                payload: secondEvent,
+            }),
+        );
+
+        expect(receiptIds.length).toBe(2);
+
+        server.send({
+            receiptId: receiptIds[1],
+            violations: [],
+        });
+
+        await expect(secondPromise).resolves.toBe(secondEvent);
+    });
+
     test('should configure the evaluator', async () => {
         const expression = '1 + 2';
         const result = 3;
@@ -256,7 +324,7 @@ describe('A SDK', () => {
         await expect(promise).resolves.toBe(result);
     });
 
-    test('should clean up resources when closed', async () => {
+    test('should clean up resources on close', async () => {
         fetchMock.mock({
             method: 'HEAD',
             matcher: configuration.bootstrapEndpointUrl,
