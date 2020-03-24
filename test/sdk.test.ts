@@ -205,10 +205,13 @@ describe('A SDK', () => {
             });
         });
 
+        const metaName = 'foo';
+        const metaValue = 'bar';
+
         const sdk = Sdk.init({
             ...configuration,
             eventMetadata: {
-                foo: 'bar',
+                [metaName]: metaValue,
             },
         });
 
@@ -228,7 +231,7 @@ describe('A SDK', () => {
             context: expect.objectContaining({
                 metadata: {
                     sdkVersion: VERSION,
-                    'custom.foo': 'bar',
+                    [`custom_${metaName}`]: metaValue,
                 },
             }),
         }));

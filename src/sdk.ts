@@ -51,7 +51,7 @@ export default class Sdk {
         };
 
         for (const metadata of Object.keys(customMetadata)) {
-            eventMetadata[`custom.${metadata}`] = customMetadata[metadata];
+            eventMetadata[`custom_${metadata}`] = customMetadata[metadata];
         }
 
         const container = new Container({
