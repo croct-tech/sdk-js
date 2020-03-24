@@ -55,9 +55,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-18.04
-    needs:
-      - security-checks
-      - validate
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
@@ -78,9 +75,6 @@ jobs:
 
   test:
     runs-on: ubuntu-18.04
-    needs:
-      - security-checks
-      - validate
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
