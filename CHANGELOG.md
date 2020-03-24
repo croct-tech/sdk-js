@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.0.1-alpha2](https://github.com/croct-tech/sdk-js/tree/0.0.1-alpha2) (2020-03-24)
+
+[Full Changelog](https://github.com/croct-tech/sdk-js/compare/0.0.1-alpha1...0.0.1-alpha2)
+
+**Implemented enhancements:**
+
+- Change copyright job name and changelog commit message [\#8](https://github.com/croct-tech/sdk-js/pull/8) ([Fryuni](https://github.com/Fryuni))
+- Narrow types allowed by operation scheme [\#5](https://github.com/croct-tech/sdk-js/pull/5) ([amorimjuliana](https://github.com/amorimjuliana))
+- Improve support for JSON validation [\#4](https://github.com/croct-tech/sdk-js/pull/4) ([amorimjuliana](https://github.com/amorimjuliana))
+- Reduce cognitive complexity of pointer regex [\#3](https://github.com/croct-tech/sdk-js/pull/3) ([amorimjuliana](https://github.com/amorimjuliana))
+- Extracts out pointer schema into a new format and add tests for identifier format [\#2](https://github.com/croct-tech/sdk-js/pull/2) ([amorimjuliana](https://github.com/amorimjuliana))
+
+**Fixed bugs:**
+
+- Fix build to use the correct package version [\#9](https://github.com/croct-tech/sdk-js/pull/9) ([Fryuni](https://github.com/Fryuni))
+- Use underline as the custom metadata separator [\#7](https://github.com/croct-tech/sdk-js/pull/7) ([marcospassos](https://github.com/marcospassos))
+
+**Merged pull requests:**
+
+- Disable Github workflow on branches [\#6](https://github.com/croct-tech/sdk-js/pull/6) ([Fryuni](https://github.com/Fryuni))
+
 ## [0.0.1-alpha1](https://github.com/croct-tech/sdk-js/tree/0.0.1-alpha1) (2020-03-20)
 
 [Full Changelog](https://github.com/croct-tech/sdk-js/compare/618c1b9870f552ef943d1d32767263f1951e0eaf...0.0.1-alpha1)
