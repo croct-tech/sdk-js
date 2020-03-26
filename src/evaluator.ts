@@ -37,7 +37,7 @@ export type EvaluationOptions = {
 }
 
 export enum EvaluationErrorType {
-    TIMEOUT = 'https://croct.help/api/evaluation/timeout',
+    TIMEOUT = 'https://croct.help/api/evaluation#timeout',
     UNEXPECTED_ERROR = 'https://croct.help/api/evaluation#unexpected-error',
     INVALID_EXPRESSION = 'https://croct.help/api/evaluation#invalid-expression',
     TOO_COMPLEX_EXPRESSION = 'https://croct.help/api/evaluation#too-complex-expression',
