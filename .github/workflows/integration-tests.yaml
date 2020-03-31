@@ -73,5 +73,5 @@ jobs:
           working-directory: integration
           record: true
           parallel: true
-          group: ${{ matrix.browser }}-windows-${{ matrix.imageTag }}
+          group: ${{ matrix.browser }}-windows
           browser: ${{ matrix.browser }}
