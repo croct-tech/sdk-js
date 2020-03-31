@@ -27,7 +27,7 @@ class TestBench {
                 // @ts-ignore
                 cy.stub(win, 'WebSocket', (url) => new WebSocket(url));
             },
-            timeout: 5000,
+            timeout: 50000,
         })
             .wait(1000, {log: false})
             .window()
