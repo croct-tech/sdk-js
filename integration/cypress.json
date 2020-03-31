@@ -1,4 +1,6 @@
 {
   "testFiles": "**/*.{feature,features}",
-  "projectId": "4sicbm"
+  "blacklistHosts": ["*fonts.googleapis.com"],
+  "projectId": "4sicbm",
+  "waitForAnimations": true
 }

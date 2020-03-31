@@ -1,13 +1,13 @@
 import { WebSocket } from 'mock-socket';
 
 // const BASE_TEST_BENCH_URL = './index.html';
-const BASE_TEST_BENCH_URL = 'https://cdn.test.croct.tech/playground/master/index.html?appId=ac88a73c-4387-4a45-8d2d-236398bda7d9';
+const BASE_TEST_BENCH_URL = 'https://cdn.test.croct.tech/playground/master/index.html?';
 
 
 class TestBench {
-    start() {
+    start(appId: string) {
         cy.visit({
-            url: BASE_TEST_BENCH_URL,
+            url: `${BASE_TEST_BENCH_URL}&appId=${appId}`,
             onBeforeLoad: (win: Window) => {
                 const fetchStub = cy.stub(win, 'fetch').as('fetchStub');
                 fetchStub

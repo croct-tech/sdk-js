@@ -1,3 +1,4 @@
+import { After } from 'cypress-cucumber-preprocessor/steps';
 import { Server, ServerOptions } from 'mock-socket';
 
 
@@ -17,12 +18,14 @@ export function rejectAllMessages(msg: ReceiptMessage): ReceiptMessage {
     };
 }
 
-class WebSocketServer extends Server {
+const WebBridgeEndpoint = 'wss://main.test.croct.tech/client/web/connect';
+
+export class WebBridgeServer extends Server {
     messages: any[];
     private answerer?: (message: any) => any = acceptAllMessages;
 
-    constructor(url: string, options?: ServerOptions) {
-        super(url, options);
+    constructor(appId: string, options?: ServerOptions) {
+        super(`${WebBridgeEndpoint}/${appId}`, options);
         this.messages = [];
         this.on('connection', socket => {
             socket.on('message',
@@ -31,6 +34,7 @@ class WebSocketServer extends Server {
                     JSON.parse(data.toString()),
                 ));
         });
+        After((done) => this.stop(done));
     }
 
     get messagesByEvent(): { [k: string]: any[] } {
@@ -50,13 +54,10 @@ class WebSocketServer extends Server {
     }
 
     private receiveData(socket: WebSocket, message: ReceiptMessage) {
+        console.log(`Received message: ${JSON.stringify(message)}`)
         this.messages.push(message);
         if (this.answerer !== undefined) {
             socket.send(JSON.stringify(this.answerer(message)));
         }
     }
 }
-
-export const WebBridgeServer = new WebSocketServer(
-    'wss://main.test.croct.tech/client/web/connect/ac88a73c-4387-4a45-8d2d-236398bda7d9',
-);

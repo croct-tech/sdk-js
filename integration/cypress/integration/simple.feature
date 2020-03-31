@@ -4,7 +4,6 @@ Feature: Basic test
     Given a compatible bridge
     And I'm at the test bench
 
-  @focus
   Scenario: It doesn't crash
     When nothing is done for 1 seconds
     Then client is bootstrapped

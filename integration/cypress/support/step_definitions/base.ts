@@ -2,18 +2,24 @@ import { Then, When } from 'cypress-cucumber-preprocessor/steps';
 import { WebBridgeServer } from '../mocks/websocket';
 
 
-When(/^nothing is done for (\d+) seconds$/i, (seconds: string) => {
-    cy.tick(parseInt(seconds, 10) * 1000)
+When('nothing is done for {int} seconds', (seconds: number) => {
+    cy.tick(seconds * 1000)
         .wait(1000, {log: false});
 });
 
 const messageTypeCounter: { [k: string]: number } = {};
 
-Then(/^(\d+) (\w+) events? is emitted$/i, (amount: string, eventName: string) => {
-    const expectedAmount = (messageTypeCounter[eventName] ?? 0) + parseInt(amount, 10);
-    expect(WebBridgeServer.messagesByEvent[eventName]).to.have.lengthOf(expectedAmount);
+Then('{int} {word} events are emitted', eventsEmitted);
+Then('1 {word} event is emitted', (eventName: string) => eventsEmitted(1, eventName));
+
+function eventsEmitted(amount: number, eventName: string) {
+    const expectedAmount = (messageTypeCounter[eventName] ?? 0) + amount;
+    cy.get<WebBridgeServer>('@server')
+        .then(server => server.messagesByEvent)
+        .its(eventName)
+        .should('have.lengthOf', expectedAmount);
     messageTypeCounter[eventName] = expectedAmount;
-});
+}
 
 Then('client is bootstrapped', () => {
     cy.get('@fetchStub')
