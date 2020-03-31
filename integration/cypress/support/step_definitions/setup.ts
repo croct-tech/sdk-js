@@ -1,5 +1,5 @@
 import { Before, Given } from 'cypress-cucumber-preprocessor/steps';
-import TestBench from '../connections/playground';
+import TestBench from '../connections/testBench';
 import { acceptAllMessages, rejectAllMessages, WebBridgeServer } from '../mocks/websocket';
 
 Before(() => {
@@ -18,6 +18,6 @@ Given('an ignoring bridge', () => {
     WebBridgeServer.setAnswerer(undefined);
 });
 
-Given('I\'m at the test bench', () => {
+Given(/I'm at the test bench/, () => {
     TestBench.start();
 });

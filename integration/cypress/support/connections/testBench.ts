@@ -25,11 +25,14 @@ class TestBench {
                         ok: true,
                     } as Response);
                 // @ts-ignore
-                cy.stub(win, 'WebSocket', (url) => new WebSocket(url));
+                cy.stub(win, 'WebSocket', (url) => {
+                    const socket = new WebSocket(url);
+                    cy.spy(socket, 'send');
+                    return socket;
+                });
             },
             timeout: 50000,
         })
-            .wait(1000, {log: false})
             .window()
             .its('playgroundReady')
             .should('be.true');

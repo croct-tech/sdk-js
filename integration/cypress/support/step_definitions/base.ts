@@ -3,7 +3,8 @@ import { WebBridgeServer } from '../mocks/websocket';
 
 
 When(/^nothing is done for (\d+) seconds$/i, (seconds: string) => {
-    cy.tick(parseInt(seconds, 10) * 1000);
+    cy.tick(parseInt(seconds, 10) * 1000)
+        .wait(1000, {log: false});
 });
 
 const messageTypeCounter: { [k: string]: number } = {};
