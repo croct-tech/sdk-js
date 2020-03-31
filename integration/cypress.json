@@ -1,0 +1,4 @@
+{
+  "testFiles": "**/*.{feature,features}",
+  "projectId": "4sicbm"
+}
