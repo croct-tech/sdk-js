@@ -1,0 +1,77 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
+
+jobs:
+  chrome-versions:
+    runs-on: ubuntu-16.04
+    strategy:
+      matrix:
+        imageTag:
+          - node12.16.1-chrome80-ff73
+          - node12.14.0-chrome79-ff71
+          - node12.13.0-chrome78-ff70
+    container:
+      image: cypress/browsers:${{ matrix.imageTag }}
+    steps:
+      - uses: actions/checkout@v1
+      - uses: cypress-io/github-action@v1
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          working-directory: integration
+          record: true
+          parallel: true
+          group: chrome-linux-${{ matrix.imageTag }}
+          browser: chrome
+
+  firefox-versions:
+    runs-on: ubuntu-16.04
+    strategy:
+      matrix:
+        imageTag:
+          - node12.16.1-chrome80-ff73
+          - node12.14.0-chrome79-ff71
+          - node12.13.0-chrome78-ff70
+    container:
+      image: cypress/browsers:${{ matrix.imageTag }}
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v1
+      - uses: cypress-io/github-action@v1
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          working-directory: integration
+          record: true
+          parallel: true
+          group: firefox-linux-${{ matrix.imageTag }}
+          browser: firefox
+
+  windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        browser:
+          - firefox
+          - chrome
+          - edge
+    steps:
+      - uses: actions/checkout@v1
+      - uses: cypress-io/github-action@v1
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          working-directory: integration
+          record: true
+          parallel: true
+          group: ${{ matrix.browser }}-windows-${{ matrix.imageTag }}
+          browser: ${{ matrix.browser }}
