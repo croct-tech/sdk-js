@@ -5,17 +5,24 @@ interface ReceiptMessage {
     receiptId: string
 }
 
-const defaultAnswerer = (msg: ReceiptMessage): ReceiptMessage => ({
-    receiptId: msg.receiptId,
-});
+export function acceptAllMessages(msg: ReceiptMessage): ReceiptMessage {
+    return {
+        receiptId: msg.receiptId,
+    };
+}
+
+export function rejectAllMessages(msg: ReceiptMessage): ReceiptMessage {
+    return {
+        receiptId: msg.receiptId,
+    };
+}
 
 class WebSocketServer extends Server {
     messages: any[];
-    private answerer: (message: any) => any = defaultAnswerer;
+    private answerer?: (message: any) => any = acceptAllMessages;
 
     constructor(url: string, options?: ServerOptions) {
         super(url, options);
-        console.log(`Server URL: ${(this as any).url}`);
         this.messages = [];
         this.on('connection', socket => {
             socket.on('message',
@@ -38,15 +45,15 @@ class WebSocketServer extends Server {
         }, {});
     }
 
-    receiveData(socket: WebSocket, message: ReceiptMessage) {
+    setAnswerer(answerer?: (message: any) => any) {
+        this.answerer = answerer;
+    }
+
+    private receiveData(socket: WebSocket, message: ReceiptMessage) {
         this.messages.push(message);
         if (this.answerer !== undefined) {
             socket.send(JSON.stringify(this.answerer(message)));
         }
-    }
-
-    setAnswerer(answerer: (message: any) => any) {
-        this.answerer = answerer;
     }
 }
 

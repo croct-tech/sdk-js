@@ -28,7 +28,11 @@ class TestBench {
                 cy.stub(win, 'WebSocket', (url) => new WebSocket(url));
             },
             timeout: 5000,
-        }).wait(1000);
+        })
+            .wait(1000, {log: false})
+            .window()
+            .its('playgroundReady')
+            .should('be.true');
     }
 }
 
