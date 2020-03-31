@@ -9,6 +9,7 @@ on:
 
 jobs:
   chrome-versions:
+    needs: [windows]
     runs-on: ubuntu-16.04
     strategy:
       matrix:
@@ -32,6 +33,7 @@ jobs:
           browser: chrome
 
   firefox-versions:
+    needs: [windows]
     runs-on: ubuntu-16.04
     strategy:
       matrix:
