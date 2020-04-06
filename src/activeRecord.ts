@@ -26,11 +26,23 @@ const operationSchema = {
 export default abstract class ActiveRecord<T extends Event> {
     private readonly operations: Operation[] = [];
 
-    public set(property: string, value: JsonValue): this {
+    public set(value: JsonValue): this;
+
+    public set(property: string, value: JsonValue): this;
+
+    public set(propertyOrValue: string | JsonValue, value?: JsonValue): this {
+        if (typeof propertyOrValue === 'string') {
+            return this.pushOperation({
+                type: 'set',
+                path: propertyOrValue,
+                value: value as JsonValue,
+            });
+        }
+
         return this.pushOperation({
             type: 'set',
-            path: property,
-            value: value,
+            path: '.',
+            value: propertyOrValue,
         });
     }
 
@@ -50,11 +62,23 @@ export default abstract class ActiveRecord<T extends Event> {
         });
     }
 
-    public merge(property: string, value: JsonObject | JsonArray): this {
+    public merge(value: JsonObject | JsonArray): this;
+
+    public merge(property: string, value: JsonObject | JsonArray): this;
+
+    public merge(propertyOrValue: string | JsonObject | JsonArray, value?: JsonObject | JsonArray): this {
+        if (typeof propertyOrValue === 'string') {
+            return this.pushOperation({
+                type: 'merge',
+                path: propertyOrValue,
+                value: value as JsonObject | JsonArray,
+            });
+        }
+
         return this.pushOperation({
             type: 'merge',
-            path: property,
-            value: value,
+            path: '.',
+            value: propertyOrValue,
         });
     }
 
@@ -98,7 +122,7 @@ export default abstract class ActiveRecord<T extends Event> {
         return this;
     }
 
-    public reset(): this {
+    protected reset(): this {
         this.operations.splice(0);
 
         return this;
