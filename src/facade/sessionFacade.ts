@@ -1,32 +1,14 @@
-import ActiveRecord from '../activeRecord';
 import Tracker from '../tracker';
-import {SessionAttributesChanged} from '../event';
+import SessionPatch from './sessionPatch';
 
-export default class SessionFacade extends ActiveRecord<SessionAttributesChanged> {
+export default class SessionFacade {
     private readonly tracker: Tracker;
 
     public constructor(tracker: Tracker) {
-        super();
-
         this.tracker = tracker;
     }
 
-    public save(): Promise<SessionAttributesChanged> {
-        if (!this.isDirty()) {
-            // Empty patch
-            return Promise.resolve({
-                type: 'sessionAttributesChanged',
-                patch: {operations: []},
-            });
-        }
-
-        const promise = this.tracker.track({
-            type: 'sessionAttributesChanged',
-            patch: this.buildPatch(),
-        });
-
-        this.reset();
-
-        return promise;
+    public edit(): SessionPatch {
+        return new SessionPatch(this.tracker);
     }
 }
