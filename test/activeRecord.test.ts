@@ -6,6 +6,10 @@ class TestRecord extends ActiveRecord<any> {
         return Promise.resolve(this);
     }
 
+    public reset(): this {
+        return super.reset();
+    }
+
     public buildPatch(): Patch {
         return super.buildPatch();
     }
@@ -18,10 +22,12 @@ class TestRecord extends ActiveRecord<any> {
 describe('An active record', () => {
     test('should build a patch', () => {
         const record = new TestRecord()
-            .set('a', '1')
+            .set('a', 1)
+            .set({a: 1})
             .add('b', '2')
             .combine('c', '3')
-            .merge('d', ['4'])
+            .merge('d', [4])
+            .merge({d: [4]})
             .increment('e', 5)
             .decrement('f', 6)
             .clear('g')
@@ -33,7 +39,12 @@ describe('An active record', () => {
                 {
                     type: 'set',
                     path: 'a',
-                    value: '1',
+                    value: 1,
+                },
+                {
+                    type: 'set',
+                    path: '.',
+                    value: {a: 1},
                 },
                 {
                     type: 'add',
@@ -48,7 +59,12 @@ describe('An active record', () => {
                 {
                     type: 'merge',
                     path: 'd',
-                    value: ['4'],
+                    value: [4],
+                },
+                {
+                    type: 'merge',
+                    path: '.',
+                    value: {d: [4]},
                 },
                 {
                     type: 'increment',
