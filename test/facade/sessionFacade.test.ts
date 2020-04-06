@@ -17,23 +17,12 @@ describe('A session facade', () => {
         jest.restoreAllMocks();
     });
 
-    test('should not track "sessionAttributesChanged" events with an empty patch', async () => {
-        const promise = sessionFacade.save();
-
-        const expectedEvent: SessionAttributesChanged = {
-            type: 'sessionAttributesChanged',
-            patch: {
-                operations: [],
-            },
-        };
-
-        await expect(promise).resolves.toEqual(expectedEvent);
-
-        expect(tracker.track).not.toHaveBeenCalled();
+    test('should always start a new patch', async () => {
+        expect(sessionFacade.edit()).not.toBe(sessionFacade.edit());
     });
 
-    test('should track "sessionAttributesChanged" events with a non-empty patch', async () => {
-        const promise = sessionFacade
+    test('should initialize the patch with the tracker', async () => {
+        const promise = sessionFacade.edit()
             .add('foo', 'bar')
             .save();
 

@@ -1,13 +1,10 @@
-import ActiveRecord from '../activeRecord';
 import Tracker from '../tracker';
-import {UserProfileChanged} from '../event';
+import UserPatch from './userPatch';
 
-export default class UserFacade extends ActiveRecord<UserProfileChanged> {
+export default class UserFacade {
     private readonly tracker: Tracker;
 
     public constructor(tracker: Tracker) {
-        super();
-
         this.tracker = tracker;
     }
 
@@ -19,22 +16,7 @@ export default class UserFacade extends ActiveRecord<UserProfileChanged> {
         return this.tracker.isUserAnonymous();
     }
 
-    public save(): Promise<UserProfileChanged> {
-        if (!this.isDirty()) {
-            // Empty patch
-            return Promise.resolve({
-                type: 'userProfileChanged',
-                patch: {operations: []},
-            });
-        }
-
-        const promise = this.tracker.track({
-            type: 'userProfileChanged',
-            patch: this.buildPatch(),
-        });
-
-        this.reset();
-
-        return promise;
+    public edit(): UserPatch {
+        return new UserPatch(this.tracker);
     }
 }

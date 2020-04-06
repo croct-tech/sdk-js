@@ -31,22 +31,12 @@ describe('A user facade', () => {
         expect(userFacade.isIdentified()).toBeTruthy();
     });
 
-    test('should not track "userProfileChanged" events with an empty patch', async () => {
-        const promise = userFacade.save();
-
-        const expectedEvent: UserProfileChanged = {
-            type: 'userProfileChanged',
-            patch: {
-                operations: [],
-            },
-        };
-
-        await expect(promise).resolves.toEqual(expectedEvent);
-        expect(tracker.track).not.toHaveBeenCalled();
+    test('should always start a new patch', async () => {
+        expect(userFacade.edit()).not.toBe(userFacade.edit());
     });
 
-    test('should track "userProfileChanged" events with a non-empty patch', async () => {
-        const promise = userFacade
+    test('should initialize the patch with the tracker', async () => {
+        const promise = userFacade.edit()
             .add('foo', 'bar')
             .save();
 
