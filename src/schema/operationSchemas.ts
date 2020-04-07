@@ -20,13 +20,15 @@ const complexMap = new JsonObjectType({
     properties: new UnionType(new JsonPrimitiveType(), simpleArray, simpleMap),
 });
 
-const value = new UnionType(new JsonPrimitiveType(), simpleArray, complexMap);
+const collectionValue = new UnionType(simpleArray, complexMap);
+
+const mixedValue = new UnionType(new JsonPrimitiveType(), simpleArray, complexMap);
 
 export const addOperation = new ObjectType({
     required: ['path', 'value'],
     properties: {
         path: pointer,
-        value: value,
+        value: mixedValue,
     },
 });
 
@@ -34,7 +36,7 @@ export const setOperation = new ObjectType({
     required: ['path', 'value'],
     properties: {
         path: pointer,
-        value: value,
+        value: mixedValue,
     },
 });
 
@@ -42,7 +44,7 @@ export const combineOperation = new ObjectType({
     required: ['path', 'value'],
     properties: {
         path: pointer,
-        value: value,
+        value: mixedValue,
     },
 });
 
@@ -50,7 +52,7 @@ export const mergeOperation = new ObjectType({
     required: ['path', 'value'],
     properties: {
         path: pointer,
-        value: new UnionType(simpleArray, complexMap),
+        value: collectionValue,
     },
 });
 
