@@ -1,4 +1,4 @@
-import {JsonArray, JsonObject, JsonValue} from './json';
+import {LenientJsonArray, LenientJsonObject, LenientJsonValue} from './json';
 
 interface AbstractOperation {
     type: string;
@@ -15,32 +15,32 @@ interface ClearOperation extends AbstractOperation {
 
 interface SetOperation extends AbstractOperation {
     type: 'set';
-    value: JsonValue;
+    value: LenientJsonValue;
 }
 
 interface AddOperation extends AbstractOperation {
     type: 'add';
-    value: JsonValue;
+    value: LenientJsonValue;
 }
 
 interface CombineOperation extends AbstractOperation {
     type: 'combine';
-    value: JsonValue;
+    value: LenientJsonValue;
 }
 
 interface MergeOperation extends AbstractOperation {
     type: 'merge';
-    value: JsonArray | JsonObject;
+    value: LenientJsonArray | LenientJsonObject;
 }
 
 interface IncrementOperation extends AbstractOperation {
     type: 'increment';
-    value: JsonValue;
+    value: LenientJsonValue;
 }
 
 interface DecrementOperation extends AbstractOperation {
     type: 'decrement';
-    value: JsonValue;
+    value: LenientJsonValue;
 }
 
 export type Operation =

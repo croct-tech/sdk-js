@@ -396,7 +396,7 @@ export default class Tracker {
     private createBeacon(event: Event, timestamp: number): Beacon {
         const token = this.context.getToken();
         const tab = this.context.getTab();
-        const metdata = this.options.eventMetadata;
+        const metadata = this.options.eventMetadata;
 
         return {
             timestamp: timestamp,
@@ -404,22 +404,40 @@ export default class Tracker {
             context: {
                 tabId: tab.id,
                 url: tab.location.href,
-                ...(Object.keys(metdata).length > 0 ? {metadata: metdata} : {}),
+                ...(Object.keys(metadata).length > 0 ? {metadata: metadata} : {}),
             },
             payload: this.createBeaconPayload(event),
         };
     }
 
     private createBeaconPayload(event: Event): BeaconPayload {
-        if (isIdentifiedUserEvent(event)) {
-            const {userId, ...payload} = event;
+        if (!isIdentifiedUserEvent(event)) {
+            return event;
+        }
+
+        if (event.type === 'userSignedUp' && typeof event.profile !== 'undefined') {
+            const {userId, profile, ...payload} = event;
 
             return {
                 ...payload,
                 externalUserId: userId,
+                patch: {
+                    operations: [
+                        {
+                            type: 'set',
+                            path: '.',
+                            value: profile,
+                        },
+                    ],
+                },
             };
         }
 
-        return event;
+        const {userId, ...payload} = event;
+
+        return {
+            ...payload,
+            externalUserId: userId,
+        };
     }
 }

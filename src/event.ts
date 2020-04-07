@@ -137,15 +137,40 @@ export interface UserProfileChanged extends AbstractEvent {
     patch: Patch;
 }
 
+type Primitive = null | string | number | boolean;
+type PrimitiveMap = {[member: string]: Primitive};
+type PrimitiveArray = Primitive[];
+
+type UserProfile = {
+    firstName?: string,
+    lastName?: string,
+    birthDate?: string,
+    gender?: Gender,
+    email?: string,
+    alternateEmail?: string,
+    phone?: string,
+    alternatePhone?: string,
+    address?: {
+        street?: string,
+        district?: string,
+        city?: string,
+        region?: string,
+        country?: string,
+        postalCode?: string,
+    },
+    avatar?: string,
+    company?: string,
+    companyUrl?: string,
+    jobTitle?: string,
+    custom?: {
+        [member: string]: Primitive | PrimitiveMap | PrimitiveArray,
+    },
+}
+
 export interface UserSignedUp extends AbstractEvent {
     type: 'userSignedUp';
     userId: string;
-    firstName?: string;
-    lastName?: string;
-    birthDate?: string;
-    gender?: Gender;
-    email?: string;
-    phone?: string;
+    profile?: UserProfile;
 }
 
 export interface UserSignedIn extends AbstractEvent {
@@ -323,8 +348,13 @@ export type EventContext = {
 
 export type BeaconPayload =
       Exclude<Event, IdentifiedUserEvent>
-    // Renames userId to externalUserId
-    | DistributiveOmit<IdentifiedUserEvent, 'userId'> & Record<'externalUserId', IdentifiedUserEvent['userId']>
+    // Renames "userId" to "externalUserId"
+    | DistributiveOmit<Exclude<IdentifiedUserEvent, UserSignedUp>, 'userId'>
+        & Record<'externalUserId', IdentifiedUserEvent['userId']>
+    // Renames "userId" to "externalUserId", remove "profile" and add "patch"
+    | Omit<UserSignedUp, 'userId' | 'profile'>
+        & Record<'externalUserId', IdentifiedUserEvent['userId']>
+        & {patch?: Patch}
 
 export type Beacon = {
     timestamp: number,

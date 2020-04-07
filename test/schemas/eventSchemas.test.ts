@@ -156,20 +156,7 @@ describe('The "userSignedUp payload schema', () => {
         }],
         [{
             userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
-            gender: 'female',
-        }],
-        [{
-            userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
-            gender: 'neutral',
-        }],
-        [{
-            userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
-            firstName: 'John',
-            lastName: 'Doe',
-            birthDate: '1960-06-22',
-            gender: 'male',
-            email: 'john@doe.com',
-            phone: '+5511987654321',
+            profile: {firstName: 'John'},
         }],
     ])('should allow %s', (value: object) => {
         function validate(): void {
@@ -193,44 +180,8 @@ describe('The "userSignedUp payload schema', () => {
             'Expected at most 254 characters at path \'/userId\', actual 255.',
         ],
         [
-            {userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392', firstName: ''},
-            'Expected at least 1 character at path \'/firstName\', actual 0.',
-        ],
-        [
-            {userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392', firstName: 'x'.repeat(51)},
-            'Expected at most 50 characters at path \'/firstName\', actual 51.',
-        ],
-        [
-            {userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392', lastName: ''},
-            'Expected at least 1 character at path \'/lastName\', actual 0.',
-        ],
-        [
-            {userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392', lastName: 'x'.repeat(51)},
-            'Expected at most 50 characters at path \'/lastName\', actual 51.',
-        ],
-        [
-            {userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392', birthDate: 'foo'},
-            'Invalid date format at path \'/birthDate\'.',
-        ],
-        [
-            {userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392', gender: 'foo'},
-            'Unexpected value at path \'/gender\', expecting \'male\', \'female\' or \'neutral\', found \'foo\'.',
-        ],
-        [
-            {userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392', email: ''},
-            'Expected at least 1 character at path \'/email\', actual 0.',
-        ],
-        [
-            {userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392', email: 'x'.repeat(255)},
-            'Expected at most 254 characters at path \'/email\', actual 255.',
-        ],
-        [
-            {userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392', phone: ''},
-            'Expected at least 1 character at path \'/phone\', actual 0.',
-        ],
-        [
-            {userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392', phone: 'x'.repeat(31)},
-            'Expected at most 30 characters at path \'/phone\', actual 31.',
+            {userId: 'username', profile: null},
+            'Expected value of type object at path \'/profile\', actual null.',
         ],
     ])('should not allow %s', (value: object, message: string) => {
         function validate(): void {
