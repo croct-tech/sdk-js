@@ -1,6 +1,7 @@
 import ObjectType from '../validation/objectType';
 import StringType from '../validation/stringType';
 import {cart, order, productDetails} from './ecommerceSchemas';
+import {userProfileSchema} from './userSchema';
 
 export const cartModified = new ObjectType({
     required: ['cart'],
@@ -48,27 +49,6 @@ export const userSignedUp = new ObjectType({
             minLength: 1,
             maxLength: 254,
         }),
-        firstName: new StringType({
-            minLength: 1,
-            maxLength: 50,
-        }),
-        lastName: new StringType({
-            minLength: 1,
-            maxLength: 50,
-        }),
-        birthDate: new StringType({
-            format: 'date',
-        }),
-        gender: new StringType({
-            enumeration: ['male', 'female', 'neutral'],
-        }),
-        email: new StringType({
-            minLength: 1,
-            maxLength: 254,
-        }),
-        phone: new StringType({
-            minLength: 1,
-            maxLength: 30,
-        }),
+        profile: userProfileSchema,
     },
 });
