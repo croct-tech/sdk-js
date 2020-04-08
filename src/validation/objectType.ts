@@ -30,7 +30,7 @@ export default class ObjectType implements TypeSchema {
     }
 
     public isValidType(value: unknown): value is object {
-        return typeof value === 'object' && value !== null && value.constructor === Object;
+        return Object.prototype.toString.call(value) === '[object Object]';
     }
 
     public validate(value: unknown, path: string[] = []): void {
