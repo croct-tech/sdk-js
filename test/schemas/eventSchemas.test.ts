@@ -49,7 +49,7 @@ describe('The "cartModified" payload schema', () => {
 
     test('should not allow %s', () => {
         function validate(): void {
-            expect((): void => cartModified.validate({})).not.toThrowError(Error);
+            expect((): void => cartModified.validate({})).not.toThrow(Error);
         }
 
         expect(validate).toThrow(Error);

@@ -169,7 +169,8 @@ describe('An evaluator', () => {
 
         const promise = evaluator.evaluate(expression);
 
-        await expect(promise).rejects.toThrowError(new EvaluationError(response));
+        await expect(promise).rejects.toThrow(EvaluationError);
+        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
     test.each([
@@ -216,7 +217,8 @@ describe('An evaluator', () => {
 
             const promise = evaluator.evaluate(expression);
 
-            await expect(promise).rejects.toThrowError(new ExpressionError(response));
+            await expect(promise).rejects.toThrow(ExpressionError);
+            await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
         },
     );
 
@@ -280,7 +282,8 @@ describe('An evaluator', () => {
 
         const promise = evaluator.evaluate(expression);
 
-        await expect(promise).rejects.toThrowError(new EvaluationError(response));
+        await expect(promise).rejects.toThrow(EvaluationError);
+        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 });
 

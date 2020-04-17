@@ -29,7 +29,7 @@ describe('An union type', () => {
             new UnionType(new StringType(), new NumberType()).validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([

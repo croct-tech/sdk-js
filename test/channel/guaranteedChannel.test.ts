@@ -54,7 +54,7 @@ describe('A guaranteed channel', () => {
         // Invalid acknowledge stamp
         sandboxChannel.notify('pong_stamp');
 
-        await expect(promise).rejects.toThrowError('Maximum confirmation time reached.');
+        await expect(promise).rejects.toThrow('Maximum confirmation time reached.');
     });
 
     test('should stop waiting for confirmation if the channel is closed in the meanwhile', async () => {

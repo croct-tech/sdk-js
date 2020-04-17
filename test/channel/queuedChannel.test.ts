@@ -101,7 +101,7 @@ describe('A queued channel', () => {
         };
         const channel = new QueuedChannel(outputChannel, new CapacityRestrictedQueue(new InMemoryQueue('foo'), 1));
 
-        await expect(channel.publish('bar')).rejects.toThrowError(new Error('The queue is full.'));
+        await expect(channel.publish('bar')).rejects.toThrow('The queue is full.');
     });
 
     test('should fail to publish messages if the channel is closed', async () => {

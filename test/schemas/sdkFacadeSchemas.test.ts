@@ -23,7 +23,7 @@ describe('The SDK facade configuration schema', () => {
             configurationSchema.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([

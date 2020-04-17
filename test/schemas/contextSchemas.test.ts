@@ -10,7 +10,7 @@ describe('The token schema', () => {
             tokenScopeSchema.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test('should not allow values other than the defined', () => {

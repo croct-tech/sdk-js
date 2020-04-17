@@ -75,7 +75,7 @@ export type ExpressionErrorResponse = ErrorResponse & {
 }
 
 export class ExpressionError extends EvaluationError<ExpressionErrorResponse> {
-    constructor(response: ExpressionErrorResponse) {
+    public constructor(response: ExpressionErrorResponse) {
         super(response);
 
         Object.setPrototypeOf(this, ExpressionError.prototype);
