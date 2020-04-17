@@ -60,6 +60,8 @@ export class EvaluationError<T extends ErrorResponse = ErrorResponse> extends Er
         super(response.title);
 
         this.response = response;
+
+        Object.setPrototypeOf(this, EvaluationError.prototype);
     }
 }
 
@@ -73,6 +75,11 @@ export type ExpressionErrorResponse = ErrorResponse & {
 }
 
 export class ExpressionError extends EvaluationError<ExpressionErrorResponse> {
+    constructor(response: ExpressionErrorResponse) {
+        super(response);
+
+        Object.setPrototypeOf(this, ExpressionError.prototype);
+    }
 }
 
 export default class Evaluator {
