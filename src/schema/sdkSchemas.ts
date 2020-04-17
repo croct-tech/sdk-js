@@ -13,7 +13,7 @@ export const eventMetadataSchema = new ObjectType({
         format: 'identifier',
     }),
     additionalProperties: new StringType({
-        maxLength: 100,
+        maxLength: 300,
     }),
 });
 

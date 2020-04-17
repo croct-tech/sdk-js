@@ -5,8 +5,7 @@ describe('The event metadata schema', () => {
         [{}],
         [{
             foo: 'bar',
-            _keyWith20Characters: 'stringValueWith100Characters______________'
-                + '__________________________________________________________',
+            _keyWith20Characters: 'x'.repeat(300),
             thirdKey: 'someValue',
             fourthKey: 'someValue',
             fifthKey: 'someValue',
@@ -34,10 +33,9 @@ describe('The event metadata schema', () => {
         ],
         [
             {
-                longValue: 'stringValueWith101Characters____________________'
-                    + '_____________________________________________________',
+                longValue: 'x'.repeat(301),
             },
-            'Expected at most 100 characters at path \'/longValue\', actual 101.',
+            'Expected at most 300 characters at path \'/longValue\', actual 301.',
         ],
         [
             {
