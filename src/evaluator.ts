@@ -101,9 +101,9 @@ export default class Evaluator {
             const response: ExpressionErrorResponse = {
                 title: 'The expression is too complex.',
                 status: 422, // Unprocessable Entity
-                type: EvaluationErrorType.UNEXPECTED_ERROR,
-                detail: `The expression must be at most ${Evaluator.MAX_EXPRESSION_LENGTH} characters length, `
-                    + `but it is ${length}.`,
+                type: EvaluationErrorType.TOO_COMPLEX_EXPRESSION,
+                detail: `The expression must be at most ${Evaluator.MAX_EXPRESSION_LENGTH} characters long, `
+                    + `but it is ${length} characters long.`,
                 errors: [{
                     cause: 'The expression is longer than expected.',
                     location: getLocation(expression, 0, Math.max(length - 1, 0)),
