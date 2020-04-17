@@ -233,7 +233,7 @@ describe('An evaluator', () => {
             status: 422,
             type: EvaluationErrorType.TOO_COMPLEX_EXPRESSION,
             detail: `The expression must be at most ${Evaluator.MAX_EXPRESSION_LENGTH} `
-                + `characters length, but it is ${length}.`,
+                + `characters long, but it is ${length} characters long.`,
             errors: [{
                 cause: 'The expression is longer than expected.',
                 location: {
@@ -243,9 +243,9 @@ describe('An evaluator', () => {
                         column: 0,
                     },
                     end: {
-                        index: length,
+                        index: length - 1,
                         line: 1,
-                        column: length,
+                        column: length - 1,
                     },
                 },
             }],
@@ -253,7 +253,8 @@ describe('An evaluator', () => {
 
         const promise = evaluator.evaluate('_'.repeat(length));
 
-        await expect(promise).rejects.toThrowError(new ExpressionError(response));
+        await expect(promise).rejects.toThrow(ExpressionError);
+        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
     test('should report unexpected errors when the cause of the evaluation failure is unknown', async () => {
