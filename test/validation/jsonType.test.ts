@@ -27,7 +27,7 @@ describe('A JSON array type', () => {
             schema.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -81,7 +81,7 @@ describe('A JSON object type', () => {
             schema.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -137,7 +137,7 @@ describe('A JSON primitive type', () => {
             new JsonPrimitiveType().validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -189,7 +189,7 @@ describe('A JSON value type', () => {
             new JsonType().validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([

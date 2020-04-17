@@ -16,7 +16,7 @@ describe('The event metadata schema', () => {
             eventMetadataSchema.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -91,7 +91,7 @@ describe('The SDK configuration schema', () => {
             configurationSchema.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([

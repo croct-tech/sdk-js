@@ -41,10 +41,10 @@ describe('A SDK', () => {
 
     test('should validate the specified configuration', () => {
         expect(() => Sdk.init('' as unknown as Configuration))
-            .toThrowError('The configuration must be a key-value map.');
+            .toThrow('The configuration must be a key-value map.');
 
         expect(() => Sdk.init({} as Configuration))
-            .toThrowError('Invalid configuration');
+            .toThrow('Invalid configuration');
     });
 
     test('should be initialized with the specified app ID', () => {

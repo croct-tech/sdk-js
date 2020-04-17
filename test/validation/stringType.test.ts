@@ -46,7 +46,7 @@ describe('A string type', () => {
             new StringType({format: format}).validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -101,7 +101,7 @@ describe('A string type', () => {
             type.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([

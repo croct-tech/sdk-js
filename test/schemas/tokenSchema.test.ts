@@ -36,7 +36,7 @@ describe('The token schema', () => {
             tokenSchema.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([

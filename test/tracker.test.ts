@@ -215,7 +215,7 @@ describe('A tracker', () => {
             sinceTime: 0,
         };
 
-        await expect(tracker.track(event)).rejects.toThrowError('The tracker is suspended.');
+        await expect(tracker.track(event)).rejects.toThrow('The tracker is suspended.');
 
         tracker.unsuspend();
 

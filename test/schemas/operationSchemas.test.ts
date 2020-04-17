@@ -44,7 +44,7 @@ describe('An add operation schema', () => {
             addOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -98,7 +98,7 @@ describe('A set operation schema', () => {
             setOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -152,7 +152,7 @@ describe('A combine operation schema', () => {
             combineOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -201,7 +201,7 @@ describe('A merge operation schema', () => {
             mergeOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -251,7 +251,7 @@ describe('An increment operation schema', () => {
             incrementOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -290,7 +290,7 @@ describe('A decrement operation schema', () => {
             decrementOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([

@@ -32,7 +32,7 @@ describe('A socket channel', () => {
 
         await channel.close();
 
-        await expect(channel.publish('bar')).rejects.toThrowError('Channel has been closed.');
+        await expect(channel.publish('bar')).rejects.toThrow('Channel has been closed.');
     });
 
     test('should fail to publish messages if an error occurs in the meanwhile', async () => {
@@ -187,7 +187,7 @@ describe('A socket channel', () => {
 
         const channel = new SocketChannel({url: url, connectionTimeout: 100});
 
-        await expect(channel.publish('timeout')).rejects.toThrowError('Maximum connection timeout reached.');
+        await expect(channel.publish('timeout')).rejects.toThrow('Maximum connection timeout reached.');
 
         expect(close).toHaveBeenCalledWith(1000, 'Maximum connection timeout reached.');
     });
@@ -199,7 +199,7 @@ describe('A socket channel', () => {
         await channel.publish('open connection');
         await server.connected;
 
-        await expect(channel.close()).rejects.toThrowError('Maximum close timeout reached.');
+        await expect(channel.close()).rejects.toThrow('Maximum close timeout reached.');
     });
 
     test('should close connection with error', async () => {
@@ -222,7 +222,7 @@ describe('A socket channel', () => {
 
         server.error();
 
-        await expect(channel.publish('foo')).rejects.toThrowError('Connection has been closed, reason');
+        await expect(channel.publish('foo')).rejects.toThrow('Connection has been closed, reason');
         await expect(logger.error).toHaveBeenCalledWith('Connection error.');
     });
 });

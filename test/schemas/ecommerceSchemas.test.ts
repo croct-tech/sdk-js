@@ -51,7 +51,7 @@ describe('The product details schema', () => {
             productDetails.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -157,7 +157,7 @@ describe('The cart item schema', () => {
             cartItem.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -304,7 +304,7 @@ describe('The cart schema', () => {
             cart.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -508,7 +508,7 @@ describe('The order item schema', () => {
             orderItem.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
@@ -680,7 +680,7 @@ describe('The order schema', () => {
             order.validate(value);
         }
 
-        expect(validate).not.toThrowError(Error);
+        expect(validate).not.toThrow(Error);
     });
 
     test.each([
