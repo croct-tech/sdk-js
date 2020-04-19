@@ -80,7 +80,6 @@ export const pageEventTypes = [
     'pageOpened',
 ] as const;
 
-
 export const tabEventTypes = [
     'tabOpened',
     'tabUrlChanged',

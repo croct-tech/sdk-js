@@ -57,6 +57,7 @@
     "no-bitwise": "off",
     "no-continue": "off",
     "no-dupe-class-members": "off",
+    "no-multiple-empty-lines": ["error", {"max":  1}],
     "no-plusplus": ["error", {"allowForLoopAfterthoughts": true}],
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     "no-unused-vars": "off",

@@ -31,7 +31,6 @@ function validateConfiguration(configuration: unknown): asserts configuration is
     }
 }
 
-
 export default class Sdk {
     private container: Container;
 
