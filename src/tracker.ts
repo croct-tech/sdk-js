@@ -75,7 +75,7 @@ export default class Tracker {
         this.trackInactivity = this.trackInactivity.bind(this);
     }
 
-    public get batch(): Promise<void> {
+    public get flushed(): Promise<void> {
         const suppress = (): void => {
             // suppress errors
         };

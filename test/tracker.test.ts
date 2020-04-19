@@ -1071,7 +1071,7 @@ describe('A tracker', () => {
         expect(channel.publish).toHaveBeenCalledTimes(1);
     });
 
-    test('should provide a callback that is called when the current event batch is processed', async () => {
+    test('should provide a callback that is called when the current pending events are flushed', async () => {
         const publish = jest.fn(event => new Promise<any>(resolve => setTimeout(() => resolve(event), 10)));
 
         const channel: OutputChannel<Beacon> = {
@@ -1087,7 +1087,7 @@ describe('A tracker', () => {
             channel: channel,
         });
 
-        await expect(tracker.batch).resolves.toBeUndefined();
+        await expect(tracker.flushed).resolves.toBeUndefined();
 
         const event: Event = {
             type: 'nothingChanged',
@@ -1096,7 +1096,7 @@ describe('A tracker', () => {
 
         const promise = tracker.track(event);
 
-        await expect(tracker.batch).resolves.toBeUndefined();
+        await expect(tracker.flushed).resolves.toBeUndefined();
 
         expect(publish).toBeCalledWith({
             timestamp: now,

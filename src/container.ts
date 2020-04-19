@@ -230,7 +230,7 @@ export class Container {
 
             this.tracker.suspend();
 
-            await this.tracker.batch;
+            await this.tracker.flushed;
         }
 
         delete this.context;
