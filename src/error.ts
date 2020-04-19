@@ -10,7 +10,6 @@ function extractMessage(error: unknown): string {
     return 'unknown error';
 }
 
-
 export function formatMessage(error: unknown): string {
     const message = extractMessage(error);
 
