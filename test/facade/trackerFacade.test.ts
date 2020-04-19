@@ -27,6 +27,21 @@ describe('A tracker facade', () => {
         expect(tracker.disable).toHaveBeenCalledTimes(1);
     });
 
+    test('should provide a callback that is called when the current pending events are flushed', async () => {
+        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const batch = jest.fn().mockResolvedValue(undefined);
+
+        Object.defineProperty(tracker, 'flushed', {
+            get: batch,
+        });
+
+        const trackerFacade = new TrackerFacade(tracker);
+
+        await expect(trackerFacade.flushed).resolves.toBeUndefined();
+
+        expect(batch).toHaveBeenCalledTimes(1);
+    });
+
     test.each<ExternalEvent[]>([
         [
             {

@@ -58,6 +58,10 @@ export default class TrackerFacade {
         this.tracker = tracker;
     }
 
+    public get flushed(): Promise<void> {
+        return this.tracker.flushed;
+    }
+
     public enable(): void {
         this.tracker.enable();
     }
