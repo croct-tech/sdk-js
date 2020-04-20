@@ -18,10 +18,7 @@ function isJsonObject(value: unknown): value is JsonObject {
 }
 
 function isPlainObject(value: unknown): value is object {
-    return typeof value === 'object' // exclude primitives
-        && value !== null // exclude nulls
-        && value.constructor === Object // exclude instances (Array, DOM, ...)
-        && Object.prototype.toString.call(value) === '[object Object]'; // exclude build-in like Math
+    return Object.prototype.toString.call(value) === '[object Object]';
 }
 
 type JsonObjectDefinition = {
