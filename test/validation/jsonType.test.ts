@@ -68,6 +68,7 @@ describe('A JSON object type', () => {
         [['foo', 'bar'], false],
         [{foo: 'bar'}, true],
         [new Object('foo'), false],
+        [new Object(), true],
     ])('should determine whether the type of a given value is valid', (value: any, expected: boolean) => {
         expect(new JsonObjectType().isValidType(value)).toBe(expected);
     });
