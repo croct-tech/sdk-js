@@ -65,6 +65,16 @@ export default class Sdk {
         const logger = container.getLogger();
         const {appId, tokenScope} = container.getConfiguration();
 
+        logger.debug(
+            '\n\n'
+            + ' ██████ ██████   ██████   ██████ ████████ \n'
+            + '██      ██   ██ ██    ██ ██         ██    \n'
+            + '██      ██████  ██    ██ ██         ██    \n'
+            + '██      ██   ██ ██    ██ ██         ██    \n'
+            + ' ██████ ██   ██  ██████   ██████    ██    \n'
+            + '\n',
+        );
+
         logger.info(`Initializing SDK v${VERSION}...`);
         logger.debug(`App ID: ${appId}`);
 
