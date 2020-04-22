@@ -6,9 +6,9 @@ on:
       - published
 
 env:
-  BOOTSTRAP_ENDPOINT: https://main.test.croct.tech/client/web/bootstrap
-  TRACKER_ENDPOINT: wss://main.test.croct.tech/client/web/connect
-  EVALUATION_ENDPOINT: https://main.test.croct.tech/client/web/evaluate
+  BOOTSTRAP_ENDPOINT: https://api.croct.io/client/web/bootstrap
+  TRACKER_ENDPOINT: wss://api.croct.io/client/web/connect
+  EVALUATION_ENDPOINT: https://api.croct.io/client/web/evaluate
 
 jobs:
   deploy:
