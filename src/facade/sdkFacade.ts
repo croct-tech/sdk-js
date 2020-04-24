@@ -19,6 +19,9 @@ export type Configuration = {
     token?: string,
     userId?: string,
     eventMetadata?: {[key: string]: string},
+    trackerEndpointUrl?: string,
+    evaluationEndpointUrl?: string,
+    bootstrapEndpointUrl?: string,
 };
 
 function validateConfiguration(configuration: unknown): asserts configuration is Configuration {

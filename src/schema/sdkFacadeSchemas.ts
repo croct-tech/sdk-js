@@ -22,5 +22,14 @@ export const configurationSchema = new ObjectType({
         token: new StringType({
             pattern: /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/,
         }),
+        trackerEndpointUrl: new StringType({
+            format: 'url',
+        }),
+        evaluationEndpointUrl: new StringType({
+            format: 'url',
+        }),
+        bootstrapEndpointUrl: new StringType({
+            format: 'url',
+        }),
     },
 });
