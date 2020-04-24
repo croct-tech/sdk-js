@@ -67,6 +67,9 @@ describe('A SDK facade', () => {
         SdkFacade.init({
             appId: appId,
             track: false,
+            trackerEndpointUrl: 'https://api.croct.io/tracker',
+            evaluationEndpointUrl: 'https://api.croct.io/evaluation',
+            bootstrapEndpointUrl: 'https://api.croct.io/bootstrap',
             debug: false,
             tokenScope: 'isolated',
             token: Token.issue(appId, 'c4r0l').toString(),
@@ -74,6 +77,9 @@ describe('A SDK facade', () => {
 
         expect(initialize).toBeCalledWith({
             appId: appId,
+            trackerEndpointUrl: 'https://api.croct.io/tracker',
+            evaluationEndpointUrl: 'https://api.croct.io/evaluation',
+            bootstrapEndpointUrl: 'https://api.croct.io/bootstrap',
             debug: false,
             tokenScope: 'isolated',
         });
