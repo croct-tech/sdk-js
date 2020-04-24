@@ -54,12 +54,12 @@ export default class Sdk {
         }
 
         const container = new Container({
-            evaluationEndpointUrl: EVALUATION_ENDPOINT_URL,
-            trackerEndpointUrl: TRACKER_ENDPOINT_URL,
-            bootstrapEndpointUrl: BOOTSTRAP_ENDPOINT_URL,
-            beaconQueueSize: 100,
-            eventMetadata: eventMetadata,
             ...containerConfiguration,
+            evaluationEndpointUrl: containerConfiguration.evaluationEndpointUrl ?? EVALUATION_ENDPOINT_URL,
+            trackerEndpointUrl: containerConfiguration.trackerEndpointUrl ?? TRACKER_ENDPOINT_URL,
+            bootstrapEndpointUrl: containerConfiguration.bootstrapEndpointUrl ?? BOOTSTRAP_ENDPOINT_URL,
+            beaconQueueSize: containerConfiguration.beaconQueueSize ?? 100,
+            eventMetadata: eventMetadata,
         });
 
         const logger = container.getLogger();

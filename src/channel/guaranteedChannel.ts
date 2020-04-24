@@ -40,11 +40,11 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
 
     public constructor({channel, logger, stamper, ...options}: Configuration<M, S>) {
         this.channel = channel;
-        this.logger = logger || new NullLogger();
+        this.logger = logger ?? new NullLogger();
         this.stamper = stamper;
         this.options = {
-            ackTimeout: 5000,
             ...options,
+            ackTimeout: options.ackTimeout ?? 5000,
         };
     }
 

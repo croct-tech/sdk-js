@@ -11,9 +11,9 @@ export default class ArrayType implements TypeSchema {
 
     public constructor(definition: Partial<ArrayDefinition> = {}) {
         this.definition = {
-            minItems: -1,
-            maxItems: -1,
             ...definition,
+            minItems: definition.minItems ?? -1,
+            maxItems: definition.maxItems ?? -1,
         };
     }
 

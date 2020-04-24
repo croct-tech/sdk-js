@@ -21,7 +21,7 @@ export default class RetryChannel<T> implements OutputChannel<T> {
     public constructor({channel, retryPolicy, logger}: Configuration<T>) {
         this.channel = channel;
         this.retryPolicy = retryPolicy;
-        this.logger = logger || new NullLogger();
+        this.logger = logger ?? new NullLogger();
     }
 
     public publish(message: T): Promise<void> {

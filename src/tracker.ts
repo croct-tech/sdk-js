@@ -58,11 +58,11 @@ export default class Tracker {
     ) {
         this.context = context;
         this.channel = channel;
-        this.logger = logger || new NullLogger();
+        this.logger = logger ?? new NullLogger();
         this.options = {
-            inactivityInterval: 30 * 1000,
-            eventMetadata: {},
             ...options,
+            inactivityInterval: options.inactivityInterval ?? 30 * 1000,
+            eventMetadata: options.eventMetadata ?? {},
         };
 
         this.enable = this.enable.bind(this);

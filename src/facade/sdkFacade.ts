@@ -62,9 +62,9 @@ export default class SdkFacade {
 
         const sdk = new SdkFacade(
             Sdk.init({
-                tokenScope: 'global',
-                debug: false,
                 ...containerConfiguration,
+                tokenScope: containerConfiguration.tokenScope ?? 'global',
+                debug: containerConfiguration.debug ?? false,
             }),
         );
 
