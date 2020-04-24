@@ -50,8 +50,8 @@ export default class BeaconSocketChannel implements DuplexChannel<string, Envelo
 
     public constructor(configuration: Configuration) {
         this.socketFactory = configuration.channelFactory;
-        this.logger = configuration.logger || new NullLogger();
-        this.loggerFactory = configuration.loggerFactory || ((): Logger => new NullLogger());
+        this.logger = configuration.logger ?? new NullLogger();
+        this.loggerFactory = configuration.loggerFactory ?? ((): Logger => new NullLogger());
         this.trackerEndpointUrl = configuration.trackerEndpointUrl;
         this.bootstrapEndpointUrl = configuration.bootstrapEndpointUrl;
         this.tokenParameter = configuration.tokenParameter;

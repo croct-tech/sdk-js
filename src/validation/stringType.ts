@@ -42,10 +42,10 @@ export default class StringType implements TypeSchema {
 
     public constructor(definition: Partial<StringDefinition> = {}) {
         this.definition = {
-            minLength: -1,
-            maxLength: -1,
-            enumeration: [],
             ...definition,
+            minLength: definition.minLength ?? -1,
+            maxLength: definition.maxLength ?? -1,
+            enumeration: definition.enumeration ?? [],
         };
     }
 

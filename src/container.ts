@@ -89,7 +89,7 @@ export class Container {
             context: this.getContext(),
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
-            eventMetadata: this.configuration.eventMetadata,
+            eventMetadata: this.configuration.eventMetadata || {},
         });
 
         const queue = this.getBeaconQueue();

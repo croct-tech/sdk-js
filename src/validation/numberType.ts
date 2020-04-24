@@ -11,10 +11,10 @@ export default class NumberType implements TypeSchema {
 
     public constructor(definition: Partial<NumberDefinition> = {}) {
         this.definition = {
-            integer: false,
-            minimum: Number.NEGATIVE_INFINITY,
-            maximum: Number.POSITIVE_INFINITY,
             ...definition,
+            integer: definition.integer ?? false,
+            minimum: definition.minimum ?? Number.NEGATIVE_INFINITY,
+            maximum: definition.maximum ?? Number.POSITIVE_INFINITY,
         };
     }
 

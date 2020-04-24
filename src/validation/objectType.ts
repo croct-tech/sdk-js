@@ -15,13 +15,13 @@ export default class ObjectType implements TypeSchema {
 
     public constructor(schema: Partial<ObjectDefinition> = {}) {
         this.definition = {
-            properties: {},
-            required: [],
-            additionalProperties: false,
-            propertyNames: new MixedSchema(),
-            minProperties: -1,
-            maxProperties: -1,
             ...schema,
+            properties: schema.properties ?? {},
+            required: schema.required ?? [],
+            additionalProperties: schema.additionalProperties ?? false,
+            propertyNames: schema.propertyNames ?? new MixedSchema(),
+            minProperties: schema.minProperties ?? -1,
+            maxProperties: schema.maxProperties ?? -1,
         };
     }
 

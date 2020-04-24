@@ -19,7 +19,7 @@ export default class MonitoredQueue<T> implements Queue<T> {
 
     public constructor(queue: Queue<T>, logger?: Logger) {
         this.queue = queue;
-        this.logger = logger || new NullLogger();
+        this.logger = logger ?? new NullLogger();
 
         this.updateStatus();
     }

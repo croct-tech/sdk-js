@@ -89,8 +89,8 @@ export default class Evaluator {
 
     public constructor(configuration: Configuration) {
         this.configuration = {
-            endpointUrl: EVALUATION_ENDPOINT_URL,
             ...configuration,
+            endpointUrl: configuration.endpointUrl ?? EVALUATION_ENDPOINT_URL,
         };
     }
 

@@ -17,7 +17,7 @@ export default class QueuedChannel<T> implements OutputChannel<T> {
     public constructor(channel: OutputChannel<T>, queue: Queue<T>, logger?: Logger) {
         this.channel = channel;
         this.queue = queue;
-        this.logger = logger || new NullLogger();
+        this.logger = logger ?? new NullLogger();
     }
 
     public flush(): Promise<void> {

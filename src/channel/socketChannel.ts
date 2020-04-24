@@ -33,12 +33,12 @@ export class SocketChannel<I extends Input, O extends Output> implements DuplexC
 
     public constructor({url, logger, ...options}: Configuration) {
         this.url = url;
-        this.logger = logger || new NullLogger();
+        this.logger = logger ?? new NullLogger();
         this.options = {
-            closeTimeout: 5000,
-            connectionTimeout: 10000,
-            protocols: [],
             ...options,
+            closeTimeout: options.closeTimeout ?? 5000,
+            connectionTimeout: options.connectionTimeout ?? 10000,
+            protocols: options.protocols ?? [],
         };
     }
 
