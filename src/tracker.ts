@@ -9,6 +9,7 @@ import {
     Beacon,
     BeaconPayload,
     Event,
+    EventContext,
     isCartPartialEvent,
     isIdentifiedUserEvent,
     PartialEvent,
@@ -23,7 +24,18 @@ export type Configuration = Options & {
     context: Context,
     channel: OutputChannel<Beacon>,
     logger?: Logger,
-};
+}
+
+export type EventInfo<T extends Event = Event> = {
+    context: EventContext,
+    event: T,
+    timestamp: number,
+    status: 'pending' | 'confirmed' | 'failed' | 'ignored',
+}
+
+export interface EventListener {
+    (event: EventInfo): void;
+}
 
 const trackedEvents: {[key: string]: {[key: string]: boolean}} = {};
 
@@ -35,6 +47,8 @@ export default class Tracker {
     private readonly channel: OutputChannel<Beacon>;
 
     private readonly logger: Logger;
+
+    private readonly listeners: EventListener[] = [];
 
     private initialized = false;
 
@@ -73,6 +87,19 @@ export default class Tracker {
         this.trackTabVisibilityChange = this.trackTabVisibilityChange.bind(this);
         this.trackTabUrlChange = this.trackTabUrlChange.bind(this);
         this.trackInactivity = this.trackInactivity.bind(this);
+    }
+
+    public addListener(listener: EventListener): void {
+        this.listeners.push(listener);
+    }
+
+    public removeListener(listener: EventListener): void {
+        let index = this.listeners.indexOf(listener);
+
+        while (index >= 0) {
+            this.listeners.splice(index, 1);
+            index = this.listeners.indexOf(listener)
+        }
     }
 
     public get flushed(): Promise<void> {
@@ -336,26 +363,53 @@ export default class Tracker {
         });
     }
 
+    private notifyEvent(event: EventInfo): void {
+        this.listeners.map(listener => listener(event));
+    }
+
     private publish<T extends Event>(event: T, timestamp: number): Promise<T> {
         this.stopInactivityTimer();
 
+        const tab = this.context.getTab();
+        const metadata = this.options.eventMetadata;
+        const context: EventContext = {
+            tabId: tab.id,
+            url: tab.location.href,
+            ...(Object.keys(metadata).length > 0 ? {metadata: metadata} : {}),
+        };
+
+        const eventInfo: EventInfo<T> = {
+            event: event,
+            context: context,
+            timestamp: timestamp,
+            status: 'pending',
+        };
+
         if (this.suspended) {
             this.logger.warn(`Tracker is suspended, ignoring event "${event.type}"`);
+
+            this.notifyEvent({...eventInfo, status: 'ignored'});
 
             return Promise.reject(new Error('The tracker is suspended.'));
         }
 
         this.logger.info(`Tracked event "${event.type}"`);
 
+        this.notifyEvent(eventInfo);
+
         return new Promise<T>((resolve, reject) => {
-            const promise = this.channel.publish(this.createBeacon(event, timestamp)).then(
+            const promise = this.channel.publish(this.createBeacon(event, timestamp, context)).then(
                 () => {
                     this.logger.debug(`Successfully published event "${event.type}"`);
+
+                    this.notifyEvent({...eventInfo, status: 'confirmed'});
 
                     resolve(event);
                 },
                 cause => {
                     this.logger.error(`Failed to publish event "${event.type}", reason: ${formatCause(cause)}`);
+
+                    this.notifyEvent({...eventInfo, status: 'failed'});
 
                     reject(cause);
                 },
@@ -393,19 +447,13 @@ export default class Tracker {
         return event;
     }
 
-    private createBeacon(event: Event, timestamp: number): Beacon {
+    private createBeacon(event: Event, timestamp: number, context: EventContext): Beacon {
         const token = this.context.getToken();
-        const tab = this.context.getTab();
-        const metadata = this.options.eventMetadata;
 
         return {
             timestamp: timestamp,
             ...(token !== null ? {token: token.toString()} : {}),
-            context: {
-                tabId: tab.id,
-                url: tab.location.href,
-                ...(Object.keys(metadata).length > 0 ? {metadata: metadata} : {}),
-            },
+            context: context,
             payload: this.createBeaconPayload(event),
         };
     }

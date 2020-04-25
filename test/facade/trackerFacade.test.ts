@@ -27,6 +27,30 @@ describe('A tracker facade', () => {
         expect(tracker.disable).toHaveBeenCalledTimes(1);
     });
 
+    test('can add event listeners to the tracker', () => {
+        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        tracker.addListener = jest.fn();
+
+        const listener = jest.fn();
+        const trackerFacade = new TrackerFacade(tracker);
+        trackerFacade.addListener(listener);
+
+        expect(tracker.addListener).toHaveBeenCalledWith(listener);
+        expect(tracker.addListener).toHaveBeenCalledTimes(1);
+    });
+
+    test('can remove event listeners from the tracker', () => {
+        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        tracker.removeListener = jest.fn();
+
+        const listener = jest.fn();
+        const trackerFacade = new TrackerFacade(tracker);
+        trackerFacade.removeListener(listener);
+
+        expect(tracker.removeListener).toHaveBeenCalledWith(listener);
+        expect(tracker.removeListener).toHaveBeenCalledTimes(1);
+    });
+
     test('should provide a callback that is called when the current pending events are flushed', async () => {
         const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
         const batch = jest.fn().mockResolvedValue(undefined);

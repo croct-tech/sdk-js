@@ -1,6 +1,6 @@
 import {ExternalEvent, ExternalEventType, ExternalEventPayload} from '../event';
 import {formatCause} from '../error';
-import Tracker from '../tracker';
+import Tracker, {EventListener} from '../tracker';
 import {
     cartViewed,
     cartModified,
@@ -68,6 +68,14 @@ export default class TrackerFacade {
 
     public disable(): void {
         this.tracker.disable();
+    }
+
+    public addListener(listener: EventListener): void {
+        this.tracker.addListener(listener);
+    }
+
+    public removeListener(listener: EventListener): void {
+        this.tracker.removeListener(listener);
     }
 
     public track<T extends ExternalEventType>(type: T, payload: ExternalEventPayload<T>): Promise<ExternalEvent<T>> {
