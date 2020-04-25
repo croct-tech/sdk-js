@@ -1,4 +1,4 @@
-import Tracker from '../src/tracker';
+import Tracker, {EventInfo, EventListener} from '../src/tracker';
 import Context from '../src/context';
 import Token from '../src/token';
 import SandboxChannel from '../src/channel/sandboxChannel';
@@ -6,6 +6,7 @@ import TabEventEmulator from './utils/tabEventEmulator';
 import {Beacon, BeaconPayload, Event, PartialEvent} from '../src/event';
 import {OutputChannel} from '../src/channel';
 import {DumbStorage} from './utils/dumbStorage';
+import {Optional} from '../src/utilityTypes';
 
 describe('A tracker', () => {
     const now = Date.now();
@@ -78,6 +79,87 @@ describe('A tracker', () => {
         tracker.disable();
 
         expect(tracker.isEnabled()).toBeFalsy();
+    });
+
+    test('should allow to add and remove event listeners', async () => {
+        const channel: OutputChannel<Beacon> = {
+            close: jest.fn(),
+            publish: jest.fn()
+                .mockResolvedValueOnce(undefined)
+                .mockRejectedValueOnce(new Error())
+                .mockResolvedValueOnce(undefined),
+        };
+        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
+        const tab = context.getTab();
+        const tracker = new Tracker({
+            context: context,
+            channel: channel,
+        });
+
+        const listener: EventListener = jest.fn();
+
+        tracker.addListener(listener);
+
+        const event: Event = {
+            type: 'nothingChanged',
+            sinceTime: 0,
+        };
+
+        const eventInfo: Optional<EventInfo, 'timestamp' | 'status'> = {
+            context: {
+                tabId: tab.id,
+                url: tab.location.href,
+            },
+            event: event,
+        };
+
+        tracker.suspend();
+
+        await expect(tracker.track(event, 1)).rejects.toThrowError();
+
+        tracker.unsuspend();
+
+        await expect(tracker.track(event, 2)).resolves.toBeDefined();
+
+        await expect(tracker.track(event, 3)).rejects.toThrowError();
+
+        // Listeners can be added more than once, should remove both
+        tracker.addListener(listener);
+        tracker.removeListener(listener);
+
+        await expect(tracker.track(event, 4)).resolves.toBeDefined();
+
+        expect(listener).toHaveBeenNthCalledWith(1, {
+            status: 'ignored',
+            timestamp: 1,
+            ...eventInfo,
+        });
+
+        expect(listener).toHaveBeenNthCalledWith(2, {
+            status: 'pending',
+            timestamp: 2,
+            ...eventInfo,
+        });
+
+        expect(listener).toHaveBeenNthCalledWith(3, {
+            status: 'confirmed',
+            timestamp: 2,
+            ...eventInfo,
+        });
+
+        expect(listener).toHaveBeenNthCalledWith(4, {
+            status: 'pending',
+            timestamp: 3,
+            ...eventInfo,
+        });
+
+        expect(listener).toHaveBeenNthCalledWith(5, {
+            status: 'failed',
+            timestamp: 3,
+            ...eventInfo,
+        });
+
+        expect(listener).toBeCalledTimes(5);
     });
 
     test('should allow to be enabled even if it is suspended', () => {

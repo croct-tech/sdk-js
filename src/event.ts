@@ -121,10 +121,8 @@ export const eventTypes = [
     ...miscEventTypes,
 ] as const;
 
-export type EventType = typeof eventTypes[number];
-
 interface AbstractEvent {
-    type: EventType;
+    type: string;
 }
 
 /*
@@ -290,7 +288,34 @@ export interface SessionAttributesChanged extends AbstractEvent {
 
 export type MiscEvent = NothingChanged | SessionAttributesChanged;
 
-export type Event = TabEvent | PageEvent | UserEvent | EcommerceEvent | MiscEvent;
+type EventMap = {
+    // Tab events
+    tabVisibilityChanged: TabVisibilityChanged,
+    tabUrlChanged: TabUrlChanged,
+    tabOpened: TabOpened,
+    // Page events
+    pageLoaded: PageLoaded,
+    pageOpened: PageOpened,
+    // User events
+    userSignedIn: UserSignedIn,
+    userSignedOut: UserSignedOut,
+    userSignedUp: UserSignedUp,
+    userProfileChanged: UserProfileChanged,
+    // E-commerce events
+    productViewed: ProductViewed,
+    cartViewed: CartViewed,
+    cartModified: CartModified,
+    checkoutStarted: CheckoutStarted,
+    orderPlaced: OrderPlaced,
+    // Misc events
+    nothingChanged: NothingChanged,
+    sessionAttributesChanged: SessionAttributesChanged,
+}
+
+export type EventType = keyof EventMap;
+
+export type Event<T extends EventType = EventType> =
+    T extends EventType ? EventMap[T] : EventMap[EventType];
 
 /**
  * Partial Events
