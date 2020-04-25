@@ -8,6 +8,9 @@ import {
     orderPlaced,
     productViewed,
     userSignedUp,
+    testGroupAssigned,
+    personalizationApplied,
+    goalCompleted,
 } from '../schema/eventSchemas';
 
 const eventSchemas = {
@@ -17,6 +20,9 @@ const eventSchemas = {
     orderPlaced,
     productViewed,
     userSignedUp,
+    testGroupAssigned,
+    personalizationApplied,
+    goalCompleted,
 };
 
 function createEvent<T extends ExternalEventType>(type: T, payload: unknown): ExternalEvent<T> {

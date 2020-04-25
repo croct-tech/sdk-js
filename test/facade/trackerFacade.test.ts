@@ -176,6 +176,29 @@ describe('A tracker facade', () => {
                 },
             },
         ],
+        [
+            {
+                type: 'testGroupAssigned',
+                testId: 'foo',
+                groupId: 'bar',
+            },
+        ],
+        [
+            {
+                type: 'personalizationApplied',
+                personalizationId: 'foo',
+                audience: 'bar',
+                testId: 'baz',
+                groupId: 'barbaz',
+            },
+        ],
+        [
+            {
+                type: 'goalCompleted',
+                goalId: 'foo',
+                value: 1,
+            },
+        ],
     ])('should track events', (event: ExternalEvent) => {
         const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
         tracker.track = jest.fn();

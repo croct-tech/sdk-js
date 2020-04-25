@@ -2,6 +2,7 @@ import ObjectType from '../validation/objectType';
 import StringType from '../validation/stringType';
 import {cart, order, productDetails} from './ecommerceSchemas';
 import {userProfileSchema} from './userSchema';
+import NumberType from '../validation/numberType';
 
 export const cartModified = new ObjectType({
     required: ['cart'],
@@ -50,5 +51,54 @@ export const userSignedUp = new ObjectType({
             maxLength: 254,
         }),
         profile: userProfileSchema,
+    },
+});
+
+export const testGroupAssigned = new ObjectType({
+    required: ['testId', 'groupId'],
+    properties: {
+        testId: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+        groupId: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+    },
+});
+
+export const personalizationApplied = new ObjectType({
+    required: ['personalizationId'],
+    properties: {
+        personalizationId: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+        audience: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+        testId: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+        groupId: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+    },
+});
+
+export const goalCompleted = new ObjectType({
+    required: ['goalId'],
+    properties: {
+        goalId: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+        value: new NumberType({
+            minimum: 0,
+        }),
     },
 });
