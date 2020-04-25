@@ -6,6 +6,9 @@ import {
     orderPlaced,
     productViewed,
     userSignedUp,
+    testGroupAssigned,
+    personalizationApplied,
+    goalCompleted,
 } from '../../src/schema/eventSchemas';
 import {Optional} from '../../src/utilityTypes';
 
@@ -149,7 +152,7 @@ describe('The "productViewed" payload schema', () => {
     });
 });
 
-describe('The "userSignedUp payload schema', () => {
+describe('The "userSignedUp" payload schema', () => {
     test.each([
         [{
             userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
@@ -186,6 +189,201 @@ describe('The "userSignedUp payload schema', () => {
     ])('should not allow %s', (value: object, message: string) => {
         function validate(): void {
             userSignedUp.validate(value);
+        }
+
+        expect(validate).toThrow(Error);
+        expect(validate).toThrow(message);
+    });
+});
+
+describe('The "testGroupAssigned" payload schema', () => {
+    test('should allow %s', () => {
+        const value = {
+            testId: 'foo',
+            groupId: 'bar',
+        };
+
+        function validate(): void {
+            testGroupAssigned.validate(value);
+        }
+
+        expect(validate).not.toThrow(Error);
+    });
+
+    test.each([
+        [
+            {},
+            'Missing property \'/testId\'.',
+        ],
+        [
+            {groupId: 'bar'},
+            'Missing property \'/testId\'.',
+        ],
+        [
+            {testId: 'foo'},
+            'Missing property \'/groupId\'.',
+        ],
+        [
+            {testId: '', groupId: 'bar'},
+            'Expected at least 1 character at path \'/testId\', actual 0.',
+        ],
+        [
+            {testId: 'foo', groupId: ''},
+            'Expected at least 1 character at path \'/groupId\', actual 0.',
+        ],
+        [
+            {testId: 'x'.repeat(51), groupId: 'bar'},
+            'Expected at most 50 characters at path \'/testId\', actual 51.',
+        ],
+        [
+            {testId: 'foo', groupId: 'x'.repeat(51)},
+            'Expected at most 50 characters at path \'/groupId\', actual 51.',
+        ],
+        [
+            {testId: null, groupId: 'bar'},
+            'Expected value of type string at path \'/testId\', actual null.',
+        ],
+        [
+            {testId: 'foo', groupId: null},
+            'Expected value of type string at path \'/groupId\', actual null.',
+        ],
+    ])('should not allow %s', (value: object, message: string) => {
+        function validate(): void {
+            testGroupAssigned.validate(value);
+        }
+
+        expect(validate).toThrow(Error);
+        expect(validate).toThrow(message);
+    });
+});
+
+describe('The "personalizationApplied" payload schema', () => {
+    test.each([
+        [{
+            personalizationId: 'foo',
+        }],
+        [{
+            personalizationId: 'foo',
+            audience: 'bar',
+            testId: 'baz',
+            groupId: 'barbaz',
+        }],
+    ])('should allow %s', (value: object) => {
+        function validate(): void {
+            personalizationApplied.validate(value);
+        }
+
+        expect(validate).not.toThrow(Error);
+    });
+
+    test.each([
+        [
+            {},
+            'Missing property \'/personalizationId\'.',
+        ],
+        [
+            {personalizationId: ''},
+            'Expected at least 1 character at path \'/personalizationId\', actual 0.',
+        ],
+        [
+            {personalizationId: 'x'.repeat(51)},
+            'Expected at most 50 characters at path \'/personalizationId\', actual 51.',
+        ],
+        [
+            {personalizationId: null},
+            'Expected value of type string at path \'/personalizationId\', actual null.',
+        ],
+        [
+            {personalizationId: 'foo', audience: ''},
+            'Expected at least 1 character at path \'/audience\', actual 0.',
+        ],
+        [
+            {personalizationId: 'foo', audience: 'x'.repeat(51)},
+            'Expected at most 50 characters at path \'/audience\', actual 51.',
+        ],
+        [
+            {personalizationId: 'foo', audience: null},
+            'Expected value of type string at path \'/audience\', actual null.',
+        ],
+        [
+            {personalizationId: 'foo', testId: ''},
+            'Expected at least 1 character at path \'/testId\', actual 0.',
+        ],
+        [
+            {personalizationId: 'foo', testId: 'x'.repeat(51)},
+            'Expected at most 50 characters at path \'/testId\', actual 51.',
+        ],
+        [
+            {personalizationId: 'foo', testId: null},
+            'Expected value of type string at path \'/testId\', actual null.',
+        ],
+        [
+            {personalizationId: 'foo', groupId: ''},
+            'Expected at least 1 character at path \'/groupId\', actual 0.',
+        ],
+        [
+            {personalizationId: 'foo', groupId: 'x'.repeat(51)},
+            'Expected at most 50 characters at path \'/groupId\', actual 51.',
+        ],
+        [
+            {personalizationId: 'foo', groupId: null},
+            'Expected value of type string at path \'/groupId\', actual null.',
+        ],
+    ])('should not allow %s', (value: object, message: string) => {
+        function validate(): void {
+            personalizationApplied.validate(value);
+        }
+
+        expect(validate).toThrow(Error);
+        expect(validate).toThrow(message);
+    });
+});
+
+describe('The "goalCompleted" payload schema', () => {
+    test.each([
+        [{
+            goalId: 'foo',
+        }],
+        [{
+            goalId: 'foo',
+            value: 1,
+        }],
+    ])('should allow %s', (value: object) => {
+        function validate(): void {
+            goalCompleted.validate(value);
+        }
+
+        expect(validate).not.toThrow(Error);
+    });
+
+    test.each([
+        [
+            {},
+            'Missing property \'/goalId\'.',
+        ],
+        [
+            {goalId: ''},
+            'Expected at least 1 character at path \'/goalId\', actual 0.',
+        ],
+        [
+            {goalId: 'x'.repeat(51)},
+            'Expected at most 50 characters at path \'/goalId\', actual 51.',
+        ],
+        [
+            {goalId: null},
+            'Expected value of type string at path \'/goalId\', actual null.',
+        ],
+        [
+            {goalId: 'foo', value: -1},
+            'Expected a value greater than or equal to 0 at path \'/value\', actual -1.',
+        ],
+        [
+            {goalId: 'foo', value: null},
+            'Expected value of type number at path \'/value\', actual null.',
+        ],
+    ])('should not allow %s', (value: object, message: string) => {
+        function validate(): void {
+            goalCompleted.validate(value);
         }
 
         expect(validate).toThrow(Error);

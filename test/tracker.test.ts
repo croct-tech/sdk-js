@@ -1123,6 +1123,32 @@ describe('A tracker', () => {
                 },
             },
         ],
+        [
+            {
+                type: 'testGroupAssigned',
+                testId: 'foo',
+                groupId: 'bar',
+            },
+            undefined,
+        ],
+        [
+            {
+                type: 'personalizationApplied',
+                personalizationId: 'foo',
+                audience: 'bar',
+                testId: 'baz',
+                groupId: 'barbaz',
+            },
+            undefined,
+        ],
+        [
+            {
+                type: 'goalCompleted',
+                goalId: 'foo',
+                value: 1,
+            },
+            undefined,
+        ],
     ])('can track event %#', async (partialEvent: PartialEvent, beaconPayload?: BeaconPayload) => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),

@@ -112,6 +112,9 @@ export const userEventTypes = [
 export const miscEventTypes = [
     'nothingChanged',
     'sessionAttributesChanged',
+    'testGroupAssigned',
+    'personalizationApplied',
+    'goalCompleted',
 ] as const;
 
 export const eventTypes = [
@@ -286,7 +289,32 @@ export interface SessionAttributesChanged extends AbstractEvent {
     patch: Patch;
 }
 
-export type MiscEvent = NothingChanged | SessionAttributesChanged;
+export interface TestGroupAssigned extends AbstractEvent {
+    type: 'testGroupAssigned';
+    testId: string;
+    groupId: string;
+}
+
+export interface PersonalizationApplied extends AbstractEvent {
+    type: 'personalizationApplied';
+    personalizationId: string;
+    audience?: string;
+    testId?: string;
+    groupId?: string;
+}
+
+export interface GoalCompleted extends AbstractEvent {
+    type: 'goalCompleted';
+    goalId: string;
+    value?: number;
+}
+
+export type MiscEvent =
+      NothingChanged
+    | SessionAttributesChanged
+    | TestGroupAssigned
+    | PersonalizationApplied
+    | GoalCompleted;
 
 type EventMap = {
     // Tab events
@@ -310,6 +338,9 @@ type EventMap = {
     // Misc events
     nothingChanged: NothingChanged,
     sessionAttributesChanged: SessionAttributesChanged,
+    testGroupAssigned: TestGroupAssigned,
+    personalizationApplied: PersonalizationApplied,
+    goalCompleted: GoalCompleted,
 }
 
 export type EventType = keyof EventMap;
@@ -337,6 +368,9 @@ type ExternalEventMap = {
     orderPlaced: OrderPlaced,
     productViewed: ProductViewed,
     userSignedUp: UserSignedUp,
+    testGroupAssigned: TestGroupAssigned,
+    personalizationApplied: PersonalizationApplied,
+    goalCompleted: GoalCompleted,
 };
 
 export type ExternalEventType = keyof ExternalEventMap;
