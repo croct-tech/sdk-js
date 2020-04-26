@@ -1146,6 +1146,7 @@ describe('A tracker', () => {
                 type: 'goalCompleted',
                 goalId: 'foo',
                 value: 1,
+                currency: 'brl',
             },
             undefined,
         ],

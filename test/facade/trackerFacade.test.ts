@@ -197,6 +197,7 @@ describe('A tracker facade', () => {
                 type: 'goalCompleted',
                 goalId: 'foo',
                 value: 1,
+                currency: 'brl',
             },
         ],
     ])('should track events', (event: ExternalEvent) => {

@@ -307,6 +307,7 @@ export interface GoalCompleted extends AbstractEvent {
     type: 'goalCompleted';
     goalId: string;
     value?: number;
+    currency?: string;
 }
 
 export type MiscEvent =
