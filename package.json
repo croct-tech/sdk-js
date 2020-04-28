@@ -52,11 +52,6 @@
     "build/index.js",
     "build/index.d.ts"
   ],
-  "jest": {
-    "setupFiles": [
-      "jest-date-mock"
-    ]
-  },
   "browserslist": [
     "last 1 version"
   ],
