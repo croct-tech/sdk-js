@@ -324,6 +324,30 @@ describe('A SDK', () => {
         await expect(promise).resolves.toBe(result);
     });
 
+    test('should provide an isolated session storage', () => {
+        jest.spyOn(Storage.prototype, 'setItem');
+
+        const sdk = Sdk.init(configuration);
+        const storage = sdk.getSessionStorage('foo', 'bar');
+
+        storage.setItem('key', 'value');
+
+        const namespacedKey = `${configuration.appId}.external.foo.bar.key`;
+        expect(window.sessionStorage.setItem).toHaveBeenCalledWith(namespacedKey, 'value');
+    });
+
+    test('should provide an isolated application storage', () => {
+        jest.spyOn(Storage.prototype, 'setItem');
+
+        const sdk = Sdk.init(configuration);
+        const storage = sdk.getApplicationStorage('foo', 'bar');
+
+        storage.setItem('key', 'value');
+
+        const namespacedKey = `${configuration.appId}.external.foo.bar.key`;
+        expect(window.localStorage.setItem).toHaveBeenCalledWith(namespacedKey, 'value');
+    });
+
     test('should clean up resources on close', async () => {
         fetchMock.mock({
             method: 'HEAD',

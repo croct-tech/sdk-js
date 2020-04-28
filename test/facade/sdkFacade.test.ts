@@ -10,6 +10,7 @@ import Evaluator from '../../src/evaluator';
 import Tab from '../../src/tab';
 import NullLogger from '../../src/logger/nullLogger';
 import {ExternalEvent} from '../../src';
+import {DumbStorage} from '../utils/dumbStorage';
 
 describe('A SDK facade', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
@@ -483,6 +484,50 @@ describe('A SDK facade', () => {
         sdkFacade.getLogger('foo', 'bar');
 
         expect(getLogger).toHaveBeenLastCalledWith('foo', 'bar');
+    });
+
+    test('should provide an isolated session storage', () => {
+        const getSessionStorage = jest.fn(() => new DumbStorage());
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'getSessionStorage').mockImplementation(getSessionStorage);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        sdkFacade.getSessionStorage('a', 'b', 'c');
+
+        expect(getSessionStorage).toHaveBeenLastCalledWith('a', 'b', 'c');
+    });
+
+    test('should provide an isolated application storage', () => {
+        const getApplicationStorage = jest.fn(() => new DumbStorage());
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'getApplicationStorage').mockImplementation(getApplicationStorage);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        sdkFacade.getApplicationStorage('a', 'b', 'c');
+
+        expect(getApplicationStorage).toHaveBeenLastCalledWith('a', 'b', 'c');
     });
 
     test('should close the SDK on close', async () => {

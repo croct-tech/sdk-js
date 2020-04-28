@@ -158,6 +158,14 @@ export default class SdkFacade {
         return this.sdk.getLogger(...namespace);
     }
 
+    public getSessionStorage(namespace: string, ...subnamespace: string[]): Storage {
+        return this.sdk.getSessionStorage(namespace, ...subnamespace);
+    }
+
+    public getApplicationStorage(namespace: string, ...subnamespace: string[]): Storage {
+        return this.sdk.getApplicationStorage(namespace, ...subnamespace);
+    }
+
     public close(): Promise<void> {
         return this.sdk.close();
     }
