@@ -140,17 +140,17 @@ test('should provide loggers that logs to the console in debug mode', () => {
     expect(warn).toHaveBeenCalledWith('[Croct]', 'Warn bar');
     expect(error).toHaveBeenCalledWith('[Croct]', 'Error bar');
 
-    const namespacedLogger = container.getLogger('Foo');
+    const namespacedLogger = container.getLogger('Foo', 'Bar');
 
     namespacedLogger.info('Info bar');
     namespacedLogger.debug('Debug bar');
     namespacedLogger.warn('Warn bar');
     namespacedLogger.error('Error bar');
 
-    expect(info).toHaveBeenLastCalledWith('[Croct:Foo]', 'Info bar');
-    expect(debug).toHaveBeenLastCalledWith('[Croct:Foo]', 'Debug bar');
-    expect(warn).toHaveBeenLastCalledWith('[Croct:Foo]', 'Warn bar');
-    expect(error).toHaveBeenLastCalledWith('[Croct:Foo]', 'Error bar');
+    expect(info).toHaveBeenLastCalledWith('[Croct:Foo:Bar]', 'Info bar');
+    expect(debug).toHaveBeenLastCalledWith('[Croct:Foo:Bar]', 'Debug bar');
+    expect(warn).toHaveBeenLastCalledWith('[Croct:Foo:Bar]', 'Warn bar');
+    expect(error).toHaveBeenLastCalledWith('[Croct:Foo:Bar]', 'Error bar');
 });
 
 test('should delegate logging to the provided logger', () => {

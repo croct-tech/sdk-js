@@ -108,8 +108,8 @@ export default class Sdk {
         return this.container.getEvaluator();
     }
 
-    public getLogger(namespace?: string): Logger {
-        return this.container.getLogger(namespace);
+    public getLogger(...namespace: string[]): Logger {
+        return this.container.getLogger(...namespace);
     }
 
     public async close(): Promise<void> {
