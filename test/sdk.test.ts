@@ -66,17 +66,17 @@ describe('A SDK', () => {
             logger: logger,
         });
 
-        const namespacedLogger = sdk.getLogger('Foo');
+        const namespacedLogger = sdk.getLogger('Foo', 'Bar');
 
         namespacedLogger.info('Info bar');
         namespacedLogger.debug('Debug bar');
         namespacedLogger.warn('Warn bar');
         namespacedLogger.error('Error bar');
 
-        expect(logger.info).toHaveBeenLastCalledWith('[Croct:Foo] Info bar');
-        expect(logger.debug).toHaveBeenLastCalledWith('[Croct:Foo] Debug bar');
-        expect(logger.warn).toHaveBeenLastCalledWith('[Croct:Foo] Warn bar');
-        expect(logger.error).toHaveBeenLastCalledWith('[Croct:Foo] Error bar');
+        expect(logger.info).toHaveBeenLastCalledWith('[Croct:Foo:Bar] Info bar');
+        expect(logger.debug).toHaveBeenLastCalledWith('[Croct:Foo:Bar] Debug bar');
+        expect(logger.warn).toHaveBeenLastCalledWith('[Croct:Foo:Bar] Warn bar');
+        expect(logger.error).toHaveBeenLastCalledWith('[Croct:Foo:Bar] Error bar');
     });
 
     test('should configure the token storage with global scope', async () => {

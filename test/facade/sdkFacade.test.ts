@@ -478,11 +478,11 @@ describe('A SDK facade', () => {
 
         sdkFacade.getLogger();
 
-        expect(getLogger).toHaveBeenLastCalledWith(undefined);
+        expect(getLogger).toHaveBeenCalledWith();
 
-        sdkFacade.getLogger('foo');
+        sdkFacade.getLogger('foo', 'bar');
 
-        expect(getLogger).toHaveBeenLastCalledWith('foo');
+        expect(getLogger).toHaveBeenLastCalledWith('foo', 'bar');
     });
 
     test('should close the SDK on close', async () => {

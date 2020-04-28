@@ -154,8 +154,8 @@ export default class SdkFacade {
         return this.evaluator.evaluate(expression, options);
     }
 
-    public getLogger(namespace?: string): Logger {
-        return this.sdk.getLogger(namespace);
+    public getLogger(...namespace: string[]): Logger {
+        return this.sdk.getLogger(...namespace);
     }
 
     public close(): Promise<void> {

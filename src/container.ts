@@ -183,8 +183,8 @@ export class Container {
         );
     }
 
-    public getLogger(namespace?: string): Logger {
-        const prefix = `Croct${namespace === undefined ? '' : `:${namespace}`}`;
+    public getLogger(...namespace: string[]): Logger {
+        const prefix = `Croct${namespace.length === 0 ? '' : `:${namespace.join(':')}`}`;
 
         if (this.configuration.logger !== undefined) {
             return new NamespacedLogger(this.configuration.logger, prefix);
