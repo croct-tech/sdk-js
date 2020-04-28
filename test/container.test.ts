@@ -7,6 +7,7 @@ import {BeaconPayload} from '../src/event';
 
 afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
     WS.clean();
 });
 
@@ -84,6 +85,44 @@ test('should flush the beacon queue on initialization', async () => {
     tracker.enable();
 
     expect(server).toReceiveMessage(expect.objectContaining({payload: payload}));
+});
+
+test('should provide an isolated session storage', () => {
+    const container = new Container({
+        ...configuration,
+        debug: true,
+    });
+
+    jest.spyOn(window.Storage.prototype, 'setItem');
+    jest.spyOn(window.Storage.prototype, 'removeItem');
+
+    const storage = container.getSessionStorage('session', 'foo');
+    storage.setItem('key', 'value');
+    storage.removeItem('key');
+
+    const namespacedKey = `${configuration.appId}.external.session.foo.key`;
+
+    expect(window.sessionStorage.setItem).toHaveBeenCalledWith(namespacedKey, 'value');
+    expect(window.sessionStorage.removeItem).toHaveBeenCalledWith(namespacedKey);
+});
+
+test('should provide an isolated application storage', () => {
+    const container = new Container({
+        ...configuration,
+        debug: true,
+    });
+
+    jest.spyOn(window.Storage.prototype, 'setItem');
+    jest.spyOn(window.Storage.prototype, 'removeItem');
+
+    const storage = container.getApplicationStorage('app', 'foo');
+    storage.setItem('key', 'value');
+    storage.removeItem('key');
+
+    const namespacedKey = `${configuration.appId}.external.app.foo.key`;
+
+    expect(window.localStorage.setItem).toHaveBeenCalledWith(namespacedKey, 'value');
+    expect(window.localStorage.removeItem).toHaveBeenCalledWith(namespacedKey);
 });
 
 test('should suppress log messages if no logger is specified and not in debug mode', () => {

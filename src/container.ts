@@ -110,8 +110,8 @@ export class Container {
 
     private createContext(): Context {
         return Context.load(
-            this.getSessionStorage('context'),
-            this.getApplicationStorage('context'),
+            this.getInternalSessionStorage('context'),
+            this.getInternalApplicationStorage('context'),
             this.configuration.tokenScope,
         );
     }
@@ -176,7 +176,7 @@ export class Container {
 
         return new MonitoredQueue<string>(
             new CapacityRestrictedQueue(
-                new PersistentQueue(this.getSessionStorage('queue'), tab.id),
+                new PersistentQueue(this.getInternalSessionStorage('queue'), tab.id),
                 this.configuration.beaconQueueSize,
             ),
             this.getLogger('BeaconQueue'),
@@ -197,16 +197,24 @@ export class Container {
         return new NullLogger();
     }
 
-    private getSessionStorage(namespace: string): Storage {
-        return new NamespacedStorage(sessionStorage, this.resolveStorageNamespace(namespace));
+    public getSessionStorage(namespace: string, ...subnamespace: string[]): Storage {
+        return this.getInternalSessionStorage('external', namespace, ...subnamespace);
     }
 
-    private getApplicationStorage(namespace: string): Storage {
-        return new NamespacedStorage(localStorage, this.resolveStorageNamespace(namespace));
+    public getApplicationStorage(namespace: string, ...subnamespace: string[]): Storage {
+        return this.getInternalApplicationStorage('external', namespace, ...subnamespace);
     }
 
-    private resolveStorageNamespace(namespace: string): string {
-        return `${this.configuration.appId.toLowerCase()}.${namespace}`;
+    private getInternalSessionStorage(namespace: string, ...subnamespace: string[]): Storage {
+        return new NamespacedStorage(sessionStorage, this.resolveStorageNamespace(namespace, ...subnamespace));
+    }
+
+    private getInternalApplicationStorage(namespace: string, ...subnamespace: string[]): Storage {
+        return new NamespacedStorage(localStorage, this.resolveStorageNamespace(namespace, ...subnamespace));
+    }
+
+    private resolveStorageNamespace(namespace: string, ...subnamespace: string[]): string {
+        return `${this.configuration.appId.toLowerCase()}.${[namespace].concat(subnamespace).join('.')}`;
     }
 
     public async dispose(): Promise<void> {
