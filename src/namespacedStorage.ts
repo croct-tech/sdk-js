@@ -13,11 +13,13 @@ export default class NamespacedStorage implements Storage {
     }
 
     public get length(): number {
-        return this.storage.length;
+        return this.getKeys().length;
     }
 
     public clear(): void {
-        this.storage.clear();
+        for (const key of this.getKeys()) {
+            this.storage.removeItem(key);
+        }
     }
 
     public getItem(key: string): string | null {
