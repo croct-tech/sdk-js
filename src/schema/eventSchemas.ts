@@ -100,5 +100,9 @@ export const goalCompleted = new ObjectType({
         value: new NumberType({
             minimum: 0,
         }),
+        currency: new StringType({
+            minLength: 1,
+            maxLength: 10,
+        }),
     },
 });

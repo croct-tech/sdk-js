@@ -347,6 +347,7 @@ describe('The "goalCompleted" payload schema', () => {
         [{
             goalId: 'foo',
             value: 1,
+            currency: 'brl',
         }],
     ])('should allow %s', (value: object) => {
         function validate(): void {
@@ -380,6 +381,18 @@ describe('The "goalCompleted" payload schema', () => {
         [
             {goalId: 'foo', value: null},
             'Expected value of type number at path \'/value\', actual null.',
+        ],
+        [
+            {goalId: 'foo', currency: ''},
+            'Expected at least 1 character at path \'/currency\', actual 0.',
+        ],
+        [
+            {goalId: 'foo', currency: 'x'.repeat(11)},
+            'Expected at most 10 characters at path \'/currency\', actual 11.',
+        ],
+        [
+            {goalId: 'foo', currency: null},
+            'Expected value of type string at path \'/currency\', actual null.',
         ],
     ])('should not allow %s', (value: object, message: string) => {
         function validate(): void {
