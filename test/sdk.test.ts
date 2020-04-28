@@ -332,7 +332,7 @@ describe('A SDK', () => {
 
         storage.setItem('key', 'value');
 
-        const namespacedKey = `${configuration.appId}.external.foo.bar.key`;
+        const namespacedKey = `croct[${configuration.appId}].external.foo.bar.key`;
         expect(window.sessionStorage.setItem).toHaveBeenCalledWith(namespacedKey, 'value');
     });
 
@@ -344,7 +344,7 @@ describe('A SDK', () => {
 
         storage.setItem('key', 'value');
 
-        const namespacedKey = `${configuration.appId}.external.foo.bar.key`;
+        const namespacedKey = `croct[${configuration.appId}].external.foo.bar.key`;
         expect(window.localStorage.setItem).toHaveBeenCalledWith(namespacedKey, 'value');
     });
 
