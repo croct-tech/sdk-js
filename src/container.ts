@@ -214,7 +214,7 @@ export class Container {
     }
 
     private resolveStorageNamespace(namespace: string, ...subnamespace: string[]): string {
-        return `${this.configuration.appId.toLowerCase()}.${[namespace].concat(subnamespace).join('.')}`;
+        return `croct[${this.configuration.appId.toLowerCase()}].${[namespace].concat(subnamespace).join('.')}`;
     }
 
     public async dispose(): Promise<void> {

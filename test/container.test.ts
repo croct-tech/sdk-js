@@ -100,7 +100,7 @@ test('should provide an isolated session storage', () => {
     storage.setItem('key', 'value');
     storage.removeItem('key');
 
-    const namespacedKey = `${configuration.appId}.external.session.foo.key`;
+    const namespacedKey = `croct[${configuration.appId}].external.session.foo.key`;
 
     expect(window.sessionStorage.setItem).toHaveBeenCalledWith(namespacedKey, 'value');
     expect(window.sessionStorage.removeItem).toHaveBeenCalledWith(namespacedKey);
@@ -119,7 +119,7 @@ test('should provide an isolated application storage', () => {
     storage.setItem('key', 'value');
     storage.removeItem('key');
 
-    const namespacedKey = `${configuration.appId}.external.app.foo.key`;
+    const namespacedKey = `croct[${configuration.appId}].external.app.foo.key`;
 
     expect(window.localStorage.setItem).toHaveBeenCalledWith(namespacedKey, 'value');
     expect(window.localStorage.removeItem).toHaveBeenCalledWith(namespacedKey);
