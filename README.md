@@ -1,4 +1,3 @@
-<a href="https://codeclimate.com/repos/5e7251b3172af05fe9000e27/maintainability"><img src="https://api.codeclimate.com/v1/badges/c44df78a3ed891af11bb/maintainability" /></a>
 <p align="center">
     <a href="https://croct.com">
         <img src="https://github.com/croct-tech/repository-template-php/raw/master/images/logo.svg" alt="Croct" width="80" height="80" />
