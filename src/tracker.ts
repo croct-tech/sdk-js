@@ -274,7 +274,7 @@ export default class Tracker {
             initEvents.pageOpened = true;
 
             this.trackPageOpen({
-                url: window.decodeURI(tab.location.href),
+                url: tab.url,
                 referrer: tab.referrer,
             });
         }
@@ -310,19 +310,18 @@ export default class Tracker {
         });
     }
 
-    private trackPageOpen({referrer, url, ...payload}: {url: string, referrer: string}): void {
+    private trackPageOpen({referrer, ...payload}: {url: string, referrer: string}): void {
         this.enqueue({
             type: 'pageOpened',
-            url: window.decodeURI(url),
             ...payload,
-            ...(referrer.length > 0 ? {referrer: window.decodeURI(referrer)} : {}),
+            ...(referrer.length > 0 ? {referrer: referrer} : {}),
         });
     }
 
     private trackPageLoad({detail: {tab}}: TabEvent): void {
         this.enqueue({
             type: 'pageLoaded',
-            url: window.decodeURI(tab.location.href),
+            url: tab.url,
             title: tab.title,
             lastModifiedTime: Date.parse(tab.document.lastModified),
         });
@@ -339,7 +338,7 @@ export default class Tracker {
         this.enqueue({
             type: 'tabUrlChanged',
             tabId: detail.tab.id,
-            url: window.decodeURI(detail.url),
+            url: detail.url,
         });
     }
 
@@ -375,7 +374,7 @@ export default class Tracker {
         const metadata = this.options.eventMetadata;
         const context: EventContext = {
             tabId: tab.id,
-            url: window.decodeURI(tab.location.href),
+            url: tab.url,
             ...(Object.keys(metadata).length > 0 ? {metadata: metadata} : {}),
         };
 

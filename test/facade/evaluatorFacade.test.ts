@@ -5,17 +5,19 @@ import {JsonObject} from '../../src/json';
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+beforeEach(() => {
+    Object.defineProperty(window.document, 'referrer', {
+        value: '',
+        configurable: true,
+    });
+});
+
 describe('An evaluator facade', () => {
     let evaluator: Evaluator;
 
     beforeEach(() => {
         evaluator = jest.genMockFromModule<Evaluator>('../../src/evaluator');
         evaluator.evaluate = jest.fn();
-
-        Object.defineProperty(window.document, 'referrer', {
-            value: '',
-            writable: true,
-        });
     });
 
     afterEach(() => {
@@ -137,16 +139,16 @@ describe('A tab context factory', () => {
         url.searchParams.append('utm_mediuM', 'medium');
         url.searchParams.append('utm_Content', 'content');
         url.searchParams.append('UTM_TERM', 'term');
-        url.searchParams.append('bar', '"bar"');
 
         const title = 'Welcome to Foo Inc.';
-        const referrer = 'http://referrer.com?foo=%22bar%22';
+        const referrer = 'http://referrer.com?foo=%22bar%22&foo="bar"';
 
         window.history.replaceState({}, 'Landing page', url.href);
         window.document.title = title;
 
         Object.defineProperty(window.document, 'referrer', {
             value: referrer,
+            configurable: true,
         });
 
         const factory = new TabContextFactory(new Tab('1', true));
@@ -160,8 +162,8 @@ describe('A tab context factory', () => {
 
         const page: Page = {
             title: title,
-            url: window.decodeURI(url.toString()),
-            referrer: window.decodeURI(referrer),
+            url: window.encodeURI(window.decodeURI(url.toString())),
+            referrer: window.encodeURI(window.decodeURI(referrer)),
         };
         const campaign: Campaign = {
             name: 'campaign',
