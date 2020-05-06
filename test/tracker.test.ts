@@ -12,7 +12,7 @@ describe('A tracker', () => {
     const now = Date.now();
     const carolToken = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'c4r0l', 1440982923);
     const erickToken = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'erick', 1440982923);
-    const pageUrl = 'http://localhost/';
+    const pageUrl = 'http://localhost/?foo=%22bar%22';
     const pageLastModified = now;
     const pageTitle = 'Welcome to Foo Inc.';
 
@@ -25,7 +25,7 @@ describe('A tracker', () => {
         tabEventEmulator.registerListeners();
 
         window.document.title = 'Welcome to Foo Inc.';
-        window.history.replaceState({}, 'Home page', 'http://localhost');
+        window.history.replaceState({}, 'Home page', pageUrl);
         Object.defineProperty(window.document, 'lastModified', {
             value: new Date(now).toISOString(),
         });
@@ -108,7 +108,7 @@ describe('A tracker', () => {
         const eventInfo: Optional<EventInfo, 'timestamp' | 'status'> = {
             context: {
                 tabId: tab.id,
-                url: tab.location.href,
+                url: window.decodeURI(tab.location.href),
             },
             event: event,
         };
@@ -307,7 +307,7 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: pageUrl,
+                url: window.decodeURI(pageUrl),
             },
             payload: event,
         });
@@ -452,7 +452,7 @@ describe('A tracker', () => {
             token: carolToken.toString(),
             context: {
                 tabId: tab.id,
-                url: pageUrl,
+                url: window.decodeURI(pageUrl),
             },
             payload: {
                 type: 'userSignedIn',
@@ -488,7 +488,7 @@ describe('A tracker', () => {
             token: carolToken.toString(),
             context: {
                 tabId: tab.id,
-                url: pageUrl,
+                url: window.decodeURI(pageUrl),
             },
             payload: {
                 type: 'userSignedIn',
@@ -505,7 +505,7 @@ describe('A tracker', () => {
                 token: carolToken.toString(),
                 context: {
                     tabId: tab.id,
-                    url: pageUrl,
+                    url: window.decodeURI(pageUrl),
                 },
                 payload: {
                     type: 'userSignedOut',
@@ -521,7 +521,7 @@ describe('A tracker', () => {
                 token: erickToken.toString(),
                 context: {
                     tabId: tab.id,
-                    url: pageUrl,
+                    url: window.decodeURI(pageUrl),
                 },
                 payload: {
                     type: 'userSignedIn',
@@ -556,7 +556,7 @@ describe('A tracker', () => {
             token: carolToken.toString(),
             context: {
                 tabId: tab.id,
-                url: pageUrl,
+                url: window.decodeURI(pageUrl),
             },
             payload: {
                 type: 'userSignedIn',
@@ -571,7 +571,7 @@ describe('A tracker', () => {
             token: carolToken.toString(),
             context: {
                 tabId: tab.id,
-                url: pageUrl,
+                url: window.decodeURI(pageUrl),
             },
             payload: {
                 type: 'userSignedOut',
@@ -606,7 +606,7 @@ describe('A tracker', () => {
                 timestamp: now,
                 context: {
                     tabId: tab.id,
-                    url: pageUrl,
+                    url: window.decodeURI(pageUrl),
                 },
                 payload: {
                     type: 'tabOpened',
@@ -651,11 +651,11 @@ describe('A tracker', () => {
                 timestamp: now,
                 context: {
                     tabId: tab.id,
-                    url: pageUrl,
+                    url: window.decodeURI(pageUrl),
                 },
                 payload: {
                     type: 'pageOpened',
-                    url: pageUrl,
+                    url: window.decodeURI(pageUrl),
                 },
             },
         );
@@ -698,12 +698,12 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: pageUrl,
+                url: window.decodeURI(pageUrl),
             },
             payload: {
                 type: 'pageLoaded',
                 title: pageTitle,
-                url: pageUrl,
+                url: window.decodeURI(pageUrl),
                 lastModifiedTime: pageLastModified,
             },
         });
@@ -731,17 +731,17 @@ describe('A tracker', () => {
 
         publish.mockClear();
 
-        window.history.pushState({}, 'New page', '/products');
+        window.history.pushState({}, 'New page', '/products?foo=%22bar%22');
 
         expect(publish).toHaveBeenCalledWith({
             context: {
                 tabId: tab.id,
-                url: `${pageUrl}products`,
+                url: 'http://localhost/products?foo="bar"',
             },
             payload: {
                 type: 'tabUrlChanged',
                 tabId: tab.id,
-                url: `${pageUrl}products`,
+                url: 'http://localhost/products?foo="bar"',
             },
             timestamp: now,
         });
@@ -769,33 +769,33 @@ describe('A tracker', () => {
 
         publish.mockClear();
 
-        window.history.pushState({}, 'New page', '/products');
+        window.history.pushState({}, 'New page', '/products?foo=%22bar%22');
 
         expect(publish).toHaveBeenLastCalledWith({
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: `${pageUrl}products`,
+                url: 'http://localhost/products?foo="bar"',
             },
             payload: {
                 type: 'tabUrlChanged',
                 tabId: tab.id,
-                url: `${pageUrl}products`,
+                url: 'http://localhost/products?foo="bar"',
             },
         });
 
-        window.history.replaceState({}, 'New page', '/products/2');
+        window.history.replaceState({}, 'New page', '/products/2?foo=%22bar%22');
 
         expect(publish).toHaveBeenLastCalledWith({
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: `${pageUrl}products/2`,
+                url: 'http://localhost/products/2?foo="bar"',
             },
             payload: {
                 type: 'tabUrlChanged',
                 tabId: tab.id,
-                url: `${pageUrl}products/2`,
+                url: 'http://localhost/products/2?foo="bar"',
             },
         });
 
@@ -830,7 +830,7 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: pageUrl,
+                url: window.decodeURI(pageUrl),
             },
             payload: {
                 type: 'tabVisibilityChanged',
@@ -845,7 +845,7 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: pageUrl,
+                url: window.decodeURI(pageUrl),
             },
             payload: {
                 type: 'tabVisibilityChanged',
@@ -884,7 +884,7 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: pageUrl,
+                url: window.decodeURI(pageUrl),
             },
             payload: {
                 type: 'nothingChanged',
@@ -1172,7 +1172,7 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: pageUrl,
+                url: window.decodeURI(pageUrl),
             },
             payload: beaconPayload === undefined ? partialEvent : beaconPayload,
         });
@@ -1211,7 +1211,7 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: pageUrl,
+                url: window.decodeURI(pageUrl),
             },
             payload: event,
         });

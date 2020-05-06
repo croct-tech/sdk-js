@@ -11,6 +11,11 @@ describe('An evaluator facade', () => {
     beforeEach(() => {
         evaluator = jest.genMockFromModule<Evaluator>('../../src/evaluator');
         evaluator.evaluate = jest.fn();
+
+        Object.defineProperty(window.document, 'referrer', {
+            value: '',
+            writable: true,
+        });
     });
 
     afterEach(() => {
@@ -132,9 +137,10 @@ describe('A tab context factory', () => {
         url.searchParams.append('utm_mediuM', 'medium');
         url.searchParams.append('utm_Content', 'content');
         url.searchParams.append('UTM_TERM', 'term');
+        url.searchParams.append('bar', '"bar"');
 
         const title = 'Welcome to Foo Inc.';
-        const referrer = 'http://referrer.com';
+        const referrer = 'http://referrer.com?foo=%22bar%22';
 
         window.history.replaceState({}, 'Landing page', url.href);
         window.document.title = title;
@@ -154,8 +160,8 @@ describe('A tab context factory', () => {
 
         const page: Page = {
             title: title,
-            url: url.toString(),
-            referrer: referrer,
+            url: window.decodeURI(url.toString()),
+            referrer: window.decodeURI(referrer),
         };
         const campaign: Campaign = {
             name: 'campaign',
