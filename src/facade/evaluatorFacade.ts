@@ -72,13 +72,13 @@ export class TabContextFactory implements ContextFactory {
 
         const page: Page = {
             title: this.tab.title,
-            url: url.toString(),
+            url: window.decodeURI(url.toString()),
         };
 
         const {referrer} = this.tab;
 
         if (referrer.length > 0) {
-            page.referrer = referrer;
+            page.referrer = window.decodeURI(referrer);
         }
 
         context.page = page;
