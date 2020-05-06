@@ -23,6 +23,10 @@ const EventMap: {[key: string]: keyof TabEventMap} = {
     visibilitychange: 'visibilityChange',
 };
 
+function normalizeUri(uri: string): string {
+    return window.encodeURI(window.decodeURI(uri));
+}
+
 export default class Tab {
     public readonly id: string;
 
@@ -69,12 +73,16 @@ export default class Tab {
         return window.location;
     }
 
+    public get url(): string {
+        return normalizeUri(window.location.href)
+    }
+
     public get title(): string {
         return document.title;
     }
 
     public get referrer(): string {
-        return document.referrer;
+        return normalizeUri(document.referrer);
     }
 
     public get isVisible(): boolean {
@@ -122,7 +130,7 @@ export default class Tab {
             const currentUrl = window.location.href;
 
             if (url !== currentUrl) {
-                listener(currentUrl);
+                listener(normalizeUri(currentUrl));
 
                 url = currentUrl;
             }

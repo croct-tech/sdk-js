@@ -5,6 +5,13 @@ import {JsonObject} from '../../src/json';
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+beforeEach(() => {
+    Object.defineProperty(window.document, 'referrer', {
+        value: '',
+        configurable: true,
+    });
+});
+
 describe('An evaluator facade', () => {
     let evaluator: Evaluator;
 
@@ -134,7 +141,7 @@ describe('A tab context factory', () => {
         url.searchParams.append('UTM_TERM', 'term');
 
         const title = 'Welcome to Foo Inc.';
-        const referrer = 'http://referrer.com';
+        const referrer = 'http://referrer.com?foo=%22bar%22&foo="bar"';
 
         window.history.replaceState({}, 'Landing page', url.href);
         window.document.title = title;
@@ -155,7 +162,7 @@ describe('A tab context factory', () => {
         const page: Page = {
             title: title,
             url: url.toString(),
-            referrer: referrer,
+            referrer: window.encodeURI(window.decodeURI(referrer)),
         };
         const campaign: Campaign = {
             name: 'campaign',
