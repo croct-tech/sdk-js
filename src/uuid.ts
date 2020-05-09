@@ -1,7 +1,12 @@
-export function uuid4(): string {
+export function uuid4(sortable = false): string {
     let uuid = '';
 
-    for (let index = 0; index < 36; index++) {
+    if (sortable) {
+        const prefix = Date.now().toString(16).padStart(12, '0').substring(0, 12);
+        uuid = `${prefix.substring(0, 8)}-${prefix.substring(8, 12)}`;
+    }
+
+    for (let index = uuid.length; index < 36; index++) {
         switch (index) {
             case 8:
             case 13:

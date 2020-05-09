@@ -22,7 +22,7 @@ export default class Context {
         let newTab = false;
 
         if (tabId === null) {
-            tabId = uuid4();
+            tabId = uuid4(true);
             newTab = true;
         }
 
