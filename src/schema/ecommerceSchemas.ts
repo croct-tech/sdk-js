@@ -71,10 +71,6 @@ export const cartItem = new ObjectType({
 export const cart = new ObjectType({
     required: ['currency', 'items', 'total'],
     properties: {
-        cartId: new StringType({
-            minLength: 1,
-            maxLength: 50,
-        }),
         currency: new StringType({
             maxLength: 10,
             minLength: 1,
@@ -136,10 +132,6 @@ export const orderItem = new ObjectType({
 export const order = new ObjectType({
     required: ['orderId', 'currency', 'items', 'total'],
     properties: {
-        cartId: new StringType({
-            minLength: 1,
-            maxLength: 50,
-        }),
         orderId: new StringType({
             minLength: 1,
             maxLength: 50,

@@ -7,7 +7,7 @@ describe('A tab', () => {
 
     beforeEach(() => {
         tabEventEmulator.registerListeners();
-        window.history.replaceState({}, 'Home page', 'http://localhost?foo=%22bar%22&foo="bar"');
+        window.history.replaceState({}, 'Home page', 'http://localhost');
     });
 
     afterEach(() => {
@@ -21,12 +21,6 @@ describe('A tab', () => {
         expect(tab.location).toEqual(window.location);
     });
 
-    test('should provide the page URL', () => {
-        const tab = new Tab(tabId, true);
-
-        expect(tab.url).toEqual(window.encodeURI(window.decodeURI(window.location.href)));
-    });
-
     test('should provide the page title', () => {
         const tab = new Tab(tabId, true);
 
@@ -34,16 +28,9 @@ describe('A tab', () => {
     });
 
     test('should provide the page referrer', () => {
-        const referrer = 'http://referrer.com?foo=%22bar%22&foo="bar"';
-
-        Object.defineProperty(window.document, 'referrer', {
-            value: referrer,
-            configurable: true,
-        });
-
         const tab = new Tab(tabId, true);
 
-        expect(tab.referrer).toEqual(window.encodeURI(window.decodeURI(referrer)));
+        expect(tab.referrer).toEqual(document.referrer);
     });
 
     test('should determine whether the tab is visible', () => {

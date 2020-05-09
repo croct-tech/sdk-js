@@ -12,7 +12,7 @@ describe('A tracker', () => {
     const now = Date.now();
     const carolToken = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'c4r0l', 1440982923);
     const erickToken = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'erick', 1440982923);
-    const pageUrl = 'http://localhost/?foo=%22bar%22&foo="bar"';
+    const pageUrl = 'http://localhost/';
     const pageLastModified = now;
     const pageTitle = 'Welcome to Foo Inc.';
 
@@ -25,7 +25,7 @@ describe('A tracker', () => {
         tabEventEmulator.registerListeners();
 
         window.document.title = 'Welcome to Foo Inc.';
-        window.history.replaceState({}, 'Home page', pageUrl);
+        window.history.replaceState({}, 'Home page', 'http://localhost');
         Object.defineProperty(window.document, 'lastModified', {
             value: new Date(now).toISOString(),
         });
@@ -108,7 +108,7 @@ describe('A tracker', () => {
         const eventInfo: Optional<EventInfo, 'timestamp' | 'status'> = {
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(tab.location.href)),
+                url: tab.location.href,
             },
             event: event,
         };
@@ -307,7 +307,7 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
+                url: pageUrl,
             },
             payload: event,
         });
@@ -452,7 +452,7 @@ describe('A tracker', () => {
             token: carolToken.toString(),
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
+                url: pageUrl,
             },
             payload: {
                 type: 'userSignedIn',
@@ -488,7 +488,7 @@ describe('A tracker', () => {
             token: carolToken.toString(),
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
+                url: pageUrl,
             },
             payload: {
                 type: 'userSignedIn',
@@ -505,7 +505,7 @@ describe('A tracker', () => {
                 token: carolToken.toString(),
                 context: {
                     tabId: tab.id,
-                    url: window.encodeURI(window.decodeURI(pageUrl)),
+                    url: pageUrl,
                 },
                 payload: {
                     type: 'userSignedOut',
@@ -521,7 +521,7 @@ describe('A tracker', () => {
                 token: erickToken.toString(),
                 context: {
                     tabId: tab.id,
-                    url: window.encodeURI(window.decodeURI(pageUrl)),
+                    url: pageUrl,
                 },
                 payload: {
                     type: 'userSignedIn',
@@ -556,7 +556,7 @@ describe('A tracker', () => {
             token: carolToken.toString(),
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
+                url: pageUrl,
             },
             payload: {
                 type: 'userSignedIn',
@@ -571,7 +571,7 @@ describe('A tracker', () => {
             token: carolToken.toString(),
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
+                url: pageUrl,
             },
             payload: {
                 type: 'userSignedOut',
@@ -606,7 +606,7 @@ describe('A tracker', () => {
                 timestamp: now,
                 context: {
                     tabId: tab.id,
-                    url: window.encodeURI(window.decodeURI(pageUrl)),
+                    url: pageUrl,
                 },
                 payload: {
                     type: 'tabOpened',
@@ -651,11 +651,11 @@ describe('A tracker', () => {
                 timestamp: now,
                 context: {
                     tabId: tab.id,
-                    url: window.encodeURI(window.decodeURI(pageUrl)),
+                    url: pageUrl,
                 },
                 payload: {
                     type: 'pageOpened',
-                    url: window.encodeURI(window.decodeURI(pageUrl)),
+                    url: pageUrl,
                 },
             },
         );
@@ -698,12 +698,12 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
+                url: pageUrl,
             },
             payload: {
                 type: 'pageLoaded',
                 title: pageTitle,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
+                url: pageUrl,
                 lastModifiedTime: pageLastModified,
             },
         });
@@ -731,17 +731,17 @@ describe('A tracker', () => {
 
         publish.mockClear();
 
-        window.history.pushState({}, 'New page', '/products?foo=%22bar%22&foo="bar"');
+        window.history.pushState({}, 'New page', '/products');
 
         expect(publish).toHaveBeenCalledWith({
             context: {
                 tabId: tab.id,
-                url: 'http://localhost/products?foo=%22bar%22&foo=%22bar%22',
+                url: `${pageUrl}products`,
             },
             payload: {
                 type: 'tabUrlChanged',
                 tabId: tab.id,
-                url: 'http://localhost/products?foo=%22bar%22&foo=%22bar%22',
+                url: `${pageUrl}products`,
             },
             timestamp: now,
         });
@@ -769,33 +769,33 @@ describe('A tracker', () => {
 
         publish.mockClear();
 
-        window.history.pushState({}, 'New page', '/products?foo=%22bar%22&foo="bar"');
+        window.history.pushState({}, 'New page', '/products');
 
         expect(publish).toHaveBeenLastCalledWith({
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: 'http://localhost/products?foo=%22bar%22&foo=%22bar%22',
+                url: `${pageUrl}products`,
             },
             payload: {
                 type: 'tabUrlChanged',
                 tabId: tab.id,
-                url: 'http://localhost/products?foo=%22bar%22&foo=%22bar%22',
+                url: `${pageUrl}products`,
             },
         });
 
-        window.history.replaceState({}, 'New page', '/products/2?foo=%22bar%22&foo="bar"');
+        window.history.replaceState({}, 'New page', '/products/2');
 
         expect(publish).toHaveBeenLastCalledWith({
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: 'http://localhost/products/2?foo=%22bar%22&foo=%22bar%22',
+                url: `${pageUrl}products/2`,
             },
             payload: {
                 type: 'tabUrlChanged',
                 tabId: tab.id,
-                url: 'http://localhost/products/2?foo=%22bar%22&foo=%22bar%22',
+                url: `${pageUrl}products/2`,
             },
         });
 
@@ -830,7 +830,7 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
+                url: pageUrl,
             },
             payload: {
                 type: 'tabVisibilityChanged',
@@ -845,7 +845,7 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
+                url: pageUrl,
             },
             payload: {
                 type: 'tabVisibilityChanged',
@@ -884,7 +884,7 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
+                url: pageUrl,
             },
             payload: {
                 type: 'nothingChanged',
@@ -1172,7 +1172,7 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
+                url: pageUrl,
             },
             payload: beaconPayload === undefined ? partialEvent : beaconPayload,
         });
@@ -1211,7 +1211,7 @@ describe('A tracker', () => {
             timestamp: now,
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
+                url: pageUrl,
             },
             payload: event,
         });

@@ -274,7 +274,7 @@ export default class Tracker {
             initEvents.pageOpened = true;
 
             this.trackPageOpen({
-                url: tab.url,
+                url: tab.location.href,
                 referrer: tab.referrer,
             });
         }
@@ -321,7 +321,7 @@ export default class Tracker {
     private trackPageLoad({detail: {tab}}: TabEvent): void {
         this.enqueue({
             type: 'pageLoaded',
-            url: tab.url,
+            url: tab.location.href,
             title: tab.title,
             lastModifiedTime: Date.parse(tab.document.lastModified),
         });
@@ -374,7 +374,7 @@ export default class Tracker {
         const metadata = this.options.eventMetadata;
         const context: EventContext = {
             tabId: tab.id,
-            url: tab.url,
+            url: tab.location.href,
             ...(Object.keys(metadata).length > 0 ? {metadata: metadata} : {}),
         };
 

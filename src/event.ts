@@ -28,7 +28,6 @@ export type CartItem = {
 }
 
 export type Cart = {
-    cartId?: string,
     currency: string,
     items: CartItem[],
     subtotal?: number,
@@ -53,7 +52,6 @@ export type OrderItem = {
 export type OrderStatus = 'placed' | 'paid' | 'completed';
 
 export type Order = {
-    cartId?: string,
     orderId: string,
     currency: string,
     items: OrderItem[],
