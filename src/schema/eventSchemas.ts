@@ -3,6 +3,9 @@ import StringType from '../validation/stringType';
 import {cart, order, productDetails} from './ecommerceSchemas';
 import {userProfileSchema} from './userSchema';
 import NumberType from '../validation/numberType';
+import UnionType from '../validation/unionType';
+import NullType from '../validation/nullType';
+import BooleanType from '../validation/booleanType';
 
 export const cartModified = new ObjectType({
     required: ['cart'],
@@ -68,28 +71,6 @@ export const testGroupAssigned = new ObjectType({
     },
 });
 
-export const personalizationApplied = new ObjectType({
-    required: ['personalizationId'],
-    properties: {
-        personalizationId: new StringType({
-            minLength: 1,
-            maxLength: 50,
-        }),
-        audience: new StringType({
-            minLength: 1,
-            maxLength: 50,
-        }),
-        testId: new StringType({
-            minLength: 1,
-            maxLength: 50,
-        }),
-        groupId: new StringType({
-            minLength: 1,
-            maxLength: 50,
-        }),
-    },
-});
-
 export const goalCompleted = new ObjectType({
     required: ['goalId'],
     properties: {
@@ -103,6 +84,48 @@ export const goalCompleted = new ObjectType({
         currency: new StringType({
             minLength: 1,
             maxLength: 10,
+        }),
+    },
+});
+
+export const eventOccurred = new ObjectType({
+    required: ['name'],
+    properties: {
+        name: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+        testId: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+        groupId: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+        personalizationId: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+        audience: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+        details: new ObjectType({
+            additionalProperties: new UnionType(
+                new NullType(),
+                new BooleanType(),
+                new NumberType(),
+                new StringType({
+                    maxLength: 300,
+                }),
+            ),
+            propertyNames: new StringType({
+                minLength: 1,
+                maxLength: 20,
+                format: 'identifier',
+            }),
+            maxProperties: 10,
         }),
     },
 });

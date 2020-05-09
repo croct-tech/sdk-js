@@ -185,11 +185,15 @@ describe('A tracker facade', () => {
         ],
         [
             {
-                type: 'personalizationApplied',
+                type: 'eventOccurred',
+                name: 'event-name',
                 personalizationId: 'foo',
                 audience: 'bar',
                 testId: 'baz',
                 groupId: 'barbaz',
+                details: {
+                    foo: 'bar',
+                },
             },
         ],
         [

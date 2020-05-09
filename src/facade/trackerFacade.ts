@@ -9,7 +9,7 @@ import {
     productViewed,
     userSignedUp,
     testGroupAssigned,
-    personalizationApplied,
+    eventOccurred,
     goalCompleted,
 } from '../schema/eventSchemas';
 
@@ -21,7 +21,7 @@ const eventSchemas = {
     productViewed,
     userSignedUp,
     testGroupAssigned,
-    personalizationApplied,
+    eventOccurred,
     goalCompleted,
 };
 
