@@ -71,7 +71,7 @@ export const testGroupAssigned = new ObjectType({
     },
 });
 
-export const goalCompleted = new ObjectType({
+export const goalAchieved = new ObjectType({
     required: ['goalId'],
     properties: {
         goalId: new StringType({

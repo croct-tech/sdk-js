@@ -10,7 +10,7 @@ import {
     userSignedUp,
     testGroupAssigned,
     eventOccurred,
-    goalCompleted,
+    goalAchieved,
 } from '../schema/eventSchemas';
 
 const eventSchemas = {
@@ -22,7 +22,7 @@ const eventSchemas = {
     userSignedUp,
     testGroupAssigned,
     eventOccurred,
-    goalCompleted,
+    goalAchieved,
 };
 
 function createEvent<T extends ExternalEventType>(type: T, payload: unknown): ExternalEvent<T> {

@@ -8,7 +8,7 @@ import {
     userSignedUp,
     testGroupAssigned,
     eventOccurred,
-    goalCompleted,
+    goalAchieved,
 } from '../../src/schema/eventSchemas';
 import {Optional} from '../../src/utilityTypes';
 
@@ -401,7 +401,7 @@ describe('The "eventOccurred" payload schema', () => {
     });
 });
 
-describe('The "goalCompleted" payload schema', () => {
+describe('The "goalAchieved" payload schema', () => {
     test.each([
         [{
             goalId: 'foo',
@@ -413,7 +413,7 @@ describe('The "goalCompleted" payload schema', () => {
         }],
     ])('should allow %s', (value: object) => {
         function validate(): void {
-            goalCompleted.validate(value);
+            goalAchieved.validate(value);
         }
 
         expect(validate).not.toThrow(Error);
@@ -458,7 +458,7 @@ describe('The "goalCompleted" payload schema', () => {
         ],
     ])('should not allow %s', (value: object, message: string) => {
         function validate(): void {
-            goalCompleted.validate(value);
+            goalAchieved.validate(value);
         }
 
         expect(validate).toThrow(Error);

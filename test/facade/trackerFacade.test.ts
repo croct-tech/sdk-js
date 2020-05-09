@@ -198,7 +198,7 @@ describe('A tracker facade', () => {
         ],
         [
             {
-                type: 'goalCompleted',
+                type: 'goalAchieved',
                 goalId: 'foo',
                 value: 1,
                 currency: 'brl',

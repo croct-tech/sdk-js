@@ -111,7 +111,7 @@ export const miscEventTypes = [
     'nothingChanged',
     'sessionAttributesChanged',
     'testGroupAssigned',
-    'goalCompleted',
+    'goalAchieved',
     'eventOccurred',
 ] as const;
 
@@ -293,8 +293,8 @@ export interface TestGroupAssigned extends AbstractEvent {
     groupId: string;
 }
 
-export interface GoalCompleted extends AbstractEvent {
-    type: 'goalCompleted';
+export interface GoalAchieved extends AbstractEvent {
+    type: 'goalAchieved';
     goalId: string;
     value?: number;
     currency?: string;
@@ -315,7 +315,7 @@ export type MiscEvent =
     | SessionAttributesChanged
     | TestGroupAssigned
     | EventOccurred
-    | GoalCompleted;
+    | GoalAchieved;
 
 type EventMap = {
     // Tab events
@@ -340,7 +340,7 @@ type EventMap = {
     nothingChanged: NothingChanged,
     sessionAttributesChanged: SessionAttributesChanged,
     testGroupAssigned: TestGroupAssigned,
-    goalCompleted: GoalCompleted,
+    goalAchieved: GoalAchieved,
     eventOccurred: EventOccurred,
 }
 
@@ -370,7 +370,7 @@ type ExternalEventMap = {
     productViewed: ProductViewed,
     userSignedUp: UserSignedUp,
     testGroupAssigned: TestGroupAssigned,
-    goalCompleted: GoalCompleted,
+    goalAchieved: GoalAchieved,
     eventOccurred: EventOccurred,
 };
 
