@@ -7,7 +7,7 @@ import {
     productViewed,
     userSignedUp,
     testGroupAssigned,
-    personalizationApplied,
+    eventOccurred,
     goalCompleted,
 } from '../../src/schema/eventSchemas';
 import {Optional} from '../../src/utilityTypes';
@@ -257,20 +257,27 @@ describe('The "testGroupAssigned" payload schema', () => {
     });
 });
 
-describe('The "personalizationApplied" payload schema', () => {
+describe('The "eventOccurred" payload schema', () => {
     test.each([
         [{
-            personalizationId: 'foo',
+            name: 'foo',
         }],
         [{
+            name: 'event-name',
             personalizationId: 'foo',
             audience: 'bar',
             testId: 'baz',
             groupId: 'barbaz',
+            details: {
+                number: 10,
+                null: null,
+                string: 'string',
+                boolean: true,
+            },
         }],
     ])('should allow %s', (value: object) => {
         function validate(): void {
-            personalizationApplied.validate(value);
+            eventOccurred.validate(value);
         }
 
         expect(validate).not.toThrow(Error);
@@ -279,59 +286,114 @@ describe('The "personalizationApplied" payload schema', () => {
     test.each([
         [
             {},
-            'Missing property \'/personalizationId\'.',
+            'Missing property \'/name\'.',
         ],
         [
-            {personalizationId: ''},
+            {name: ''},
+            'Expected at least 1 character at path \'/name\', actual 0.',
+        ],
+        [
+            {name: 'x'.repeat(51)},
+            'Expected at most 50 characters at path \'/name\', actual 51.',
+        ],
+        [
+            {name: null},
+            'Expected value of type string at path \'/name\', actual null.',
+        ],
+        [
+            {name: 'foo', personalizationId: ''},
             'Expected at least 1 character at path \'/personalizationId\', actual 0.',
         ],
         [
-            {personalizationId: 'x'.repeat(51)},
+            {name: 'foo', personalizationId: 'x'.repeat(51)},
             'Expected at most 50 characters at path \'/personalizationId\', actual 51.',
         ],
         [
-            {personalizationId: null},
+            {name: 'foo', personalizationId: null},
             'Expected value of type string at path \'/personalizationId\', actual null.',
         ],
         [
-            {personalizationId: 'foo', audience: ''},
+            {name: 'foo', audience: ''},
             'Expected at least 1 character at path \'/audience\', actual 0.',
         ],
         [
-            {personalizationId: 'foo', audience: 'x'.repeat(51)},
+            {name: 'foo', audience: 'x'.repeat(51)},
             'Expected at most 50 characters at path \'/audience\', actual 51.',
         ],
         [
-            {personalizationId: 'foo', audience: null},
+            {name: 'foo', audience: null},
             'Expected value of type string at path \'/audience\', actual null.',
         ],
         [
-            {personalizationId: 'foo', testId: ''},
+            {name: 'foo', testId: ''},
             'Expected at least 1 character at path \'/testId\', actual 0.',
         ],
         [
-            {personalizationId: 'foo', testId: 'x'.repeat(51)},
+            {name: 'foo', testId: 'x'.repeat(51)},
             'Expected at most 50 characters at path \'/testId\', actual 51.',
         ],
         [
-            {personalizationId: 'foo', testId: null},
+            {name: 'foo', testId: null},
             'Expected value of type string at path \'/testId\', actual null.',
         ],
         [
-            {personalizationId: 'foo', groupId: ''},
+            {name: 'foo', groupId: ''},
             'Expected at least 1 character at path \'/groupId\', actual 0.',
         ],
         [
-            {personalizationId: 'foo', groupId: 'x'.repeat(51)},
+            {name: 'foo', groupId: 'x'.repeat(51)},
             'Expected at most 50 characters at path \'/groupId\', actual 51.',
         ],
         [
-            {personalizationId: 'foo', groupId: null},
+            {name: 'foo', groupId: null},
             'Expected value of type string at path \'/groupId\', actual null.',
+        ],
+        [
+            {name: 'foo', details: null},
+            'Expected value of type object at path \'/details\', actual null.',
+        ],
+        [
+            {name: 'foo', details: {'@bar': 1}},
+            'Invalid identifier format at path \'/details/@bar\'.',
+        ],
+        [
+            {name: 'foo', details: {looooooooooooooongKey: 'baz'}},
+            'Expected at most 20 characters at path \'/details/looooooooooooooongKey\', actual 21.',
+        ],
+        [
+            {name: 'foo', details: {longString: 'x'.repeat(301)}},
+            'Expected at most 300 characters at path \'/details/longString\', actual 301.',
+        ],
+        [
+            {name: 'foo', details: {bar: []}},
+            'Expected value of type null, boolean, number or string at path \'/details/bar\', actual array.',
+        ],
+        [
+            {name: 'foo', details: {bar: {}}},
+            'Expected value of type null, boolean, number or string at path \'/details/bar\', actual Object.',
+        ],
+        [
+            {
+                name: 'foo',
+                details: {
+                    a: 1,
+                    b: 2,
+                    c: 3,
+                    d: 4,
+                    e: 5,
+                    f: 6,
+                    g: 7,
+                    h: 8,
+                    i: 9,
+                    j: 10,
+                    k: 11,
+                },
+            },
+            'Expected at most 10 entries at path \'/details\', actual 11.',
         ],
     ])('should not allow %s', (value: object, message: string) => {
         function validate(): void {
-            personalizationApplied.validate(value);
+            eventOccurred.validate(value);
         }
 
         expect(validate).toThrow(Error);
