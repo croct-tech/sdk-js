@@ -264,7 +264,6 @@ describe('The cart schema', () => {
     test.each([
         [minimalCart],
         [{
-            cartId: 'f0b96546-be9c-4aa9-b672-64f0dcc57804',
             currency: 'brl',
             items: [
                 {
@@ -310,7 +309,6 @@ describe('The cart schema', () => {
     test.each([
         [
             {
-                cartId: 'f0b96546-be9c-4aa9-b672-64f0dcc57804',
                 total: 776.49,
                 items: [minimalCartItem],
             },
@@ -318,7 +316,6 @@ describe('The cart schema', () => {
         ],
         [
             {
-                cartId: 'f0b96546-be9c-4aa9-b672-64f0dcc57804',
                 currency: 'brl',
                 items: [minimalCartItem],
             },
@@ -326,29 +323,10 @@ describe('The cart schema', () => {
         ],
         [
             {
-                cartId: 'f0b96546-be9c-4aa9-b672-64f0dcc57804',
                 currency: 'brl',
                 total: 776.49,
             },
             'Missing property \'/items\'.',
-        ],
-        [
-            {
-                cartId: '',
-                currency: 'brl',
-                total: 776.49,
-                items: [minimalCartItem],
-            },
-            'Expected at least 1 character at path \'/cartId\', actual 0.',
-        ],
-        [
-            {
-                cartId: 'x'.repeat(51),
-                currency: 'brl',
-                total: 776.49,
-                items: [minimalCartItem],
-            },
-            'Expected at most 50 characters at path \'/cartId\', actual 51',
         ],
         [
             {
@@ -615,7 +593,6 @@ describe('The order schema', () => {
     test.each([
         [minimalOrder],
         [{
-            cartId: 'f0b96546-be9c-4aa9-b672-64f0dcc57804',
             orderId: 'b76c0ef6-9520-4107-9de3-11110829588e',
             currency: 'brl',
             items: [
@@ -715,26 +692,6 @@ describe('The order schema', () => {
                 total: 776.49,
             },
             'Missing property \'/items\'.',
-        ],
-        [
-            {
-                cartId: '',
-                orderId: 'b76c0ef6-9520-4107-9de3-11110829588e',
-                currency: 'brl',
-                total: 776.49,
-                items: [minimalOrderItem],
-            },
-            'Expected at least 1 character at path \'/cartId\', actual 0.',
-        ],
-        [
-            {
-                cartId: 'x'.repeat(51),
-                orderId: 'b76c0ef6-9520-4107-9de3-11110829588e',
-                currency: 'brl',
-                total: 776.49,
-                items: [minimalOrderItem],
-            },
-            'Expected at most 50 characters at path \'/cartId\', actual 51',
         ],
         [
             {
