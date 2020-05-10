@@ -19,6 +19,7 @@ export type Configuration = {
     token?: string,
     userId?: string,
     eventMetadata?: {[key: string]: string},
+    logger?: Logger,
     trackerEndpointUrl?: string,
     evaluationEndpointUrl?: string,
     bootstrapEndpointUrl?: string,

@@ -65,6 +65,8 @@ describe('A SDK facade', () => {
     test('should load the SDK using the specified configuration', () => {
         const initialize = jest.spyOn(Sdk, 'init');
 
+        const logger = new NullLogger();
+
         SdkFacade.init({
             appId: appId,
             track: false,
@@ -74,6 +76,7 @@ describe('A SDK facade', () => {
             debug: false,
             tokenScope: 'isolated',
             token: Token.issue(appId, 'c4r0l').toString(),
+            logger: logger,
         });
 
         expect(initialize).toBeCalledWith({
@@ -83,6 +86,7 @@ describe('A SDK facade', () => {
             bootstrapEndpointUrl: 'https://api.croct.io/bootstrap',
             debug: false,
             tokenScope: 'isolated',
+            logger: logger,
         });
     });
 
