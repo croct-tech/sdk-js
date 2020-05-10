@@ -23,7 +23,7 @@
 
 ## Installation
 
-The SDK can be install via NPM. Before installing, make sure you are authenticated to the GitHub Packages. For more information, see ["Authenticating to GitHub Packages."](https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-to-github-packages)
+The SDK can be installed via NPM. Before installing, make sure you are authenticated to the GitHub Packages. For more information, see ["Authenticating to GitHub Packages."](https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-to-github-packages)
 
 Once authenticated, run the following command to install the latest version of the package: 
 
