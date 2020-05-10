@@ -110,8 +110,8 @@ export class Container {
 
     private createContext(): Context {
         return Context.load(
-            this.getInternalSessionStorage('context'),
-            this.getInternalApplicationStorage('context'),
+            this.getGlobalTabStorage('context'),
+            this.getGlobalBrowserStorage('context'),
             this.configuration.tokenScope,
         );
     }
@@ -176,7 +176,7 @@ export class Container {
 
         return new MonitoredQueue<string>(
             new CapacityRestrictedQueue(
-                new PersistentQueue(this.getInternalSessionStorage('queue'), tab.id),
+                new PersistentQueue(this.getGlobalTabStorage('queue'), tab.id),
                 this.configuration.beaconQueueSize,
             ),
             this.getLogger('BeaconQueue'),
@@ -197,19 +197,19 @@ export class Container {
         return new NullLogger();
     }
 
-    public getSessionStorage(namespace: string, ...subnamespace: string[]): Storage {
-        return this.getInternalSessionStorage('external', namespace, ...subnamespace);
+    public getTabStorage(namespace: string, ...subnamespace: string[]): Storage {
+        return this.getGlobalTabStorage('external', namespace, ...subnamespace);
     }
 
-    public getApplicationStorage(namespace: string, ...subnamespace: string[]): Storage {
-        return this.getInternalApplicationStorage('external', namespace, ...subnamespace);
+    public getBrowserStorage(namespace: string, ...subnamespace: string[]): Storage {
+        return this.getGlobalBrowserStorage('external', namespace, ...subnamespace);
     }
 
-    private getInternalSessionStorage(namespace: string, ...subnamespace: string[]): Storage {
+    private getGlobalTabStorage(namespace: string, ...subnamespace: string[]): Storage {
         return new NamespacedStorage(sessionStorage, this.resolveStorageNamespace(namespace, ...subnamespace));
     }
 
-    private getInternalApplicationStorage(namespace: string, ...subnamespace: string[]): Storage {
+    private getGlobalBrowserStorage(namespace: string, ...subnamespace: string[]): Storage {
         return new NamespacedStorage(localStorage, this.resolveStorageNamespace(namespace, ...subnamespace));
     }
 
