@@ -305,9 +305,9 @@ export interface EventOccurred extends AbstractEvent {
     name: string;
     testId?: string;
     groupId?: string;
-    personalizationId: string;
+    personalizationId?: string;
     audience?: string;
-    details: {[key: string]: string|number|boolean|null};
+    details?: {[key: string]: string|number|boolean|null};
 }
 
 export type MiscEvent =
