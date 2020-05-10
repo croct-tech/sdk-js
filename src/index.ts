@@ -7,6 +7,7 @@ import TrackerFacade from './facade/trackerFacade';
 import UserFacade from './facade/userFacade';
 import SdkFacade, {Configuration as SdkFacadeConfiguration} from './facade/sdkFacade';
 import Tracker, {Configuration as TrackerConfiguration, EventListener, EventInfo} from './tracker';
+import Tab from './tab';
 import {
     Event,
     EventType,
@@ -34,6 +35,7 @@ export {
     SdkConfiguration,
     Container,
     ContainerConfiguration,
+    Tab,
     EvaluatorFacade,
     EvaluationFacadeOptions,
     ContextFactory,
