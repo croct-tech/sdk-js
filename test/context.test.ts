@@ -27,14 +27,14 @@ describe('A context', () => {
     });
 
     test('should share token across all tabs if the token scope is global', () => {
-        const sessionStorage = new DumbStorage();
-        const applicationStorage = new DumbStorage();
+        const tabStorage = new DumbStorage();
+        const browserStorage = new DumbStorage();
 
-        const contextA = Context.load(sessionStorage, applicationStorage, 'global');
+        const contextA = Context.load(tabStorage, browserStorage, 'global');
 
         contextA.setToken(carolToken);
 
-        const contextB = Context.load(sessionStorage, applicationStorage, 'global');
+        const contextB = Context.load(tabStorage, browserStorage, 'global');
 
         expect(contextA.getToken()).toEqual(carolToken);
         expect(contextB.getToken()).toEqual(carolToken);
@@ -46,11 +46,11 @@ describe('A context', () => {
     });
 
     test('should share token across related tabs if the token scope is contextual', () => {
-        const sessionStorage = new DumbStorage();
-        const applicationStorage = new DumbStorage();
+        const tabStorage = new DumbStorage();
+        const browserStorage = new DumbStorage();
 
         // Open the tab A
-        const contextA = Context.load(sessionStorage, applicationStorage, 'contextual');
+        const contextA = Context.load(tabStorage, browserStorage, 'contextual');
 
         contextA.setToken(carolToken);
 
@@ -60,7 +60,7 @@ describe('A context', () => {
         tabEventEmulator.newTab();
 
         // Open tab B from tab A
-        const contextB = Context.load(sessionStorage, applicationStorage, 'contextual');
+        const contextB = Context.load(tabStorage, browserStorage, 'contextual');
 
         // Both tabs should have carol's token
         expect(contextA.getToken()).toEqual(carolToken);
@@ -75,7 +75,7 @@ describe('A context', () => {
         tabEventEmulator.newTab();
 
         // Open tab C from tab B
-        const contextC = Context.load(sessionStorage, applicationStorage, 'contextual');
+        const contextC = Context.load(tabStorage, browserStorage, 'contextual');
 
         // Both tab B and C should have the erick's token
         expect(contextA.getToken()).toEqual(carolToken);
@@ -88,7 +88,7 @@ describe('A context', () => {
         tabEventEmulator.newTab();
 
         // Open tab D from tab A
-        const contextD = Context.load(sessionStorage, applicationStorage, 'contextual');
+        const contextD = Context.load(tabStorage, browserStorage, 'contextual');
 
         // Both tab A and D should have the carol's token
         expect(contextA.getToken()).toEqual(carolToken);
@@ -98,14 +98,14 @@ describe('A context', () => {
     });
 
     test('should not share token across tabs if the token scope is isolated', () => {
-        const sessionStorage = new DumbStorage();
-        const applicationStorage = new DumbStorage();
+        const tabStorage = new DumbStorage();
+        const browserStorage = new DumbStorage();
 
-        const contextA = Context.load(sessionStorage, applicationStorage, 'isolated');
+        const contextA = Context.load(tabStorage, browserStorage, 'isolated');
 
         contextA.setToken(carolToken);
 
-        const contextB = Context.load(sessionStorage, applicationStorage, 'isolated');
+        const contextB = Context.load(tabStorage, browserStorage, 'isolated');
 
         expect(contextA.getToken()).toEqual(carolToken);
         expect(contextB.getToken()).toBeNull();

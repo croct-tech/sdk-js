@@ -328,7 +328,7 @@ describe('A SDK', () => {
         jest.spyOn(Storage.prototype, 'setItem');
 
         const sdk = Sdk.init(configuration);
-        const storage = sdk.getSessionStorage('foo', 'bar');
+        const storage = sdk.getTabStorage('foo', 'bar');
 
         storage.setItem('key', 'value');
 
@@ -336,11 +336,11 @@ describe('A SDK', () => {
         expect(window.sessionStorage.setItem).toHaveBeenCalledWith(namespacedKey, 'value');
     });
 
-    test('should provide an isolated application storage', () => {
+    test('should provide an isolated browser storage', () => {
         jest.spyOn(Storage.prototype, 'setItem');
 
         const sdk = Sdk.init(configuration);
-        const storage = sdk.getApplicationStorage('foo', 'bar');
+        const storage = sdk.getBrowserStorage('foo', 'bar');
 
         storage.setItem('key', 'value');
 

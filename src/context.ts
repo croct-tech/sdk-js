@@ -17,8 +17,8 @@ export default class Context {
         this.tokenStorage = tokenStorage;
     }
 
-    public static load(sessionStorage: Storage, applicationStorage: Storage, tokenScope: TokenScope): Context {
-        let tabId: string | null = sessionStorage.getItem('tab');
+    public static load(tabStorage: Storage, browserStorage: Storage, tokenScope: TokenScope): Context {
+        let tabId: string | null = tabStorage.getItem('tab');
         let newTab = false;
 
         if (tabId === null) {
@@ -28,20 +28,20 @@ export default class Context {
 
         const tab = new Tab(tabId, newTab);
 
-        sessionStorage.removeItem('tab');
+        tabStorage.removeItem('tab');
 
-        tab.addListener('unload', () => sessionStorage.setItem('tab', tab.id));
+        tab.addListener('unload', () => tabStorage.setItem('tab', tab.id));
 
         switch (tokenScope) {
             case 'isolated':
                 return new Context(tab, new InMemoryStorage());
 
             case 'global':
-                return new Context(tab, new PersistentStorage(applicationStorage));
+                return new Context(tab, new PersistentStorage(browserStorage));
 
             case 'contextual': {
-                const primaryStorage = new PersistentStorage(sessionStorage, `${tabId}.token`);
-                const secondaryStorage = new PersistentStorage(applicationStorage);
+                const primaryStorage = new PersistentStorage(tabStorage, `${tabId}.token`);
+                const secondaryStorage = new PersistentStorage(browserStorage);
 
                 if (tab.isNew) {
                     primaryStorage.setToken(secondaryStorage.getToken());

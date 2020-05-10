@@ -487,13 +487,13 @@ describe('A SDK facade', () => {
     });
 
     test('should provide an isolated session storage', () => {
-        const getSessionStorage = jest.fn(() => new DumbStorage());
+        const getTabStorage = jest.fn(() => new DumbStorage());
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'getSessionStorage').mockImplementation(getSessionStorage);
+                jest.spyOn(sdk, 'getTabStorage').mockImplementation(getTabStorage);
 
                 return sdk;
             });
@@ -503,19 +503,19 @@ describe('A SDK facade', () => {
             track: false,
         });
 
-        sdkFacade.getSessionStorage('a', 'b', 'c');
+        sdkFacade.getTabStorage('a', 'b', 'c');
 
-        expect(getSessionStorage).toHaveBeenLastCalledWith('a', 'b', 'c');
+        expect(getTabStorage).toHaveBeenLastCalledWith('a', 'b', 'c');
     });
 
-    test('should provide an isolated application storage', () => {
-        const getApplicationStorage = jest.fn(() => new DumbStorage());
+    test('should provide an isolated browser storage', () => {
+        const getBrowserStorage = jest.fn(() => new DumbStorage());
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'getApplicationStorage').mockImplementation(getApplicationStorage);
+                jest.spyOn(sdk, 'getBrowserStorage').mockImplementation(getBrowserStorage);
 
                 return sdk;
             });
@@ -525,9 +525,9 @@ describe('A SDK facade', () => {
             track: false,
         });
 
-        sdkFacade.getApplicationStorage('a', 'b', 'c');
+        sdkFacade.getBrowserStorage('a', 'b', 'c');
 
-        expect(getApplicationStorage).toHaveBeenLastCalledWith('a', 'b', 'c');
+        expect(getBrowserStorage).toHaveBeenLastCalledWith('a', 'b', 'c');
     });
 
     test('should close the SDK on close', async () => {

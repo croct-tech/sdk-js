@@ -112,12 +112,12 @@ export default class Sdk {
         return this.container.getLogger(...namespace);
     }
 
-    public getSessionStorage(namespace: string, ...subnamespace: string[]): Storage {
-        return this.container.getSessionStorage(namespace, ...subnamespace);
+    public getTabStorage(namespace: string, ...subnamespace: string[]): Storage {
+        return this.container.getTabStorage(namespace, ...subnamespace);
     }
 
-    public getApplicationStorage(namespace: string, ...subnamespace: string[]): Storage {
-        return this.container.getApplicationStorage(namespace, ...subnamespace);
+    public getBrowserStorage(namespace: string, ...subnamespace: string[]): Storage {
+        return this.container.getBrowserStorage(namespace, ...subnamespace);
     }
 
     public async close(): Promise<void> {

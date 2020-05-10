@@ -87,7 +87,7 @@ test('should flush the beacon queue on initialization', async () => {
     expect(server).toReceiveMessage(expect.objectContaining({payload: payload}));
 });
 
-test('should provide an isolated session storage', () => {
+test('should provide an isolated tab storage', () => {
     const container = new Container({
         ...configuration,
         debug: true,
@@ -96,7 +96,7 @@ test('should provide an isolated session storage', () => {
     jest.spyOn(window.Storage.prototype, 'setItem');
     jest.spyOn(window.Storage.prototype, 'removeItem');
 
-    const storage = container.getSessionStorage('session', 'foo');
+    const storage = container.getTabStorage('session', 'foo');
     storage.setItem('key', 'value');
     storage.removeItem('key');
 
@@ -106,7 +106,7 @@ test('should provide an isolated session storage', () => {
     expect(window.sessionStorage.removeItem).toHaveBeenCalledWith(namespacedKey);
 });
 
-test('should provide an isolated application storage', () => {
+test('should provide an isolated browser storage', () => {
     const container = new Container({
         ...configuration,
         debug: true,
@@ -115,7 +115,7 @@ test('should provide an isolated application storage', () => {
     jest.spyOn(window.Storage.prototype, 'setItem');
     jest.spyOn(window.Storage.prototype, 'removeItem');
 
-    const storage = container.getApplicationStorage('app', 'foo');
+    const storage = container.getBrowserStorage('app', 'foo');
     storage.setItem('key', 'value');
     storage.removeItem('key');
 
