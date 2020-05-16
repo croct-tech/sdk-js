@@ -35,11 +35,11 @@ jobs:
         run: |-
           npm run build
           cd build
-          sed -i -e "s~<@version@>~${GITHUB_REF##*/}~" constants.json
-          sed -i -e "s~<@trackerEndpointUrl@>~${TRACKER_ENDPOINT}~" constants.json
-          sed -i -e "s~<@evaluationEndpointUrl@>~${EVALUATION_ENDPOINT}~" constants.json
-          sed -i -e "s~<@bootstrapEndpointUrl@>~${BOOTSTRAP_ENDPOINT}~" constants.json
-          sed -i -e "s~<@maxExpressionLength@>~${MAX_EXPRESSION_LENGHT}~" constants.json
+          sed -i -e "s~<@version@>~${GITHUB_REF##*/}~" constants.js
+          sed -i -e "s~<@trackerEndpointUrl@>~${TRACKER_ENDPOINT}~" constants.js
+          sed -i -e "s~<@evaluationEndpointUrl@>~${EVALUATION_ENDPOINT}~" constants.js
+          sed -i -e "s~<@bootstrapEndpointUrl@>~${BOOTSTRAP_ENDPOINT}~" constants.js
+          sed -i -e "s~<@maxExpressionLength@>~${MAX_EXPRESSION_LENGHT}~" constants.js
 
       - name: Publish to NPM
         run: |-
