@@ -1,4 +1,4 @@
-import {Queue} from '../queue';
+import {Queue} from './index';
 
 export default class CapacityRestrictedQueue<T> implements Queue<T> {
     private readonly queue: Queue<T>;

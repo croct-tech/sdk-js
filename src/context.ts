@@ -1,8 +1,8 @@
 import Token, {TokenStorage} from './token';
 import Tab from './tab';
-import PersistentStorage from './tokenStorage/persistentStorage';
-import ReplicatedStorage from './tokenStorage/replicatedStorage';
-import InMemoryStorage from './tokenStorage/inMemoryStorage';
+import PersistentStorage from './token/persistentStorage';
+import ReplicatedStorage from './token/replicatedStorage';
+import InMemoryStorage from './token/inMemoryStorage';
 import {uuid4} from './uuid';
 
 export type TokenScope = 'isolated' | 'global' | 'contextual';

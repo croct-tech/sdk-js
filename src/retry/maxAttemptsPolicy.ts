@@ -1,4 +1,4 @@
-import {RetryPolicy} from '../retryPolicy';
+import {RetryPolicy} from './index';
 
 export default class MaxAttemptsPolicy<T> implements RetryPolicy<T> {
     private readonly maxAttempts: number;

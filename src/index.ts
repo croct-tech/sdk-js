@@ -1,21 +1,14 @@
 import Sdk, {Configuration as SdkConfiguration} from './sdk';
 import {VERSION} from './constants';
 import {Configuration as ContainerConfiguration, Container} from './container';
-import Logger from './logger';
+import Logger from './logging';
 import SessionFacade from './facade/sessionFacade';
 import TrackerFacade from './facade/trackerFacade';
 import UserFacade from './facade/userFacade';
 import SdkFacade, {Configuration as SdkFacadeConfiguration} from './facade/sdkFacade';
-import Tracker, {Configuration as TrackerConfiguration, EventListener, EventInfo} from './tracker';
+import Tracker, {Configuration as TrackerConfiguration, EventInfo, EventListener} from './tracker';
 import Tab from './tab';
-import {
-    Event,
-    EventType,
-    ExternalEvent,
-    ExternalEventType,
-    ExternalEventPayload,
-    EventContext,
-} from './event';
+import {Event, EventContext, EventType, ExternalEvent, ExternalEventPayload, ExternalEventType} from './event';
 import EvaluatorFacade, {
     ContextFactory,
     EvaluationOptions as EvaluationFacadeOptions,

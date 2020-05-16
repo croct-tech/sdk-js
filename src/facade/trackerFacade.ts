@@ -1,16 +1,16 @@
-import {ExternalEvent, ExternalEventType, ExternalEventPayload} from '../event';
+import {ExternalEvent, ExternalEventPayload, ExternalEventType} from '../event';
 import {formatCause} from '../error';
 import Tracker, {EventListener} from '../tracker';
 import {
-    cartViewed,
     cartModified,
+    cartViewed,
     checkoutStarted,
-    orderPlaced,
-    productViewed,
-    userSignedUp,
-    testGroupAssigned,
     eventOccurred,
     goalCompleted,
+    orderPlaced,
+    productViewed,
+    testGroupAssigned,
+    userSignedUp,
 } from '../schema/eventSchemas';
 
 const eventSchemas = {
