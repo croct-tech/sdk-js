@@ -1,4 +1,4 @@
-import Logger from '../logging';
+import {Logger} from '../logging';
 import {ChannelListener, DuplexChannel} from './index';
 import {formatCause} from '../error';
 import NullLogger from '../logging/nullLogger';

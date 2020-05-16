@@ -1,6 +1,6 @@
 import WS from 'jest-websocket-mock';
 import {SocketChannel} from '../../src/channel/socketChannel';
-import Logger from '../../src/logging';
+import {Logger} from '../../src/logging';
 
 describe('A socket channel', () => {
     const url = 'ws://localhost:8080';

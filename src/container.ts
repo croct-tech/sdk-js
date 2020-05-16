@@ -1,4 +1,4 @@
-import Logger from './logging';
+import {Logger} from './logging';
 import Context, {TokenScope} from './context';
 import ConsoleLogger from './logging/consoleLogger';
 import NullLogger from './logging/nullLogger';

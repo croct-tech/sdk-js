@@ -8,7 +8,7 @@ import {formatCause} from '../error';
 import {configurationSchema} from '../schema/sdkFacadeSchemas';
 import Sdk from '../sdk';
 import SessionFacade from './sessionFacade';
-import Logger from '../logging';
+import {Logger} from '../logging';
 import {ExternalEvent, ExternalEventPayload, ExternalEventType} from '../event';
 
 export type Configuration = {

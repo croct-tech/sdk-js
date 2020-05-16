@@ -1,6 +1,6 @@
 import {OutputChannel} from './index';
 import {Queue} from '../queue';
-import Logger from '../logging';
+import {Logger} from '../logging';
 import NullLogger from '../logging/nullLogger';
 
 export default class QueuedChannel<T> implements OutputChannel<T> {

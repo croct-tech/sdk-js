@@ -4,7 +4,7 @@ import Sdk, {Configuration} from '../src/sdk';
 import NullLogger from '../src/logging/nullLogger';
 import Token from '../src/token';
 import TabEventEmulator from './utils/tabEventEmulator';
-import Logger from '../src/logging';
+import {Logger} from '../src/logging';
 import {BeaconPayload, NothingChanged} from '../src/event';
 import {VERSION} from '../src/constants';
 
