@@ -1,4 +1,4 @@
-import MaxAttemptsPolicy from '../../src/retryPolicy/maxAttemptsPolicy';
+import MaxAttemptsPolicy from '../../src/retry/maxAttemptsPolicy';
 
 describe('A max-attempts policy', () => {
     test('should ensure the delay is non-negative', () => {

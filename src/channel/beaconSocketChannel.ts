@@ -1,7 +1,7 @@
-import {ChannelListener, DuplexChannel} from '../channel';
+import {ChannelListener, DuplexChannel} from './index';
 import {Envelope} from './guaranteedChannel';
-import Logger, {LoggerFactory} from '../logger';
-import NullLogger from '../logger/nullLogger';
+import Logger, {LoggerFactory} from '../logging';
+import NullLogger from '../logging/nullLogger';
 import {formatCause} from '../error';
 
 export interface DuplexChannelFactory {

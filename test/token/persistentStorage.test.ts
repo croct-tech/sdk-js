@@ -1,5 +1,5 @@
 import Token from '../../src/token';
-import PersistentStorage from '../../src/tokenStorage/persistentStorage';
+import PersistentStorage from '../../src/token/persistentStorage';
 import {DumbStorage} from '../utils/dumbStorage';
 
 describe('A persistent storage', () => {

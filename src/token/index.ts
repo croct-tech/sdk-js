@@ -1,15 +1,15 @@
-import {base64UrlDecode, base64UrlEncode} from './base64Url';
-import tokenSchema from './schema/tokenSchema';
-import {formatCause} from './error';
+import {base64UrlDecode, base64UrlEncode} from '../base64Url';
+import tokenSchema from '../schema/tokenSchema';
+import {formatCause} from '../error';
 
-type Headers = {
+export type Headers = {
     typ: string,
     alg: string,
     kid?: string,
     appId: string,
 };
 
-type Claims = {
+export type Claims = {
     iss: string,
     aud: string,
     iat: number,

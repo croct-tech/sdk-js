@@ -1,7 +1,7 @@
-import {OutputChannel} from '../channel';
-import Logger from '../logger';
-import {RetryPolicy} from '../retryPolicy';
-import NullLogger from '../logger/nullLogger';
+import {OutputChannel} from './index';
+import Logger from '../logging';
+import {RetryPolicy} from '../retry';
+import NullLogger from '../logging/nullLogger';
 
 type Configuration<T> = {
     channel: OutputChannel<T>,

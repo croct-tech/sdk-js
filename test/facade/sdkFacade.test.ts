@@ -8,7 +8,7 @@ import SessionFacade from '../../src/facade/sessionFacade';
 import TrackerFacade from '../../src/facade/trackerFacade';
 import Evaluator from '../../src/evaluator';
 import Tab from '../../src/tab';
-import NullLogger from '../../src/logger/nullLogger';
+import NullLogger from '../../src/logging/nullLogger';
 import {ExternalEvent} from '../../src';
 import {DumbStorage} from '../utils/dumbStorage';
 

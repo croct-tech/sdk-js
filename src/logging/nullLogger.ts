@@ -1,4 +1,4 @@
-import Logger from '../logger';
+import Logger from './index';
 
 export default class NullLogger implements Logger {
     public debug(): void {

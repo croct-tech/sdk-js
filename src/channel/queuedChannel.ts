@@ -1,7 +1,7 @@
-import {OutputChannel} from '../channel';
+import {OutputChannel} from './index';
 import {Queue} from '../queue';
-import Logger from '../logger';
-import NullLogger from '../logger/nullLogger';
+import Logger from '../logging';
+import NullLogger from '../logging/nullLogger';
 
 export default class QueuedChannel<T> implements OutputChannel<T> {
     private readonly channel: OutputChannel<T>;

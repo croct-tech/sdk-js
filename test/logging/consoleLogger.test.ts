@@ -1,4 +1,4 @@
-import ConsoleLogger from '../../src/logger/consoleLogger';
+import ConsoleLogger from '../../src/logging/consoleLogger';
 
 describe('A console logger', () => {
     afterEach(() => {

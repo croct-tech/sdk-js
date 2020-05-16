@@ -1,4 +1,4 @@
-import {OutputChannel} from '../channel';
+import {OutputChannel} from './index';
 import {Transformer} from '../transformer';
 
 export default class EncodedChannel<D, E> implements OutputChannel<D> {

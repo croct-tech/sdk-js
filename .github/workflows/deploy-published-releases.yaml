@@ -9,6 +9,7 @@ env:
   BOOTSTRAP_ENDPOINT: https://api.croct.io/client/web/bootstrap
   TRACKER_ENDPOINT: wss://api.croct.io/client/web/connect
   EVALUATION_ENDPOINT: https://api.croct.io/client/web/evaluate
+  MAX_EXPRESSION_LENGHT: 300
 
 jobs:
   deploy:
@@ -30,21 +31,21 @@ jobs:
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Build bundles
+      - name: Build package
         run: |-
+          npm run build
+          cd build
+          sed -i -e "s~<@version@>~${GITHUB_REF##*/}~" constants.json
+          sed -i -e "s~<@trackerEndpointUrl@>~${TRACKER_ENDPOINT}~" constants.json
+          sed -i -e "s~<@evaluationEndpointUrl@>~${EVALUATION_ENDPOINT}~" constants.json
+          sed -i -e "s~<@bootstrapEndpointUrl@>~${BOOTSTRAP_ENDPOINT}~" constants.json
+          sed -i -e "s~<@maxExpressionLength@>~${MAX_EXPRESSION_LENGHT}~" constants.json
+
+      - name: Publish to NPM
+      - run: |-
+          cp package.json README.md build/
+          cd build
           sed -i -e "s~\"version\": \"0.0.0-dev\"~\"version\": \"${GITHUB_REF##*/}\"~" package.json
-          npx rollup -c rollup.config.js \
-            --config-bootstrap-endpoint ${BOOTSTRAP_ENDPOINT} \
-            --config-tracker-endpoint ${TRACKER_ENDPOINT} \
-            --config-evaluation-endpoint ${EVALUATION_ENDPOINT}
-          rm -r build/declarations
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v1
-        with:
-          name: bundle
-          path: build
-
-      - run: npm publish
+          npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-import Token, {TokenStorage} from '../token';
+import Token, {TokenStorage} from './index';
 
 export default class PersistentStorage implements TokenStorage {
     private readonly storage: Storage;

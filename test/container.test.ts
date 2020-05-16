@@ -1,8 +1,8 @@
 import WS from 'jest-websocket-mock';
 import * as fetchMock from 'fetch-mock';
 import {Configuration, Container} from '../src/container';
-import NullLogger from '../src/logger/nullLogger';
-import Logger from '../src/logger';
+import NullLogger from '../src/logging/nullLogger';
+import Logger from '../src/logging';
 import {BeaconPayload} from '../src/event';
 
 afterEach(() => {
