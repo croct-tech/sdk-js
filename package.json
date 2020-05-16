@@ -43,8 +43,8 @@
     "typescript": "^3.7.5"
   },
   "files": [
-    "*.js",
-    "*.ts"
+    "**/*.js",
+    "**/*.ts"
   ],
   "browserslist": [
     "last 1 version"

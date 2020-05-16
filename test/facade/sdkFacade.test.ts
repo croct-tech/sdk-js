@@ -9,7 +9,7 @@ import TrackerFacade from '../../src/facade/trackerFacade';
 import Evaluator from '../../src/evaluator';
 import Tab from '../../src/tab';
 import NullLogger from '../../src/logging/nullLogger';
-import {ExternalEvent} from '../../src';
+import {ExternalEvent} from '../../src/event';
 import {DumbStorage} from '../utils/dumbStorage';
 
 describe('A SDK facade', () => {
