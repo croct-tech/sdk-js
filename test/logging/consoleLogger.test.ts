@@ -6,7 +6,7 @@ describe('A console logger', () => {
     });
 
     test('should log debug messages to the console', () => {
-        const consoleDebug = jest.spyOn(global.console, 'debug').mockImplementation();
+        const consoleDebug = jest.spyOn(window.console, 'debug').mockImplementation();
 
         const logger = new ConsoleLogger();
 
@@ -16,7 +16,7 @@ describe('A console logger', () => {
     });
 
     test('should log debug messages prefixed with a namespace to the console', () => {
-        const consoleDebug = jest.spyOn(global.console, 'debug').mockImplementation();
+        const consoleDebug = jest.spyOn(window.console, 'debug').mockImplementation();
 
         const logger = new ConsoleLogger('foo');
 
@@ -26,7 +26,7 @@ describe('A console logger', () => {
     });
 
     test('should log info messages to the console', () => {
-        const consoleInfo = jest.spyOn(global.console, 'info').mockImplementation();
+        const consoleInfo = jest.spyOn(window.console, 'info').mockImplementation();
 
         const logger = new ConsoleLogger();
 
@@ -36,7 +36,7 @@ describe('A console logger', () => {
     });
 
     test('should log info messages prefixed with a namespace to the console', () => {
-        const consoleInfo = jest.spyOn(global.console, 'info').mockImplementation();
+        const consoleInfo = jest.spyOn(window.console, 'info').mockImplementation();
 
         const logger = new ConsoleLogger('foo');
 
@@ -46,7 +46,7 @@ describe('A console logger', () => {
     });
 
     test('should log warn messages to the console', () => {
-        const consoleWarn = jest.spyOn(global.console, 'warn').mockImplementation();
+        const consoleWarn = jest.spyOn(window.console, 'warn').mockImplementation();
 
         const logger = new ConsoleLogger();
 
@@ -56,7 +56,7 @@ describe('A console logger', () => {
     });
 
     test('should log warn messages prefixed with a namespace to the console', () => {
-        const consoleWarn = jest.spyOn(global.console, 'warn').mockImplementation();
+        const consoleWarn = jest.spyOn(window.console, 'warn').mockImplementation();
 
         const logger = new ConsoleLogger('foo');
 
@@ -66,7 +66,7 @@ describe('A console logger', () => {
     });
 
     test('should log error messages to the console', () => {
-        const consoleError = jest.spyOn(global.console, 'error').mockImplementation();
+        const consoleError = jest.spyOn(window.console, 'error').mockImplementation();
 
         const logger = new ConsoleLogger();
 
@@ -76,7 +76,7 @@ describe('A console logger', () => {
     });
 
     test('should log error messages prefixed with a namespace to the console', () => {
-        const consoleError = jest.spyOn(global.console, 'error').mockImplementation();
+        const consoleError = jest.spyOn(window.console, 'error').mockImplementation();
 
         const logger = new ConsoleLogger('foo');
 
