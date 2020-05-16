@@ -1,4 +1,4 @@
-import BackoffPolicy from '../../src/retryPolicy/backoffPolicy';
+import BackoffPolicy from '../../src/retry/backoffPolicy';
 
 describe('A backoff policy', () => {
     test('should not allow a negative minimum retry delay', () => {

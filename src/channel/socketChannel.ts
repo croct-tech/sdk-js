@@ -1,7 +1,7 @@
-import Logger from '../logger';
-import {ChannelListener, DuplexChannel} from '../channel';
+import Logger from '../logging';
+import {ChannelListener, DuplexChannel} from './index';
 import {formatCause} from '../error';
-import NullLogger from '../logger/nullLogger';
+import NullLogger from '../logging/nullLogger';
 
 type Input = string | ArrayBufferLike | Blob | ArrayBufferView;
 type Output = string | ArrayBuffer | Blob;

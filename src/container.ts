@@ -1,9 +1,9 @@
-import Logger from './logger';
+import Logger from './logging';
 import Context, {TokenScope} from './context';
-import ConsoleLogger from './logger/consoleLogger';
-import NullLogger from './logger/nullLogger';
+import ConsoleLogger from './logging/consoleLogger';
+import NullLogger from './logging/nullLogger';
 import NamespacedStorage from './namespacedStorage';
-import BackoffPolicy from './retryPolicy/backoffPolicy';
+import BackoffPolicy from './retry/backoffPolicy';
 import {OutputChannel} from './channel';
 import PersistentQueue from './queue/persistentQueue';
 import {GuaranteedChannel, TimeStamper} from './channel/guaranteedChannel';
@@ -18,7 +18,7 @@ import {SocketChannel} from './channel/socketChannel';
 import Token, {TokenProvider} from './token';
 import Tracker from './tracker';
 import Evaluator from './evaluator';
-import NamespacedLogger from './logger/namespacedLogger';
+import NamespacedLogger from './logging/namespacedLogger';
 import {encodeJson} from './transformer';
 
 export type Configuration = {

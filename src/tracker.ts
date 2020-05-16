@@ -1,8 +1,8 @@
-import Logger from './logger';
+import Logger from './logging';
 import Context from './context';
 import Tab, {TabEvent, TabUrlChangeEvent, TabVisibilityChangeEvent} from './tab';
 import {OutputChannel} from './channel';
-import NullLogger from './logger/nullLogger';
+import NullLogger from './logging/nullLogger';
 import Token from './token';
 import {formatCause} from './error';
 import {

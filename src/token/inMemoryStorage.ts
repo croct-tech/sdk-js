@@ -1,4 +1,4 @@
-import Token, {TokenStorage} from '../token';
+import Token, {TokenStorage} from './index';
 
 export default class InMemoryStorage implements TokenStorage {
     private token: Token | null = null;

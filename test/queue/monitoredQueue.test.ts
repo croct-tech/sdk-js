@@ -1,6 +1,6 @@
 import MonitoredQueue, {Status} from '../../src/queue/monitoredQueue';
 import InMemoryQueue from '../../src/queue/inMemoryQueue';
-import NullLogger from '../../src/logger/nullLogger';
+import NullLogger from '../../src/logging/nullLogger';
 import CapacityRestrictedQueue from '../../src/queue/capacityRestrictedQueue';
 
 describe('A monitored queue', () => {

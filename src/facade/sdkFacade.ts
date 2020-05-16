@@ -1,4 +1,4 @@
-import EvaluatorFacade, {TabContextFactory, EvaluationOptions} from './evaluatorFacade';
+import EvaluatorFacade, {EvaluationOptions, TabContextFactory} from './evaluatorFacade';
 import TrackerFacade from './trackerFacade';
 import Context, {TokenScope} from '../context';
 import UserFacade from './userFacade';
@@ -8,7 +8,7 @@ import {formatCause} from '../error';
 import {configurationSchema} from '../schema/sdkFacadeSchemas';
 import Sdk from '../sdk';
 import SessionFacade from './sessionFacade';
-import Logger from '../logger';
+import Logger from '../logging';
 import {ExternalEvent, ExternalEventPayload, ExternalEventType} from '../event';
 
 export type Configuration = {

@@ -1,4 +1,4 @@
-import {ChannelListener, DuplexChannel} from '../channel';
+import {ChannelListener, DuplexChannel} from './index';
 
 export default class SandboxChannel<I, O> implements DuplexChannel<I, O> {
     private readonly listeners: ChannelListener<I>[] = [];

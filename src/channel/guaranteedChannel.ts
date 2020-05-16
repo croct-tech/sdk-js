@@ -1,6 +1,6 @@
-import Logger from '../logger';
-import {DuplexChannel, OutputChannel} from '../channel';
-import NullLogger from '../logger/nullLogger';
+import Logger from '../logging';
+import {DuplexChannel, OutputChannel} from './index';
+import NullLogger from '../logging/nullLogger';
 
 export type MessageStamper<M, S> = {
     generate(message: M): S,

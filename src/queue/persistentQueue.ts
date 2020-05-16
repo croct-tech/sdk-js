@@ -1,4 +1,4 @@
-import {Queue} from '../queue';
+import {Queue} from './index';
 
 export default class PersistentQueue<T> implements Queue<T> {
     private cache: T[];
