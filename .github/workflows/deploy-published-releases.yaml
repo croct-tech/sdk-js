@@ -42,7 +42,7 @@ jobs:
           sed -i -e "s~<@maxExpressionLength@>~${MAX_EXPRESSION_LENGHT}~" constants.json
 
       - name: Publish to NPM
-      - run: |-
+        run: |-
           cp package.json README.md build/
           cd build
           sed -i -e "s~\"version\": \"0.0.0-dev\"~\"version\": \"${GITHUB_REF##*/}\"~" package.json
