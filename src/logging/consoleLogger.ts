@@ -1,4 +1,4 @@
-import Logger from './index';
+import {Logger} from './index';
 
 type ConsoleMethod = {
     (message?: any, ...optionalParams: any[]): void,

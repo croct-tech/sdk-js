@@ -1,4 +1,4 @@
-import Logger from './logging';
+import {Logger} from './logging';
 import Context from './context';
 import Tab, {TabEvent, TabUrlChangeEvent, TabVisibilityChangeEvent} from './tab';
 import {OutputChannel} from './channel';

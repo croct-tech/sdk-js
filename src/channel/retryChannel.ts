@@ -1,5 +1,5 @@
 import {OutputChannel} from './index';
-import Logger from '../logging';
+import {Logger} from '../logging';
 import {RetryPolicy} from '../retry';
 import NullLogger from '../logging/nullLogger';
 

@@ -1,5 +1,5 @@
 import NamespacedLogger from '../../src/logging/namespacedLogger';
-import Logger from '../../src/logging';
+import {Logger} from '../../src/logging';
 
 describe('A namespaced logger', () => {
     let innerLogger: Logger;
