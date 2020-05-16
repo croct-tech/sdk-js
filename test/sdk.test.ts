@@ -6,7 +6,7 @@ import Token from '../src/token';
 import TabEventEmulator from './utils/tabEventEmulator';
 import Logger from '../src/logging';
 import {BeaconPayload, NothingChanged} from '../src/event';
-import {VERSION} from '../src';
+import {VERSION} from '../src/constants';
 
 jest.mock('../src/constants', () => ({
     VERSION: '0.0.1-test',
