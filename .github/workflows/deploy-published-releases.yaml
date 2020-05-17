@@ -49,6 +49,7 @@ jobs:
       - name: Publish pre-release to NPM
         if: ${{ github.event.release.prerelease }}
         run: |-
+          cd build
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
           npm publish --access public --tag next
         env:
@@ -57,6 +58,7 @@ jobs:
       - name: Publish release to NPM
         if: ${{ !github.event.release.prerelease }}
         run: |-
+          cd build
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
           npm publish --access public
         env:
