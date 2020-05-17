@@ -50,8 +50,6 @@ jobs:
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: npm ci
 
-      - run: npm run validate
-
   lint:
     runs-on: ubuntu-18.04
     steps:
