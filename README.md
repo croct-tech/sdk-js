@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://croct.com">
-        <img src="https://github.com/croct-tech/repository-template-php/raw/master/images/logo.svg" alt="Croct" width="80" height="80" />
+        <img src="https://github.com/croct-tech/repository-template-typescript/raw/master/images/logo.svg" alt="Croct" width="80" height="80" />
     </a>
     <br />
     <strong>SDK JS</strong>
