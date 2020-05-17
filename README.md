@@ -5,13 +5,14 @@
     <br />
     <strong>SDK JS</strong>
     <br />
-    The official Croct SDK for JavaScript, available for browsers and mobile devices.
+    The official Croct SDK for JavaScript.
 </p>
 <p align="center">
+<a href="https://www.npmjs.com/package/@croct/sdk"><img alt="Version" src="https://img.shields.io/npm/v/@croct/sdk"/></a>
+    <a href="https://bundlephobia.com/result?p=@croct/sdk"><img alt="Gzipped Size" src="https://img.shields.io/bundlephobia/minzip/@croct/sdk"/></a>
     <img alt="Build" src="https://github.com/croct-tech/sdk-js/workflows/Validations/badge.svg" />
     <a href="https://codeclimate.com/repos/5e7251b3172af05fe9000e27/maintainability"><img alt="Maintainability" src="https://api.codeclimate.com/v1/badges/c44df78a3ed891af11bb/maintainability" /></a>
     <a href="https://codeclimate.com/repos/5e7251b3172af05fe9000e27/test_coverage"><img alt="Coverage" src="https://api.codeclimate.com/v1/badges/c44df78a3ed891af11bb/test_coverage" /></a>
-    <img alt="License" src="https://img.shields.io/badge/license-proprietary-lightgrey" />
     <br />
     <br />
     <a href="https://github.com/croct-tech/sdk-js/releases">Releases</a>
@@ -23,12 +24,10 @@
 
 ## Installation
 
-The SDK can be installed via NPM. Before installing, make sure you are authenticated to the GitHub Packages. For more information, see ["Authenticating to GitHub Packages."](https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-to-github-packages)
-
-Once authenticated, run the following command to install the latest version of the package: 
+The preferred way to install the Croct SDK is to use the NPM package manager. Simply enter the following command into a terminal window:
 
 ```sh
-npm install @croct-tech/sdk
+npm install @croct/sdk
 ```
 
 ## Contributing
@@ -52,7 +51,6 @@ Then, to run all tests:
 npm test
 ```
 
-## Copyright Notice
-Copyright © 2015-2020 Croct Limited, All Rights Reserved.
+## License
 
-All information contained herein is, and remains the property of Croct Limited. The intellectual, design and technical concepts contained herein are proprietary to Croct Limited s and may be covered by U.S. and Foreign Patents, patents in process, and are protected by trade secret or copyright law. Dissemination of this information or reproduction of this material is strictly forbidden unless prior written permission is obtained from Croct Limited.
+This project is released under the [MIT License](LICENSE).

@@ -1,13 +1,13 @@
 {
-  "name": "@croct-tech/sdk",
+  "name": "@croct/sdk",
   "version": "0.0.0-dev",
   "description": "Croct SDK for JavaScript.",
+  "license": "MIT",
   "author": {
     "name": "Croct",
     "email": "sdk-js+lib@croct.com",
     "url": "https://croct.com"
   },
-  "license": "UNLICENSED",
   "main": "index.js",
   "types": "index.d.ts",
   "repository": {
@@ -19,7 +19,6 @@
   },
   "homepage": "https://github.com/croct-tech/sdk-js#readme",
   "scripts": {
-    "validate": "tsc --noEmit",
     "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
     "lint-fix": "eslint --fix --fix-type suggestion --fix-type problem 'src/**/*.ts' 'test/**/*.ts'",
     "test": "jest -c jest.config.js --coverage",
@@ -48,8 +47,5 @@
   ],
   "browserslist": [
     "last 1 version"
-  ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  }
+  ]
 }
