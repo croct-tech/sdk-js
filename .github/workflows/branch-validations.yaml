@@ -26,11 +26,13 @@ jobs:
         with:
           path: node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: npm ci
 
-      - run: npm audit
+      - name: Check dependency vulnerabilities
+        run: npm audit
 
   validate:
     runs-on: ubuntu-18.04
@@ -46,9 +48,13 @@ jobs:
         with:
           path: node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: npm ci
+
+      - name: Check compilation errors
+        run: npm run validate
 
   lint:
     runs-on: ubuntu-18.04
@@ -64,11 +70,13 @@ jobs:
         with:
           path: node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: npm ci
 
-      - run: npm run lint
+      - name: Check coding standard violations
+        run: npm run lint
 
   test:
     runs-on: ubuntu-18.04
@@ -84,6 +92,7 @@ jobs:
         with:
           path: node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: npm ci
