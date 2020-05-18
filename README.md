@@ -14,11 +14,11 @@
     <a href="https://codeclimate.com/repos/5e7251b3172af05fe9000e27/test_coverage"><img alt="Coverage" src="https://api.codeclimate.com/v1/badges/c44df78a3ed891af11bb/test_coverage"/></a>
     <br />
     <br />
-    <a href="https://github.com/croct-tech/sdk-js/releases">Releases</a>
+    <a href="https://github.com/croct-tech/sdk-js/releases">📦Releases</a>
     ·
-    <a href="https://github.com/croct-tech/sdk-js/issues">Report Bug</a>
+    <a href="https://github.com/croct-tech/sdk-js/issues/new?labels=bug&template=bug-report.md">🐞Report Bug</a>
     ·
-    <a href="https://github.com/croct-tech/sdk-js/issues">Request Feature</a>
+    <a href="https://github.com/croct-tech/sdk-js/issues/new?labels=enhancement&template=feature-request.md">✨Request Feature</a>
 </p>
 
 ## Installation
