@@ -3,7 +3,11 @@ import MixedSchema from './mixedSchema';
 
 type ObjectDefinition = {
     properties: {[key: string]: Schema},
-    additionalProperties: false | Schema,
+    additionalProperties: boolean | Schema,
+    subtypes?: {
+        discriminator: string,
+        schemas: {[key: string]: ObjectType},
+    },
     propertyNames: Schema,
     required: string[],
     minProperties: number,
@@ -66,6 +70,8 @@ export default class ObjectType implements TypeSchema {
             );
         }
 
+        const additionalProperties: {[key: string]: any} = {...value};
+
         for (const property of this.definition.required) {
             if (!(property in value)) {
                 throw new Violation(`Missing property '${formatPath(path.concat([property]))}'.`, path, {
@@ -84,6 +90,8 @@ export default class ObjectType implements TypeSchema {
             if (propertyRule !== undefined) {
                 propertyRule.validate(entryValue, propertyPath);
 
+                delete additionalProperties[entryName];
+
                 continue;
             }
 
@@ -93,7 +101,19 @@ export default class ObjectType implements TypeSchema {
                 });
             }
 
-            this.definition.additionalProperties.validate(entryValue, propertyPath);
+            if (this.definition.additionalProperties !== true) {
+                this.definition.additionalProperties.validate(entryValue, propertyPath);
+            }
+        }
+
+        const {subtypes} = this.definition;
+
+        if (subtypes !== undefined) {
+            const type = (value as any)[subtypes.discriminator];
+
+            if (type !== undefined && subtypes.schemas[type] !== undefined) {
+                subtypes.schemas[type].validate(additionalProperties, path);
+            }
         }
     }
 }
