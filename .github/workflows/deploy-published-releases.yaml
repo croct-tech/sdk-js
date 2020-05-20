@@ -53,7 +53,7 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
           npm publish --access public --tag next
         env:
-          NPM_TOKEN: ${{ secrets.BOT_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish release to NPM
         if: ${{ !github.event.release.prerelease }}
@@ -62,4 +62,4 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
           npm publish --access public
         env:
-          NPM_TOKEN: ${{ secrets.BOT_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
