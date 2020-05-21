@@ -3,6 +3,7 @@ import FunctionType from '../validation/functionType';
 
 export const loggerSchema = new ObjectType({
     required: ['debug', 'info', 'warn', 'error'],
+    additionalProperties: true,
     properties: {
         debug: new FunctionType(),
         info: new FunctionType(),
