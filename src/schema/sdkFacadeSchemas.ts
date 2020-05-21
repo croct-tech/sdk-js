@@ -2,8 +2,8 @@ import ObjectType from '../validation/objectType';
 import StringType from '../validation/stringType';
 import BooleanType from '../validation/booleanType';
 import {tokenScopeSchema} from './contextSchemas';
-import MixedSchema from '../validation/mixedSchema';
 import {eventMetadataSchema} from './sdkSchemas';
+import {loggerSchema} from './loggerSchema';
 
 export const configurationSchema = new ObjectType({
     required: ['appId'],
@@ -14,7 +14,7 @@ export const configurationSchema = new ObjectType({
         tokenScope: tokenScopeSchema,
         debug: new BooleanType(),
         track: new BooleanType(),
-        logger: new MixedSchema(),
+        logger: loggerSchema,
         eventMetadata: eventMetadataSchema,
         userId: new StringType({
             minLength: 1,

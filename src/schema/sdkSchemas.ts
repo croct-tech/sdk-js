@@ -2,8 +2,8 @@ import ObjectType from '../validation/objectType';
 import StringType from '../validation/stringType';
 import BooleanType from '../validation/booleanType';
 import {tokenScopeSchema} from './contextSchemas';
-import MixedSchema from '../validation/mixedSchema';
 import NumberType from '../validation/numberType';
+import {loggerSchema} from './loggerSchema';
 
 export const eventMetadataSchema = new ObjectType({
     maxProperties: 5,
@@ -38,7 +38,7 @@ export const configurationSchema = new ObjectType({
             integer: true,
         }),
         debug: new BooleanType(),
-        logger: new MixedSchema(),
+        logger: loggerSchema,
         eventMetadata: eventMetadataSchema,
     },
 });

@@ -23,19 +23,19 @@ describe('The event metadata schema', () => {
             {
                 '@foo': 'foo',
             },
-            'Invalid identifier format at path \'/@foo\'.',
+            "Invalid identifier format at path '/@foo'.",
         ],
         [
             {
                 _keyWith21Characters_: 'foo',
             },
-            'Expected at most 20 characters at path \'/_keyWith21Characters_\', actual 21.',
+            "Expected at most 20 characters at path '/_keyWith21Characters_', actual 21.",
         ],
         [
             {
                 longValue: 'x'.repeat(301),
             },
-            'Expected at most 300 characters at path \'/longValue\', actual 301.',
+            "Expected at most 300 characters at path '/longValue', actual 301.",
         ],
         [
             {
@@ -46,13 +46,13 @@ describe('The event metadata schema', () => {
                 e: '5',
                 f: '6',
             },
-            'Expected at most 5 entries at path \'/\', actual 6.',
+            "Expected at most 5 entries at path '/', actual 6.",
         ],
         [
             {
                 foo: 1,
             },
-            'Expected value of type string at path \'/foo\', actual integer.',
+            "Expected value of type string at path '/foo', actual integer.",
         ],
     ])('should not allow %s', (value: object, message: string) => {
         function validate(): void {
@@ -81,7 +81,12 @@ describe('The SDK configuration schema', () => {
             bootstrapEndpointUrl: 'http://www.baz.com',
             beaconQueueSize: 1,
             debug: true,
-            logger: true,
+            logger: {
+                debug: jest.fn(),
+                info: jest.fn(),
+                warn: jest.fn(),
+                error: jest.fn(),
+            },
             eventMetadata: {},
         }],
     ])('should allow %s', (value: object) => {
@@ -95,39 +100,43 @@ describe('The SDK configuration schema', () => {
     test.each([
         [
             {},
-            'Missing property \'/appId\'.',
+            "Missing property '/appId'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', tokenScope: 'x'},
-            'Unexpected value at path \'/tokenScope\'',
+            "Unexpected value at path '/tokenScope'",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', debug: 'foo'},
-            'Expected value of type boolean at path \'/debug\', actual string.',
+            "Expected value of type boolean at path '/debug', actual string.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', trackerEndpointUrl: 'foo'},
-            'Invalid url format at path \'/trackerEndpointUrl\'.',
+            "Invalid url format at path '/trackerEndpointUrl'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', evaluationEndpointUrl: 'foo'},
-            'Invalid url format at path \'/evaluationEndpointUrl\'.',
+            "Invalid url format at path '/evaluationEndpointUrl'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', bootstrapEndpointUrl: 'foo'},
-            'Invalid url format at path \'/bootstrapEndpointUrl\'.',
+            "Invalid url format at path '/bootstrapEndpointUrl'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', beaconQueueSize: -1},
-            'Expected a value greater than or equal to 0 at path \'/beaconQueueSize\', actual -1.',
+            "Expected a value greater than or equal to 0 at path '/beaconQueueSize', actual -1.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', beaconQueueSize: 1.2},
-            'Expected value of type integer at path \'/beaconQueueSize\', actual number.',
+            "Expected value of type integer at path '/beaconQueueSize', actual number.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', eventMetadata: {foo: 1}},
-            'Expected value of type string at path \'/eventMetadata/foo\', actual integer.',
+            "Expected value of type string at path '/eventMetadata/foo', actual integer.",
+        ],
+        [
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', logger: null},
+            "Expected value of type object at path '/logger', actual null.",
         ],
     ])('should not allow %s', (value: object, message: string) => {
         function validate(): void {

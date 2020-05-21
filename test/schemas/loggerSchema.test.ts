@@ -1,0 +1,93 @@
+import {Logger} from '../../src/logging';
+import {loggerSchema} from '../../src/schema/loggerSchema';
+
+describe('The logger schema', () => {
+    test('should allow valid loggers', () => {
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
+        expect(() => loggerSchema.validate(logger)).not.toThrowError();
+    });
+
+    test.each([
+        [
+            {
+                info: jest.fn(),
+                warn: jest.fn(),
+                error: jest.fn(),
+            },
+            "Missing property '/debug'.",
+        ],
+        [
+            {
+                debug: 1,
+                info: jest.fn(),
+                warn: jest.fn(),
+                error: jest.fn(),
+            },
+            "Expected value of type function at path '/debug', actual integer.",
+        ],
+        [
+            {
+                debug: jest.fn(),
+                warn: jest.fn(),
+                error: jest.fn(),
+            },
+            "Missing property '/info'.",
+        ],
+        [
+            {
+                debug: jest.fn(),
+                info: 1,
+                warn: jest.fn(),
+                error: jest.fn(),
+            },
+            "Expected value of type function at path '/info', actual integer.",
+        ],
+        [
+            {
+                debug: jest.fn(),
+                info: jest.fn(),
+                error: jest.fn(),
+            },
+            "Missing property '/warn'.",
+        ],
+        [
+            {
+                debug: jest.fn(),
+                info: jest.fn(),
+                warn: 1,
+                error: jest.fn(),
+            },
+            "Expected value of type function at path '/warn', actual integer.",
+        ],
+        [
+            {
+                debug: jest.fn(),
+                info: jest.fn(),
+                warn: jest.fn(),
+            },
+            "Missing property '/error'.",
+        ],
+        [
+            {
+                debug: jest.fn(),
+                info: jest.fn(),
+                warn: jest.fn(),
+                error: 1,
+            },
+            "Expected value of type function at path '/error', actual integer.",
+        ],
+    ])('should not allow %s', (value: object, message: string) => {
+        function validate(): void {
+            loggerSchema.validate(value);
+        }
+
+        expect(validate).toThrow(Error);
+        expect(validate).toThrow(message);
+    });
+});
