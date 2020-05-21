@@ -73,6 +73,7 @@
       "extends": ["plugin:jest/recommended"],
       "plugins": ["jest"],
       "rules": {
+        "@typescript-eslint/no-empty-function": "off",
         "no-new-object": "off"
       },
       "env": {
