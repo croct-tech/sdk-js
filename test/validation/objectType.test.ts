@@ -81,7 +81,17 @@ describe('An object type', () => {
                 },
             }),
         ],
-    ])('should allow %s with %o', (value: object, type: ObjectType) => {
+        [
+            (): void => {
+                // function
+            },
+            new ObjectType({type: Function}),
+        ],
+        [
+            /regex/,
+            new ObjectType({type: RegExp}),
+        ],
+    ])('should allow %s with %o', (value: any, type: ObjectType) => {
         function validate(): void {
             type.validate(value);
         }
@@ -227,6 +237,16 @@ describe('An object type', () => {
                 },
             }),
             "Unknown property '/foo'.",
+        ],
+        [
+            1,
+            new ObjectType({type: Function}),
+            "Expected value of type Function at path '/', actual integer.",
+        ],
+        [
+            null,
+            new ObjectType({type: RegExp}),
+            "Expected value of type RegExp at path '/', actual null.",
         ],
     ])('should not allow %s with %o', (
         value: any,
