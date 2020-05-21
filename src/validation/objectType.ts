@@ -2,6 +2,7 @@ import {describe, formatPath, Schema, TypeSchema, Violation} from './index';
 import MixedSchema from './mixedSchema';
 
 type ObjectDefinition = {
+    type?: {new (...args: any): any},
     properties: {[key: string]: Schema},
     additionalProperties: boolean | Schema,
     subtypes?: {
@@ -30,19 +31,30 @@ export default class ObjectType implements TypeSchema {
     }
 
     public getTypes(): string[] {
+        if (this.definition.type !== undefined) {
+            return [this.definition.type.name];
+        }
+
         return ['object'];
     }
 
     public isValidType(value: unknown): value is object {
+        if (this.definition.type !== undefined) {
+            return value instanceof this.definition.type;
+        }
+
         return Object.prototype.toString.call(value) === '[object Object]';
     }
 
     public validate(value: unknown, path: string[] = []): void {
         if (!this.isValidType(value)) {
+            const [type] = this.getTypes();
+
             throw new Violation(
-                `Expected value of type object at path '${formatPath(path)}', actual ${describe(value)}.`,
+                `Expected value of type ${type} at path '${formatPath(path)}', `
+                + `actual ${describe(value)}.`,
                 path,
-                {type: 'object'},
+                {type: type},
             );
         }
 
