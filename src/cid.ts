@@ -33,9 +33,9 @@ export class CachedAssigner implements CidAssigner {
 
         const newCid = await this.generator.assignCid();
 
-        this.logger.debug('New CID stored into cache');
-
         this.storage.setItem(this.key, newCid);
+
+        this.logger.debug('New CID stored into cache');
 
         return newCid;
     }
