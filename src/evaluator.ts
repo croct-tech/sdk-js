@@ -182,12 +182,11 @@ export default class Evaluator {
     private async fetch(endpoint: string): Promise<Response> {
         const {tokenProvider, cidAssigner, appId} = this.configuration;
 
-        const token = await tokenProvider.getToken();
-        const cid = await cidAssigner.assignCid();
+        const [token, cid] = await Promise.all([tokenProvider.getToken(), cidAssigner.assignCid()]);
 
         const headers = {
             'X-App-Id': appId,
-            'X-Client-Id': cid,
+            'X-Client-Id': cid as string,
             ...(token !== null && {'X-Token': token.toString()}),
         };
 
