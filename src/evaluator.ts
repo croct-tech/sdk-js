@@ -3,11 +3,13 @@ import {TokenProvider} from './token';
 import {EVALUATION_ENDPOINT_URL, MAX_EXPRESSION_LENGTH} from './constants';
 import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
+import {CidAssigner} from './cid';
 
 export type Configuration = {
     appId: string,
     endpointUrl?: string,
     tokenProvider: TokenProvider,
+    cidAssigner: CidAssigner,
 }
 
 export type Campaign = {
@@ -120,13 +122,6 @@ export default class Evaluator {
             endpoint.searchParams.append('context', JSON.stringify(options.context));
         }
 
-        const token = await this.configuration.tokenProvider.getToken();
-
-        const headers = {
-            'X-App-Id': this.configuration.appId,
-            ...(token !== null && {'X-Token': token.toString()}),
-        };
-
         return new Promise((resolve, reject) => {
             if (options.timeout !== undefined) {
                 window.setTimeout(
@@ -144,11 +139,7 @@ export default class Evaluator {
                 );
             }
 
-            const promise = window.fetch(endpoint.toString(), {
-                method: 'GET',
-                headers: headers,
-                credentials: 'include',
-            });
+            const promise = this.fetch(endpoint.toString());
 
             promise.then(
                 response => {
@@ -185,6 +176,25 @@ export default class Evaluator {
                     reject(new EvaluationError(errorResponse))
                 },
             );
+        });
+    }
+
+    private async fetch(endpoint: string): Promise<Response> {
+        const {tokenProvider, cidAssigner, appId} = this.configuration;
+
+        const token = await tokenProvider.getToken();
+        const cid = await cidAssigner.assignCid();
+
+        const headers = {
+            'X-App-Id': appId,
+            'X-Client-Id': cid,
+            ...(token !== null && {'X-Token': token.toString()}),
+        };
+
+        return window.fetch(endpoint.toString(), {
+            method: 'GET',
+            headers: headers,
+            credentials: 'include',
         });
     }
 }

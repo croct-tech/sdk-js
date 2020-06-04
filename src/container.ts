@@ -20,6 +20,7 @@ import Tracker from './tracker';
 import Evaluator from './evaluator';
 import NamespacedLogger from './logging/namespacedLogger';
 import {encodeJson} from './transformer';
+import {CachedAssigner, CidAssigner, RemoteAssigner} from './cid';
 
 export type Configuration = {
     appId: string,
@@ -36,15 +37,17 @@ export type Configuration = {
 export class Container {
     private readonly configuration: Configuration;
 
-    private context: Context;
+    private context?: Context;
 
-    private tracker: Tracker;
+    private tracker?: Tracker;
 
-    private evaluator: Evaluator;
+    private evaluator?: Evaluator;
 
-    private beaconChannel: OutputChannel<Beacon>;
+    private cidAssigner?: CidAssigner;
 
-    private beaconQueue: MonitoredQueue<string>;
+    private beaconChannel?: OutputChannel<Beacon>;
+
+    private beaconQueue?: MonitoredQueue<string>;
 
     public constructor(configuration: Configuration) {
         this.configuration = configuration;
@@ -73,6 +76,7 @@ export class Container {
                     return Promise.resolve(context.getToken());
                 }
             }(),
+            cidAssigner: this.getCidAssigner(),
         });
     }
 
@@ -126,18 +130,19 @@ export class Container {
 
     private createBeaconChannel(): OutputChannel<Beacon> {
         const channelLogger = this.getLogger('BeaconChannel');
-        const {appId, trackerEndpointUrl, bootstrapEndpointUrl} = this.configuration;
+        const {appId, trackerEndpointUrl} = this.configuration;
 
         const queuedChannel = new QueuedChannel(
             new RetryChannel({
                 channel: new GuaranteedChannel({
                     channel: new BeaconSocketChannel({
                         trackerEndpointUrl: `${trackerEndpointUrl}/${appId}`,
-                        bootstrapEndpointUrl: bootstrapEndpointUrl,
                         tokenParameter: 'token',
                         loggerFactory: this.getLogger.bind(this),
                         logger: channelLogger,
                         channelFactory: (url, logger): SocketChannel<any, any> => new SocketChannel({url, logger}),
+                        cidAssigner: this.getCidAssigner(),
+                        cidParameter: 'clientId',
                     }),
                     stamper: new TimeStamper(),
                     ackTimeout: 10000,
@@ -160,6 +165,26 @@ export class Container {
         });
 
         return new EncodedChannel<Beacon, string>(queuedChannel, encodeJson);
+    }
+
+    public getCidAssigner(): CidAssigner {
+        if (this.cidAssigner === undefined) {
+            this.cidAssigner = this.createCidAssigner();
+        }
+
+        return this.cidAssigner;
+    }
+
+    private createCidAssigner(): CidAssigner {
+        return new CachedAssigner(
+            new RemoteAssigner(
+                this.configuration.bootstrapEndpointUrl,
+                this.getLogger('RemoveCidProvider'),
+            ),
+            this.getGlobalBrowserStorage('client'),
+            'id',
+            this.getLogger('CachedCidProvider'),
+        )
     }
 
     public getBeaconQueue(): MonitoredQueue<string> {
