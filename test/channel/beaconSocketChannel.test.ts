@@ -3,7 +3,7 @@ import BeaconSocketChannel, {DuplexChannelFactory} from '../../src/channel/beaco
 import {DuplexChannel} from '../../src/channel';
 import {Envelope} from '../../src/channel/guaranteedChannel';
 import {Beacon, BeaconPayload, EventContext} from '../../src/event';
-import {FixedCidAssigner} from '../../src/cid';
+import FixedCidAssigner from '../../src/cid/fixedCidAssigner';
 
 describe('A beacon socket channel', () => {
     afterEach(() => {

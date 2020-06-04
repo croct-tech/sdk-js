@@ -20,7 +20,13 @@ import Tracker from './tracker';
 import Evaluator from './evaluator';
 import NamespacedLogger from './logging/namespacedLogger';
 import {encodeJson} from './transformer';
-import {CachedAssigner, CidAssigner, RemoteAssigner} from './cid';
+import CidAssigner from './cid/index';
+import CachedAssigner from './cid/cachedAssigner';
+import RemoteAssigner from './cid/remoteAssigner';
+import FallbackCache from './cache/fallbackCache';
+import StorageCache from './cache/storageCache';
+import CookieCache from './cache/cookieCache';
+import {getBaseDomain} from './cookie';
 
 export type Configuration = {
     appId: string,
@@ -176,14 +182,23 @@ export class Container {
     }
 
     private createCidAssigner(): CidAssigner {
+        const logger = this.getLogger('CidAssigner');
+
         return new CachedAssigner(
             new RemoteAssigner(
                 this.configuration.bootstrapEndpointUrl,
-                this.getLogger('RemoveCidProvider'),
+                logger,
             ),
-            this.getGlobalBrowserStorage('client'),
-            'id',
-            this.getLogger('CachedCidProvider'),
+            new FallbackCache(
+                new StorageCache(this.getLocalStorage(), 'croct.cid'),
+                new CookieCache('croct.cid', {
+                    sameSite: 'strict',
+                    domain: getBaseDomain(),
+                    secure: true,
+                    maxAge: 5 * 365 * 24 * 60 * 60, // approximately 5 years
+                }),
+            ),
+            logger,
         )
     }
 
@@ -231,15 +246,29 @@ export class Container {
     }
 
     private getGlobalTabStorage(namespace: string, ...subnamespace: string[]): Storage {
-        return new NamespacedStorage(sessionStorage, this.resolveStorageNamespace(namespace, ...subnamespace));
+        return new NamespacedStorage(
+            this.getSessionStorage(),
+            this.resolveStorageNamespace(namespace, ...subnamespace),
+        );
     }
 
     private getGlobalBrowserStorage(namespace: string, ...subnamespace: string[]): Storage {
-        return new NamespacedStorage(localStorage, this.resolveStorageNamespace(namespace, ...subnamespace));
+        return new NamespacedStorage(
+            this.getLocalStorage(),
+            this.resolveStorageNamespace(namespace, ...subnamespace),
+        );
     }
 
     private resolveStorageNamespace(namespace: string, ...subnamespace: string[]): string {
         return `croct[${this.configuration.appId.toLowerCase()}].${[namespace].concat(subnamespace).join('.')}`;
+    }
+
+    private getLocalStorage(): Storage {
+        return localStorage;
+    }
+
+    private getSessionStorage(): Storage {
+        return sessionStorage;
     }
 
     public async dispose(): Promise<void> {

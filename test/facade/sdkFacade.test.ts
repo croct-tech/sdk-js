@@ -15,6 +15,13 @@ import {DumbStorage} from '../utils/dumbStorage';
 describe('A SDK facade', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
 
+    beforeEach(() => {
+        Object.defineProperty(window.document, 'domain', {
+            value: 'localhost.dev',
+            configurable: true,
+        });
+    });
+
     afterEach(() => {
         jest.restoreAllMocks();
     });

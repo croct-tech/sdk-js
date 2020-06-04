@@ -2,7 +2,7 @@ import {ChannelListener, DuplexChannel} from './index';
 import {Envelope} from './guaranteedChannel';
 import {Logger, LoggerFactory} from '../logging';
 import NullLogger from '../logging/nullLogger';
-import {CidAssigner} from '../cid';
+import CidAssigner from '../cid';
 
 export interface DuplexChannelFactory {
     (url: string, logger: Logger): DuplexChannel<string, string>;

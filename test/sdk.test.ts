@@ -45,6 +45,11 @@ describe('A SDK', () => {
 
     beforeEach(() => {
         tabEventEmulator.registerListeners();
+
+        Object.defineProperty(window.document, 'domain', {
+            value: 'localhost.dev',
+            configurable: true,
+        });
     });
 
     afterEach(() => {

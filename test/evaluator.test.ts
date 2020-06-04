@@ -4,11 +4,13 @@ import Evaluator, {
     ErrorResponse,
     EvaluationContext,
     EvaluationError,
-    EvaluationErrorType, ExpressionError,
+    EvaluationErrorType,
+    ExpressionError,
     ExpressionErrorResponse,
 } from '../src/evaluator';
 import Token, {FixedTokenProvider, TokenProvider} from '../src/token';
-import {CidAssigner, FixedCidAssigner} from '../src/cid';
+import CidAssigner from '../src/cid';
+import FixedCidAssigner from '../src/cid/fixedCidAssigner';
 
 jest.mock('../src/constants', () => ({
     MAX_EXPRESSION_LENGTH: 30,

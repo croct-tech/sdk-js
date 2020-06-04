@@ -3,7 +3,7 @@ import {TokenProvider} from './token';
 import {EVALUATION_ENDPOINT_URL, MAX_EXPRESSION_LENGTH} from './constants';
 import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
-import {CidAssigner} from './cid';
+import CidAssigner from './cid';
 
 export type Configuration = {
     appId: string,
