@@ -16,6 +16,7 @@ describe('A SDK', () => {
     const tabEventEmulator = new TabEventEmulator();
     const configuration: Required<Configuration> = {
         appId: '00000000-0000-0000-0000-000000000000',
+        cid: 'e6a133ffd3d2410681403d5e1bd95505',
         tokenScope: 'global',
         beaconQueueSize: 3,
         debug: true,
@@ -350,6 +351,12 @@ describe('A SDK', () => {
         const promise = sdk.evaluator.evaluate(expression);
 
         await expect(promise).resolves.toBe(result);
+    });
+
+    test('should assign a CID', async () => {
+        const sdk = Sdk.init(configuration);
+
+        await expect(sdk.getCid()).resolves.toEqual(configuration.cid);
     });
 
     test('should provide an isolated session storage', () => {

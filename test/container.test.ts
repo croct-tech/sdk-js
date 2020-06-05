@@ -97,7 +97,21 @@ test('should flush the beacon queue on initialization', async () => {
     expect(server).toReceiveMessage(expect.objectContaining({payload: payload}));
 });
 
-test('should configure the CID assigner with multiple caching levels', async () => {
+test('should configure a fixed CID assigner if a CID is specified', async () => {
+    const cid = 'e6a133ffd3d2410681403d5e1bd95505';
+
+    const container = new Container({
+        ...configuration,
+        cid: cid,
+    });
+
+    const assigner = container.getCidAssigner();
+
+    await expect(assigner.assignCid()).resolves.toBe(cid);
+    await expect(assigner.assignCid()).resolves.toBe(cid);
+});
+
+test('should configure the CID assigner with multiple caching levels if a CID is not specified', async () => {
     fetchMock.mock({
         method: 'GET',
         matcher: configuration.bootstrapEndpointUrl,

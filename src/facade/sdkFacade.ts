@@ -86,6 +86,10 @@ export default class SdkFacade {
         return this.sdk.context;
     }
 
+    public getCid(): Promise<string> {
+        return this.sdk.getCid();
+    }
+
     public get tracker(): TrackerFacade {
         if (this.trackerFacade === undefined) {
             this.trackerFacade = new TrackerFacade(this.sdk.tracker);

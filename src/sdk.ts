@@ -11,6 +11,7 @@ export type Configuration = {
     appId: string,
     tokenScope: TokenScope,
     debug: boolean,
+    cid?: string,
     trackerEndpointUrl?: string,
     evaluationEndpointUrl?: string,
     bootstrapEndpointUrl?: string,
@@ -94,6 +95,12 @@ export default class Sdk {
         const {appId} = this.container.getConfiguration();
 
         return appId;
+    }
+
+    public getCid(): Promise<string> {
+        const assigner = this.container.getCidAssigner();
+
+        return assigner.assignCid();
     }
 
     public get context(): Context {

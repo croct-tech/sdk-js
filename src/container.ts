@@ -27,10 +27,12 @@ import FallbackCache from './cache/fallbackCache';
 import StorageCache from './cache/storageCache';
 import CookieCache from './cache/cookieCache';
 import {getBaseDomain} from './cookie';
+import FixedCidAssigner from './cid/fixedCidAssigner';
 
 export type Configuration = {
     appId: string,
     tokenScope: TokenScope,
+    cid?: string,
     debug: boolean,
     trackerEndpointUrl: string,
     evaluationEndpointUrl: string,
@@ -182,6 +184,10 @@ export class Container {
     }
 
     private createCidAssigner(): CidAssigner {
+        if (this.configuration.cid !== undefined) {
+            return new FixedCidAssigner(this.configuration.cid);
+        }
+
         const logger = this.getLogger('CidAssigner');
 
         return new CachedAssigner(

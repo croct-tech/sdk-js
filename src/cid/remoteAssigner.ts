@@ -17,9 +17,7 @@ export default class RemoteAssigner implements CidAssigner {
 
     public assignCid(): Promise<string> {
         if (this.pending === undefined) {
-            this.pending = this.fetchCid();
-
-            this.pending.finally(() => {
+            this.pending = this.fetchCid().finally(() => {
                 this.pending = undefined;
             });
         }

@@ -541,6 +541,28 @@ describe('A SDK facade', () => {
         expect(getBrowserStorage).toHaveBeenLastCalledWith('a', 'b', 'c');
     });
 
+    test('should assign a CID', async () => {
+        const getCid = jest.fn().mockResolvedValue('123');
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'getCid').mockImplementation(getCid);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        await expect(sdkFacade.getCid()).resolves.toEqual('123');
+
+        expect(getCid).toHaveBeenCalled();
+    });
+
     test('should close the SDK on close', async () => {
         const close = jest.fn(() => Promise.resolve());
 
