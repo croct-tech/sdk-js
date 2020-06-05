@@ -8,12 +8,26 @@ export default class RemoteAssigner implements CidAssigner {
 
     private readonly endpoint: string;
 
+    private pending?: Promise<string>;
+
     public constructor(endpoint: string, logger?: Logger) {
         this.endpoint = endpoint;
         this.logger = logger ?? new NullLogger();
     }
 
-    public async assignCid(): Promise<string> {
+    public assignCid(): Promise<string> {
+        if (this.pending === undefined) {
+            this.pending = this.fetchCid();
+
+            this.pending.finally(() => {
+                this.pending = undefined;
+            });
+        }
+
+        return this.pending;
+    }
+
+    private async fetchCid(): Promise<string> {
         const options: RequestInit = {
             method: 'GET',
             credentials: 'include',
