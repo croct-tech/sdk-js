@@ -5,10 +5,20 @@ import NullLogger from '../src/logging/nullLogger';
 import {Logger} from '../src/logging';
 import {BeaconPayload} from '../src/event';
 
+beforeEach(() => {
+    localStorage.clear();
+
+    Object.defineProperty(window.document, 'domain', {
+        value: 'subdomain.localhost.dev',
+        configurable: true,
+    });
+});
+
 afterEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
     WS.clean();
+    fetchMock.reset();
 });
 
 const configuration: Configuration = {
@@ -59,9 +69,9 @@ test('should load the beacon queue only once', () => {
 
 test('should flush the beacon queue on initialization', async () => {
     fetchMock.mock({
-        method: 'HEAD',
+        method: 'GET',
         matcher: configuration.bootstrapEndpointUrl,
-        response: '',
+        response: '123',
     });
 
     let container = new Container(configuration);
@@ -85,6 +95,52 @@ test('should flush the beacon queue on initialization', async () => {
     tracker.enable();
 
     expect(server).toReceiveMessage(expect.objectContaining({payload: payload}));
+});
+
+test('should configure a fixed CID assigner if a CID is specified', async () => {
+    const cid = 'e6a133ffd3d2410681403d5e1bd95505';
+
+    const container = new Container({
+        ...configuration,
+        cid: cid,
+    });
+
+    const assigner = container.getCidAssigner();
+
+    await expect(assigner.assignCid()).resolves.toBe(cid);
+    await expect(assigner.assignCid()).resolves.toBe(cid);
+});
+
+test('should configure the CID assigner with multiple caching levels if a CID is not specified', async () => {
+    fetchMock.mock({
+        method: 'GET',
+        matcher: configuration.bootstrapEndpointUrl,
+        response: '123',
+    });
+
+    let cookie = '';
+    const cookieSetter = jest.fn().mockImplementation(value => {
+        cookie = `${value.split(';')[0]};`;
+    });
+
+    const cookieGetter = jest.fn().mockImplementation(() => cookie);
+
+    Object.defineProperty(window.document, 'cookie', {
+        set: cookieSetter,
+        get: cookieGetter,
+        configurable: true,
+    });
+
+    const container = new Container(configuration);
+    const assigner = container.getCidAssigner();
+
+    await expect(assigner.assignCid()).resolves.toBe('123');
+
+    expect(localStorage.getItem('croct.cid')).toBe('123');
+
+    expect(cookieSetter).toHaveBeenCalledWith(
+        'croct.cid=123; Secure; Max-Age=157680000; Domain=localhost.dev; SameSite=strict;',
+    );
 });
 
 test('should provide an isolated tab storage', () => {

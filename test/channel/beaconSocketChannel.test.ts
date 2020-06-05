@@ -1,20 +1,12 @@
-import * as fetchMock from 'fetch-mock';
-import {MockOptions} from 'fetch-mock';
 import SandboxChannel from '../../src/channel/sandboxChannel';
-import BeaconSocketChannel from '../../src/channel/beaconSocketChannel';
+import BeaconSocketChannel, {DuplexChannelFactory} from '../../src/channel/beaconSocketChannel';
 import {DuplexChannel} from '../../src/channel';
 import {Envelope} from '../../src/channel/guaranteedChannel';
 import {Beacon, BeaconPayload, EventContext} from '../../src/event';
+import FixedCidAssigner from '../../src/cid/fixedCidAssigner';
 
 describe('A beacon socket channel', () => {
-    const bootstrapRequestMatcher: MockOptions = {
-        method: 'HEAD',
-        matcher: 'https://localhost:8080/boostrap',
-        response: '',
-    };
-
     afterEach(() => {
-        fetchMock.reset();
         jest.restoreAllMocks();
     });
 
@@ -37,11 +29,14 @@ describe('A beacon socket channel', () => {
         date.mockReturnValue(now);
 
         const socketChannel = new SandboxChannel<string, string>();
+        const channelFactory: DuplexChannelFactory = jest.fn().mockReturnValue(socketChannel);
+
         const channel = new BeaconSocketChannel({
-            channelFactory: (): SandboxChannel<string, string> => socketChannel,
-            tokenParameter: 'token-parameter',
+            channelFactory: channelFactory,
+            tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
-            bootstrapEndpointUrl: 'https://localhost:8080/boostrap',
+            cidParameter: 'clientId',
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         const beacon: Beacon = {
@@ -55,10 +50,9 @@ describe('A beacon socket channel', () => {
             message: JSON.stringify(beacon),
         };
 
-        fetchMock.mock(bootstrapRequestMatcher);
-
         await channel.publish(message);
 
+        expect(channelFactory).toHaveBeenCalledWith('ws://localhost:8080/?clientId=123', {});
         expect(socketChannel.messages).toHaveLength(1);
 
         const [publishedMessage] = socketChannel.messages;
@@ -80,13 +74,17 @@ describe('A beacon socket channel', () => {
 
         const firstSocketChannel = new SandboxChannel<string, string>();
         const secondSocketChannel = new SandboxChannel<string, string>();
+
+        const channelFactory: DuplexChannelFactory = jest.fn()
+            .mockReturnValueOnce(firstSocketChannel)
+            .mockReturnValueOnce(secondSocketChannel);
+
         const channel = new BeaconSocketChannel({
-            channelFactory: jest.fn()
-                .mockReturnValueOnce(firstSocketChannel)
-                .mockReturnValueOnce(secondSocketChannel),
-            tokenParameter: 'token-parameter',
+            channelFactory: channelFactory,
+            tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
-            bootstrapEndpointUrl: 'https://localhost:8080/boostrap',
+            cidParameter: 'clientId',
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         const firstBeacon: Beacon = {
@@ -100,9 +98,9 @@ describe('A beacon socket channel', () => {
             message: JSON.stringify(firstBeacon),
         };
 
-        fetchMock.mock(bootstrapRequestMatcher);
-
         await channel.publish(firstMessage);
+
+        expect(channelFactory).toHaveBeenLastCalledWith('ws://localhost:8080/?clientId=123', {});
 
         expect(firstSocketChannel.messages).toHaveLength(1);
 
@@ -131,6 +129,8 @@ describe('A beacon socket channel', () => {
 
         await channel.publish(secondMessage);
 
+        expect(channelFactory).toHaveBeenCalledWith('ws://localhost:8080/?clientId=123&token=some-token', {});
+
         expect(secondSocketChannel.messages).toHaveLength(1);
 
         const [secondPublishedMessage] = secondSocketChannel.messages;
@@ -158,11 +158,13 @@ describe('A beacon socket channel', () => {
             subscribe: jest.fn(),
             unsubscribe: jest.fn(),
         };
+
         const channel = new BeaconSocketChannel({
             channelFactory: (): DuplexChannel<string, string> => duplexChannel,
-            tokenParameter: 'token-parameter',
+            tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
-            bootstrapEndpointUrl: 'https://localhost:8080/boostrap',
+            cidParameter: 'clientId',
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         const firstBeacon: Beacon = {
@@ -175,8 +177,6 @@ describe('A beacon socket channel', () => {
             id: '123',
             message: JSON.stringify(firstBeacon),
         };
-
-        fetchMock.mock(bootstrapRequestMatcher);
 
         await channel.publish(firstMessage);
 
@@ -205,7 +205,9 @@ describe('A beacon socket channel', () => {
         await expect(channel.publish(secondMessage)).rejects.toThrow(error);
     });
 
-    test('should fail if an unexpected error occurs during the bootstrap', async () => {
+    test('should fail if an unexpected error occurs assigning a CID', async () => {
+        const error = new Error('Unexpected error');
+
         const duplexChannel: DuplexChannel<string, string> = {
             close: jest.fn(),
             publish: jest.fn(),
@@ -214,14 +216,10 @@ describe('A beacon socket channel', () => {
         };
         const channel = new BeaconSocketChannel({
             channelFactory: (): DuplexChannel<string, string> => duplexChannel,
-            tokenParameter: 'token-parameter',
+            tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
-            bootstrapEndpointUrl: 'https://localhost:8080/boostrap',
-        });
-
-        fetchMock.mock({
-            ...bootstrapRequestMatcher,
-            response: 503,
+            cidParameter: 'clientId',
+            cidAssigner: {assignCid: jest.fn().mockRejectedValue(error)},
         });
 
         const beacon: Beacon = {
@@ -236,9 +234,7 @@ describe('A beacon socket channel', () => {
             message: JSON.stringify(beacon),
         };
 
-        await expect(channel.publish(message))
-            .rejects
-            .toThrow('Unexpected error during bootstrap: service Unavailable');
+        await expect(channel.publish(message)).rejects.toThrow(error);
     });
 
     test('should allow subscribing and unsubscribing listeners', async () => {
@@ -246,9 +242,10 @@ describe('A beacon socket channel', () => {
         const listener = jest.fn();
         const channel = new BeaconSocketChannel({
             channelFactory: (): SandboxChannel<string, string> => socketChannel,
-            tokenParameter: 'token-parameter',
+            tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
-            bootstrapEndpointUrl: 'https://localhost:8080/boostrap',
+            cidParameter: 'clientId',
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         channel.subscribe(listener);
@@ -263,8 +260,6 @@ describe('A beacon socket channel', () => {
             id: '123',
             message: JSON.stringify(beacon),
         };
-
-        fetchMock.mock(bootstrapRequestMatcher);
 
         await channel.publish(message);
 
@@ -284,9 +279,10 @@ describe('A beacon socket channel', () => {
         const listener = jest.fn();
         const channel = new BeaconSocketChannel({
             channelFactory: (): SandboxChannel<string, string> => socketChannel,
-            tokenParameter: 'token-parameter',
+            tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
-            bootstrapEndpointUrl: 'https://localhost:8080/boostrap',
+            cidParameter: 'clientId',
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         channel.subscribe(listener);
@@ -302,8 +298,6 @@ describe('A beacon socket channel', () => {
             message: JSON.stringify(beacon),
         };
 
-        fetchMock.mock(bootstrapRequestMatcher);
-
         await channel.publish(message);
 
         socketChannel.notify('invalid-json');
@@ -315,9 +309,10 @@ describe('A beacon socket channel', () => {
         const socketChannel = new SandboxChannel<string, string>();
         const channel = new BeaconSocketChannel({
             channelFactory: (): SandboxChannel<string, string> => socketChannel,
-            tokenParameter: 'token-parameter',
+            tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
-            bootstrapEndpointUrl: 'https://localhost:8080/boostrap',
+            cidParameter: 'clientId',
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         await expect(channel.close()).resolves.toBeUndefined();
@@ -327,9 +322,10 @@ describe('A beacon socket channel', () => {
         const socketChannel = new SandboxChannel<string, string>();
         const channel = new BeaconSocketChannel({
             channelFactory: (): SandboxChannel<string, string> => socketChannel,
-            tokenParameter: 'token-parameter',
+            tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
-            bootstrapEndpointUrl: 'https://localhost:8080/boostrap',
+            cidParameter: 'clientId',
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         const beacon: Beacon = {
@@ -342,8 +338,6 @@ describe('A beacon socket channel', () => {
             id: '123',
             message: JSON.stringify(beacon),
         };
-
-        fetchMock.mock(bootstrapRequestMatcher);
 
         await channel.publish(message).then(() => channel.close());
 

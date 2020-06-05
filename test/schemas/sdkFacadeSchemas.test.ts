@@ -7,6 +7,10 @@ describe('The SDK facade configuration schema', () => {
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            cid: '9f62d6343c8742028df3e9e3ec596526',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
         }],
         [{
@@ -38,6 +42,10 @@ describe('The SDK facade configuration schema', () => {
         [
             {},
             "Missing property '/appId'.",
+        ],
+        [
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', cid: '7e9d59a9'},
+            "Invalid format at path '/cid'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', bootstrapEndpointUrl: 'x'},

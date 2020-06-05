@@ -2,7 +2,7 @@ import {ChannelListener, DuplexChannel} from './index';
 import {Envelope} from './guaranteedChannel';
 import {Logger, LoggerFactory} from '../logging';
 import NullLogger from '../logging/nullLogger';
-import {formatCause} from '../error';
+import CidAssigner from '../cid';
 
 export interface DuplexChannelFactory {
     (url: string, logger: Logger): DuplexChannel<string, string>;
@@ -13,8 +13,9 @@ type Configuration = {
     loggerFactory?: LoggerFactory,
     tokenParameter: string,
     trackerEndpointUrl: string,
-    bootstrapEndpointUrl: string,
     channelFactory: DuplexChannelFactory,
+    cidAssigner: CidAssigner,
+    cidParameter: string,
 };
 
 type Violation = {
@@ -34,11 +35,13 @@ export default class BeaconSocketChannel implements DuplexChannel<string, Envelo
 
     private readonly loggerFactory: LoggerFactory;
 
+    private readonly cidAssigner: CidAssigner;
+
+    private readonly cidParameter: string;
+
     private readonly tokenParameter: string;
 
     private readonly trackerEndpointUrl: string;
-
-    private readonly bootstrapEndpointUrl: string;
 
     private readonly listeners: ChannelListener<string>[] = [];
 
@@ -52,8 +55,9 @@ export default class BeaconSocketChannel implements DuplexChannel<string, Envelo
         this.socketFactory = configuration.channelFactory;
         this.logger = configuration.logger ?? new NullLogger();
         this.loggerFactory = configuration.loggerFactory ?? ((): Logger => new NullLogger());
+        this.cidAssigner = configuration.cidAssigner;
+        this.cidParameter = configuration.cidParameter;
         this.trackerEndpointUrl = configuration.trackerEndpointUrl;
-        this.bootstrapEndpointUrl = configuration.bootstrapEndpointUrl;
         this.tokenParameter = configuration.tokenParameter;
         this.notify = this.notify.bind(this);
     }
@@ -62,32 +66,7 @@ export default class BeaconSocketChannel implements DuplexChannel<string, Envelo
         const {token, timestamp, context, payload} = JSON.parse(message);
 
         if (this.token !== token || this.socketChannel === undefined) {
-            if (this.socketChannel === undefined) {
-                this.logger.debug('Bootstrapping tracker...');
-
-                const options: RequestInit = {
-                    method: 'HEAD',
-                    credentials: 'include',
-                };
-
-                await window.fetch(this.bootstrapEndpointUrl, options)
-                    .then(response => {
-                        if (response.ok) {
-                            this.logger.info('Tracker bootstrap completed.');
-
-                            return response;
-                        }
-
-                        return Promise.reject(
-                            new Error(`Unexpected error during bootstrap: ${formatCause(response.statusText)}`),
-                        );
-                    })
-                    .catch(error => {
-                        this.logger.error('Tracker bootstrap failed.');
-
-                        return Promise.reject(error);
-                    });
-            } else {
+            if (this.socketChannel !== undefined) {
                 this.logger.info('Connection no longer valid for current message.');
 
                 this.socketChannel.unsubscribe(this.notify);
@@ -96,7 +75,7 @@ export default class BeaconSocketChannel implements DuplexChannel<string, Envelo
             }
 
             this.token = token;
-            this.socketChannel = this.createSocketChannel(token);
+            this.socketChannel = await this.createSocketChannel(token);
         }
 
         return this.socketChannel.publish(
@@ -110,8 +89,9 @@ export default class BeaconSocketChannel implements DuplexChannel<string, Envelo
         );
     }
 
-    private createSocketChannel(token?: string): DuplexChannel<string, string> {
-        const endpoint = new window.URL(this.trackerEndpointUrl);
+    private async createSocketChannel(token?: string): Promise<DuplexChannel<string, string>> {
+        const endpoint = new URL(this.trackerEndpointUrl);
+        endpoint.searchParams.append(this.cidParameter, await this.cidAssigner.assignCid());
 
         if (token !== undefined) {
             endpoint.searchParams.append(this.tokenParameter, token);

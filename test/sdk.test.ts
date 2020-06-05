@@ -16,6 +16,7 @@ describe('A SDK', () => {
     const tabEventEmulator = new TabEventEmulator();
     const configuration: Required<Configuration> = {
         appId: '00000000-0000-0000-0000-000000000000',
+        cid: 'e6a133ffd3d2410681403d5e1bd95505',
         tokenScope: 'global',
         beaconQueueSize: 3,
         debug: true,
@@ -26,8 +27,30 @@ describe('A SDK', () => {
         trackerEndpointUrl: 'wss://localtest/connect',
     };
 
+    // Mock Socket does not support query strings:
+    // https://github.com/thoov/mock-socket/pull/231
+    function creatWebSocketMock(endpoint: string): WS {
+        const ws = new WS(endpoint, {jsonProtocol: true});
+
+        window.WebSocket = class WebSocket extends window.WebSocket {
+            public constructor(originalUrl: string) {
+                const url = new URL(originalUrl);
+                url.search = '';
+
+                super(url.toString());
+            }
+        };
+
+        return ws;
+    }
+
     beforeEach(() => {
         tabEventEmulator.registerListeners();
+
+        Object.defineProperty(window.document, 'domain', {
+            value: 'localhost.dev',
+            configurable: true,
+        });
     });
 
     afterEach(() => {
@@ -187,12 +210,12 @@ describe('A SDK', () => {
 
     test('should configure the tracker', async () => {
         fetchMock.mock({
-            method: 'HEAD',
+            method: 'GET',
             matcher: configuration.bootstrapEndpointUrl,
-            response: '',
+            response: '123',
         });
 
-        const server = new WS(`${configuration.trackerEndpointUrl}/${configuration.appId}`, {jsonProtocol: true});
+        const server = creatWebSocketMock(`${configuration.trackerEndpointUrl}/${configuration.appId}`);
 
         server.on('connection', socket => {
             socket.on('message', message => {
@@ -239,12 +262,12 @@ describe('A SDK', () => {
 
     test('should ensure that events are delivered one at a time and in order', async () => {
         fetchMock.mock({
-            method: 'HEAD',
+            method: 'GET',
             matcher: configuration.bootstrapEndpointUrl,
-            response: '',
+            response: '123',
         });
 
-        const server = new WS(`${configuration.trackerEndpointUrl}/${configuration.appId}`, {jsonProtocol: true});
+        const server = creatWebSocketMock(`${configuration.trackerEndpointUrl}/${configuration.appId}`);
         const receiptIds: string[] = [];
 
         server.on('connection', socket => {
@@ -311,6 +334,12 @@ describe('A SDK', () => {
 
         fetchMock.mock({
             method: 'GET',
+            matcher: configuration.bootstrapEndpointUrl,
+            response: '123',
+        });
+
+        fetchMock.mock({
+            method: 'GET',
             matcher: configuration.evaluationEndpointUrl,
             query: {
                 expression: expression,
@@ -322,6 +351,12 @@ describe('A SDK', () => {
         const promise = sdk.evaluator.evaluate(expression);
 
         await expect(promise).resolves.toBe(result);
+    });
+
+    test('should assign a CID', async () => {
+        const sdk = Sdk.init(configuration);
+
+        await expect(sdk.getCid()).resolves.toEqual(configuration.cid);
     });
 
     test('should provide an isolated session storage', () => {
@@ -350,12 +385,12 @@ describe('A SDK', () => {
 
     test('should clean up resources on close', async () => {
         fetchMock.mock({
-            method: 'HEAD',
+            method: 'GET',
             matcher: configuration.bootstrapEndpointUrl,
-            response: '',
+            response: '123',
         });
 
-        const server = new WS(`${configuration.trackerEndpointUrl}/${configuration.appId}`, {jsonProtocol: true});
+        const server = creatWebSocketMock(`${configuration.trackerEndpointUrl}/${configuration.appId}`);
 
         const log = jest.fn();
 

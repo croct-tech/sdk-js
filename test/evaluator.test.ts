@@ -4,10 +4,13 @@ import Evaluator, {
     ErrorResponse,
     EvaluationContext,
     EvaluationError,
-    EvaluationErrorType, ExpressionError,
+    EvaluationErrorType,
+    ExpressionError,
     ExpressionErrorResponse,
 } from '../src/evaluator';
-import Token, {FixedTokenProvider} from '../src/token';
+import Token, {FixedTokenProvider, TokenProvider} from '../src/token';
+import CidAssigner from '../src/cid';
+import FixedCidAssigner from '../src/cid/fixedCidAssigner';
 
 jest.mock('../src/constants', () => ({
     MAX_EXPRESSION_LENGTH: 30,
@@ -25,6 +28,7 @@ describe('An evaluator', () => {
         },
         headers: {
             'X-App-Id': appId,
+            'X-Client-Id': '123',
         },
     };
 
@@ -38,6 +42,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(null),
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         const result = 'Anonymous';
@@ -57,6 +62,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(token),
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         const result = 'Carol';
@@ -80,6 +86,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(null),
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         fetchMock.mock({
@@ -109,6 +116,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(null),
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         const context: Required<EvaluationContext> = {
@@ -151,6 +159,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(null),
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         const response: ErrorResponse = {
@@ -184,6 +193,7 @@ describe('An evaluator', () => {
                 appId: appId,
                 endpointUrl: endpoint,
                 tokenProvider: new FixedTokenProvider(null),
+                cidAssigner: new FixedCidAssigner('123'),
             });
 
             const response: ExpressionErrorResponse = {
@@ -227,6 +237,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(null),
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         const length = Evaluator.MAX_EXPRESSION_LENGTH + 1;
@@ -264,6 +275,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(null),
+            cidAssigner: new FixedCidAssigner('123'),
         });
 
         const response: ErrorResponse = {
@@ -279,6 +291,56 @@ describe('An evaluator', () => {
                 throws: new Error(response.title),
             },
         });
+
+        const promise = evaluator.evaluate(expression);
+
+        await expect(promise).rejects.toThrow(EvaluationError);
+        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+    });
+
+    test('should report an unexpected error occurring while assigning a CID', async () => {
+        const cidAssigner: CidAssigner = {
+            assignCid: jest.fn().mockRejectedValue(new Error('Unexpected CID error.')),
+        };
+
+        const evaluator = new Evaluator({
+            appId: appId,
+            endpointUrl: endpoint,
+            tokenProvider: new FixedTokenProvider(null),
+            cidAssigner: cidAssigner,
+        });
+
+        const response: ErrorResponse = {
+            title: 'Unexpected CID error.',
+            type: EvaluationErrorType.UNEXPECTED_ERROR,
+            detail: 'Please try again or contact Croct support if the error persists.',
+            status: 500,
+        };
+
+        const promise = evaluator.evaluate(expression);
+
+        await expect(promise).rejects.toThrow(EvaluationError);
+        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+    });
+
+    test('should report an unexpected error occurring while retrieving the token', async () => {
+        const tokenProvider: TokenProvider = {
+            getToken: jest.fn().mockRejectedValue(new Error('Unexpected token error.')),
+        };
+
+        const evaluator = new Evaluator({
+            appId: appId,
+            endpointUrl: endpoint,
+            tokenProvider: tokenProvider,
+            cidAssigner: new FixedCidAssigner('123'),
+        });
+
+        const response: ErrorResponse = {
+            title: 'Unexpected token error.',
+            type: EvaluationErrorType.UNEXPECTED_ERROR,
+            detail: 'Please try again or contact Croct support if the error persists.',
+            status: 500,
+        };
 
         const promise = evaluator.evaluate(expression);
 

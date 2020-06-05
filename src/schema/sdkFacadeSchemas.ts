@@ -11,6 +11,9 @@ export const configurationSchema = new ObjectType({
         appId: new StringType({
             format: 'uuid',
         }),
+        cid: new StringType({
+            pattern: /^[0-9a-f]{32}$/i,
+        }),
         tokenScope: tokenScopeSchema,
         debug: new BooleanType(),
         track: new BooleanType(),

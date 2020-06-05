@@ -15,6 +15,13 @@ import {DumbStorage} from '../utils/dumbStorage';
 describe('A SDK facade', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
 
+    beforeEach(() => {
+        Object.defineProperty(window.document, 'domain', {
+            value: 'localhost.dev',
+            configurable: true,
+        });
+    });
+
     afterEach(() => {
         jest.restoreAllMocks();
     });
@@ -532,6 +539,28 @@ describe('A SDK facade', () => {
         sdkFacade.getBrowserStorage('a', 'b', 'c');
 
         expect(getBrowserStorage).toHaveBeenLastCalledWith('a', 'b', 'c');
+    });
+
+    test('should assign a CID', async () => {
+        const getCid = jest.fn().mockResolvedValue('123');
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'getCid').mockImplementation(getCid);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        await expect(sdkFacade.getCid()).resolves.toEqual('123');
+
+        expect(getCid).toHaveBeenCalled();
     });
 
     test('should close the SDK on close', async () => {
