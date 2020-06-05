@@ -3,7 +3,6 @@ import Context from './context';
 import Tab, {TabEvent, TabUrlChangeEvent, TabVisibilityChangeEvent} from './tab';
 import {OutputChannel} from './channel';
 import NullLogger from './logging/nullLogger';
-import Token from './token';
 import {formatCause} from './error';
 import {
     Beacon,
@@ -197,64 +196,6 @@ export default class Tracker {
         }
     }
 
-    public isUserAnonymous(): boolean {
-        return this.context.isAnonymous();
-    }
-
-    public setToken(token: Token): void {
-        const currentToken = this.context.getToken();
-
-        if (currentToken !== null && currentToken.toString() === token.toString()) {
-            return;
-        }
-
-        const currentSubject = currentToken !== null ? currentToken.getSubject() : null;
-        const subject = token.getSubject();
-
-        if (subject === currentSubject) {
-            this.context.setToken(token);
-        } else {
-            if (currentSubject !== null) {
-                this.trackUserSignOut({userId: currentSubject});
-                this.logger.info('User signed out');
-            }
-
-            this.context.setToken(token);
-
-            if (subject !== null) {
-                this.trackUserSignIn({userId: subject});
-                this.logger.info(`User signed in as ${subject}`);
-            }
-        }
-
-        this.logger.debug('New token saved');
-    }
-
-    public unsetToken(): void {
-        const token = this.context.getToken();
-
-        if (token !== null) {
-            const subject = token.getSubject();
-
-            if (subject !== null) {
-                this.trackUserSignOut({userId: subject});
-                this.logger.info('User signed out');
-            }
-
-            this.context.setToken(null);
-
-            this.logger.debug('Token removed');
-        }
-    }
-
-    public hasToken(): boolean {
-        return this.getToken() !== null;
-    }
-
-    public getToken(): Token | null {
-        return this.context.getToken();
-    }
-
     private initialize(): void {
         const tab: Tab = this.context.getTab();
 
@@ -294,20 +235,6 @@ export default class Tracker {
 
     public track<T extends PartialEvent>(event: T, timestamp: number = Date.now()): Promise<T> {
         return this.publish(this.enrichEvent(event, timestamp), timestamp).then(() => event);
-    }
-
-    private trackUserSignIn(payload: {userId: string}): void {
-        this.enqueue({
-            type: 'userSignedIn',
-            ...payload,
-        });
-    }
-
-    private trackUserSignOut(payload: {userId: string}): void {
-        this.enqueue({
-            type: 'userSignedOut',
-            ...payload,
-        });
     }
 
     private trackPageOpen({referrer, ...payload}: {url: string, referrer: string}): void {
@@ -463,7 +390,7 @@ export default class Tracker {
             return event;
         }
 
-        if (event.type === 'userSignedUp' && typeof event.profile !== 'undefined') {
+        if (event.type === 'userSignedUp' && event.profile !== undefined) {
             const {userId, profile, ...payload} = event;
 
             return {
