@@ -33,5 +33,35 @@ describe('A remote CID assigner', () => {
 
         await expect(cachedAssigner.assignCid()).rejects.toThrow('Failed to assign CID: service Unavailable');
     });
+
+    test('should not assign CIDs concurrently', async () => {
+        const cachedAssigner = new RemoteAssigner(ENDPOINT);
+
+        let resolve: {(value: string): void} = jest.fn();
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: new Promise(resolver => {
+                resolve = resolver;
+            }),
+        });
+
+        const done = jest.fn();
+
+        const firstCid = cachedAssigner.assignCid();
+        const secondCid = cachedAssigner.assignCid();
+
+        firstCid.then(done);
+        secondCid.then(done);
+
+        expect(done).not.toHaveBeenCalled();
+
+        resolve('123');
+
+        await expect(firstCid).resolves.toEqual('123');
+        await expect(secondCid).resolves.toEqual('123');
+
+        expect(done).toHaveBeenCalled();
+    });
 });
 
