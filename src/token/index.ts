@@ -31,7 +31,11 @@ export default class Token {
         this.signature = signature;
     }
 
-    public static issue(appId: string, subject: string, timestamp: number = Math.floor(Date.now() / 1000)): Token {
+    public static issue(
+        appId: string,
+        subject: string|null = null,
+        timestamp: number = Math.floor(Date.now() / 1000),
+    ): Token {
         if (timestamp < 0) {
             throw new Error('The timestamp must be non-negative.');
         }
@@ -50,7 +54,7 @@ export default class Token {
                 iss: 'croct.io',
                 aud: 'croct.io',
                 iat: timestamp,
-                ...(subject !== undefined ? {sub: subject} : null),
+                ...(subject !== null ? {sub: subject} : null),
             },
         );
     }

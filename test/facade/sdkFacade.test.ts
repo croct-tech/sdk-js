@@ -9,11 +9,28 @@ import TrackerFacade from '../../src/facade/trackerFacade';
 import Evaluator from '../../src/evaluator';
 import Tab from '../../src/tab';
 import NullLogger from '../../src/logging/nullLogger';
-import {ExternalEvent} from '../../src/event';
 import {DumbStorage} from '../utils/dumbStorage';
+import {ExternalEvent} from '../../src/event';
 
 describe('A SDK facade', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
+
+    const {default: ContextMock} = jest.genMockFromModule<{default: jest.Mock<Context>}>('../../src/context');
+    const {default: TrackerMock} = jest.genMockFromModule<{default: jest.Mock<Tracker>}>('../../src/tracker');
+
+    function createContextMock(): Context {
+        const context = new ContextMock();
+
+        let token: Token|null = null;
+        context.getToken = jest.fn().mockImplementation(() => token);
+        context.setToken = jest.fn().mockImplementation(newToken => {
+            token = newToken;
+        });
+
+        context.isAnonymous = jest.fn().mockImplementation(() => token !== null);
+
+        return context;
+    }
 
     beforeEach(() => {
         Object.defineProperty(window.document, 'domain', {
@@ -98,14 +115,13 @@ describe('A SDK facade', () => {
     });
 
     test('should load the SDK and set the provided token', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
-        tracker.setToken = jest.fn();
+        const context = createContextMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
 
                 return sdk;
             });
@@ -118,19 +134,18 @@ describe('A SDK facade', () => {
             track: false,
         });
 
-        expect(tracker.setToken).toBeCalledWith(carolToken);
-        expect(tracker.setToken).toBeCalledTimes(1);
+        expect(context.setToken).toBeCalledWith(carolToken);
+        expect(context.setToken).toBeCalledTimes(1);
     });
 
     test('should load the SDK and set a token for the provided user ID', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
-        tracker.setToken = jest.fn();
+        const context = createContextMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
 
                 return sdk;
             });
@@ -145,13 +160,12 @@ describe('A SDK facade', () => {
             track: false,
         });
 
-        expect(tracker.setToken).toBeCalledWith(Token.issue(appId, 'c4r0l'));
-        expect(tracker.setToken).toBeCalledTimes(1);
+        expect(context.setToken).toBeCalledWith(Token.issue(appId, 'c4r0l'));
+        expect(context.setToken).toBeCalledTimes(1);
     });
 
     test('should load the SDK with the tracker enabled if the flag "track" is true', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
-        tracker.enable = jest.fn();
+        const tracker = new TrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -171,7 +185,7 @@ describe('A SDK facade', () => {
     });
 
     test('should load the SDK with the tracker disabled if the flag "track" is false', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = new TrackerMock();
         tracker.enable = jest.fn();
 
         jest.spyOn(Sdk, 'init')
@@ -192,7 +206,7 @@ describe('A SDK facade', () => {
     });
 
     test('should provide a tracker facade', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = new TrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -213,13 +227,15 @@ describe('A SDK facade', () => {
     });
 
     test('should provide an user facade', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = new TrackerMock();
+        const context = new ContextMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
                 jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
 
                 return sdk;
             });
@@ -230,11 +246,11 @@ describe('A SDK facade', () => {
         });
 
         expect(sdkFacade.user).toBe(sdkFacade.user);
-        expect(sdkFacade.user).toStrictEqual(new UserFacade(tracker));
+        expect(sdkFacade.user).toStrictEqual(new UserFacade(context, tracker));
     });
 
     test('should provide a session facade', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = new TrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -255,7 +271,7 @@ describe('A SDK facade', () => {
     });
 
     test('should provide the context', () => {
-        const context = jest.genMockFromModule<Context>('../../src/context');
+        const context = createContextMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -274,30 +290,15 @@ describe('A SDK facade', () => {
         expect(sdkFacade.context).toBe(context);
     });
 
-    test('should not allow identifying a user using a non-string user ID', () => {
-        const sdkFacade = SdkFacade.init({
-            appId: appId,
-            track: false,
-        });
-
-        function identify(): void {
-            sdkFacade.identify(null as unknown as string);
-        }
-
-        expect(identify).toThrow(Error);
-        expect(identify).toThrow('The user ID must be of type string.');
-    });
-
     test('should allow identifying a user', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
-        tracker.setToken = jest.fn();
+        const context = createContextMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
                 jest.spyOn(sdk, 'appId', 'get').mockReturnValue(appId);
-                jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
 
                 return sdk;
             });
@@ -313,21 +314,26 @@ describe('A SDK facade', () => {
 
         sdkFacade.identify('c4r0l');
 
-        expect(tracker.setToken).toBeCalledWith(Token.issue(appId, 'c4r0l'));
-        expect(tracker.setToken).toBeCalledTimes(1);
+        expect(context.setToken).toBeCalledWith(Token.issue(appId, 'c4r0l'));
+        expect(context.setToken).toBeCalledTimes(1);
     });
 
     test('should allow anonymizing a user', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
-        tracker.setToken = jest.fn();
-        tracker.unsetToken = jest.fn();
-        tracker.isUserAnonymous = jest.fn(() => false);
+        const context = createContextMock();
+
+        let token: Token|null = null;
+        context.getToken = jest.fn().mockImplementation(() => token);
+        context.setToken = jest.fn().mockImplementation(newToken => {
+            token = newToken;
+        });
+
+        context.isAnonymous = jest.fn(() => false);
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
 
                 return sdk;
             });
@@ -340,32 +346,97 @@ describe('A SDK facade', () => {
 
         sdkFacade.anonymize();
 
-        expect(tracker.unsetToken).toBeCalledTimes(1);
-    });
-
-    test('should not allow setting an invalid token', () => {
-        const sdkFacade = SdkFacade.init({
-            appId: appId,
-            track: false,
-        });
-
-        function setToken(): void {
-            sdkFacade.setToken(null as unknown as string);
-        }
-
-        expect(setToken).toThrow(Error);
-        expect(setToken).toThrow('The token must be of type string.');
+        expect(context.setToken).toHaveBeenLastCalledWith(null);
     });
 
     test('should allow to unset a token', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
-        tracker.setToken = jest.fn();
-        tracker.unsetToken = jest.fn();
+        const context = createContextMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        sdkFacade.unsetToken();
+
+        expect(context.setToken).toBeCalledTimes(0);
+
+        sdkFacade.setToken(Token.issue(appId, 'c4r0l'));
+
+        sdkFacade.unsetToken();
+
+        expect(context.setToken).toHaveBeenLastCalledWith(null);
+    });
+
+    test('should allow to set a token', () => {
+        const context = createContextMock();
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        const carolToken = Token.issue(appId, 'c4r0l');
+
+        sdkFacade.setToken(carolToken);
+
+        expect(context.setToken).toBeCalledWith(carolToken);
+        expect(context.setToken).toBeCalledTimes(1);
+    });
+
+    test('should provide the current token', () => {
+        const context = createContextMock();
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        const carolToken = Token.issue(appId, 'c4r0l');
+
+        expect(sdkFacade.getToken()).toBeNull();
+
+        sdkFacade.setToken(carolToken);
+
+        expect(sdkFacade.getToken()).toEqual(carolToken);
+    });
+
+    test('should allow to refresh the token of the current anonymous user', () => {
+        const context = createContextMock();
+        const tracker = new TrackerMock();
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
                 jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
 
                 return sdk;
@@ -373,23 +444,35 @@ describe('A SDK facade', () => {
 
         const sdkFacade = SdkFacade.init({
             appId: appId,
-            token: Token.issue(appId, 'c4r0l').toString(),
             track: false,
         });
 
-        sdkFacade.unsetToken();
+        const oldToken = Token.issue(appId, null, 1440982924);
 
-        expect(tracker.unsetToken).toBeCalledTimes(1);
+        expect(sdkFacade.getToken()).toBeNull();
+
+        sdkFacade.setToken(oldToken);
+
+        expect(sdkFacade.getToken()).toEqual(oldToken);
+
+        const newToken = Token.issue(appId, null, 1440982925);
+
+        sdkFacade.setToken(newToken);
+
+        expect(sdkFacade.getToken()).toEqual(newToken);
+
+        expect(tracker.track).toBeCalledTimes(0);
     });
 
-    test('should allow to set a token', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
-        tracker.setToken = jest.fn();
+    test('should allow to refresh the token of the current identified user', () => {
+        const context = createContextMock();
+        const tracker = new TrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
                 jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
 
                 return sdk;
@@ -402,14 +485,263 @@ describe('A SDK facade', () => {
 
         const carolToken = Token.issue(appId, 'c4r0l');
 
-        sdkFacade.setToken(carolToken.toString());
+        expect(sdkFacade.getToken()).toBeNull();
 
-        expect(tracker.setToken).toBeCalledWith(carolToken);
-        expect(tracker.setToken).toBeCalledTimes(1);
+        tracker.track = jest.fn().mockResolvedValue({
+            type: 'userSignedIn',
+            userId: 'c4r0l',
+        });
+
+        sdkFacade.setToken(carolToken);
+
+        expect(sdkFacade.getToken()).toEqual(carolToken);
+
+        const newCarolToken = Token.issue(appId, 'c4r0l', 1440982924);
+
+        sdkFacade.setToken(newCarolToken);
+
+        expect(sdkFacade.getToken()).toEqual(newCarolToken);
+
+        expect(tracker.track).toBeCalledTimes(1);
+        expect(tracker.track).toBeCalledWith({
+            type: 'userSignedIn',
+            userId: 'c4r0l',
+        });
+    });
+
+    test('should track "userSignedIn" event when setting a token with an identified subject', () => {
+        const context = createContextMock();
+        const tracker = new TrackerMock();
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        const carolToken = Token.issue(appId, 'c4r0l');
+
+        tracker.track = jest.fn().mockResolvedValue({
+            type: 'userSignedIn',
+            userId: 'c4r0l',
+        });
+
+        sdkFacade.setToken(carolToken);
+
+        expect(tracker.track).toHaveBeenLastCalledWith({
+            type: 'userSignedIn',
+            userId: 'c4r0l',
+        });
+
+        sdkFacade.setToken(carolToken);
+
+        expect(tracker.track).toHaveBeenCalledTimes(1);
+    });
+
+    test('should track "userSignedIn" event when replacing an anonymous token with an identified token', () => {
+        const context = createContextMock();
+        const tracker = new TrackerMock();
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        sdkFacade.setToken(Token.issue(appId));
+
+        expect(tracker.track).toHaveBeenCalledTimes(0);
+
+        tracker.track = jest.fn().mockResolvedValue({
+            type: 'userSignedIn',
+            userId: 'c4r0l',
+        });
+
+        sdkFacade.setToken(Token.issue(appId, 'c4r0l'));
+
+        expect(tracker.track).toHaveBeenLastCalledWith({
+            type: 'userSignedIn',
+            userId: 'c4r0l',
+        });
+
+        expect(tracker.track).toHaveBeenCalledTimes(1);
+    });
+
+    test('should track both "userSignedIn" and "userSignedOut" events when setting a token with a new subject', () => {
+        const context = createContextMock();
+        const tracker = new TrackerMock();
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        const carolToken = Token.issue(appId, 'c4r0l');
+
+        tracker.track = jest.fn()
+            .mockResolvedValue({
+                type: 'userSignedIn',
+                userId: 'c4r0l',
+            })
+            .mockResolvedValueOnce({
+                type: 'userSignedOut',
+                userId: 'c4r0l',
+            })
+            .mockResolvedValueOnce({
+                type: 'userSignedIn',
+                userId: 'erick',
+            });
+
+        sdkFacade.setToken(carolToken);
+
+        expect(tracker.track).toHaveBeenLastCalledWith({
+            type: 'userSignedIn',
+            userId: 'c4r0l',
+        });
+
+        const erickToken = Token.issue(appId, 'erick');
+
+        sdkFacade.setToken(erickToken);
+
+        expect(tracker.track).toHaveBeenNthCalledWith(2, {
+            type: 'userSignedOut',
+            userId: 'c4r0l',
+        });
+
+        expect(tracker.track).toHaveBeenNthCalledWith(3, {
+            type: 'userSignedIn',
+            userId: 'erick',
+        });
+
+        expect(tracker.track).toHaveBeenCalledTimes(3);
+    });
+
+    test('should track "userSignedOut" event when unsetting a token with an identified subject', () => {
+        const context = createContextMock();
+        const tracker = new TrackerMock();
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        const carolToken = Token.issue(appId, 'c4r0l');
+
+        tracker.track = jest.fn()
+            .mockResolvedValueOnce({
+                type: 'userSignedIn',
+                userId: 'c4r0l',
+            })
+            .mockResolvedValue({
+                type: 'userSignedOut',
+                userId: 'c4r0l',
+            });
+
+        sdkFacade.setToken(carolToken);
+
+        expect(tracker.track).toHaveBeenLastCalledWith({
+            type: 'userSignedIn',
+            userId: 'c4r0l',
+        });
+
+        sdkFacade.unsetToken();
+
+        expect(tracker.track).toHaveBeenLastCalledWith({
+            type: 'userSignedOut',
+            userId: 'c4r0l',
+        });
+
+        expect(tracker.track).toHaveBeenCalledTimes(2);
+    });
+
+    test('should track "userSignedOut" event when setting an anonymous token', () => {
+        const context = createContextMock();
+        const tracker = new TrackerMock();
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        const carolToken = Token.issue(appId, 'c4r0l');
+
+        tracker.track = jest.fn()
+            .mockResolvedValueOnce({
+                type: 'userSignedIn',
+                userId: 'c4r0l',
+            })
+            .mockResolvedValue({
+                type: 'userSignedOut',
+                userId: 'c4r0l',
+            });
+
+        sdkFacade.setToken(carolToken);
+
+        expect(tracker.track).toHaveBeenLastCalledWith({
+            type: 'userSignedIn',
+            userId: 'c4r0l',
+        });
+
+        sdkFacade.setToken(Token.issue(appId));
+
+        expect(tracker.track).toHaveBeenLastCalledWith({
+            type: 'userSignedOut',
+            userId: 'c4r0l',
+        });
+
+        expect(tracker.track).toHaveBeenCalledTimes(2);
     });
 
     test('should track events', async () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = new TrackerMock();
         tracker.track = jest.fn(event => Promise.resolve(event));
 
         jest.spyOn(Sdk, 'init')
@@ -443,10 +775,11 @@ describe('A SDK facade', () => {
         const tab = new Tab('1', true);
         const result = '2';
 
-        const evaluator = jest.genMockFromModule<Evaluator>('../../src/evaluator');
+        const {default: EvaluatorMock} = jest.genMockFromModule<{default: jest.Mock<Evaluator>}>('../../src/evaluator');
+        const evaluator = new EvaluatorMock();
         evaluator.evaluate = jest.fn(() => Promise.resolve(result));
 
-        const context = jest.genMockFromModule<Context>('../../src/context');
+        const context = createContextMock();
         context.getTab = jest.fn(() => tab);
 
         jest.spyOn(Sdk, 'init')

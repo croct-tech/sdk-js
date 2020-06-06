@@ -9,7 +9,7 @@ import {configurationSchema} from '../schema/sdkFacadeSchemas';
 import Sdk from '../sdk';
 import SessionFacade from './sessionFacade';
 import {Logger} from '../logging';
-import {ExternalEvent, ExternalEventPayload, ExternalEventType} from '../event';
+import {ExternalEvent, ExternalEventPayload, ExternalEventType, PartialEvent} from '../event';
 
 export type Configuration = {
     appId: string,
@@ -72,7 +72,7 @@ export default class SdkFacade {
         if (userId !== undefined) {
             sdk.identify(userId);
         } else if (token !== undefined) {
-            sdk.setToken(token);
+            sdk.setToken(Token.parse(token));
         }
 
         if (track) {
@@ -100,7 +100,7 @@ export default class SdkFacade {
 
     public get user(): UserFacade {
         if (this.userFacade === undefined) {
-            this.userFacade = new UserFacade(this.sdk.tracker);
+            this.userFacade = new UserFacade(this.context, this.sdk.tracker);
         }
 
         return this.userFacade;
@@ -126,29 +126,89 @@ export default class SdkFacade {
     }
 
     public identify(userId: string): void {
-        if (typeof userId !== 'string') {
-            throw new Error('The user ID must be of type string.');
-        }
-
-        this.sdk.tracker.setToken(Token.issue(this.sdk.appId, userId));
+        this.setToken(Token.issue(this.sdk.appId, userId));
     }
 
     public anonymize(): void {
-        if (!this.sdk.tracker.isUserAnonymous()) {
-            this.sdk.tracker.unsetToken();
+        if (!this.context.isAnonymous()) {
+            this.unsetToken();
         }
     }
 
-    public setToken(token: string): void {
-        if (typeof token !== 'string') {
-            throw new Error('The token must be of type string.');
+    public getToken(): Token|null {
+        return this.context.getToken();
+    }
+
+    public setToken(token: Token): void {
+        const currentToken = this.getToken();
+
+        if (currentToken !== null && currentToken.toString() === token.toString()) {
+            return;
         }
 
-        this.sdk.tracker.setToken(Token.parse(token));
+        const currentSubject = currentToken?.getSubject() ?? null;
+        const subject = token.getSubject();
+        const logger = this.getLogger();
+
+        if (subject === currentSubject) {
+            this.context.setToken(token);
+
+            logger.debug('Token refreshed');
+
+            return;
+        }
+
+        if (currentSubject !== null) {
+            this.trackInternalEvent({
+                type: 'userSignedOut',
+                userId: currentSubject,
+            });
+
+            logger.info('User signed out');
+        }
+
+        this.context.setToken(token);
+
+        if (subject !== null) {
+            this.trackInternalEvent({
+                type: 'userSignedIn',
+                userId: subject,
+            });
+
+            logger.info(`User signed in as ${subject}`);
+        }
+
+        logger.debug('New token saved, ');
     }
 
     public unsetToken(): void {
-        this.sdk.tracker.unsetToken();
+        const token = this.getToken();
+
+        if (token === null) {
+            return;
+        }
+
+        const logger = this.getLogger();
+        const subject = token.getSubject();
+
+        if (subject !== null) {
+            this.trackInternalEvent({
+                type: 'userSignedOut',
+                userId: subject,
+            });
+
+            logger.info('User signed out');
+        }
+
+        this.context.setToken(null);
+
+        logger.debug('Token removed');
+    }
+
+    private trackInternalEvent(event: PartialEvent): void {
+        this.sdk.tracker.track(event).catch(() => {
+            // suppress error as it is already logged by the tracker
+        });
     }
 
     public track<T extends ExternalEventType>(type: T, payload: ExternalEventPayload<T>): Promise<ExternalEvent<T>> {

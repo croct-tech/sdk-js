@@ -1,17 +1,15 @@
 import Tracker, {EventInfo, EventListener} from '../src/tracker';
 import Context from '../src/context';
-import Token from '../src/token';
 import SandboxChannel from '../src/channel/sandboxChannel';
 import TabEventEmulator from './utils/tabEventEmulator';
 import {Beacon, BeaconPayload, Event, PartialEvent} from '../src/event';
 import {OutputChannel} from '../src/channel';
 import {DumbStorage} from './utils/dumbStorage';
 import {Optional} from '../src/utilityTypes';
+import Token from '../src/token';
 
 describe('A tracker', () => {
     const now = Date.now();
-    const carolToken = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'c4r0l', 1440982923);
-    const erickToken = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'erick', 1440982923);
     const pageUrl = 'http://localhost/?foo=%22bar%22&foo="bar"';
     const pageLastModified = now;
     const pageTitle = 'Welcome to Foo Inc.';
@@ -340,64 +338,6 @@ describe('A tracker', () => {
         await expect(tracker.track(event)).rejects.toEqual('Error.');
     });
 
-    test('should determine whether the user is anonymous', () => {
-        const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
-            channel: new SandboxChannel(),
-        });
-
-        expect(tracker.isUserAnonymous()).toBeTruthy();
-
-        tracker.setToken(carolToken);
-
-        expect(tracker.isUserAnonymous()).toBeFalsy();
-    });
-
-    test('should determine whether the context has a token', () => {
-        const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
-            channel: new SandboxChannel(),
-        });
-
-        expect(tracker.hasToken()).toBeFalsy();
-
-        tracker.setToken(carolToken);
-
-        expect(tracker.hasToken()).toBeTruthy();
-    });
-
-    test('should provide the current token', () => {
-        const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
-            channel: new SandboxChannel(),
-        });
-
-        expect(tracker.getToken()).toBeNull();
-
-        tracker.setToken(carolToken);
-
-        expect(tracker.getToken()).toEqual(carolToken);
-    });
-
-    test('should allow to refresh the token of the current user', () => {
-        const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
-            channel: new SandboxChannel(),
-        });
-
-        expect(tracker.getToken()).toBeNull();
-
-        tracker.setToken(carolToken);
-
-        expect(tracker.getToken()).toEqual(carolToken);
-
-        const newCarolToken = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'c4r0l', 1440982924);
-
-        tracker.setToken(newCarolToken);
-
-        expect(tracker.getToken()).toEqual(newCarolToken);
-    });
-
     test('should include the metadata in the beacons', async () => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),
@@ -429,157 +369,32 @@ describe('A tracker', () => {
         );
     });
 
-    test('should track "userSignedIn" event when setting a token with an identified subject', () => {
+    test('should include the token in the beacons', async () => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),
             publish: jest.fn().mockResolvedValue(undefined),
         };
 
+        const token = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'c4r0l');
+
         const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
+        context.setToken(token);
 
         const tracker = new Tracker({
             context: context,
             channel: channel,
         });
 
-        expect(tracker.isUserAnonymous()).toBeTruthy();
-
-        tracker.setToken(carolToken);
-
-        expect(channel.publish).toHaveBeenLastCalledWith({
-            timestamp: Date.now(),
-            token: carolToken.toString(),
-            context: {
-                tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
-            },
-            payload: {
-                type: 'userSignedIn',
-                externalUserId: 'c4r0l',
-            },
+        await tracker.track({
+            type: 'nothingChanged',
+            sinceTime: 0,
         });
 
-        tracker.setToken(carolToken);
-
-        expect(channel.publish).toHaveBeenCalledTimes(1);
-    });
-
-    test('should track both "userSignedIn" and "userSignedOut" events when setting a token with a new subject', () => {
-        const channel: OutputChannel<Beacon> = {
-            close: jest.fn(),
-            publish: jest.fn().mockResolvedValue(undefined),
-        };
-
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
-
-        const tracker = new Tracker({
-            context: context,
-            channel: channel,
-        });
-
-        expect(tracker.isUserAnonymous()).toBeTruthy();
-
-        tracker.setToken(carolToken);
-
-        expect(channel.publish).toHaveBeenLastCalledWith({
-            timestamp: now,
-            token: carolToken.toString(),
-            context: {
-                tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
-            },
-            payload: {
-                type: 'userSignedIn',
-                externalUserId: 'c4r0l',
-            },
-        });
-
-        tracker.setToken(erickToken);
-
-        expect(channel.publish).toHaveBeenNthCalledWith(
-            2,
-            {
-                timestamp: now,
-                token: carolToken.toString(),
-                context: {
-                    tabId: tab.id,
-                    url: window.encodeURI(window.decodeURI(pageUrl)),
-                },
-                payload: {
-                    type: 'userSignedOut',
-                    externalUserId: 'c4r0l',
-                },
-            },
+        expect(channel.publish).toBeCalledWith(
+            expect.objectContaining({
+                token: token.toString(),
+            }),
         );
-
-        expect(channel.publish).toHaveBeenNthCalledWith(
-            3,
-            {
-                timestamp: now,
-                token: erickToken.toString(),
-                context: {
-                    tabId: tab.id,
-                    url: window.encodeURI(window.decodeURI(pageUrl)),
-                },
-                payload: {
-                    type: 'userSignedIn',
-                    externalUserId: 'erick',
-                },
-            },
-        );
-
-        expect(channel.publish).toHaveBeenCalledTimes(3);
-    });
-
-    test('should track "userSignedOut" event when unsetting a token with an identified subject', () => {
-        const channel: OutputChannel<Beacon> = {
-            close: jest.fn(),
-            publish: jest.fn().mockResolvedValue(undefined),
-        };
-
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
-
-        const tracker = new Tracker({
-            context: context,
-            channel: channel,
-        });
-
-        expect(tracker.isUserAnonymous()).toBeTruthy();
-
-        tracker.setToken(carolToken);
-
-        expect(channel.publish).toHaveBeenLastCalledWith({
-            timestamp: now,
-            token: carolToken.toString(),
-            context: {
-                tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
-            },
-            payload: {
-                type: 'userSignedIn',
-                externalUserId: 'c4r0l',
-            },
-        });
-
-        tracker.unsetToken();
-
-        expect(channel.publish).toHaveBeenLastCalledWith({
-            timestamp: now,
-            token: carolToken.toString(),
-            context: {
-                tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(pageUrl)),
-            },
-            payload: {
-                type: 'userSignedOut',
-                externalUserId: 'c4r0l',
-            },
-        });
-
-        expect(channel.publish).toHaveBeenCalledTimes(2);
     });
 
     test('should track "tabOpened" event when enabled on a tab for the first time', () => {
@@ -1121,6 +936,26 @@ describe('A tracker', () => {
                         },
                     ],
                 },
+            },
+        ],
+        [
+            {
+                type: 'userSignedIn',
+                userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
+            },
+            {
+                type: 'userSignedIn',
+                externalUserId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
+            },
+        ],
+        [
+            {
+                type: 'userSignedOut',
+                userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
+            },
+            {
+                type: 'userSignedOut',
+                externalUserId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
             },
         ],
         [
