@@ -42,7 +42,7 @@ describe('A token', () => {
 
     test('may have a subject', () => {
         const identifiedToken = Token.issue(appId, 'c4r0l', 1440982923);
-        const anonymousToken = Token.parse(anonymousSerializedToken);
+        const anonymousToken = Token.issue(appId, null, 1440982923);
 
         expect(identifiedToken.getSubject()).toBe('c4r0l');
         expect(anonymousToken.getSubject()).toBeNull();
@@ -59,7 +59,7 @@ describe('A token', () => {
 
     test('should determine whether the subject is anonymous', () => {
         const identifiedToken = Token.issue(appId, 'c4r0l', 1440982923);
-        const anonymousToken = Token.parse(anonymousSerializedToken);
+        const anonymousToken = Token.issue(appId, null, 1440982923);
 
         expect(identifiedToken.isAnonymous()).toBeFalsy();
         expect(anonymousToken.isAnonymous()).toBeTruthy();
