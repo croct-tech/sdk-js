@@ -2,7 +2,7 @@ import SandboxChannel from '../../src/channel/sandboxChannel';
 import BeaconSocketChannel, {DuplexChannelFactory} from '../../src/channel/beaconSocketChannel';
 import {DuplexChannel} from '../../src/channel';
 import {Envelope} from '../../src/channel/guaranteedChannel';
-import {Beacon, BeaconPayload, EventContext} from '../../src/event';
+import {Beacon, BeaconPayload, TrackingEventContext} from '../../src/trackingEvents';
 import FixedCidAssigner from '../../src/cid/fixedCidAssigner';
 
 describe('A beacon socket channel', () => {
@@ -10,7 +10,7 @@ describe('A beacon socket channel', () => {
         jest.restoreAllMocks();
     });
 
-    const context: EventContext = {
+    const context: TrackingEventContext = {
         tabId: '123',
         url: 'https://localhost',
         metadata: {

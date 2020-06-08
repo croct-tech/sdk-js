@@ -1,6 +1,6 @@
 import Tracker from '../../src/tracker';
 import UserFacade from '../../src/facade/userFacade';
-import {UserProfileChanged} from '../../src/event';
+import {UserProfileChanged} from '../../src/trackingEvents';
 import Context from '../../src/context';
 
 describe('A user facade', () => {

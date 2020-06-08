@@ -1,4 +1,4 @@
-import {Cart, CartItem, Order, OrderItem, ProductDetails} from '../../src/event';
+import {Cart, CartItem, Order, OrderItem, ProductDetails} from '../../src/trackingEvents';
 import {cart, cartItem, order, orderItem, productDetails} from '../../src/schema/ecommerceSchemas';
 import {Optional} from '../../src/utilityTypes';
 

@@ -13,9 +13,9 @@ import MonitoredQueue from './queue/monitoredQueue';
 import CapacityRestrictedQueue from './queue/capacityRestrictedQueue';
 import EncodedChannel from './channel/encodedChannel';
 import BeaconSocketChannel from './channel/beaconSocketChannel';
-import {Beacon} from './event';
+import {Beacon} from './trackingEvents';
 import {SocketChannel} from './channel/socketChannel';
-import Token, {TokenProvider} from './token';
+import {TokenProvider} from './token';
 import Tracker from './tracker';
 import Evaluator from './evaluator';
 import NamespacedLogger from './logging/namespacedLogger';
@@ -24,10 +24,12 @@ import CidAssigner from './cid/index';
 import CachedAssigner from './cid/cachedAssigner';
 import RemoteAssigner from './cid/remoteAssigner';
 import FallbackCache from './cache/fallbackCache';
-import StorageCache from './cache/storageCache';
 import CookieCache from './cache/cookieCache';
 import {getBaseDomain} from './cookie';
 import FixedCidAssigner from './cid/fixedCidAssigner';
+import {EventManager, SynchronousEventManager} from './eventManager';
+import {SdkEventMap} from './sdkEvents';
+import LocalStorageCache from './cache/localStorageCache';
 
 export type Configuration = {
     appId: string,
@@ -47,6 +49,8 @@ export class Container {
 
     private context?: Context;
 
+    private tokenProvider?: TokenProvider;
+
     private tracker?: Tracker;
 
     private evaluator?: Evaluator;
@@ -56,6 +60,10 @@ export class Container {
     private beaconChannel?: OutputChannel<Beacon>;
 
     private beaconQueue?: MonitoredQueue<string>;
+
+    private removeTokenSyncListener?: {(): void};
+
+    private readonly eventManager = new SynchronousEventManager<SdkEventMap>();
 
     public constructor(configuration: Configuration) {
         this.configuration = configuration;
@@ -74,16 +82,10 @@ export class Container {
     }
 
     private createEvaluator(): Evaluator {
-        const context = this.getContext();
-
         return new Evaluator({
             appId: this.configuration.appId,
             endpointUrl: this.configuration.evaluationEndpointUrl,
-            tokenProvider: new class implements TokenProvider {
-                public getToken(): Promise<Token | null> {
-                    return Promise.resolve(context.getToken());
-                }
-            }(),
+            tokenProvider: this.getTokenProvider(),
             cidAssigner: this.getCidAssigner(),
         });
     }
@@ -97,8 +99,11 @@ export class Container {
     }
 
     private createTracker(): Tracker {
+        const context = this.getContext();
+
         const tracker = new Tracker({
-            context: this.getContext(),
+            tab: context.getTab(),
+            tokenProvider: this.getTokenProvider(),
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
             eventMetadata: this.configuration.eventMetadata || {},
@@ -112,6 +117,15 @@ export class Container {
         return tracker;
     }
 
+    public getTokenProvider(): TokenProvider {
+        if (this.tokenProvider === undefined) {
+            const context = this.getContext();
+            this.tokenProvider = {getToken: context.getToken.bind(context)};
+        }
+
+        return this.tokenProvider;
+    }
+
     public getContext(): Context {
         if (this.context === undefined) {
             this.context = this.createContext();
@@ -121,11 +135,21 @@ export class Container {
     }
 
     private createContext(): Context {
-        return Context.load(
-            this.getGlobalTabStorage('context'),
-            this.getGlobalBrowserStorage('context'),
-            this.configuration.tokenScope,
-        );
+        const browserStorage = this.getLocalStorage();
+        const browserCache = new LocalStorageCache(browserStorage, 'croct.token');
+        const tabStorage = this.getSessionStorage();
+
+        this.removeTokenSyncListener = LocalStorageCache.autoSync(browserCache);
+
+        return Context.load({
+            tokenScope: this.configuration.tokenScope,
+            eventDispatcher: this.getEventManager(),
+            cache: {
+                tabId: new LocalStorageCache(tabStorage, 'croct.tab'),
+                tabToken: new LocalStorageCache(tabStorage, 'croct.token'),
+                browserToken: browserCache,
+            },
+        });
     }
 
     private getBeaconChannel(): OutputChannel<Beacon> {
@@ -196,7 +220,7 @@ export class Container {
                 logger,
             ),
             new FallbackCache(
-                new StorageCache(this.getLocalStorage(), 'croct.cid'),
+                new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),
                 new CookieCache('croct.cid', {
                     sameSite: 'strict',
                     domain: getBaseDomain(),
@@ -277,6 +301,10 @@ export class Container {
         return sessionStorage;
     }
 
+    public getEventManager(): EventManager<SdkEventMap> {
+        return this.eventManager;
+    }
+
     public async dispose(): Promise<void> {
         const logger = this.getLogger();
 
@@ -284,6 +312,12 @@ export class Container {
             logger.debug('Closing beacon channel...');
 
             await this.beaconChannel.close();
+        }
+
+        if (this.removeTokenSyncListener) {
+            logger.debug('Removing token sync listener...');
+
+            this.removeTokenSyncListener();
         }
 
         if (this.tracker) {
@@ -302,10 +336,13 @@ export class Container {
         }
 
         delete this.context;
+        delete this.tokenProvider;
+        delete this.cidAssigner;
         delete this.tracker;
         delete this.evaluator;
         delete this.beaconChannel;
         delete this.beaconQueue;
+        delete this.removeTokenSyncListener;
 
         logger.debug('Container resources released.');
     }

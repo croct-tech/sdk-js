@@ -19,9 +19,11 @@ export default class FallbackCache implements Cache {
         return null;
     }
 
-    public put(value: string | null): void {
-        for (const cache of this.caches) {
-            cache.put(value);
-        }
+    public put(value: string): void {
+        this.caches.forEach(cache => cache.put(value));
+    }
+
+    public clear(): void {
+        this.caches.forEach(cache => cache.clear());
     }
 }

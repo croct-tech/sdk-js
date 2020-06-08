@@ -1,6 +1,6 @@
 import {Operation, Patch} from './patch';
 import {JsonArray, JsonObject, JsonValue} from './json';
-import {Event} from './event';
+import {TrackingEvent} from './trackingEvents';
 import {
     addOperation,
     clearOperation,
@@ -23,7 +23,7 @@ const operationSchema = {
     unset: unsetOperation,
 };
 
-export default abstract class ActiveRecord<T extends Event> {
+export default abstract class ActiveRecord<T extends TrackingEvent> {
     private readonly operations: Operation[] = [];
 
     public set(value: JsonValue): this;

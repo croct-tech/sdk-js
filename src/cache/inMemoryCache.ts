@@ -1,17 +1,21 @@
 import Cache from './index';
 
 export default class InMemoryCache implements Cache {
-    private cache: string | null = null;
+    private cache?: string;
 
-    public constructor(cache: string | null = null) {
+    public constructor(cache?: string) {
         this.cache = cache;
     }
 
     public get(): string | null {
-        return this.cache;
+        return this.cache ?? null;
     }
 
-    public put(value: string | null): void {
+    public put(value: string): void {
         this.cache = value;
+    }
+
+    public clear(): void {
+        delete this.cache;
     }
 }

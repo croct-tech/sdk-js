@@ -134,12 +134,10 @@ export default class Token {
 }
 
 export interface TokenProvider {
-    getToken(): Promise<Token | null>;
+    getToken(): Token | null;
 }
 
-export interface TokenStorage {
-    getToken(): Token | null;
-
+export interface TokenStore extends TokenProvider {
     setToken(token: Token | null): void;
 }
 
@@ -150,7 +148,7 @@ export class FixedTokenProvider implements TokenProvider {
         this.token = token;
     }
 
-    public getToken(): Promise<Token | null> {
-        return Promise.resolve(this.token);
+    public getToken(): Token | null {
+        return this.token;
     }
 }

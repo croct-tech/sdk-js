@@ -1,24 +1,50 @@
-import Token, {TokenStorage} from './token';
+import Token, {TokenStore} from './token';
 import Tab from './tab';
-import PersistentStorage from './token/persistentStorage';
-import ReplicatedStorage from './token/replicatedStorage';
-import InMemoryStorage from './token/inMemoryStorage';
+import CachedTokenStore from './token/cachedTokenStore';
+import ReplicatedTokenStore from './token/replicatedTokenStore';
+import InMemoryTokenStore from './token/inMemoryTokenStore';
 import {uuid4} from './uuid';
+import {EventDispatcher} from './eventManager';
+import {SdkEventMap} from './sdkEvents';
+import LocalStorageCache from './cache/localStorageCache';
 
 export type TokenScope = 'isolated' | 'global' | 'contextual';
+
+export type Configuration = {
+    tokenScope: TokenScope,
+    eventDispatcher: ContextEventDispatcher,
+    cache: {
+        tabId: LocalStorageCache,
+        tabToken: LocalStorageCache,
+        browserToken: LocalStorageCache,
+    },
+};
+
+type ContextEventDispatcher = EventDispatcher<Pick<SdkEventMap, 'tokenChanged'>>;
+
+function tokenEquals(left: Token|null, right: Token|null): boolean {
+    return left === right || (left !== null && right !== null && left.toString() === right.toString());
+}
 
 export default class Context {
     private readonly tab: Tab;
 
-    private readonly tokenStorage: TokenStorage;
+    private readonly tokenStore: TokenStore;
 
-    public constructor(tab: Tab, tokenStorage: TokenStorage) {
+    private readonly eventDispatcher: ContextEventDispatcher;
+
+    private lastToken: Token|null;
+
+    private constructor(tab: Tab, tokenStore: TokenStore, eventDispatcher: ContextEventDispatcher) {
         this.tab = tab;
-        this.tokenStorage = tokenStorage;
+        this.tokenStore = tokenStore;
+        this.eventDispatcher = eventDispatcher;
+        this.lastToken = tokenStore.getToken();
+        this.syncToken = this.syncToken.bind(this);
     }
 
-    public static load(tabStorage: Storage, browserStorage: Storage, tokenScope: TokenScope): Context {
-        let tabId: string | null = tabStorage.getItem('tab');
+    public static load({cache, tokenScope, eventDispatcher}: Configuration): Context {
+        let tabId: string | null = cache.tabId.get();
         let newTab = false;
 
         if (tabId === null) {
@@ -28,20 +54,24 @@ export default class Context {
 
         const tab = new Tab(tabId, newTab);
 
-        tabStorage.removeItem('tab');
+        cache.tabId.clear();
 
-        tab.addListener('unload', () => tabStorage.setItem('tab', tab.id));
+        tab.addListener('unload', () => cache.tabId.put(tab.id));
 
         switch (tokenScope) {
             case 'isolated':
-                return new Context(tab, new InMemoryStorage());
+                return new Context(tab, new InMemoryTokenStore(), eventDispatcher);
 
-            case 'global':
-                return new Context(tab, new PersistentStorage(browserStorage));
+            case 'global': {
+                const context = new Context(tab, new CachedTokenStore(cache.browserToken), eventDispatcher);
+                cache.browserToken.addListener(context.syncToken);
+
+                return context;
+            }
 
             case 'contextual': {
-                const primaryStorage = new PersistentStorage(tabStorage, `${tabId}.token`);
-                const secondaryStorage = new PersistentStorage(browserStorage);
+                const primaryStorage = new CachedTokenStore(cache.tabToken);
+                const secondaryStorage = new CachedTokenStore(cache.browserToken);
 
                 if (tab.isNew) {
                     primaryStorage.setToken(secondaryStorage.getToken());
@@ -53,7 +83,7 @@ export default class Context {
                     }
                 });
 
-                return new Context(tab, new ReplicatedStorage(primaryStorage, secondaryStorage));
+                return new Context(tab, new ReplicatedTokenStore(primaryStorage, secondaryStorage), eventDispatcher);
             }
         }
     }
@@ -75,10 +105,34 @@ export default class Context {
     }
 
     public getToken(): Token | null {
-        return this.tokenStorage.getToken();
+        return this.tokenStore.getToken();
     }
 
     public setToken(token: Token | null): void {
-        this.tokenStorage.setToken(token);
+        const oldToken = this.lastToken;
+
+        this.lastToken = token;
+        this.tokenStore.setToken(token);
+
+        if (!tokenEquals(oldToken, token)) {
+            this.eventDispatcher.dispatch('tokenChanged', {
+                oldToken: oldToken,
+                newToken: token,
+            });
+        }
+    }
+
+    private syncToken(): void {
+        const newToken = this.tokenStore.getToken();
+        const oldToken = this.lastToken;
+
+        if (!tokenEquals(oldToken, newToken)) {
+            this.lastToken = newToken;
+
+            this.eventDispatcher.dispatch('tokenChanged', {
+                oldToken: oldToken,
+                newToken: newToken,
+            });
+        }
     }
 }

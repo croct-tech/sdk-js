@@ -9,7 +9,14 @@ import {configurationSchema} from '../schema/sdkFacadeSchemas';
 import Sdk from '../sdk';
 import SessionFacade from './sessionFacade';
 import {Logger} from '../logging';
-import {ExternalEvent, ExternalEventPayload, ExternalEventType, PartialEvent} from '../event';
+import {
+    ExternalTrackingEvent as ExternalEvent,
+    ExternalTrackingEventPayload as ExternalEventPayload,
+    ExternalTrackingEventType as ExternalEventType,
+    PartialTrackingEvent as PartialEvent,
+} from '../trackingEvents';
+import {SdkEvent, SdkEventType} from '../sdkEvents';
+import {EventListener} from '../eventManager';
 
 export type Configuration = {
     appId: string,
@@ -229,6 +236,26 @@ export default class SdkFacade {
 
     public getBrowserStorage(namespace: string, ...subnamespace: string[]): Storage {
         return this.sdk.getBrowserStorage(namespace, ...subnamespace);
+    }
+
+    public addListener<T extends SdkEventType>(type: T, listener: EventListener<SdkEvent<T>>): void {
+        this.sdk.getEventManager().addListener(type, listener);
+    }
+
+    public removeListener<T extends SdkEventType>(type: T, listener: EventListener<SdkEvent<T>>): void {
+        this.sdk.getEventManager().removeListener(type, listener);
+    }
+
+    public dispatch(namespace: string, eventName: string, event: object): void {
+        if (namespace.length === 0) {
+            throw new Error('The namespace cannot be empty.');
+        }
+
+        if (eventName.length === 0) {
+            throw new Error('The event name cannot be empty.');
+        }
+
+        this.sdk.getEventManager().dispatch(`${namespace}.${eventName}`, event);
     }
 
     public close(): Promise<void> {

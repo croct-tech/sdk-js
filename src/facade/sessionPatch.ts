@@ -1,6 +1,6 @@
 import ActiveRecord from '../activeRecord';
 import Tracker from '../tracker';
-import {SessionAttributesChanged} from '../event';
+import {SessionAttributesChanged} from '../trackingEvents';
 
 export default class SessionPatch extends ActiveRecord<SessionAttributesChanged> {
     private readonly tracker: Tracker;

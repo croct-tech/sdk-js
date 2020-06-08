@@ -1,5 +1,5 @@
 import Tracker from '../../src/tracker';
-import {SessionAttributesChanged} from '../../src/event';
+import {SessionAttributesChanged} from '../../src/trackingEvents';
 import SessionPatch from '../../src/facade/sessionPatch';
 
 describe('A session patch', () => {
