@@ -1,6 +1,6 @@
-import Cache, {CacheListener} from './index';
+import {CacheListener, ObservableCache} from './index';
 
-export default class LocalStorageCache implements Cache {
+export default class LocalStorageCache implements ObservableCache {
     private readonly storage: Storage;
 
     private readonly key: string;
