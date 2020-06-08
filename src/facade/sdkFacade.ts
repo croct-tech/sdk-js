@@ -15,8 +15,8 @@ import {
     ExternalTrackingEventType as ExternalEventType,
     PartialTrackingEvent as PartialEvent,
 } from '../trackingEvents';
-import {SdkEvent, SdkEventType} from '../sdkEvents';
-import {EventListener} from '../eventManager';
+import {SdkEvent, SdkEventMap, SdkEventType} from '../sdkEvents';
+import {EventListener, EventManager} from '../eventManager';
 
 export type Configuration = {
     appId: string,
@@ -44,7 +44,7 @@ function validateConfiguration(configuration: unknown): asserts configuration is
     }
 }
 
-export default class SdkFacade {
+export default class SdkFacade implements EventManager<SdkEventMap> {
     private readonly sdk: Sdk;
 
     private trackerFacade?: TrackerFacade;
@@ -246,16 +246,16 @@ export default class SdkFacade {
         this.sdk.getEventManager().removeListener(type, listener);
     }
 
-    public dispatch(namespace: string, eventName: string, event: object): void {
-        if (namespace.length === 0) {
-            throw new Error('The namespace cannot be empty.');
+    public dispatch<T extends keyof SdkEventMap>(eventName: T, event: SdkEventMap[T]): void {
+        if (!/[a-z][a-z_]+\.[a-z][a-z_]+/i.test(eventName)) {
+            throw new Error(
+                'The event name must be in the form of "namespaced.eventName", where '
+                + 'both the namespace and event name must start with a letter, followed by '
+                + 'any series of letters and underscores.',
+            );
         }
 
-        if (eventName.length === 0) {
-            throw new Error('The event name cannot be empty.');
-        }
-
-        this.sdk.getEventManager().dispatch(`${namespace}.${eventName}`, event);
+        this.sdk.getEventManager().dispatch(eventName, event);
     }
 
     public close(): Promise<void> {

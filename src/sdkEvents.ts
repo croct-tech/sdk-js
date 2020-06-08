@@ -5,8 +5,7 @@ export interface TokenChanged {
     newToken: Token|null;
 }
 
-export type SdkEventMap = {
-    [key: string]: object,
+export type SdkEventMap = Record<string, object> & {
     tokenChanged: TokenChanged,
 }
 

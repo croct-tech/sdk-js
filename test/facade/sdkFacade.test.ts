@@ -948,19 +948,27 @@ describe('A SDK facade', () => {
 
         const event = {};
 
-        sdkFacade.dispatch('foo', 'bar', event);
+        sdkFacade.dispatch('foo.bar', event);
 
         expect(eventManager.dispatch).toHaveBeenCalledWith('foo.bar', event);
     });
 
-    test('should only allow dispatching custom events specifying a fully-qualified name', () => {
+    test.each<[string]>([
+        [''],
+        ['.'],
+        ['f'],
+        ['foo'],
+        ['foo.'],
+        ['foo.b'],
+        ['foo.b'],
+    ])('should only allow dispatching custom events specifying a fully-qualified name', (eventName: string) => {
         const sdkFacade = SdkFacade.init({
             appId: appId,
             track: false,
         });
 
-        expect(() => sdkFacade.dispatch('', 'bar', {})).toThrow('The namespace cannot be empty');
-        expect(() => sdkFacade.dispatch('foo', '', {})).toThrow('The event name cannot be empty');
+        expect(() => sdkFacade.dispatch(eventName, {}))
+            .toThrow('The event name must be in the form of "namespaced.eventName"');
     });
 
     test('should close the SDK on close', async () => {
