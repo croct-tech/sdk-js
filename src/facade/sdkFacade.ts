@@ -1,22 +1,17 @@
-import EvaluatorFacade, {EvaluationOptions, TabContextFactory} from './evaluatorFacade';
+import EvaluatorFacade, {TabContextFactory} from './evaluatorFacade';
 import TrackerFacade from './trackerFacade';
 import Context, {TokenScope} from '../context';
 import UserFacade from './userFacade';
 import Token from '../token';
-import {JsonValue} from '../json';
 import {formatCause} from '../error';
 import {configurationSchema} from '../schema/sdkFacadeSchemas';
 import Sdk from '../sdk';
 import SessionFacade from './sessionFacade';
 import {Logger} from '../logging';
-import {
-    ExternalTrackingEvent as ExternalEvent,
-    ExternalTrackingEventPayload as ExternalEventPayload,
-    ExternalTrackingEventType as ExternalEventType,
-    PartialTrackingEvent as PartialEvent,
-} from '../trackingEvents';
-import {SdkEvent, SdkEventMap, SdkEventType} from '../sdkEvents';
-import {EventListener, EventManager} from '../eventManager';
+import {SdkEventMap} from '../sdkEvents';
+import {EventManager} from '../eventManager';
+import CidAssigner from '../cid/index';
+import {PartialTrackingEvent} from '../trackingEvents';
 
 export type Configuration = {
     appId: string,
@@ -44,7 +39,7 @@ function validateConfiguration(configuration: unknown): asserts configuration is
     }
 }
 
-export default class SdkFacade implements EventManager<SdkEventMap> {
+export default class SdkFacade {
     private readonly sdk: Sdk;
 
     private trackerFacade?: TrackerFacade;
@@ -93,8 +88,8 @@ export default class SdkFacade implements EventManager<SdkEventMap> {
         return this.sdk.context;
     }
 
-    public getCid(): Promise<string> {
-        return this.sdk.getCid();
+    public get cidAssigner(): CidAssigner {
+        return this.sdk.cidAssigner;
     }
 
     public get tracker(): TrackerFacade {
@@ -130,6 +125,26 @@ export default class SdkFacade implements EventManager<SdkEventMap> {
         }
 
         return this.evaluatorFacade;
+    }
+
+    public get eventManager(): EventManager<Record<string, object>, SdkEventMap> {
+        const {eventManager} = this.sdk;
+
+        return {
+            addListener: eventManager.addListener.bind(eventManager),
+            removeListener: eventManager.removeListener.bind(eventManager),
+            dispatch: (eventName: string, event: object): void => {
+                if (!/[a-z][a-z_]+\.[a-z][a-z_]+/i.test(eventName)) {
+                    throw new Error(
+                        'The event name must be in the form of "namespaced.eventName", where '
+                        + 'both the namespace and event name must start with a letter, followed by '
+                        + 'any series of letters and underscores.',
+                    );
+                }
+
+                eventManager.dispatch(eventName, event);
+            },
+        }
     }
 
     public identify(userId: string): void {
@@ -212,18 +227,10 @@ export default class SdkFacade implements EventManager<SdkEventMap> {
         logger.debug('Token removed');
     }
 
-    private trackInternalEvent(event: PartialEvent): void {
+    private trackInternalEvent(event: PartialTrackingEvent): void {
         this.sdk.tracker.track(event).catch(() => {
             // suppress error as it is already logged by the tracker
         });
-    }
-
-    public track<T extends ExternalEventType>(type: T, payload: ExternalEventPayload<T>): Promise<ExternalEvent<T>> {
-        return this.tracker.track(type, payload);
-    }
-
-    public evaluate(expression: string, options: EvaluationOptions = {}): Promise<JsonValue> {
-        return this.evaluator.evaluate(expression, options);
     }
 
     public getLogger(...namespace: string[]): Logger {
@@ -236,26 +243,6 @@ export default class SdkFacade implements EventManager<SdkEventMap> {
 
     public getBrowserStorage(namespace: string, ...subnamespace: string[]): Storage {
         return this.sdk.getBrowserStorage(namespace, ...subnamespace);
-    }
-
-    public addListener<T extends SdkEventType>(type: T, listener: EventListener<SdkEvent<T>>): void {
-        this.sdk.getEventManager().addListener(type, listener);
-    }
-
-    public removeListener<T extends SdkEventType>(type: T, listener: EventListener<SdkEvent<T>>): void {
-        this.sdk.getEventManager().removeListener(type, listener);
-    }
-
-    public dispatch<T extends keyof SdkEventMap>(eventName: T, event: SdkEventMap[T]): void {
-        if (!/[a-z][a-z_]+\.[a-z][a-z_]+/i.test(eventName)) {
-            throw new Error(
-                'The event name must be in the form of "namespaced.eventName", where '
-                + 'both the namespace and event name must start with a letter, followed by '
-                + 'any series of letters and underscores.',
-            );
-        }
-
-        this.sdk.getEventManager().dispatch(eventName, event);
     }
 
     public close(): Promise<void> {

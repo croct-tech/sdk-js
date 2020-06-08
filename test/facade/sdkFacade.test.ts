@@ -6,13 +6,13 @@ import UserFacade from '../../src/facade/userFacade';
 import Tracker from '../../src/tracker';
 import SessionFacade from '../../src/facade/sessionFacade';
 import TrackerFacade from '../../src/facade/trackerFacade';
-import Evaluator from '../../src/evaluator';
-import Tab from '../../src/tab';
 import NullLogger from '../../src/logging/nullLogger';
 import {DumbStorage} from '../utils/dumbStorage';
-import {ExternalTrackingEvent} from '../../src/trackingEvents';
-import {SynchronousEventManager} from '../../src/eventManager';
+import {EventManager} from '../../src/eventManager';
 import {SdkEventMap} from '../../src/sdkEvents';
+import CidAssigner from '../../src/cid';
+import Evaluator from '../../src/evaluator';
+import Tab from '../../src/tab';
 
 describe('A SDK facade', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
@@ -270,6 +270,38 @@ describe('A SDK facade', () => {
 
         expect(sdkFacade.session).toBe(sdkFacade.session);
         expect(sdkFacade.session).toStrictEqual(new SessionFacade(tracker));
+    });
+
+    test('should provide an evaluator facade', async () => {
+        const tab = new Tab('1', true);
+        const result = '2';
+
+        const {default: EvaluatorMock} = jest.genMockFromModule<{default: jest.Mock<Evaluator>}>('../../src/evaluator');
+        const evaluator = new EvaluatorMock();
+        evaluator.evaluate = jest.fn(() => Promise.resolve(result));
+
+        const context = createContextMock();
+        context.getTab = jest.fn(() => tab);
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'evaluator', 'get').mockReturnValue(evaluator);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        await expect(sdkFacade.evaluator.evaluate('1 + 1', {timeout: 5})).resolves.toBe(result);
+
+        expect(evaluator.evaluate).toHaveBeenCalledWith('1 + 1', expect.objectContaining({timeout: 5}));
+        expect(evaluator.evaluate).toBeCalledTimes(1);
     });
 
     test('should provide the context', () => {
@@ -742,69 +774,6 @@ describe('A SDK facade', () => {
         expect(tracker.track).toHaveBeenCalledTimes(2);
     });
 
-    test('should track events', async () => {
-        const tracker = new TrackerMock();
-        tracker.track = jest.fn(event => Promise.resolve(event));
-
-        jest.spyOn(Sdk, 'init')
-            .mockImplementationOnce(config => {
-                const sdk = Sdk.init(config);
-
-                jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
-
-                return sdk;
-            });
-
-        const event: ExternalTrackingEvent = {
-            type: 'userSignedUp',
-            userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
-        };
-
-        const sdkFacade = SdkFacade.init({
-            appId: appId,
-            track: false,
-        });
-
-        const promise = sdkFacade.track('userSignedUp', event);
-
-        await expect(promise).resolves.toEqual(event);
-
-        expect(tracker.track).toHaveBeenCalledWith(event);
-        expect(tracker.track).toBeCalledTimes(1);
-    });
-
-    test('should evaluate expressions', async () => {
-        const tab = new Tab('1', true);
-        const result = '2';
-
-        const {default: EvaluatorMock} = jest.genMockFromModule<{default: jest.Mock<Evaluator>}>('../../src/evaluator');
-        const evaluator = new EvaluatorMock();
-        evaluator.evaluate = jest.fn(() => Promise.resolve(result));
-
-        const context = createContextMock();
-        context.getTab = jest.fn(() => tab);
-
-        jest.spyOn(Sdk, 'init')
-            .mockImplementationOnce(config => {
-                const sdk = Sdk.init(config);
-
-                jest.spyOn(sdk, 'evaluator', 'get').mockReturnValue(evaluator);
-                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
-
-                return sdk;
-            });
-
-        const sdkFacade = SdkFacade.init({
-            appId: appId,
-            track: false,
-        });
-
-        await expect(sdkFacade.evaluate('1 + 1', {timeout: 5})).resolves.toBe(result);
-
-        expect(evaluator.evaluate).toHaveBeenCalledWith('1 + 1', expect.objectContaining({timeout: 5}));
-        expect(evaluator.evaluate).toBeCalledTimes(1);
-    });
-
     test('should provide loggers, optionally namespaced', () => {
         const logger = new NullLogger();
         const getLogger = jest.fn(() => logger);
@@ -876,14 +845,16 @@ describe('A SDK facade', () => {
         expect(getBrowserStorage).toHaveBeenLastCalledWith('a', 'b', 'c');
     });
 
-    test('should assign a CID', async () => {
-        const getCid = jest.fn().mockResolvedValue('123');
+    test('should provide a CID assigner', async () => {
+        const cidAssigner: CidAssigner = {
+            assignCid: jest.fn().mockResolvedValue('123'),
+        };
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'getCid').mockImplementation(getCid);
+                jest.spyOn(sdk, 'cidAssigner', 'get').mockReturnValue(cidAssigner);
 
                 return sdk;
             });
@@ -893,13 +864,17 @@ describe('A SDK facade', () => {
             track: false,
         });
 
-        await expect(sdkFacade.getCid()).resolves.toEqual('123');
+        await expect(sdkFacade.cidAssigner.assignCid()).resolves.toEqual('123');
 
-        expect(getCid).toHaveBeenCalled();
+        expect(cidAssigner.assignCid).toHaveBeenCalled();
     });
 
     test('should allow to subscribe and unsubscribe to events', () => {
-        const eventManager = new SynchronousEventManager<SdkEventMap>();
+        const eventManager: EventManager<Record<string, object>, SdkEventMap> = {
+            addListener: jest.fn(),
+            removeListener: jest.fn(),
+            dispatch: jest.fn(),
+        };
 
         jest.spyOn(eventManager, 'addListener');
         jest.spyOn(eventManager, 'removeListener');
@@ -908,7 +883,7 @@ describe('A SDK facade', () => {
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'getEventManager').mockReturnValue(eventManager);
+                jest.spyOn(sdk, 'eventManager', 'get').mockReturnValue(eventManager);
 
                 return sdk;
             });
@@ -920,15 +895,19 @@ describe('A SDK facade', () => {
 
         const listener = jest.fn();
 
-        sdkFacade.addListener('foo.bar', listener);
-        sdkFacade.removeListener('foo.bar', listener);
+        sdkFacade.eventManager.addListener('foo.bar', listener);
+        sdkFacade.eventManager.removeListener('foo.bar', listener);
 
         expect(eventManager.addListener).toHaveBeenCalledWith('foo.bar', listener);
         expect(eventManager.removeListener).toHaveBeenCalledWith('foo.bar', listener);
     });
 
     test('should allow external services to dispatch custom events', () => {
-        const eventManager = new SynchronousEventManager<SdkEventMap>();
+        const eventManager: EventManager<Record<string, object>, SdkEventMap> = {
+            addListener: jest.fn(),
+            removeListener: jest.fn(),
+            dispatch: jest.fn(),
+        };
 
         jest.spyOn(eventManager, 'dispatch');
 
@@ -936,7 +915,7 @@ describe('A SDK facade', () => {
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'getEventManager').mockReturnValue(eventManager);
+                jest.spyOn(sdk, 'eventManager', 'get').mockReturnValue(eventManager);
 
                 return sdk;
             });
@@ -948,7 +927,7 @@ describe('A SDK facade', () => {
 
         const event = {};
 
-        sdkFacade.dispatch('foo.bar', event);
+        sdkFacade.eventManager.dispatch('foo.bar', event);
 
         expect(eventManager.dispatch).toHaveBeenCalledWith('foo.bar', event);
     });
@@ -971,7 +950,7 @@ describe('A SDK facade', () => {
             track: false,
         });
 
-        expect(() => sdkFacade.dispatch(eventName, {}))
+        expect(() => sdkFacade.eventManager.dispatch(eventName, {}))
             .toThrow('The event name must be in the form of "namespaced.eventName"');
     });
 

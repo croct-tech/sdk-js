@@ -379,21 +379,20 @@ describe('A SDK', () => {
         await expect(promise).resolves.toBe(result);
     });
 
-    test('should assign a CID', async () => {
+    test('should provide a CID assigner', async () => {
         const sdk = Sdk.init(configuration);
 
-        await expect(sdk.getCid()).resolves.toEqual(configuration.cid);
+        await expect(sdk.cidAssigner.assignCid()).resolves.toEqual(configuration.cid);
     });
 
     test('should provide an event manager to allow inter-service communication', () => {
         const sdk = Sdk.init(configuration);
-        const eventManager = sdk.getEventManager();
 
         const listener = jest.fn();
-        eventManager.addListener('somethingHappened', listener);
+        sdk.eventManager.addListener('somethingHappened', listener);
 
         const event = {};
-        eventManager.dispatch('somethingHappened', {});
+        sdk.eventManager.dispatch('somethingHappened', {});
 
         expect(listener).toHaveBeenCalledWith(event);
     });

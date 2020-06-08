@@ -8,6 +8,7 @@ import Tracker from './tracker';
 import Evaluator from './evaluator';
 import {SdkEventMap} from './sdkEvents';
 import {EventManager} from './eventManager';
+import CidAssigner from './cid/index';
 
 export type Configuration = {
     appId: string,
@@ -99,10 +100,8 @@ export default class Sdk {
         return appId;
     }
 
-    public getCid(): Promise<string> {
-        const assigner = this.container.getCidAssigner();
-
-        return assigner.assignCid();
+    public get cidAssigner(): CidAssigner {
+        return this.container.getCidAssigner();
     }
 
     public get context(): Context {
@@ -117,6 +116,10 @@ export default class Sdk {
         return this.container.getEvaluator();
     }
 
+    public get eventManager(): EventManager<SdkEventMap> {
+        return this.container.getEventManager();
+    }
+
     public getLogger(...namespace: string[]): Logger {
         return this.container.getLogger(...namespace);
     }
@@ -127,10 +130,6 @@ export default class Sdk {
 
     public getBrowserStorage(namespace: string, ...subnamespace: string[]): Storage {
         return this.container.getBrowserStorage(namespace, ...subnamespace);
-    }
-
-    public getEventManager(): EventManager<SdkEventMap> {
-        return this.container.getEventManager();
     }
 
     public async close(): Promise<void> {
