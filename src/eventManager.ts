@@ -14,7 +14,8 @@ export interface EventSubscriber<TEvents extends EventMap> {
     removeListener<T extends keyof TEvents>(eventName: T, listener: EventListener<TEvents[T]>): void;
 }
 
-export interface EventManager<TEvents extends EventMap> extends EventDispatcher<TEvents>, EventSubscriber<TEvents> {
+export interface EventManager<DEvents extends EventMap, SEvents extends EventMap = DEvents>
+    extends EventDispatcher<DEvents>, EventSubscriber<SEvents> {
 }
 
 export class SynchronousEventManager<TEvents extends EventMap> implements EventManager<TEvents> {
