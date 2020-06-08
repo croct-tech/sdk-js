@@ -10,7 +10,9 @@ import Evaluator from '../../src/evaluator';
 import Tab from '../../src/tab';
 import NullLogger from '../../src/logging/nullLogger';
 import {DumbStorage} from '../utils/dumbStorage';
-import {ExternalEvent} from '../../src/event';
+import {ExternalTrackingEvent} from '../../src/trackingEvents';
+import {SynchronousEventManager} from '../../src/eventManager';
+import {SdkEventMap} from '../../src/sdkEvents';
 
 describe('A SDK facade', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
@@ -753,7 +755,7 @@ describe('A SDK facade', () => {
                 return sdk;
             });
 
-        const event: ExternalEvent = {
+        const event: ExternalTrackingEvent = {
             type: 'userSignedUp',
             userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
         };
@@ -894,6 +896,83 @@ describe('A SDK facade', () => {
         await expect(sdkFacade.getCid()).resolves.toEqual('123');
 
         expect(getCid).toHaveBeenCalled();
+    });
+
+    test('should allow to subscribe and unsubscribe to events', () => {
+        const eventManager = new SynchronousEventManager<SdkEventMap>();
+
+        jest.spyOn(eventManager, 'addListener');
+        jest.spyOn(eventManager, 'removeListener');
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'getEventManager').mockReturnValue(eventManager);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        const listener = jest.fn();
+
+        sdkFacade.addListener('foo.bar', listener);
+        sdkFacade.removeListener('foo.bar', listener);
+
+        expect(eventManager.addListener).toHaveBeenCalledWith('foo.bar', listener);
+        expect(eventManager.removeListener).toHaveBeenCalledWith('foo.bar', listener);
+    });
+
+    test('should allow external services to dispatch custom events', () => {
+        const eventManager = new SynchronousEventManager<SdkEventMap>();
+
+        jest.spyOn(eventManager, 'dispatch');
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'getEventManager').mockReturnValue(eventManager);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        const event = {};
+
+        sdkFacade.dispatch('foo.bar', event);
+
+        expect(eventManager.dispatch).toHaveBeenCalledWith('foo.bar', event);
+    });
+
+    test.each<[string]>([
+        [''],
+        ['.'],
+        ['f'],
+        ['0'],
+        ['foo'],
+        ['foo.'],
+        ['foo.b'],
+        ['foo.0'],
+        ['0foo.0'],
+        ['0foo.0bar'],
+        ['0.0'],
+    ])('should only allow dispatching custom events specifying a fully-qualified name', (eventName: string) => {
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        expect(() => sdkFacade.dispatch(eventName, {}))
+            .toThrow('The event name must be in the form of "namespaced.eventName"');
     });
 
     test('should close the SDK on close', async () => {

@@ -1,11 +1,11 @@
-import Token, {TokenStorage} from './index';
+import Token, {TokenStore} from './index';
 
-export default class ReplicatedStorage implements TokenStorage {
-    private primary: TokenStorage;
+export default class ReplicatedTokenStore implements TokenStore {
+    private primary: TokenStore;
 
-    private secondary: TokenStorage;
+    private secondary: TokenStore;
 
-    public constructor(primary: TokenStorage, secondary: TokenStorage) {
+    public constructor(primary: TokenStore, secondary: TokenStore) {
         this.primary = primary;
         this.secondary = secondary;
     }

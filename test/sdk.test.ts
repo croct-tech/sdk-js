@@ -5,7 +5,7 @@ import NullLogger from '../src/logging/nullLogger';
 import Token from '../src/token';
 import TabEventEmulator from './utils/tabEventEmulator';
 import {Logger} from '../src/logging';
-import {BeaconPayload, NothingChanged} from '../src/event';
+import {BeaconPayload, NothingChanged} from '../src/trackingEvents';
 import {VERSION} from '../src/constants';
 
 jest.mock('../src/constants', () => ({
@@ -110,7 +110,7 @@ describe('A SDK', () => {
             tokenScope: 'global',
         });
 
-        tabEventEmulator.newTab();
+        const tabIndex = tabEventEmulator.newTab();
 
         const sdkTabB = Sdk.init({
             ...configuration,
@@ -119,10 +119,36 @@ describe('A SDK', () => {
 
         sdkTabA.context.setToken(token);
 
+        tabEventEmulator.dispatchEvent(
+            window,
+            new StorageEvent('storage', {
+                bubbles: false,
+                cancelable: false,
+                key: 'croct.token',
+                oldValue: null,
+                newValue: token.toString(),
+                storageArea: localStorage,
+            }),
+            tabIndex,
+        );
+
         expect(sdkTabA.context.getToken()).toEqual(token);
         expect(sdkTabB.context.getToken()).toEqual(token);
 
         sdkTabB.context.setToken(null);
+
+        tabEventEmulator.dispatchEvent(
+            window,
+            new StorageEvent('storage', {
+                bubbles: false,
+                cancelable: false,
+                key: 'croct.token',
+                oldValue: token.toString(),
+                newValue: null,
+                storageArea: localStorage,
+            }),
+            tabIndex - 1,
+        );
 
         expect(sdkTabA.context.getToken()).toEqual(null);
         expect(sdkTabB.context.getToken()).toEqual(null);
@@ -357,6 +383,19 @@ describe('A SDK', () => {
         const sdk = Sdk.init(configuration);
 
         await expect(sdk.getCid()).resolves.toEqual(configuration.cid);
+    });
+
+    test('should provide an event manager to allow inter-service communication', () => {
+        const sdk = Sdk.init(configuration);
+        const eventManager = sdk.getEventManager();
+
+        const listener = jest.fn();
+        eventManager.addListener('somethingHappened', listener);
+
+        const event = {};
+        eventManager.dispatch('somethingHappened', {});
+
+        expect(listener).toHaveBeenCalledWith(event);
     });
 
     test('should provide an isolated session storage', () => {

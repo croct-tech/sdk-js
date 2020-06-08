@@ -1,6 +1,10 @@
 import Tracker from '../../src/tracker';
 import TrackerFacade from '../../src/facade/trackerFacade';
-import {ExternalEvent, ExternalEventPayload, ExternalEventType} from '../../src/event';
+import {
+    ExternalTrackingEvent as ExternalEvent,
+    ExternalTrackingEventPayload as ExternalEventPayload,
+    ExternalTrackingEventType as ExternalEventType,
+} from '../../src/trackingEvents';
 
 describe('A tracker facade', () => {
     afterEach(() => {

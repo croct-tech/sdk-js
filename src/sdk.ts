@@ -6,6 +6,8 @@ import {configurationSchema} from './schema/sdkSchemas';
 import {formatCause} from './error';
 import Tracker from './tracker';
 import Evaluator from './evaluator';
+import {SdkEventMap} from './sdkEvents';
+import {EventManager} from './eventManager';
 
 export type Configuration = {
     appId: string,
@@ -125,6 +127,10 @@ export default class Sdk {
 
     public getBrowserStorage(namespace: string, ...subnamespace: string[]): Storage {
         return this.container.getBrowserStorage(namespace, ...subnamespace);
+    }
+
+    public getEventManager(): EventManager<SdkEventMap> {
+        return this.container.getEventManager();
     }
 
     public async close(): Promise<void> {

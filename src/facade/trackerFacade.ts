@@ -1,4 +1,8 @@
-import {ExternalEvent, ExternalEventPayload, ExternalEventType} from '../event';
+import {
+    ExternalTrackingEvent as ExternalEvent,
+    ExternalTrackingEventPayload as ExternalEventPayload,
+    ExternalTrackingEventType as ExternalEventType,
+} from '../trackingEvents';
 import {formatCause} from '../error';
 import Tracker, {EventListener} from '../tracker';
 import {

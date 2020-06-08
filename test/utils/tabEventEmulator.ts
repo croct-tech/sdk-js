@@ -74,8 +74,8 @@ export default class TabEventEmulator {
         this.dispatchEvent(window, new Event('DOMContentLoaded', {bubbles: true, cancelable: true}));
     }
 
-    public dispatchEvent(eventTarget: EventTarget, event: Event): void {
-        for (const {target, type, listener} of this.listeners[this.tabIndex]) {
+    public dispatchEvent(eventTarget: EventTarget, event: Event, tabIndex: number = this.tabIndex): void {
+        for (const {target, type, listener} of this.listeners[tabIndex]) {
             if (target === eventTarget && type === event.type) {
                 listener.apply(target, [event]);
             }

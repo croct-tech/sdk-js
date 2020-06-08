@@ -10,7 +10,7 @@ describe('An in-memory cache', () => {
 
         expect(cache.get()).toBe('foo');
 
-        cache.put(null);
+        cache.clear()
 
         expect(cache.get()).toBeNull();
     });

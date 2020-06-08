@@ -1,3 +1,5 @@
+import {SynchronousEventManager, EventListener} from './eventManager';
+
 export type TabEvent<T = {}> = CustomEvent<{tab: Tab} & T>;
 export type TabVisibilityChangeEvent = TabEvent<{visible: boolean}>;
 export type TabUrlChangeEvent = TabEvent<{url: string}>;
@@ -9,10 +11,6 @@ type TabEventMap = {
     unload: TabEvent,
     visibilityChange: TabVisibilityChangeEvent,
     urlChange: TabUrlChangeEvent,
-}
-
-interface TabEventListener<T extends keyof TabEventMap> {
-    (event: TabEventMap[T]): void;
 }
 
 const EventMap: {[key: string]: keyof TabEventMap} = {
@@ -32,7 +30,7 @@ export default class Tab {
 
     public readonly isNew: boolean;
 
-    private readonly listeners: Partial<{[key in keyof TabEventMap]: TabEventListener<key>[]}> = {};
+    private readonly eventManager = new SynchronousEventManager<TabEventMap>();
 
     public constructor(id: string, isNew: boolean) {
         this.id = id;
@@ -42,7 +40,7 @@ export default class Tab {
     }
 
     private initialize(): void {
-        const listener: EventListener = event => {
+        const listener = (event: Event): void => {
             this.emit(EventMap[event.type], new CustomEvent(EventMap[event.type], {detail: {tab: this}}));
         };
 
@@ -93,34 +91,16 @@ export default class Tab {
         return document;
     }
 
-    public addListener<T extends keyof TabEventMap>(type: T, listener: TabEventListener<T>): void {
-        if (this.listeners[type] === undefined) {
-            this.listeners[type] = [];
-        }
-
-        (this.listeners[type] as TabEventListener<T>[]).push(listener);
+    public addListener<T extends keyof TabEventMap>(type: T, listener: EventListener<TabEventMap[T]>): void {
+        this.eventManager.addListener(type, listener);
     }
 
-    public removeListener<T extends keyof TabEventMap>(type: T, listener: TabEventListener<T>): void {
-        const listeners = this.listeners[type] as TabEventListener<T>[];
-
-        if (!listeners) {
-            return;
-        }
-
-        const index = listeners.indexOf(listener);
-
-        if (index >= 0) {
-            listeners.splice(index, 1);
-        }
+    public removeListener<T extends keyof TabEventMap>(type: T, listener: EventListener<TabEventMap[T]>): void {
+        this.eventManager.removeListener(type, listener);
     }
 
     private emit<T extends keyof TabEventMap>(type: T, event: TabEventMap[T]): void {
-        const listeners = this.listeners[type] as TabEventListener<T>[];
-
-        if (listeners !== undefined) {
-            listeners.forEach(listener => listener(event));
-        }
+        this.eventManager.dispatch(type, event);
     }
 
     private static addUrlChangeListener(listener: {(url: string): void}): void {

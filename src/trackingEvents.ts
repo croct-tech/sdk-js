@@ -122,7 +122,7 @@ export const eventTypes = [
     ...miscEventTypes,
 ] as const;
 
-interface AbstractEvent {
+interface BaseEvent {
     type: string;
 }
 
@@ -130,7 +130,7 @@ interface AbstractEvent {
  * User events
  */
 
-export interface UserProfileChanged extends AbstractEvent {
+export interface UserProfileChanged extends BaseEvent {
     type: 'userProfileChanged';
     patch: Patch;
 }
@@ -165,18 +165,18 @@ type UserProfile = {
     },
 }
 
-export interface UserSignedUp extends AbstractEvent {
+export interface UserSignedUp extends BaseEvent {
     type: 'userSignedUp';
     userId: string;
     profile?: UserProfile;
 }
 
-export interface UserSignedIn extends AbstractEvent {
+export interface UserSignedIn extends BaseEvent {
     type: 'userSignedIn';
     userId: string;
 }
 
-export interface UserSignedOut extends AbstractEvent {
+export interface UserSignedOut extends BaseEvent {
     type: 'userSignedOut';
     userId: string;
 }
@@ -190,7 +190,7 @@ export type UserEvent = UserProfileChanged | IdentifiedUserEvent;
 
 export type CartEventType = typeof cartEventTypes[number];
 
-interface BaseCartEvent extends AbstractEvent {
+interface BaseCartEvent extends BaseEvent {
     type: CartEventType;
     cart: Cart;
 }
@@ -210,12 +210,12 @@ export interface CheckoutStarted extends BaseCartEvent {
 
 export type CartEvent = CartModified | CartViewed | CheckoutStarted;
 
-export interface OrderPlaced extends AbstractEvent {
+export interface OrderPlaced extends BaseEvent {
     type: 'orderPlaced';
     order: Order;
 }
 
-export interface ProductViewed extends AbstractEvent {
+export interface ProductViewed extends BaseEvent {
     type: 'productViewed';
     product: ProductDetails;
 }
@@ -228,7 +228,7 @@ export type EcommerceEvent = OrderPlaced | ProductViewed | CartEvent;
 
 export type TabEventType = typeof tabEventTypes[number];
 
-interface BaseTabEvent extends AbstractEvent {
+interface BaseTabEvent extends BaseEvent {
     type: TabEventType;
     tabId: string;
 }
@@ -255,7 +255,7 @@ export type TabEvent = TabVisibilityChanged | TabUrlChanged | TabOpened;
 
 export type PageEventType = typeof pageEventTypes[number];
 
-interface BasePageEvent extends AbstractEvent {
+interface BasePageEvent extends BaseEvent {
     type: PageEventType;
     url: string;
 }
@@ -277,30 +277,30 @@ export type PageEvent = PageLoaded | PageOpened;
  * Misc events
  */
 
-export interface NothingChanged extends AbstractEvent {
+export interface NothingChanged extends BaseEvent {
     type: 'nothingChanged';
     sinceTime: number;
 }
 
-export interface SessionAttributesChanged extends AbstractEvent {
+export interface SessionAttributesChanged extends BaseEvent {
     type: 'sessionAttributesChanged';
     patch: Patch;
 }
 
-export interface TestGroupAssigned extends AbstractEvent {
+export interface TestGroupAssigned extends BaseEvent {
     type: 'testGroupAssigned';
     testId: string;
     groupId: string;
 }
 
-export interface GoalCompleted extends AbstractEvent {
+export interface GoalCompleted extends BaseEvent {
     type: 'goalCompleted';
     goalId: string;
     value?: number;
     currency?: string;
 }
 
-export interface EventOccurred extends AbstractEvent {
+export interface EventOccurred extends BaseEvent {
     type: 'eventOccurred';
     name: string;
     testId?: string;
@@ -344,10 +344,10 @@ type EventMap = {
     eventOccurred: EventOccurred,
 }
 
-export type EventType = keyof EventMap;
+export type TrackingEventType = keyof EventMap;
 
-export type Event<T extends EventType = EventType> =
-    T extends EventType ? EventMap[T] : EventMap[EventType];
+export type TrackingEvent<T extends TrackingEventType = TrackingEventType> =
+    T extends TrackingEventType ? EventMap[T] : EventMap[TrackingEventType];
 
 /**
  * Partial Events
@@ -356,7 +356,7 @@ export type Event<T extends EventType = EventType> =
 type CartPartialEvent <T extends CartEvent = CartEvent> =
     DistributiveOmit<T, 'cart'> & Record<'cart', Optional<Cart, 'lastUpdateTime'>>;
 
-export type PartialEvent = Exclude<Event, PageEvent | TabEvent | CartEvent> | CartPartialEvent;
+export type PartialTrackingEvent = Exclude<TrackingEvent, PageEvent | TabEvent | CartEvent> | CartPartialEvent;
 
 /**
  * External Events
@@ -374,24 +374,24 @@ type ExternalEventMap = {
     eventOccurred: EventOccurred,
 };
 
-export type ExternalEventType = keyof ExternalEventMap;
+export type ExternalTrackingEventType = keyof ExternalEventMap;
 
-export type ExternalEvent<T extends ExternalEventType = ExternalEventType> =
-    T extends ExternalEventType
+export type ExternalTrackingEvent<T extends ExternalTrackingEventType = ExternalTrackingEventType> =
+    T extends ExternalTrackingEventType
         ? ExternalEventMap[T]
-        : ExternalEventMap[ExternalEventType]
+        : ExternalEventMap[ExternalTrackingEventType]
 
-export type ExternalEventPayload<T extends ExternalEventType> = Omit<ExternalEventMap[T], 'type'>;
+export type ExternalTrackingEventPayload<T extends ExternalTrackingEventType> = Omit<ExternalEventMap[T], 'type'>;
 
 /*
  * Type guards
  */
 
-export function isIdentifiedUserEvent(event: Event): event is IdentifiedUserEvent {
+export function isIdentifiedUserEvent(event: TrackingEvent): event is IdentifiedUserEvent {
     return identifiedUserEventTypes.includes((event as IdentifiedUserEvent).type);
 }
 
-export function isCartPartialEvent(event: PartialEvent): event is CartPartialEvent {
+export function isCartPartialEvent(event: PartialTrackingEvent): event is CartPartialEvent {
     return cartEventTypes.includes((event as CartEvent).type);
 }
 
@@ -399,14 +399,14 @@ export function isCartPartialEvent(event: PartialEvent): event is CartPartialEve
  * Beacon
  */
 
-export type EventContext = {
+export type TrackingEventContext = {
     tabId: string,
     url: string,
     metadata?: {[key: string]: string},
 };
 
 export type BeaconPayload =
-      Exclude<Event, IdentifiedUserEvent>
+      Exclude<TrackingEvent, IdentifiedUserEvent>
     // Renames "userId" to "externalUserId"
     | DistributiveOmit<Exclude<IdentifiedUserEvent, UserSignedUp>, 'userId'>
         & Record<'externalUserId', IdentifiedUserEvent['userId']>
@@ -418,6 +418,6 @@ export type BeaconPayload =
 export type Beacon = {
     timestamp: number,
     token?: string,
-    context: EventContext,
+    context: TrackingEventContext,
     payload: BeaconPayload,
 }

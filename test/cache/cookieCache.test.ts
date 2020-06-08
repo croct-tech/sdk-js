@@ -25,7 +25,7 @@ describe('A cookie cache', () => {
 
         expect(setCookie).toBeCalledWith('zita', 'foo', options);
 
-        cache.put(null);
+        cache.clear();
 
         expect(unsetCookie).toBeCalledWith('zita');
     });

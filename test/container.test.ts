@@ -3,7 +3,9 @@ import * as fetchMock from 'fetch-mock';
 import {Configuration, Container} from '../src/container';
 import NullLogger from '../src/logging/nullLogger';
 import {Logger} from '../src/logging';
-import {BeaconPayload} from '../src/event';
+import {BeaconPayload} from '../src/trackingEvents';
+import LocalStorageCache from '../src/cache/localStorageCache'
+import Token from '../src/token';
 
 beforeEach(() => {
     localStorage.clear();
@@ -65,6 +67,61 @@ test('should load the beacon queue only once', () => {
     const container = new Container(configuration);
 
     expect(container.getBeaconQueue()).toBe(container.getBeaconQueue());
+});
+
+test('should configure the event manager to notify about token changes', () => {
+    const container = new Container(configuration);
+    const eventManager = container.getEventManager();
+
+    const tokenChangedListener = jest.fn();
+
+    eventManager.addListener('tokenChanged', tokenChangedListener);
+
+    const firstToken = Token.issue(configuration.appId);
+
+    const context = container.getContext();
+
+    // Set twice to ensure the listener will be called only once
+    context.setToken(firstToken);
+    context.setToken(firstToken);
+
+    // Simulate a login
+    const secondToken = Token.issue(configuration.appId, 'c4r0l');
+
+    context.setToken(secondToken);
+
+    // Then simulate switching an account from another tab
+    const thirdToken = Token.issue(configuration.appId, '3r1ck');
+
+    localStorage.setItem('croct.token', thirdToken.toString());
+
+    window.dispatchEvent(
+        new StorageEvent('storage', {
+            bubbles: false,
+            cancelable: false,
+            key: 'croct.token',
+            oldValue: secondToken.toString(),
+            newValue: thirdToken.toString(),
+            storageArea: localStorage,
+        }),
+    );
+
+    expect(tokenChangedListener).toHaveBeenCalledTimes(3);
+
+    expect(tokenChangedListener).toHaveBeenNthCalledWith(1, {
+        newToken: firstToken,
+        oldToken: null,
+    });
+
+    expect(tokenChangedListener).toHaveBeenNthCalledWith(2, {
+        newToken: secondToken,
+        oldToken: firstToken,
+    });
+
+    expect(tokenChangedListener).toHaveBeenNthCalledWith(3, {
+        newToken: thirdToken,
+        oldToken: secondToken,
+    });
 });
 
 test('should flush the beacon queue on initialization', async () => {
@@ -287,17 +344,39 @@ test('should delegate logging to the provided logger', () => {
 });
 
 test('should release managed resources once disposed', async () => {
+    const {autoSync} = LocalStorageCache;
+
+    const removeListener: jest.Mock = jest.fn();
+
+    jest.spyOn(LocalStorageCache, 'autoSync').mockImplementation((...args) => {
+        const listenerRemover = autoSync(...args);
+
+        removeListener.mockImplementation(() => listenerRemover());
+
+        return removeListener;
+    });
+
     const container = new Container(configuration);
 
     const tracker = container.getTracker();
     const evaluator = container.getEvaluator();
     const context = container.getContext();
+    const tokenProvider = container.getTokenProvider();
     const beaconQueue = container.getBeaconQueue();
+    const cidAssigner = container.getCidAssigner();
+
+    expect(LocalStorageCache.autoSync).toHaveBeenCalled();
+
+    expect(removeListener).not.toHaveBeenCalled();
 
     await expect(container.dispose()).resolves.toBeUndefined();
+
+    expect(removeListener).toHaveBeenCalled();
 
     expect(tracker).not.toBe(container.getTracker());
     expect(evaluator).not.toBe(container.getEvaluator());
     expect(context).not.toBe(container.getContext());
+    expect(tokenProvider).not.toBe(container.getTokenProvider());
     expect(beaconQueue).not.toBe(container.getBeaconQueue());
+    expect(cidAssigner).not.toBe(container.getCidAssigner());
 });

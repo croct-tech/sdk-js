@@ -8,11 +8,13 @@ describe('An fallback cache', () => {
                 .mockReturnValueOnce(null)
                 .mockReturnValueOnce('foo'),
             put: jest.fn(),
+            clear: jest.fn(),
         };
 
         const secondCache: Cache = {
             get: jest.fn().mockReturnValue(null),
             put: jest.fn(),
+            clear: jest.fn(),
         };
 
         const cache = new FallbackCache(firstCache, secondCache);
@@ -32,11 +34,13 @@ describe('An fallback cache', () => {
         const firstCache: Cache = {
             get: jest.fn(),
             put: jest.fn(),
+            clear: jest.fn(),
         };
 
         const secondCache: Cache = {
             get: jest.fn(),
             put: jest.fn(),
+            clear: jest.fn(),
         };
 
         const cache = new FallbackCache(firstCache, secondCache);
@@ -47,5 +51,26 @@ describe('An fallback cache', () => {
         expect(firstCache.put).toBeCalledWith('bar');
         expect(secondCache.put).toBeCalledTimes(1);
         expect(secondCache.put).toBeCalledWith('bar');
+    });
+
+    test('should clear all underlying caches', async () => {
+        const firstCache: Cache = {
+            get: jest.fn(),
+            put: jest.fn(),
+            clear: jest.fn(),
+        };
+
+        const secondCache: Cache = {
+            get: jest.fn(),
+            put: jest.fn(),
+            clear: jest.fn(),
+        };
+
+        const cache = new FallbackCache(firstCache, secondCache);
+
+        cache.clear();
+
+        expect(firstCache.clear).toBeCalledTimes(1);
+        expect(secondCache.clear).toBeCalledTimes(1);
     });
 });

@@ -1,12 +1,13 @@
 import Tracker, {EventInfo, EventListener} from '../src/tracker';
-import Context from '../src/context';
 import SandboxChannel from '../src/channel/sandboxChannel';
 import TabEventEmulator from './utils/tabEventEmulator';
-import {Beacon, BeaconPayload, Event, PartialEvent} from '../src/event';
+import {Beacon, BeaconPayload, TrackingEvent, PartialTrackingEvent} from '../src/trackingEvents';
 import {OutputChannel} from '../src/channel';
-import {DumbStorage} from './utils/dumbStorage';
 import {Optional} from '../src/utilityTypes';
 import Token from '../src/token';
+import InMemoryTokenStore from '../src/token/inMemoryTokenStore';
+import Tab from '../src/tab';
+import {uuid4} from '../src/uuid';
 
 describe('A tracker', () => {
     const now = Date.now();
@@ -19,6 +20,9 @@ describe('A tracker', () => {
     beforeEach(() => {
         const date = jest.spyOn(Date, 'now');
         date.mockReturnValue(now);
+
+        sessionStorage.clear();
+        localStorage.clear();
 
         tabEventEmulator.registerListeners();
 
@@ -36,7 +40,8 @@ describe('A tracker', () => {
 
     test('should determine whether it is enabled or disabled', () => {
         const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: new Tab('123', true),
             channel: new SandboxChannel(),
         });
 
@@ -53,7 +58,8 @@ describe('A tracker', () => {
 
     test('should not fail if enabled more than once', () => {
         const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
         });
 
@@ -68,7 +74,8 @@ describe('A tracker', () => {
 
     test('should not fail if disabled more than once', () => {
         const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
         });
 
@@ -87,10 +94,12 @@ describe('A tracker', () => {
                 .mockRejectedValueOnce(new Error())
                 .mockResolvedValueOnce(undefined),
         };
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
+
+        const tab = new Tab(uuid4(), true);
+
         const tracker = new Tracker({
-            context: context,
+            tokenProvider: new InMemoryTokenStore(),
+            tab: tab,
             channel: channel,
         });
 
@@ -98,7 +107,7 @@ describe('A tracker', () => {
 
         tracker.addListener(listener);
 
-        const event: Event = {
+        const event: TrackingEvent = {
             type: 'nothingChanged',
             sinceTime: 0,
         };
@@ -162,7 +171,8 @@ describe('A tracker', () => {
 
     test('should allow to be enabled even if it is suspended', () => {
         const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
         });
 
@@ -179,7 +189,8 @@ describe('A tracker', () => {
 
     test('should allow to be disabled even if it is suspended', () => {
         const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
         });
 
@@ -197,7 +208,8 @@ describe('A tracker', () => {
 
     test('should determine whether it is suspended or not', () => {
         const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
         });
 
@@ -214,7 +226,8 @@ describe('A tracker', () => {
 
     test('should not fail if suspended more than once', () => {
         const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
         });
 
@@ -229,7 +242,8 @@ describe('A tracker', () => {
 
     test('should not fail if unsuspended more than once', () => {
         const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
         });
 
@@ -247,7 +261,8 @@ describe('A tracker', () => {
         };
 
         const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: new Tab(uuid4(), true),
             channel: channel,
         });
 
@@ -276,11 +291,11 @@ describe('A tracker', () => {
 
         tabEventEmulator.newTab();
 
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
+        const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
-            context: context,
+            tokenProvider: new InMemoryTokenStore(),
+            tab: tab,
             channel: channel,
         });
 
@@ -290,7 +305,7 @@ describe('A tracker', () => {
 
         tracker.suspend();
 
-        const event: Event = {
+        const event: TrackingEvent = {
             type: 'nothingChanged',
             sinceTime: 0,
         };
@@ -322,7 +337,8 @@ describe('A tracker', () => {
         };
 
         const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: new Tab(uuid4(), true),
             channel: channel,
         });
 
@@ -330,7 +346,7 @@ describe('A tracker', () => {
 
         publish.mockClear();
 
-        const event: Event = {
+        const event: TrackingEvent = {
             type: 'nothingChanged',
             sinceTime: 0,
         };
@@ -350,7 +366,8 @@ describe('A tracker', () => {
         };
 
         const tracker = new Tracker({
-            context: Context.load(new DumbStorage(), new DumbStorage(), 'isolated'),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: new Tab(uuid4(), true),
             channel: channel,
             eventMetadata: metadata,
         });
@@ -377,11 +394,12 @@ describe('A tracker', () => {
 
         const token = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'c4r0l');
 
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        context.setToken(token);
+        const store = new InMemoryTokenStore();
+        store.setToken(token);
 
         const tracker = new Tracker({
-            context: context,
+            tokenProvider: store,
+            tab: new Tab(uuid4(), true),
             channel: channel,
         });
 
@@ -405,11 +423,12 @@ describe('A tracker', () => {
             publish: publish,
         };
 
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
+        const tab = new Tab(uuid4(), true);
+        const store = new InMemoryTokenStore();
 
         let tracker = new Tracker({
-            context: context,
+            tokenProvider: store,
+            tab: tab,
             channel: channel,
         });
 
@@ -433,7 +452,8 @@ describe('A tracker', () => {
         publish.mockClear();
 
         tracker = new Tracker({
-            context: context,
+            tokenProvider: store,
+            tab: tab,
             channel: channel,
         });
 
@@ -450,11 +470,12 @@ describe('A tracker', () => {
             publish: publish,
         };
 
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
+        const store = new InMemoryTokenStore();
+        const tab = new Tab(uuid4(), true);
 
         let tracker = new Tracker({
-            context: context,
+            tokenProvider: store,
+            tab: tab,
             channel: channel,
         });
 
@@ -478,7 +499,8 @@ describe('A tracker', () => {
         publish.mockClear();
 
         tracker = new Tracker({
-            context: context,
+            tokenProvider: store,
+            tab: tab,
             channel: channel,
         });
 
@@ -495,11 +517,11 @@ describe('A tracker', () => {
             publish: publish,
         };
 
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
+        const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
-            context: context,
+            tokenProvider: new InMemoryTokenStore(),
+            tab: tab,
             channel: channel,
         });
 
@@ -534,11 +556,11 @@ describe('A tracker', () => {
             publish: publish,
         };
 
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
+        const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
-            context: context,
+            tokenProvider: new InMemoryTokenStore(),
+            tab: tab,
             channel: channel,
         });
 
@@ -572,11 +594,11 @@ describe('A tracker', () => {
             publish: publish,
         };
 
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
+        const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
-            context: context,
+            tokenProvider: new InMemoryTokenStore(),
+            tab: tab,
             channel: channel,
         });
 
@@ -627,11 +649,11 @@ describe('A tracker', () => {
 
         tabEventEmulator.newTab();
 
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
+        const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
-            context: context,
+            tokenProvider: new InMemoryTokenStore(),
+            tab: tab,
             channel: channel,
         });
 
@@ -680,11 +702,11 @@ describe('A tracker', () => {
             publish: publish,
         };
 
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
+        const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
-            context: context,
+            tokenProvider: new InMemoryTokenStore(),
+            tab: tab,
             channel: channel,
             inactivityInterval: 10,
         });
@@ -710,7 +732,7 @@ describe('A tracker', () => {
         expect(publish).toHaveBeenCalledTimes(1);
     });
 
-    test.each<[PartialEvent, BeaconPayload | undefined]>([
+    test.each<[PartialTrackingEvent, BeaconPayload | undefined]>([
         [
             {
                 type: 'productViewed',
@@ -989,17 +1011,17 @@ describe('A tracker', () => {
             },
             undefined,
         ],
-    ])('can track event %#', async (partialEvent: PartialEvent, beaconPayload?: BeaconPayload) => {
+    ])('can track event %#', async (partialEvent: PartialTrackingEvent, beaconPayload?: BeaconPayload) => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),
             publish: jest.fn().mockResolvedValue(undefined),
         };
 
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
+        const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
-            context: context,
+            tokenProvider: new InMemoryTokenStore(),
+            tab: tab,
             channel: channel,
         });
 
@@ -1027,17 +1049,17 @@ describe('A tracker', () => {
             publish: publish,
         };
 
-        const context = Context.load(new DumbStorage(), new DumbStorage(), 'isolated');
-        const tab = context.getTab();
+        const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
-            context: context,
+            tokenProvider: new InMemoryTokenStore(),
+            tab: tab,
             channel: channel,
         });
 
         await expect(tracker.flushed).resolves.toBeUndefined();
 
-        const event: Event = {
+        const event: TrackingEvent = {
             type: 'nothingChanged',
             sinceTime: 0,
         };

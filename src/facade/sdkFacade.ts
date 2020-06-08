@@ -9,7 +9,14 @@ import {configurationSchema} from '../schema/sdkFacadeSchemas';
 import Sdk from '../sdk';
 import SessionFacade from './sessionFacade';
 import {Logger} from '../logging';
-import {ExternalEvent, ExternalEventPayload, ExternalEventType, PartialEvent} from '../event';
+import {
+    ExternalTrackingEvent as ExternalEvent,
+    ExternalTrackingEventPayload as ExternalEventPayload,
+    ExternalTrackingEventType as ExternalEventType,
+    PartialTrackingEvent as PartialEvent,
+} from '../trackingEvents';
+import {SdkEvent, SdkEventMap, SdkEventType} from '../sdkEvents';
+import {EventListener, EventManager} from '../eventManager';
 
 export type Configuration = {
     appId: string,
@@ -37,7 +44,7 @@ function validateConfiguration(configuration: unknown): asserts configuration is
     }
 }
 
-export default class SdkFacade {
+export default class SdkFacade implements EventManager<SdkEventMap> {
     private readonly sdk: Sdk;
 
     private trackerFacade?: TrackerFacade;
@@ -229,6 +236,26 @@ export default class SdkFacade {
 
     public getBrowserStorage(namespace: string, ...subnamespace: string[]): Storage {
         return this.sdk.getBrowserStorage(namespace, ...subnamespace);
+    }
+
+    public addListener<T extends SdkEventType>(type: T, listener: EventListener<SdkEvent<T>>): void {
+        this.sdk.getEventManager().addListener(type, listener);
+    }
+
+    public removeListener<T extends SdkEventType>(type: T, listener: EventListener<SdkEvent<T>>): void {
+        this.sdk.getEventManager().removeListener(type, listener);
+    }
+
+    public dispatch<T extends keyof SdkEventMap>(eventName: T, event: SdkEventMap[T]): void {
+        if (!/[a-z][a-z_]+\.[a-z][a-z_]+/i.test(eventName)) {
+            throw new Error(
+                'The event name must be in the form of "namespaced.eventName", where '
+                + 'both the namespace and event name must start with a letter, followed by '
+                + 'any series of letters and underscores.',
+            );
+        }
+
+        this.sdk.getEventManager().dispatch(eventName, event);
     }
 
     public close(): Promise<void> {

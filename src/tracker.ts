@@ -1,5 +1,4 @@
 import {Logger} from './logging';
-import Context from './context';
 import Tab, {TabEvent, TabUrlChangeEvent, TabVisibilityChangeEvent} from './tab';
 import {OutputChannel} from './channel';
 import NullLogger from './logging/nullLogger';
@@ -7,12 +6,13 @@ import {formatCause} from './error';
 import {
     Beacon,
     BeaconPayload,
-    Event,
-    EventContext,
+    TrackingEvent,
+    TrackingEventContext,
     isCartPartialEvent,
     isIdentifiedUserEvent,
-    PartialEvent,
-} from './event';
+    PartialTrackingEvent,
+} from './trackingEvents';
+import {TokenProvider} from './token/index';
 
 type Options = {
     inactivityInterval?: number,
@@ -20,13 +20,25 @@ type Options = {
 };
 
 export type Configuration = Options & {
-    context: Context,
     channel: OutputChannel<Beacon>,
     logger?: Logger,
+    tab: Tab,
+    tokenProvider: TokenProvider,
 }
 
-export type EventInfo<T extends Event = Event> = {
-    context: EventContext,
+type State = {
+    initialized: boolean,
+    enabled: boolean,
+    suspended: boolean,
+}
+
+type InactivityTimer = {
+    id?: number,
+    since: number,
+}
+
+export type EventInfo<T extends TrackingEvent = TrackingEvent> = {
+    context: TrackingEventContext,
     event: T,
     timestamp: number,
     status: 'pending' | 'confirmed' | 'failed' | 'ignored',
@@ -41,7 +53,9 @@ const trackedEvents: {[key: string]: {[key: string]: boolean}} = {};
 export default class Tracker {
     private readonly options: Required<Options>;
 
-    private readonly context: Context;
+    private tab: Tab;
+
+    private tokenProvider: TokenProvider;
 
     private readonly channel: OutputChannel<Beacon>;
 
@@ -49,27 +63,21 @@ export default class Tracker {
 
     private readonly listeners: EventListener[] = [];
 
-    private initialized = false;
-
-    private enabled = false;
-
-    private suspended = false;
-
     private readonly pending: Promise<void>[] = [];
 
-    private inactivityTimer: number;
+    private readonly state: State = {
+        enabled: false,
+        initialized: false,
+        suspended: false,
+    };
 
-    private inactiveSince: number;
+    private readonly inactivityTimer: InactivityTimer = {
+        since: 0,
+    };
 
-    public constructor(
-        {
-            context,
-            channel,
-            logger,
-            ...options
-        }: Configuration,
-    ) {
-        this.context = context;
+    public constructor({tab, tokenProvider, channel, logger, ...options}: Configuration) {
+        this.tab = tab;
+        this.tokenProvider = tokenProvider;
         this.channel = channel;
         this.logger = logger ?? new NullLogger();
         this.options = {
@@ -110,130 +118,126 @@ export default class Tracker {
     }
 
     public isEnabled(): boolean {
-        return this.enabled;
+        return this.state.enabled;
     }
 
     public isSuspended(): boolean {
-        return this.suspended;
+        return this.state.suspended;
     }
 
     public enable(): void {
-        if (this.enabled) {
+        if (this.state.enabled) {
             return;
         }
 
         this.logger.info('Tracker enabled');
 
-        this.enabled = true;
+        this.state.enabled = true;
 
-        if (this.suspended) {
+        if (this.state.suspended) {
             return;
         }
 
         this.startInactivityTimer();
 
-        if (!this.initialized) {
-            this.initialized = true;
+        if (!this.state.initialized) {
+            this.state.initialized = true;
             this.initialize();
         }
 
-        const tab = this.context.getTab();
-
-        tab.addListener('load', this.trackPageLoad);
-        tab.addListener('urlChange', this.trackTabUrlChange);
-        tab.addListener('visibilityChange', this.trackTabVisibilityChange);
+        this.tab.addListener('load', this.trackPageLoad);
+        this.tab.addListener('urlChange', this.trackTabUrlChange);
+        this.tab.addListener('visibilityChange', this.trackTabVisibilityChange);
     }
 
     public disable(): void {
-        if (!this.enabled) {
+        if (!this.state.enabled) {
             return;
         }
 
         this.logger.info('Tracker disabled');
 
-        this.enabled = false;
+        this.state.enabled = false;
 
-        if (this.suspended) {
+        if (this.state.suspended) {
             return;
         }
 
-        const tab = this.context.getTab();
-
-        tab.removeListener('load', this.trackPageLoad);
-        tab.removeListener('urlChange', this.trackTabUrlChange);
-        tab.removeListener('visibilityChange', this.trackTabVisibilityChange);
+        this.tab.removeListener('load', this.trackPageLoad);
+        this.tab.removeListener('urlChange', this.trackTabUrlChange);
+        this.tab.removeListener('visibilityChange', this.trackTabVisibilityChange);
 
         this.stopInactivityTimer();
     }
 
     public suspend(): void {
-        if (this.suspended) {
+        if (this.state.suspended) {
             return;
         }
 
         this.logger.info('Tracker suspended');
 
-        if (this.enabled) {
+        if (this.state.enabled) {
             this.disable();
-            this.enabled = true;
+            this.state.enabled = true;
         }
 
-        this.suspended = true;
+        this.state.suspended = true;
     }
 
     public unsuspend(): void {
-        if (!this.suspended) {
+        if (!this.state.suspended) {
             return;
         }
 
         this.logger.info('Tracker unsuspended');
 
-        this.suspended = false;
+        this.state.suspended = false;
 
-        if (this.enabled) {
-            this.enabled = false;
+        if (this.state.enabled) {
+            this.state.enabled = false;
             this.enable();
         }
     }
 
     private initialize(): void {
-        const tab: Tab = this.context.getTab();
-
-        if (trackedEvents[tab.id] === undefined) {
-            trackedEvents[tab.id] = {};
+        if (trackedEvents[this.tab.id] === undefined) {
+            trackedEvents[this.tab.id] = {};
         }
 
-        const initEvents = trackedEvents[tab.id];
+        const initEvents = trackedEvents[this.tab.id];
 
-        if (tab.isNew && !initEvents.tabOpened) {
+        if (this.tab.isNew && !initEvents.tabOpened) {
             initEvents.tabOpened = true;
 
-            this.trackTabOpen({tabId: tab.id});
+            this.trackTabOpen({tabId: this.tab.id});
         }
 
         if (!initEvents.pageOpened) {
             initEvents.pageOpened = true;
 
             this.trackPageOpen({
-                url: tab.url,
-                referrer: tab.referrer,
+                url: this.tab.url,
+                referrer: this.tab.referrer,
             });
         }
     }
 
     private stopInactivityTimer(): void {
-        window.clearInterval(this.inactivityTimer);
+        if (this.inactivityTimer.id !== undefined) {
+            window.clearInterval(this.inactivityTimer.id);
 
-        delete this.inactivityTimer;
+            delete this.inactivityTimer.id;
+        }
     }
 
     private startInactivityTimer(): void {
         this.stopInactivityTimer();
 
-        this.inactivityTimer = window.setInterval(this.trackInactivity, this.options.inactivityInterval);
+        this.inactivityTimer.id = window.setInterval(this.trackInactivity, this.options.inactivityInterval);
     }
 
-    public track<T extends PartialEvent>(event: T, timestamp: number = Date.now()): Promise<T> {
+    public track<T extends PartialTrackingEvent>(event: T, timestamp: number = Date.now()): Promise<T> {
         return this.publish(this.enrichEvent(event, timestamp), timestamp).then(() => event);
     }
 
@@ -280,11 +284,11 @@ export default class Tracker {
     private trackInactivity(): void {
         this.enqueue({
             type: 'nothingChanged',
-            sinceTime: this.inactiveSince,
+            sinceTime: this.inactivityTimer.since,
         });
     }
 
-    private enqueue(event: Event, timestamp: number = Date.now()): void {
+    private enqueue(event: TrackingEvent, timestamp: number = Date.now()): void {
         this.publish(event, timestamp).catch(() => {
             // suppress error
         });
@@ -294,14 +298,13 @@ export default class Tracker {
         this.listeners.map(listener => listener(event));
     }
 
-    private publish<T extends Event>(event: T, timestamp: number): Promise<T> {
+    private publish<T extends TrackingEvent>(event: T, timestamp: number): Promise<T> {
         this.stopInactivityTimer();
 
-        const tab = this.context.getTab();
         const metadata = this.options.eventMetadata;
-        const context: EventContext = {
-            tabId: tab.id,
-            url: tab.url,
+        const context: TrackingEventContext = {
+            tabId: this.tab.id,
+            url: this.tab.url,
             ...(Object.keys(metadata).length > 0 ? {metadata: metadata} : {}),
         };
 
@@ -312,7 +315,7 @@ export default class Tracker {
             status: 'pending',
         };
 
-        if (this.suspended) {
+        if (this.state.suspended) {
             this.logger.warn(`Tracker is suspended, ignoring event "${event.type}"`);
 
             this.notifyEvent({...eventInfo, status: 'ignored'});
@@ -349,16 +352,16 @@ export default class Tracker {
             });
 
             if (event.type !== 'nothingChanged') {
-                this.inactiveSince = Date.now();
+                this.inactivityTimer.since = Date.now();
             }
 
-            if (this.enabled) {
+            if (this.state.enabled) {
                 this.startInactivityTimer();
             }
         });
     }
 
-    private enrichEvent(event: PartialEvent, timestamp: number): Event {
+    private enrichEvent(event: PartialTrackingEvent, timestamp: number): TrackingEvent {
         if (isCartPartialEvent(event)) {
             const {cart: {lastUpdateTime = timestamp, ...cart}, ...payload} = event;
 
@@ -374,8 +377,8 @@ export default class Tracker {
         return event;
     }
 
-    private createBeacon(event: Event, timestamp: number, context: EventContext): Beacon {
-        const token = this.context.getToken();
+    private createBeacon(event: TrackingEvent, timestamp: number, context: TrackingEventContext): Beacon {
+        const token = this.tokenProvider.getToken();
 
         return {
             timestamp: timestamp,
@@ -385,7 +388,7 @@ export default class Tracker {
         };
     }
 
-    private createBeaconPayload(event: Event): BeaconPayload {
+    private createBeaconPayload(event: TrackingEvent): BeaconPayload {
         if (!isIdentifiedUserEvent(event)) {
             return event;
         }

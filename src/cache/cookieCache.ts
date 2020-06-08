@@ -15,13 +15,11 @@ export default class CookieCache implements Cache {
         return getCookie(this.cookieName);
     }
 
-    public put(value: string|null): void {
-        if (value === null) {
-            unsetCookie(this.cookieName);
-
-            return;
-        }
-
+    public put(value: string): void {
         setCookie(this.cookieName, value, this.options);
+    }
+
+    public clear(): void {
+        unsetCookie(this.cookieName);
     }
 }

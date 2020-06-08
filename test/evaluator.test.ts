@@ -8,7 +8,7 @@ import Evaluator, {
     ExpressionError,
     ExpressionErrorResponse,
 } from '../src/evaluator';
-import Token, {FixedTokenProvider, TokenProvider} from '../src/token';
+import Token, {FixedTokenProvider} from '../src/token';
 import CidAssigner from '../src/cid';
 import FixedCidAssigner from '../src/cid/fixedCidAssigner';
 
@@ -312,31 +312,6 @@ describe('An evaluator', () => {
 
         const response: ErrorResponse = {
             title: 'Unexpected CID error.',
-            type: EvaluationErrorType.UNEXPECTED_ERROR,
-            detail: 'Please try again or contact Croct support if the error persists.',
-            status: 500,
-        };
-
-        const promise = evaluator.evaluate(expression);
-
-        await expect(promise).rejects.toThrow(EvaluationError);
-        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
-    });
-
-    test('should report an unexpected error occurring while retrieving the token', async () => {
-        const tokenProvider: TokenProvider = {
-            getToken: jest.fn().mockRejectedValue(new Error('Unexpected token error.')),
-        };
-
-        const evaluator = new Evaluator({
-            appId: appId,
-            endpointUrl: endpoint,
-            tokenProvider: tokenProvider,
-            cidAssigner: new FixedCidAssigner('123'),
-        });
-
-        const response: ErrorResponse = {
-            title: 'Unexpected token error.',
             type: EvaluationErrorType.UNEXPECTED_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,

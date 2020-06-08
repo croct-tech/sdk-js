@@ -1,29 +1,29 @@
 import Token from '../../src/token';
-import ReplicatedStorage from '../../src/token/replicatedStorage';
-import InMemoryStorage from '../../src/token/inMemoryStorage';
+import ReplicatedTokenStore from '../../src/token/replicatedTokenStore';
+import InMemoryTokenStore from '../../src/token/inMemoryTokenStore';
 
-describe('A replicated storage', () => {
+describe('A replicated token store', () => {
     const token = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'c4r0l', 1440982923);
 
-    test('should set the token in both storages', () => {
-        const firstStorage = new InMemoryStorage();
-        const secondStorage = new InMemoryStorage();
-        const storage = new ReplicatedStorage(firstStorage, secondStorage);
+    test('should set the token in both stores', () => {
+        const firstStore = new InMemoryTokenStore();
+        const secondStore = new InMemoryTokenStore();
+        const store = new ReplicatedTokenStore(firstStore, secondStore);
 
-        expect(firstStorage.getToken()).toBeNull();
-        expect(secondStorage.getToken()).toBeNull();
+        expect(firstStore.getToken()).toBeNull();
+        expect(secondStore.getToken()).toBeNull();
 
-        storage.setToken(token);
+        store.setToken(token);
 
-        expect(firstStorage.getToken()).toEqual(token);
-        expect(secondStorage.getToken()).toEqual(token);
+        expect(firstStore.getToken()).toEqual(token);
+        expect(secondStore.getToken()).toEqual(token);
     });
 
-    test('should retrieve the token from the primary storage', () => {
-        const storage = new ReplicatedStorage(new InMemoryStorage(), new InMemoryStorage());
+    test('should retrieve the token from the primary store', () => {
+        const store = new ReplicatedTokenStore(new InMemoryTokenStore(), new InMemoryTokenStore());
 
-        storage.setToken(token);
+        store.setToken(token);
 
-        expect(storage.getToken()).toEqual(token);
+        expect(store.getToken()).toEqual(token);
     });
 });
