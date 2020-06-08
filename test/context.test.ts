@@ -1,13 +1,16 @@
-import Context from '../src/context';
+import Context, {TokenScope} from '../src/context';
 import Token from '../src/token';
 import TabEventEmulator from './utils/tabEventEmulator';
 import LocalStorageCache from '../src/cache/localStorageCache';
 import {DumbStorage} from './utils/dumbStorage';
+import {EventDispatcher} from '../src/eventManager';
+import {SdkEventMap} from '../src/sdkEvents';
 
 describe('A context', () => {
     const tabEventEmulator: TabEventEmulator = new TabEventEmulator();
-    const carolToken = Token.issue('1ec38bc1-8512-4c59-a011-7cc169bf9939', 'c4r0l');
-    const erickToken = Token.issue('1ec38bc1-8512-4c59-a011-7cc169bf9939', '3r1ck');
+    const appId = '1ec38bc1-8512-4c59-a011-7cc169bf9939';
+    const carolToken = Token.issue(appId, 'c4r0l');
+    const erickToken = Token.issue(appId, '3r1ck');
 
     beforeEach(() => {
         tabEventEmulator.registerListeners();
@@ -302,5 +305,85 @@ describe('A context', () => {
 
         expect(identifiedContext.isAnonymous()).toBeFalsy();
         expect(anonymousContext.isAnonymous()).toBeTruthy();
+    });
+
+    test.each<[TokenScope]>([
+        ['isolated'],
+        ['contextual'],
+        ['global'],
+    ])('should report token changes', (tokenScope: TokenScope) => {
+        const eventDispatcher: EventDispatcher<SdkEventMap> = {dispatch: jest.fn()};
+
+        localStorage.setItem('token', erickToken.toString());
+
+        const context = Context.load({
+            tokenScope: tokenScope,
+            eventDispatcher: eventDispatcher,
+            cache: {
+                tabId: new LocalStorageCache(new DumbStorage(), 'tab'),
+                tabToken: new LocalStorageCache(new DumbStorage(), 'token'),
+                browserToken: new LocalStorageCache(localStorage, 'token'),
+            },
+        });
+
+        // Set twice to ensure the event will be fired once
+        context.setToken(carolToken);
+        context.setToken(carolToken);
+
+        context.setToken(null);
+
+        expect(eventDispatcher.dispatch).toHaveBeenCalledTimes(2);
+
+        expect(eventDispatcher.dispatch).toHaveBeenNthCalledWith(1, 'tokenChanged', {
+            oldToken: tokenScope === 'isolated' ? null : erickToken,
+            newToken: carolToken,
+        });
+
+        expect(eventDispatcher.dispatch).toHaveBeenNthCalledWith(2, 'tokenChanged', {
+            oldToken: carolToken,
+            newToken: null,
+        });
+    });
+
+    test('should report external token changes', () => {
+        const browserCache = new LocalStorageCache(localStorage, 'token');
+        const tabStorage = new DumbStorage();
+        const eventDispatcher: EventDispatcher<SdkEventMap> = {dispatch: jest.fn()};
+
+        browserCache.put(erickToken.toString());
+
+        const context = Context.load({
+            tokenScope: 'global',
+            eventDispatcher: eventDispatcher,
+            cache: {
+                tabId: new LocalStorageCache(tabStorage, 'tab'),
+                tabToken: new LocalStorageCache(tabStorage, 'token'),
+                browserToken: browserCache,
+            },
+        });
+
+        context.setToken(carolToken);
+
+        const anonymousToken = Token.issue(appId);
+
+        browserCache.put(anonymousToken.toString());
+        browserCache.put(erickToken.toString());
+
+        expect(eventDispatcher.dispatch).toHaveBeenCalledTimes(3);
+
+        expect(eventDispatcher.dispatch).toHaveBeenNthCalledWith(1, 'tokenChanged', {
+            oldToken: erickToken,
+            newToken: carolToken,
+        });
+
+        expect(eventDispatcher.dispatch).toHaveBeenNthCalledWith(2, 'tokenChanged', {
+            oldToken: carolToken,
+            newToken: anonymousToken,
+        });
+
+        expect(eventDispatcher.dispatch).toHaveBeenNthCalledWith(3, 'tokenChanged', {
+            oldToken: anonymousToken,
+            newToken: erickToken,
+        });
     });
 });

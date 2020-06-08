@@ -957,10 +957,14 @@ describe('A SDK facade', () => {
         [''],
         ['.'],
         ['f'],
+        ['0'],
         ['foo'],
         ['foo.'],
         ['foo.b'],
-        ['foo.b'],
+        ['foo.0'],
+        ['0foo.0'],
+        ['0foo.0bar'],
+        ['0.0'],
     ])('should only allow dispatching custom events specifying a fully-qualified name', (eventName: string) => {
         const sdkFacade = SdkFacade.init({
             appId: appId,
