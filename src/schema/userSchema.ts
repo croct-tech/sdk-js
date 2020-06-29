@@ -84,7 +84,7 @@ export const userProfileSchema = new ObjectType({
         }),
         custom: new ObjectType({
             propertyNames: new StringType({
-                maxLength: 20,
+                maxLength: 50,
                 format: 'identifier',
             }),
             maxProperties: 10,
@@ -108,7 +108,7 @@ export const userProfileSchema = new ObjectType({
                 }),
                 new ObjectType({
                     propertyNames: new StringType({
-                        maxLength: 20,
+                        maxLength: 50,
                         format: 'identifier',
                     }),
                     maxProperties: 10,
