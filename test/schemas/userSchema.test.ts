@@ -166,12 +166,14 @@ describe('The user profile schema', () => {
             'Expected at most 100 characters at path \'/custom/longString\', actual 101.',
         ],
         [
-            {custom: {looooooooooooooongKey: 'x'}},
-            'Expected at most 20 characters at path \'/custom/looooooooooooooongKey\', actual 21.',
+            {custom: {looooooooooooooooooooooooooooooooooooooooooooongKey: 'x'}},
+            'Expected at most 50 characters at path '
+                + '\'/custom/looooooooooooooooooooooooooooooooooooooooooooongKey\', actual 51.',
         ],
         [
-            {custom: {map: {looooooooooooooongKey: 'x'}}},
-            'Expected at most 20 characters at path \'/custom/map/looooooooooooooongKey\', actual 21.',
+            {custom: {map: {looooooooooooooooooooooooooooooooooooooooooooongKey: 'x'}}},
+            'Expected at most 50 characters at path '
+                + '\'/custom/map/looooooooooooooooooooooooooooooooooooooooooooongKey\', actual 51.',
         ],
         [
             {custom: {'@foo': 1}},
