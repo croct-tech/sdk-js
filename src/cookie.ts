@@ -1,4 +1,4 @@
-export function getBaseDomain(domain = window.document.domain): string {
+export function getBaseDomain(domain = window.document.domain ?? ''): string {
     const parts: string[] = domain.split('.');
     const random = `___${Math.random()}`;
 
