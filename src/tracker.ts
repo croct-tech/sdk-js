@@ -12,10 +12,10 @@ import {
     isIdentifiedUserEvent,
     PartialTrackingEvent,
 } from './trackingEvents';
-import {TokenProvider} from './token/index';
+import {TokenProvider} from './token';
+import {RetryPolicy} from './retry';
 
 type Options = {
-    inactivityInterval?: number,
     eventMetadata?: {[key: string]: string},
 };
 
@@ -24,6 +24,7 @@ export type Configuration = Options & {
     logger?: Logger,
     tab: Tab,
     tokenProvider: TokenProvider,
+    inactivityRetryPolicy: RetryPolicy<number>,
 }
 
 type State = {
@@ -57,6 +58,8 @@ export default class Tracker {
 
     private tokenProvider: TokenProvider;
 
+    private inactivityRetryPolicy: RetryPolicy<any>;
+
     private readonly channel: OutputChannel<Beacon>;
 
     private readonly logger: Logger;
@@ -75,14 +78,14 @@ export default class Tracker {
         since: 0,
     };
 
-    public constructor({tab, tokenProvider, channel, logger, ...options}: Configuration) {
+    public constructor({tab, tokenProvider, channel, logger, inactivityRetryPolicy, ...options}: Configuration) {
         this.tab = tab;
         this.tokenProvider = tokenProvider;
+        this.inactivityRetryPolicy = inactivityRetryPolicy;
         this.channel = channel;
         this.logger = logger ?? new NullLogger();
         this.options = {
             ...options,
-            inactivityInterval: options.inactivityInterval ?? 30 * 1000,
             eventMetadata: options.eventMetadata ?? {},
         };
 
@@ -225,7 +228,7 @@ export default class Tracker {
 
     private stopInactivityTimer(): void {
         if (this.inactivityTimer.id !== undefined) {
-            window.clearInterval(this.inactivityTimer.id);
+            window.clearTimeout(this.inactivityTimer.id);
 
             delete this.inactivityTimer.id;
         }
@@ -234,7 +237,29 @@ export default class Tracker {
     private startInactivityTimer(): void {
         this.stopInactivityTimer();
 
-        this.inactivityTimer.id = window.setInterval(this.trackInactivity, this.options.inactivityInterval);
+        this.inactivityTimer.since = Date.now();
+
+        let iteration = -1;
+
+        const startTimer = (): void => {
+            if (!this.inactivityRetryPolicy.shouldRetry(iteration + 1, this.inactivityTimer.since)) {
+                window.clearTimeout(this.inactivityTimer.id);
+
+                return;
+            }
+
+            iteration += 1;
+
+            this.inactivityTimer.id = window.setTimeout(
+                () => {
+                    this.trackInactivity();
+                    startTimer();
+                },
+                this.inactivityRetryPolicy.getDelay(iteration),
+            );
+        };
+
+        startTimer();
     }
 
     public track<T extends PartialTrackingEvent>(event: T, timestamp: number = Date.now()): Promise<T> {
@@ -299,7 +324,9 @@ export default class Tracker {
     }
 
     private publish<T extends TrackingEvent>(event: T, timestamp: number): Promise<T> {
-        this.stopInactivityTimer();
+        if (event.type !== 'nothingChanged') {
+            this.stopInactivityTimer();
+        }
 
         const metadata = this.options.eventMetadata;
         const context: TrackingEventContext = {
@@ -351,11 +378,7 @@ export default class Tracker {
                 this.pending.splice(this.pending.indexOf(promise), 1);
             });
 
-            if (event.type !== 'nothingChanged') {
-                this.inactivityTimer.since = Date.now();
-            }
-
-            if (this.state.enabled) {
+            if (this.state.enabled && event.type !== 'nothingChanged') {
                 this.startInactivityTimer();
             }
         });

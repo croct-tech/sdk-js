@@ -30,6 +30,7 @@ import FixedCidAssigner from './cid/fixedCidAssigner';
 import {EventManager, SynchronousEventManager} from './eventManager';
 import {SdkEventMap} from './sdkEvents';
 import LocalStorageCache from './cache/localStorageCache';
+import ArbitraryPolicy from './retry/arbitraryPolicy';
 
 export type Configuration = {
     appId: string,
@@ -104,6 +105,7 @@ export class Container {
         const tracker = new Tracker({
             tab: context.getTab(),
             tokenProvider: this.getTokenProvider(),
+            inactivityRetryPolicy: new ArbitraryPolicy([30_000, 30_000, 120_000, 120_000, 300_000, 300_000, 900_000]),
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
             eventMetadata: this.configuration.eventMetadata || {},

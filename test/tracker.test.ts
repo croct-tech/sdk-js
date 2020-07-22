@@ -8,6 +8,8 @@ import Token from '../src/token';
 import InMemoryTokenStore from '../src/token/inMemoryTokenStore';
 import Tab from '../src/tab';
 import {uuid4} from '../src/uuid';
+import NeverPolicy from '../src/retry/neverPolicy';
+import {RetryPolicy} from '../src/retry';
 
 describe('A tracker', () => {
     const now = Date.now();
@@ -40,6 +42,7 @@ describe('A tracker', () => {
 
     test('should determine whether it is enabled or disabled', () => {
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: new Tab('123', true),
             channel: new SandboxChannel(),
@@ -58,6 +61,7 @@ describe('A tracker', () => {
 
     test('should not fail if enabled more than once', () => {
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
@@ -74,6 +78,7 @@ describe('A tracker', () => {
 
     test('should not fail if disabled more than once', () => {
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
@@ -98,6 +103,7 @@ describe('A tracker', () => {
         const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: tab,
             channel: channel,
@@ -171,6 +177,7 @@ describe('A tracker', () => {
 
     test('should allow to be enabled even if it is suspended', () => {
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
@@ -189,6 +196,7 @@ describe('A tracker', () => {
 
     test('should allow to be disabled even if it is suspended', () => {
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
@@ -208,6 +216,7 @@ describe('A tracker', () => {
 
     test('should determine whether it is suspended or not', () => {
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
@@ -226,6 +235,7 @@ describe('A tracker', () => {
 
     test('should not fail if suspended more than once', () => {
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
@@ -242,6 +252,7 @@ describe('A tracker', () => {
 
     test('should not fail if unsuspended more than once', () => {
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: new Tab(uuid4(), true),
             channel: new SandboxChannel(),
@@ -261,6 +272,7 @@ describe('A tracker', () => {
         };
 
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: new Tab(uuid4(), true),
             channel: channel,
@@ -294,6 +306,7 @@ describe('A tracker', () => {
         const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: tab,
             channel: channel,
@@ -337,6 +350,7 @@ describe('A tracker', () => {
         };
 
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: new Tab(uuid4(), true),
             channel: channel,
@@ -366,6 +380,7 @@ describe('A tracker', () => {
         };
 
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: new Tab(uuid4(), true),
             channel: channel,
@@ -398,6 +413,7 @@ describe('A tracker', () => {
         store.setToken(token);
 
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: store,
             tab: new Tab(uuid4(), true),
             channel: channel,
@@ -427,6 +443,7 @@ describe('A tracker', () => {
         const store = new InMemoryTokenStore();
 
         let tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: store,
             tab: tab,
             channel: channel,
@@ -452,6 +469,7 @@ describe('A tracker', () => {
         publish.mockClear();
 
         tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: store,
             tab: tab,
             channel: channel,
@@ -474,6 +492,7 @@ describe('A tracker', () => {
         const tab = new Tab(uuid4(), true);
 
         let tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: store,
             tab: tab,
             channel: channel,
@@ -499,6 +518,7 @@ describe('A tracker', () => {
         publish.mockClear();
 
         tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: store,
             tab: tab,
             channel: channel,
@@ -520,6 +540,7 @@ describe('A tracker', () => {
         const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: tab,
             channel: channel,
@@ -559,6 +580,7 @@ describe('A tracker', () => {
         const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: tab,
             channel: channel,
@@ -597,6 +619,7 @@ describe('A tracker', () => {
         const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: tab,
             channel: channel,
@@ -652,6 +675,7 @@ describe('A tracker', () => {
         const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: tab,
             channel: channel,
@@ -702,22 +726,37 @@ describe('A tracker', () => {
             publish: publish,
         };
 
-        const tab = new Tab(uuid4(), true);
+        const tab = new Tab(uuid4(), false);
+
+        const retryPolicy: RetryPolicy<number> = {
+            shouldRetry: jest.fn()
+                .mockReturnValueOnce(true)
+                .mockReturnValueOnce(true)
+                .mockReturnValueOnce(true)
+                .mockReturnValueOnce(true)
+                .mockReturnValueOnce(false),
+            getDelay: jest.fn()
+                .mockReturnValueOnce(5)
+                .mockReturnValueOnce(2)
+                .mockReturnValueOnce(3)
+                .mockReturnValueOnce(5),
+        };
 
         const tracker = new Tracker({
             tokenProvider: new InMemoryTokenStore(),
+            inactivityRetryPolicy: retryPolicy,
             tab: tab,
             channel: channel,
-            inactivityInterval: 10,
         });
 
         tracker.enable();
 
         publish.mockClear();
 
-        await new Promise(resolve => window.setTimeout(resolve, 11));
+        // Initial inactivity (before event page opened)
+        expect(retryPolicy.shouldRetry).toHaveBeenCalledWith(0, now);
 
-        expect(publish).toHaveBeenLastCalledWith({
+        const nothingChanged: Beacon = {
             timestamp: now,
             context: {
                 tabId: tab.id,
@@ -727,9 +766,36 @@ describe('A tracker', () => {
                 type: 'nothingChanged',
                 sinceTime: now,
             },
-        });
+        };
 
-        expect(publish).toHaveBeenCalledTimes(1);
+        // First inactivity period
+        await new Promise(resolve => window.setTimeout(resolve, 3));
+
+        expect(publish).toHaveBeenLastCalledWith(nothingChanged);
+
+        expect(retryPolicy.shouldRetry).toHaveBeenCalledWith(0, now);
+
+        // Second inactivity period
+        await new Promise(resolve => window.setTimeout(resolve, 4));
+
+        expect(publish).toHaveBeenLastCalledWith(nothingChanged);
+
+        expect(retryPolicy.shouldRetry).toHaveBeenCalledWith(1, now);
+
+        // Third inactivity period
+        await new Promise(resolve => window.setTimeout(resolve, 6));
+
+        expect(publish).toHaveBeenLastCalledWith(nothingChanged);
+
+        expect(retryPolicy.shouldRetry).toHaveBeenCalledWith(2, now);
+
+        // Fourth inactivity period
+        await new Promise(resolve => window.setTimeout(resolve, 6));
+
+        expect(retryPolicy.shouldRetry).toHaveBeenCalledWith(3, now);
+
+        expect(retryPolicy.shouldRetry).toHaveBeenCalledTimes(5);
+        expect(publish).toHaveBeenCalledTimes(3);
     });
 
     test.each<[PartialTrackingEvent, BeaconPayload | undefined]>([
@@ -1020,6 +1086,7 @@ describe('A tracker', () => {
         const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: tab,
             channel: channel,
@@ -1052,6 +1119,7 @@ describe('A tracker', () => {
         const tab = new Tab(uuid4(), true);
 
         const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
             tab: tab,
             channel: channel,
