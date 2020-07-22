@@ -15,6 +15,11 @@ beforeEach(() => {
 });
 
 describe('A function to detect the base domain', () => {
+    test('should not fail if the domain is undefined', () => {
+        expect(document.domain).toBeUndefined();
+        expect(getBaseDomain()).toBe('');
+    });
+
     test('should detect the top-most domain that allows for setting cookies', () => {
         let cookie = '';
         cookieSetter.mockImplementation(value => {
