@@ -23,9 +23,6 @@ import {encodeJson} from './transformer';
 import CidAssigner from './cid/index';
 import CachedAssigner from './cid/cachedAssigner';
 import RemoteAssigner from './cid/remoteAssigner';
-import FallbackCache from './cache/fallbackCache';
-import CookieCache from './cache/cookieCache';
-import {getBaseDomain} from './cookie';
 import FixedCidAssigner from './cid/fixedCidAssigner';
 import {EventManager, SynchronousEventManager} from './eventManager';
 import {SdkEventMap} from './sdkEvents';
@@ -221,15 +218,7 @@ export class Container {
                 this.configuration.bootstrapEndpointUrl,
                 logger,
             ),
-            new FallbackCache(
-                new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),
-                new CookieCache('croct.cid', {
-                    sameSite: 'strict',
-                    domain: getBaseDomain(),
-                    secure: true,
-                    maxAge: 5 * 365 * 24 * 60 * 60, // approximately 5 years
-                }),
-            ),
+            new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),
             logger,
         )
     }
