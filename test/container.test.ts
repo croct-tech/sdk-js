@@ -9,11 +9,6 @@ import Token from '../src/token';
 
 beforeEach(() => {
     localStorage.clear();
-
-    Object.defineProperty(window.document, 'domain', {
-        value: 'subdomain.localhost.dev',
-        configurable: true,
-    });
 });
 
 afterEach(() => {
@@ -168,24 +163,11 @@ test('should configure a fixed CID assigner if a CID is specified', async () => 
     await expect(assigner.assignCid()).resolves.toBe(cid);
 });
 
-test('should configure the CID assigner with multiple caching levels if a CID is not specified', async () => {
+test('should configure the CID assigner if a CID is not specified', async () => {
     fetchMock.mock({
         method: 'GET',
         matcher: configuration.bootstrapEndpointUrl,
         response: '123',
-    });
-
-    let cookie = '';
-    const cookieSetter = jest.fn().mockImplementation(value => {
-        cookie = `${value.split(';')[0]};`;
-    });
-
-    const cookieGetter = jest.fn().mockImplementation(() => cookie);
-
-    Object.defineProperty(window.document, 'cookie', {
-        set: cookieSetter,
-        get: cookieGetter,
-        configurable: true,
     });
 
     const container = new Container(configuration);
@@ -194,10 +176,6 @@ test('should configure the CID assigner with multiple caching levels if a CID is
     await expect(assigner.assignCid()).resolves.toBe('123');
 
     expect(localStorage.getItem('croct.cid')).toBe('123');
-
-    expect(cookieSetter).toHaveBeenCalledWith(
-        'croct.cid=123; Secure; Max-Age=157680000; Domain=localhost.dev; SameSite=strict;',
-    );
 });
 
 test('should provide an isolated tab storage', () => {

@@ -34,13 +34,6 @@ describe('A SDK facade', () => {
         return context;
     }
 
-    beforeEach(() => {
-        Object.defineProperty(window.document, 'domain', {
-            value: 'localhost.dev',
-            configurable: true,
-        });
-    });
-
     afterEach(() => {
         jest.restoreAllMocks();
     });
