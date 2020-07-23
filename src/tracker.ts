@@ -25,25 +25,25 @@ export type Configuration = Options & {
     tab: Tab,
     tokenProvider: TokenProvider,
     inactivityRetryPolicy: RetryPolicy<number>,
-}
+};
 
 type State = {
     initialized: boolean,
     enabled: boolean,
     suspended: boolean,
-}
+};
 
 type InactivityTimer = {
     id?: number,
     since: number,
-}
+};
 
 export type EventInfo<T extends TrackingEvent = TrackingEvent> = {
     context: TrackingEventContext,
     event: T,
     timestamp: number,
     status: 'pending' | 'confirmed' | 'failed' | 'ignored',
-}
+};
 
 export interface EventListener {
     (event: EventInfo): void;
@@ -108,7 +108,7 @@ export default class Tracker {
 
         while (index >= 0) {
             this.listeners.splice(index, 1);
-            index = this.listeners.indexOf(listener)
+            index = this.listeners.indexOf(listener);
         }
     }
 

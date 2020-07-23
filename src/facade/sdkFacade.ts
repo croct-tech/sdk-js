@@ -144,7 +144,7 @@ export default class SdkFacade {
 
                 eventManager.dispatch(eventName, event);
             },
-        }
+        };
     }
 
     public identify(userId: string): void {

@@ -2,7 +2,7 @@ import {Logger} from './index';
 
 type ConsoleMethod = {
     (message?: any, ...optionalParams: any[]): void,
-}
+};
 
 export default class ConsoleLogger implements Logger {
     private readonly namespace?: string;

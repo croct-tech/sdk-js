@@ -3,7 +3,7 @@ import {SynchronousEventManager} from '../src/eventManager';
 type TestEventMap = {
     foo: object,
     bar: object,
-}
+};
 
 describe('A synchronous event manager', () => {
     test('should dispatch events to subscribed listeners', () => {

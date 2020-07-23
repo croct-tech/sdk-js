@@ -7,7 +7,7 @@ export interface TokenChanged {
 
 export type SdkEventMap = Record<string, object> & {
     tokenChanged: TokenChanged,
-}
+};
 
 export type SdkEventType = keyof SdkEventMap;
 

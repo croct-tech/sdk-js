@@ -11,7 +11,7 @@ type TabEventMap = {
     unload: TabEvent,
     visibilityChange: TabVisibilityChangeEvent,
     urlChange: TabUrlChangeEvent,
-}
+};
 
 const EventMap: {[key: string]: keyof TabEventMap} = {
     focus: 'focus',
@@ -72,7 +72,7 @@ export default class Tab {
     }
 
     public get url(): string {
-        return normalizeUri(window.location.href)
+        return normalizeUri(window.location.href);
     }
 
     public get title(): string {

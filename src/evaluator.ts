@@ -10,7 +10,7 @@ export type Configuration = {
     endpointUrl?: string,
     tokenProvider: TokenProvider,
     cidAssigner: CidAssigner,
-}
+};
 
 export type Campaign = {
     name?: string,
@@ -18,7 +18,7 @@ export type Campaign = {
     medium?: string,
     term?: string,
     content?: string,
-}
+};
 
 export type Page = {
     title: string,
@@ -36,7 +36,7 @@ export type EvaluationContext = {
 export type EvaluationOptions = {
     timeout?: number,
     context?: EvaluationContext,
-}
+};
 
 export enum EvaluationErrorType {
     TIMEOUT = 'https://croct.help/api/evaluation#timeout',
@@ -53,7 +53,7 @@ export type ErrorResponse = {
     title: string,
     status: number,
     detail?: string,
-}
+};
 
 export class EvaluationError<T extends ErrorResponse = ErrorResponse> extends Error {
     public readonly response: T;
@@ -70,11 +70,11 @@ export class EvaluationError<T extends ErrorResponse = ErrorResponse> extends Er
 type ExpressionErrorDetail = {
     cause: string,
     location: Location,
-}
+};
 
 export type ExpressionErrorResponse = ErrorResponse & {
     errors: ExpressionErrorDetail[],
-}
+};
 
 export class ExpressionError extends EvaluationError<ExpressionErrorResponse> {
     public constructor(response: ExpressionErrorResponse) {
@@ -173,7 +173,7 @@ export default class Evaluator {
                         status: 500, // Internal Server Error
                     };
 
-                    reject(new EvaluationError(errorResponse))
+                    reject(new EvaluationError(errorResponse));
                 },
             );
         });
