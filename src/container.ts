@@ -220,7 +220,7 @@ export class Container {
             ),
             new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),
             logger,
-        )
+        );
     }
 
     public getBeaconQueue(): MonitoredQueue<string> {

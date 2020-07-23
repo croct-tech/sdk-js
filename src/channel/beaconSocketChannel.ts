@@ -21,12 +21,12 @@ type Configuration = {
 type Violation = {
     message: string,
     path: string,
-}
+};
 
 type Confirmation = {
     receiptId: string | null,
     violations?: Violation[],
-}
+};
 
 export default class BeaconSocketChannel implements DuplexChannel<string, Envelope<string, string>> {
     private readonly socketFactory: DuplexChannelFactory;

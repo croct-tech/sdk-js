@@ -79,7 +79,7 @@ describe('The string location function', () => {
 
     test('should fail if the start index is negative', () => {
         function location(): void {
-            getLocation('foo', -1, 0)
+            getLocation('foo', -1, 0);
         }
 
         expect(location).toThrow(Error);
@@ -88,7 +88,7 @@ describe('The string location function', () => {
 
     test('should fail if the start index is greater than end index', () => {
         function location(): void {
-            getLocation('foo', 1, 0)
+            getLocation('foo', 1, 0);
         }
 
         expect(location).toThrow(Error);

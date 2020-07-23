@@ -16,7 +16,7 @@ export type ProductDetails = {
     originalPrice?: number,
     url?: string,
     imageUrl?: string,
-}
+};
 
 export type CartItem = {
     index: number,
@@ -25,7 +25,7 @@ export type CartItem = {
     total: number,
     discount?: number,
     coupon?: string,
-}
+};
 
 export type Cart = {
     currency: string,
@@ -38,7 +38,7 @@ export type Cart = {
     total: number,
     coupon?: string,
     lastUpdateTime: number,
-}
+};
 
 export type OrderItem = {
     index: number,
@@ -47,7 +47,7 @@ export type OrderItem = {
     total: number,
     discount?: number,
     coupon?: string,
-}
+};
 
 export type OrderStatus = 'placed' | 'paid' | 'completed';
 
@@ -163,7 +163,7 @@ type UserProfile = {
     custom?: {
         [member: string]: Primitive | PrimitiveMap | PrimitiveArray,
     },
-}
+};
 
 export interface UserSignedUp extends BaseEvent {
     type: 'userSignedUp';
@@ -342,7 +342,7 @@ type EventMap = {
     testGroupAssigned: TestGroupAssigned,
     goalCompleted: GoalCompleted,
     eventOccurred: EventOccurred,
-}
+};
 
 export type TrackingEventType = keyof EventMap;
 
@@ -379,7 +379,7 @@ export type ExternalTrackingEventType = keyof ExternalEventMap;
 export type ExternalTrackingEvent<T extends ExternalTrackingEventType = ExternalTrackingEventType> =
     T extends ExternalTrackingEventType
         ? ExternalEventMap[T]
-        : ExternalEventMap[ExternalTrackingEventType]
+        : ExternalEventMap[ExternalTrackingEventType];
 
 export type ExternalTrackingEventPayload<T extends ExternalTrackingEventType> = Omit<ExternalEventMap[T], 'type'>;
 
@@ -413,11 +413,11 @@ export type BeaconPayload =
     // Renames "userId" to "externalUserId", remove "profile" and add "patch"
     | Omit<UserSignedUp, 'userId' | 'profile'>
         & Record<'externalUserId', IdentifiedUserEvent['userId']>
-        & {patch?: Patch}
+        & {patch?: Patch};
 
 export type Beacon = {
     timestamp: number,
     token?: string,
     context: TrackingEventContext,
     payload: BeaconPayload,
-}
+};

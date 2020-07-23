@@ -2,12 +2,12 @@ export type Position = {
     line: number,
     column: number,
     index: number,
-}
+};
 
 export type Location = {
     start: Position,
     end: Position,
-}
+};
 
 export function getLength(input: string): number {
     return [...input].length;
@@ -81,5 +81,5 @@ export function getLocation(input: string, startIndex: number, endIndex: number)
     return {
         start: start,
         end: end,
-    }
+    };
 }

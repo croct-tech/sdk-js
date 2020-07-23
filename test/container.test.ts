@@ -4,7 +4,7 @@ import {Configuration, Container} from '../src/container';
 import NullLogger from '../src/logging/nullLogger';
 import {Logger} from '../src/logging';
 import {BeaconPayload} from '../src/trackingEvents';
-import LocalStorageCache from '../src/cache/localStorageCache'
+import LocalStorageCache from '../src/cache/localStorageCache';
 import Token from '../src/token';
 
 beforeEach(() => {
