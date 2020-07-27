@@ -1,6 +1,8 @@
 {
   "testFiles": "**/*.{feature,features}",
-  "blacklistHosts": ["*fonts.googleapis.com"],
-  "projectId": "4sicbm",
-  "waitForAnimations": true
+  "blacklistHosts": [
+    "*fonts.googleapis.com"
+  ],
+  "waitForAnimations": true,
+  "projectId": "i2fb3e"
 }
