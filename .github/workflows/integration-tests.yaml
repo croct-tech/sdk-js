@@ -11,6 +11,7 @@ jobs:
   chrome-versions:
     runs-on: ubuntu-16.04
     strategy:
+      fail-fast: false
       matrix:
         imageTag:
           - node12.18.0-chrome83-ff77
@@ -34,6 +35,7 @@ jobs:
   firefox-versions:
     runs-on: ubuntu-16.04
     strategy:
+      fail-fast: false
       matrix:
         imageTag:
           - node12.18.0-chrome83-ff77
