@@ -82,6 +82,20 @@ export const userProfileSchema = new ObjectType({
             minLength: 1,
             maxLength: 50,
         }),
+        interests: new ArrayType({
+            maxItems: 30,
+            items: new StringType({
+                minLength: 1,
+                maxLength: 30,
+            }),
+        }),
+        activities: new ArrayType({
+            maxItems: 30,
+            items: new StringType({
+                minLength: 1,
+                maxLength: 30,
+            }),
+        }),
         custom: new ObjectType({
             propertyNames: new StringType({
                 maxLength: 50,
