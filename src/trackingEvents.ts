@@ -138,6 +138,8 @@ export interface UserProfileChanged extends BaseEvent {
 type Primitive = null | string | number | boolean;
 type PrimitiveMap = {[member: string]: Primitive};
 type PrimitiveArray = Primitive[];
+type Map = {[member: string]: Primitive | PrimitiveMap | PrimitiveArray};
+type Array = PrimitiveArray | PrimitiveMap[] | PrimitiveArray[];
 
 type UserProfile = {
     firstName?: string,
@@ -161,7 +163,7 @@ type UserProfile = {
     companyUrl?: string,
     jobTitle?: string,
     custom?: {
-        [member: string]: Primitive | PrimitiveMap | PrimitiveArray,
+        [member: string]: Primitive | PrimitiveMap | PrimitiveArray | Map | Array,
     },
 };
 

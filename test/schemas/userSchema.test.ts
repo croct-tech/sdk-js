@@ -93,6 +93,10 @@ describe('The user profile schema', () => {
                 },
             },
         }],
+        [{custom: {nestedArrayInArray: [[1, 2, 3]]}}],
+        [{custom: {nestedArrayInMap: {foo: [1, 2, 3]}}}],
+        [{custom: {nestedMapInArray: [{foo: 'bar'}]}}],
+        [{custom: {nestedMapInMap: {foo: {bar: 'baz'}}}}],
     ])('should allow %s', (value: object) => {
         function validate(): void {
             userProfileSchema.validate(value);
@@ -184,24 +188,24 @@ describe('The user profile schema', () => {
             'Invalid identifier format at path \'/custom/map/@foo\'.',
         ],
         [
-            {custom: {nestedArrayInArray: [[1, 2, 3]]}},
+            {custom: {nestedArrayInNestedArray: [[[1, 2, 3]]]}},
             'Expected value of type boolean, null, number or string at path '
-            + '\'/custom/nestedArrayInArray/0\', actual array.',
+            + '\'/custom/nestedArrayInNestedArray/0/0\', actual array.',
         ],
         [
-            {custom: {nestedArrayInMap: {foo: [1, 2, 3]}}},
+            {custom: {nestedArrayInNestedMap: {foo: {bar: [1, 2, 3]}}}},
             'Expected value of type boolean, null, number or string at path '
-            + '\'/custom/nestedArrayInMap/foo\', actual array.',
+            + '\'/custom/nestedArrayInNestedMap/foo/bar\', actual array.',
         ],
         [
-            {custom: {nestedMapInArray: [{foo: 'bar'}]}},
+            {custom: {nestedMapInNestedArray: [[{foo: 'bar'}]]}},
             'Expected value of type boolean, null, number or string at path '
-            + '\'/custom/nestedMapInArray/0\', actual Object.',
+            + '\'/custom/nestedMapInNestedArray/0/0\', actual Object.',
         ],
         [
-            {custom: {nestedMapInMap: {foo: {bar: 'baz'}}}},
+            {custom: {nestedMapInNestedMap: {foo: {bar: {baz: 1}}}}},
             'Expected value of type boolean, null, number or string at path '
-            + '\'/custom/nestedMapInMap/foo\', actual Object.',
+            + '\'/custom/nestedMapInNestedMap/foo/bar\', actual Object.',
         ],
         [
             {

@@ -182,6 +182,38 @@ describe('A tracker facade', () => {
         ],
         [
             {
+                type: 'userSignedUp',
+                userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
+                profile: {
+                    custom: {
+                        nestedArrayInArray: [[1, 1.2, null, true, false, '', 'x'.repeat(100)]],
+                        nestedMapInArray: [{
+                            integer: 1,
+                            number: 1.2,
+                            null: null,
+                            true: true,
+                            false: false,
+                            emptyString: '',
+                            longString: 'x'.repeat(100),
+                        }],
+                        nestedArrayInMap: {foo: [1, 1.2, null, true, false, '', 'x'.repeat(100)]},
+                        nestedMapInMap: {
+                            foo: {
+                                integer: 1,
+                                number: 1.2,
+                                null: null,
+                                true: true,
+                                false: false,
+                                emptyString: '',
+                                longString: 'x'.repeat(100),
+                            },
+                        },
+                    },
+                },
+            },
+        ],
+        [
+            {
                 type: 'testGroupAssigned',
                 testId: 'foo',
                 groupId: 'bar',
