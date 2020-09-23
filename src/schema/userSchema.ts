@@ -118,6 +118,32 @@ export const userProfileSchema = new ObjectType({
                         new StringType({
                             maxLength: 100,
                         }),
+                        new ArrayType({
+                            maxItems: 10,
+                            items: new UnionType(
+                                new BooleanType(),
+                                new NullType(),
+                                new NumberType(),
+                                new StringType({
+                                    maxLength: 100,
+                                }),
+                            ),
+                        }),
+                        new ObjectType({
+                            propertyNames: new StringType({
+                                maxLength: 50,
+                                format: 'identifier',
+                            }),
+                            maxProperties: 10,
+                            additionalProperties: new UnionType(
+                                new BooleanType(),
+                                new NullType(),
+                                new NumberType(),
+                                new StringType({
+                                    maxLength: 100,
+                                }),
+                            ),
+                        }),
                     ),
                 }),
                 new ObjectType({
@@ -132,6 +158,32 @@ export const userProfileSchema = new ObjectType({
                         new NumberType(),
                         new StringType({
                             maxLength: 100,
+                        }),
+                        new ArrayType({
+                            maxItems: 10,
+                            items: new UnionType(
+                                new BooleanType(),
+                                new NullType(),
+                                new NumberType(),
+                                new StringType({
+                                    maxLength: 100,
+                                }),
+                            ),
+                        }),
+                        new ObjectType({
+                            propertyNames: new StringType({
+                                maxLength: 50,
+                                format: 'identifier',
+                            }),
+                            maxProperties: 10,
+                            additionalProperties: new UnionType(
+                                new BooleanType(),
+                                new NullType(),
+                                new NumberType(),
+                                new StringType({
+                                    maxLength: 100,
+                                }),
+                            ),
                         }),
                     ),
                 }),
