@@ -138,8 +138,9 @@ export interface UserProfileChanged extends BaseEvent {
 type Primitive = null | string | number | boolean;
 type PrimitiveMap = {[member: string]: Primitive};
 type PrimitiveArray = Primitive[];
-type Map = {[member: string]: Primitive | PrimitiveMap | PrimitiveArray};
-type Array = PrimitiveArray | PrimitiveMap[] | PrimitiveArray[];
+type TwoLevelMap = {[member: string]: Primitive | PrimitiveMap | PrimitiveArray};
+type TwoLevelArray = PrimitiveArray | PrimitiveMap[] | PrimitiveArray[];
+type CustomAttribute = Primitive | TwoLevelMap | TwoLevelArray;
 
 type UserProfile = {
     firstName?: string,
@@ -165,7 +166,7 @@ type UserProfile = {
     interests?: string[],
     activities?: string[],
     custom?: {
-        [member: string]: Primitive | PrimitiveMap | PrimitiveArray | Map | Array,
+        [member: string]: CustomAttribute,
     },
 };
 
