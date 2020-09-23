@@ -951,6 +951,8 @@ describe('A tracker', () => {
                     company: 'Croct',
                     companyUrl: 'http://croct.com',
                     jobTitle: 'CEO',
+                    interests: ['enterprise'],
+                    activities: ['login'],
                     custom: {
                         integer: 1,
                         number: 1.2,
@@ -1023,6 +1025,8 @@ describe('A tracker', () => {
                                 company: 'Croct',
                                 companyUrl: 'http://croct.com',
                                 jobTitle: 'CEO',
+                                interests: ['enterprise'],
+                                activities: ['login'],
                                 custom: {
                                     integer: 1,
                                     number: 1.2,

@@ -40,6 +40,10 @@ describe('The user profile schema', () => {
         [{companyUrl: `http://www.${'x'.repeat(185)}.com`}],
         [{jobTitle: 'x'}],
         [{jobTitle: 'x'.repeat(50)}],
+        [{interests: []}],
+        [{interests: new Array(30).fill('x')}],
+        [{activities: []}],
+        [{activities: new Array(30).fill('x')}],
         [{
             custom: {
                 integer: 1,
@@ -166,18 +170,42 @@ describe('The user profile schema', () => {
         [{jobTitle: ''}, 'Expected at least 1 character at path \'/jobTitle\', actual 0.'],
         [{jobTitle: 'x'.repeat(51)}, 'Expected at most 50 characters at path \'/jobTitle\', actual 51.'],
         [
+            {interests: ['']},
+            'Expected at least 1 character at path \'/interests/0\', actual 0.',
+        ],
+        [
+            {interests: ['x'.repeat(31)]},
+            'Expected at most 30 characters at path \'/interests/0\', actual 31.',
+        ],
+        [
+            {interests: new Array(31).fill('x')},
+            'Expected at most 30 items at path \'/interests\', actual 31.',
+        ],
+        [
+            {activities: ['']},
+            'Expected at least 1 character at path \'/activities/0\', actual 0.',
+        ],
+        [
+            {activities: ['x'.repeat(31)]},
+            'Expected at most 30 characters at path \'/activities/0\', actual 31.',
+        ],
+        [
+            {activities: new Array(31).fill('x')},
+            'Expected at most 30 items at path \'/activities\', actual 31.',
+        ],
+        [
             {custom: {longString: 'x'.repeat(101)}},
             'Expected at most 100 characters at path \'/custom/longString\', actual 101.',
         ],
         [
             {custom: {looooooooooooooooooooooooooooooooooooooooooooongKey: 'x'}},
             'Expected at most 50 characters at path '
-                + '\'/custom/looooooooooooooooooooooooooooooooooooooooooooongKey\', actual 51.',
+            + '\'/custom/looooooooooooooooooooooooooooooooooooooooooooongKey\', actual 51.',
         ],
         [
             {custom: {map: {looooooooooooooooooooooooooooooooooooooooooooongKey: 'x'}}},
             'Expected at most 50 characters at path '
-                + '\'/custom/map/looooooooooooooooooooooooooooooooooooooooooooongKey\', actual 51.',
+            + '\'/custom/map/looooooooooooooooooooooooooooooooooooooooooooongKey\', actual 51.',
         ],
         [
             {custom: {'@foo': 1}},
