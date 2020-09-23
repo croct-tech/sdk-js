@@ -160,6 +160,8 @@ type UserProfile = {
     company?: string,
     companyUrl?: string,
     jobTitle?: string,
+    interests?: string[],
+    activities?: string[],
     custom?: {
         [member: string]: Primitive | PrimitiveMap | PrimitiveArray,
     },
