@@ -18,7 +18,7 @@ export type Configuration = {
     tokenScope?: TokenScope,
     debug?: boolean,
     track?: boolean,
-    token?: string,
+    token?: string | null,
     userId?: string,
     eventMetadata?: {[key: string]: string},
     logger?: Logger,
@@ -74,7 +74,11 @@ export default class SdkFacade {
         if (userId !== undefined) {
             sdk.identify(userId);
         } else if (token !== undefined) {
-            sdk.setToken(Token.parse(token));
+            if (token === null) {
+                sdk.unsetToken();
+            } else {
+                sdk.setToken(Token.parse(token));
+            }
         }
 
         if (track) {
