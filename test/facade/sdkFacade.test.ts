@@ -133,6 +133,29 @@ describe('A SDK facade', () => {
         expect(context.setToken).toBeCalledTimes(1);
     });
 
+    test('should load the SDK and unset any existing token', () => {
+        const context = createContextMock();
+
+        context.getToken = jest.fn().mockImplementation(() => Token.issue(appId, 'c4r0l'));
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+
+                return sdk;
+            });
+
+        SdkFacade.init({
+            appId: appId,
+            token: null,
+            track: false,
+        });
+
+        expect(context.setToken).toBeCalledWith(null);
+    });
+
     test('should load the SDK and set a token for the provided user ID', () => {
         const context = createContextMock();
 

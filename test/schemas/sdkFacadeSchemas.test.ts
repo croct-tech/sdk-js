@@ -15,6 +15,10 @@ describe('The SDK facade configuration schema', () => {
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            token: null,
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             trackerEndpointUrl: 'https://api.croct.io/tracker',
             evaluationEndpointUrl: 'https://api.croct.io/evaluation',
             bootstrapEndpointUrl: 'https://api.croct.io/bootstrap',
@@ -77,7 +81,7 @@ describe('The SDK facade configuration schema', () => {
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', token: 1},
-            "Expected value of type string at path '/token', actual integer.",
+            "Expected value of type string or null at path '/token', actual integer.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', debug: 'foo'},

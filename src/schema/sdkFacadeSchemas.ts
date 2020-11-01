@@ -4,6 +4,8 @@ import BooleanType from '../validation/booleanType';
 import {tokenScopeSchema} from './contextSchemas';
 import {eventMetadataSchema} from './sdkSchemas';
 import {loggerSchema} from './loggerSchema';
+import UnionType from '../validation/unionType';
+import NullType from '../validation/nullType';
 
 export const configurationSchema = new ObjectType({
     required: ['appId'],
@@ -22,9 +24,12 @@ export const configurationSchema = new ObjectType({
         userId: new StringType({
             minLength: 1,
         }),
-        token: new StringType({
-            pattern: /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/,
-        }),
+        token: new UnionType(
+            new StringType({
+                pattern: /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/,
+            }),
+            new NullType(),
+        ),
         trackerEndpointUrl: new StringType({
             format: 'url',
         }),
