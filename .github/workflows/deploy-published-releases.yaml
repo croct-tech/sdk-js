@@ -44,7 +44,7 @@ jobs:
           sed -i -e "s~<@trackerEndpointUrl@>~${TRACKER_ENDPOINT}~" constants.js
           sed -i -e "s~<@evaluationEndpointUrl@>~${EVALUATION_ENDPOINT}~" constants.js
           sed -i -e "s~<@bootstrapEndpointUrl@>~${BOOTSTRAP_ENDPOINT}~" constants.js
-          sed -i -e "s~<@maxExpressionLength@>~${MAX_EXPRESSION_LENGHT}~" constants.js
+          sed -i -e "s~parseInt('<@maxExpressionLength@>', 10)~${MAX_EXPRESSION_LENGHT}~" constants.js
 
       - name: Publish pre-release to NPM
         if: ${{ github.event.release.prerelease }}
