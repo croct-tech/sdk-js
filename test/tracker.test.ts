@@ -121,7 +121,7 @@ describe('A tracker', () => {
         const eventInfo: Optional<EventInfo, 'timestamp' | 'status'> = {
             context: {
                 tabId: tab.id,
-                url: window.encodeURI(window.decodeURI(tab.location.href)),
+                url: tab.url,
             },
             event: event,
         };

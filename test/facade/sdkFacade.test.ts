@@ -12,7 +12,7 @@ import {EventManager} from '../../src/eventManager';
 import {SdkEventMap} from '../../src/sdkEvents';
 import CidAssigner from '../../src/cid';
 import Evaluator from '../../src/evaluator';
-import Tab from '../../src/tab';
+import Tab, {UrlSanitizer} from '../../src/tab';
 
 describe('A SDK facade', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
@@ -85,6 +85,7 @@ describe('A SDK facade', () => {
         const initialize = jest.spyOn(Sdk, 'init');
 
         const logger = new NullLogger();
+        const urlSanitizer: UrlSanitizer = jest.fn((url: string) => new URL(url));
 
         SdkFacade.init({
             appId: appId,
@@ -96,6 +97,7 @@ describe('A SDK facade', () => {
             tokenScope: 'isolated',
             token: Token.issue(appId, 'c4r0l').toString(),
             logger: logger,
+            urlSanitizer: urlSanitizer,
         });
 
         expect(initialize).toBeCalledWith({
@@ -106,6 +108,7 @@ describe('A SDK facade', () => {
             debug: false,
             tokenScope: 'isolated',
             logger: logger,
+            urlSanitizer: urlSanitizer,
         });
     });
 

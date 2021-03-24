@@ -9,6 +9,7 @@ import Evaluator from './evaluator';
 import {SdkEventMap} from './sdkEvents';
 import {EventManager} from './eventManager';
 import CidAssigner from './cid/index';
+import {UrlSanitizer} from './tab';
 
 export type Configuration = {
     appId: string,
@@ -19,6 +20,7 @@ export type Configuration = {
     evaluationEndpointUrl?: string,
     bootstrapEndpointUrl?: string,
     beaconQueueSize?: number,
+    urlSanitizer?: UrlSanitizer,
     logger?: Logger,
     eventMetadata?: {[key: string]: string},
 };

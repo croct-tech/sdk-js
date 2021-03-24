@@ -4,6 +4,7 @@ import BooleanType from '../validation/booleanType';
 import {tokenScopeSchema} from './contextSchemas';
 import NumberType from '../validation/numberType';
 import {loggerSchema} from './loggerSchema';
+import FunctionType from '../validation/functionType';
 
 export const eventMetadataSchema = new ObjectType({
     maxProperties: 5,
@@ -42,6 +43,7 @@ export const configurationSchema = new ObjectType({
         }),
         debug: new BooleanType(),
         logger: loggerSchema,
+        urlSanitizer: new FunctionType(),
         eventMetadata: eventMetadataSchema,
     },
 });
