@@ -12,6 +12,7 @@ import {SdkEventMap} from '../sdkEvents';
 import {EventManager} from '../eventManager';
 import CidAssigner from '../cid/index';
 import {PartialTrackingEvent} from '../trackingEvents';
+import {UrlSanitizer} from '../tab';
 
 export type Configuration = {
     appId: string,
@@ -22,6 +23,7 @@ export type Configuration = {
     userId?: string,
     eventMetadata?: {[key: string]: string},
     logger?: Logger,
+    urlSanitizer?: UrlSanitizer,
     trackerEndpointUrl?: string,
     evaluationEndpointUrl?: string,
     bootstrapEndpointUrl?: string,

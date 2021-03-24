@@ -28,6 +28,7 @@ import {EventManager, SynchronousEventManager} from './eventManager';
 import {SdkEventMap} from './sdkEvents';
 import LocalStorageCache from './cache/localStorageCache';
 import ArbitraryPolicy from './retry/arbitraryPolicy';
+import {UrlSanitizer} from './tab';
 
 export type Configuration = {
     appId: string,
@@ -39,6 +40,7 @@ export type Configuration = {
     bootstrapEndpointUrl: string,
     beaconQueueSize: number,
     logger?: Logger,
+    urlSanitizer?: UrlSanitizer,
     eventMetadata?: {[key: string]: string},
 };
 
@@ -143,6 +145,7 @@ export class Container {
         return Context.load({
             tokenScope: this.configuration.tokenScope,
             eventDispatcher: this.getEventManager(),
+            urlSanitizer: this.configuration.urlSanitizer,
             cache: {
                 tabId: new LocalStorageCache(tabStorage, 'croct.tab'),
                 tabToken: new LocalStorageCache(tabStorage, 'croct.token'),

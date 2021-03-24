@@ -4,6 +4,8 @@ export type TabEvent<T = {}> = CustomEvent<{tab: Tab} & T>;
 export type TabVisibilityChangeEvent = TabEvent<{visible: boolean}>;
 export type TabUrlChangeEvent = TabEvent<{url: string}>;
 
+export type UrlSanitizer = (url: string) => URL;
+
 type TabEventMap = {
     focus: TabEvent,
     blur: TabEvent,
@@ -21,20 +23,19 @@ const EventMap: {[key: string]: keyof TabEventMap} = {
     visibilitychange: 'visibilityChange',
 };
 
-function normalizeUri(uri: string): string {
-    return window.encodeURI(window.decodeURI(uri));
-}
-
 export default class Tab {
     public readonly id: string;
 
     public readonly isNew: boolean;
 
+    public readonly urlSanitizer?: UrlSanitizer;
+
     private readonly eventManager = new SynchronousEventManager<TabEventMap>();
 
-    public constructor(id: string, isNew: boolean) {
+    public constructor(id: string, isNew: boolean, urlSanitizer?: UrlSanitizer) {
         this.id = id;
         this.isNew = isNew;
+        this.urlSanitizer = urlSanitizer;
 
         this.initialize();
     }
@@ -63,16 +64,12 @@ export default class Tab {
         );
 
         Tab.addUrlChangeListener(url => {
-            this.emit('urlChange', new CustomEvent('urlChange', {detail: {tab: this, url: url}}));
+            this.emit('urlChange', new CustomEvent('urlChange', {detail: {tab: this, url: this.sanitizeUrl(url)}}));
         });
     }
 
-    public get location(): Location {
-        return window.location;
-    }
-
     public get url(): string {
-        return normalizeUri(window.location.href);
+        return this.sanitizeUrl(window.location.href);
     }
 
     public get title(): string {
@@ -80,7 +77,7 @@ export default class Tab {
     }
 
     public get referrer(): string {
-        return normalizeUri(document.referrer);
+        return this.sanitizeUrl(document.referrer);
     }
 
     public get isVisible(): boolean {
@@ -99,6 +96,16 @@ export default class Tab {
         this.eventManager.removeListener(type, listener);
     }
 
+    private sanitizeUrl(url: string): string {
+        const normalized = window.encodeURI(window.decodeURI(url));
+
+        if (this.urlSanitizer !== undefined) {
+            return this.urlSanitizer(normalized).toString();
+        }
+
+        return normalized;
+    }
+
     private emit<T extends keyof TabEventMap>(type: T, event: TabEventMap[T]): void {
         this.eventManager.dispatch(type, event);
     }
@@ -110,7 +117,7 @@ export default class Tab {
             const currentUrl = window.location.href;
 
             if (url !== currentUrl) {
-                listener(normalizeUri(currentUrl));
+                listener(currentUrl);
 
                 url = currentUrl;
             }

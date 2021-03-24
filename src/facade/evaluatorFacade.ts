@@ -67,7 +67,7 @@ export class TabContextFactory implements ContextFactory {
     }
 
     public createContext(attributes?: JsonObject): EvaluationContext {
-        const url = new URL(this.tab.location.href);
+        const url = new URL(this.tab.url);
         const context: EvaluationContext = {};
 
         const page: Page = {

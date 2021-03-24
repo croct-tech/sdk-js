@@ -46,6 +46,20 @@ test('should load the context only once', () => {
     expect(container.getContext()).toBe(container.getContext());
 });
 
+test('should configure the context with the specified URL sanitizer', () => {
+    const sanitizedUrl = 'example://sanitized';
+    const sanitizer = jest.fn().mockReturnValue(new URL(sanitizedUrl));
+
+    const container = new Container({
+        ...configuration,
+        urlSanitizer: sanitizer,
+    });
+
+    const context = container.getContext();
+
+    expect(context.getTab().url).toBe(sanitizedUrl);
+});
+
 test('should load the tracker only once', () => {
     const container = new Container(configuration);
 

@@ -1,4 +1,4 @@
-import Tab from '../src/tab';
+import Tab, {UrlSanitizer} from '../src/tab';
 import TabEventEmulator from './utils/tabEventEmulator';
 
 describe('A tab', () => {
@@ -15,16 +15,21 @@ describe('A tab', () => {
         tabEventEmulator.reset();
     });
 
-    test('should provide the page location', () => {
-        const tab = new Tab(tabId, true);
-
-        expect(tab.location).toEqual(window.location);
-    });
-
     test('should provide the page URL', () => {
         const tab = new Tab(tabId, true);
 
         expect(tab.url).toEqual(window.encodeURI(window.decodeURI(window.location.href)));
+    });
+
+    test('should provide a sanitized page URL', () => {
+        const sanitizedUrl = 'sanitized://example';
+
+        const sanitizer: UrlSanitizer = jest.fn().mockReturnValue(new URL(sanitizedUrl));
+        const tab = new Tab(tabId, true, sanitizer);
+
+        expect(tab.url).toEqual(sanitizedUrl);
+
+        expect(sanitizer).toHaveBeenCalledWith(window.encodeURI(window.decodeURI(window.location.href)));
     });
 
     test('should provide the page title', () => {
@@ -44,6 +49,23 @@ describe('A tab', () => {
         const tab = new Tab(tabId, true);
 
         expect(tab.referrer).toEqual(window.encodeURI(window.decodeURI(referrer)));
+    });
+
+    test('should provide a sanitized page referrer', () => {
+        const referrer = 'http://referrer.com?foo=%22bar%22&foo="bar"';
+        const sanitizedUrl = 'sanitized://example';
+
+        Object.defineProperty(window.document, 'referrer', {
+            value: referrer,
+            configurable: true,
+        });
+
+        const sanitizer: UrlSanitizer = jest.fn().mockReturnValue(new URL(sanitizedUrl));
+        const tab = new Tab(tabId, true, sanitizer);
+
+        expect(tab.referrer).toEqual(sanitizedUrl);
+
+        expect(sanitizer).toHaveBeenCalledWith(window.encodeURI(window.decodeURI(referrer)));
     });
 
     test('should determine whether the tab is visible', () => {
@@ -164,13 +186,35 @@ describe('A tab', () => {
         }));
     });
 
+    test('should emit the "urlChange" event with a sanitized URL on history push state', () => {
+        const sanitizedUrl = 'sanitized://example';
+
+        const sanitizer: UrlSanitizer = jest.fn().mockReturnValue(new URL(sanitizedUrl));
+        const tab = new Tab(tabId, true, sanitizer);
+        const listener = jest.fn();
+
+        tab.addListener('urlChange', listener);
+
+        window.history.pushState({}, 'Other page', '/other-page');
+
+        expect(sanitizer).toHaveBeenCalledWith('http://localhost/other-page');
+
+        expect(listener).toHaveBeenNthCalledWith(1, expect.objectContaining({
+            type: 'urlChange',
+            detail: {
+                url: sanitizedUrl,
+                tab: tab,
+            },
+        }));
+    });
+
     test('should not emit the "urlChange" event on history push state if the page does not change', () => {
         const tab = new Tab(tabId, true);
         const listener = jest.fn();
 
         tab.addListener('urlChange', listener);
 
-        window.history.pushState({}, 'Same page', tab.location.href);
+        window.history.pushState({}, 'Same page', tab.url);
 
         expect(listener).not.toHaveBeenCalled();
     });
@@ -192,13 +236,35 @@ describe('A tab', () => {
         }));
     });
 
+    test('should emit the "urlChange" event with a sanitized URL on history replace state', () => {
+        const sanitizedUrl = 'sanitized://example';
+
+        const sanitizer: UrlSanitizer = jest.fn().mockReturnValue(new URL(sanitizedUrl));
+        const tab = new Tab(tabId, true, sanitizer);
+        const listener = jest.fn();
+
+        tab.addListener('urlChange', listener);
+
+        window.history.replaceState({}, 'Other page', '/other-page');
+
+        expect(sanitizer).toHaveBeenCalledWith('http://localhost/other-page');
+
+        expect(listener).toHaveBeenNthCalledWith(1, expect.objectContaining({
+            type: 'urlChange',
+            detail: {
+                url: sanitizedUrl,
+                tab: tab,
+            },
+        }));
+    });
+
     test('should not emit the "urlChange" event on history replace state if the page does not change', () => {
         const tab = new Tab(tabId, true);
         const listener = jest.fn();
 
         tab.addListener('urlChange', listener);
 
-        window.history.replaceState({}, 'Same page', tab.location.href);
+        window.history.replaceState({}, 'Same page', tab.url);
 
         expect(listener).not.toHaveBeenCalled();
     });

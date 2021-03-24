@@ -21,6 +21,7 @@ describe('A SDK', () => {
         beaconQueueSize: 3,
         debug: true,
         logger: new NullLogger(),
+        urlSanitizer: jest.fn().mockImplementation((url: string) => new URL(url)),
         eventMetadata: {},
         bootstrapEndpointUrl: 'https://localtest/boostrap',
         evaluationEndpointUrl: 'https://localtest/evaluate',
@@ -95,6 +96,20 @@ describe('A SDK', () => {
         expect(logger.debug).toHaveBeenLastCalledWith('[Croct:Foo:Bar] Debug bar');
         expect(logger.warn).toHaveBeenLastCalledWith('[Croct:Foo:Bar] Warn bar');
         expect(logger.error).toHaveBeenLastCalledWith('[Croct:Foo:Bar] Error bar');
+    });
+
+    test('should configure the context with the specified URL sanitizer', () => {
+        const sanitizedUrl = 'example://sanitized';
+        const sanitizer = jest.fn().mockReturnValue(new URL(sanitizedUrl));
+
+        const sdk = Sdk.init({
+            ...configuration,
+            urlSanitizer: sanitizer,
+        });
+
+        const tab = sdk.context.getTab();
+
+        expect(tab.url).toBe(sanitizedUrl);
     });
 
     test('should configure the token storage with global scope', async () => {

@@ -6,6 +6,7 @@ import {eventMetadataSchema} from './sdkSchemas';
 import {loggerSchema} from './loggerSchema';
 import UnionType from '../validation/unionType';
 import NullType from '../validation/nullType';
+import FunctionType from '../validation/functionType';
 
 export const configurationSchema = new ObjectType({
     required: ['appId'],
@@ -20,6 +21,7 @@ export const configurationSchema = new ObjectType({
         debug: new BooleanType(),
         track: new BooleanType(),
         logger: loggerSchema,
+        urlSanitizer: new FunctionType(),
         eventMetadata: eventMetadataSchema,
         userId: new StringType({
             minLength: 1,

@@ -1,5 +1,5 @@
 import Token, {TokenStore} from './token';
-import Tab from './tab';
+import Tab, {UrlSanitizer} from './tab';
 import CachedTokenStore from './token/cachedTokenStore';
 import ReplicatedTokenStore from './token/replicatedTokenStore';
 import InMemoryTokenStore from './token/inMemoryTokenStore';
@@ -12,6 +12,7 @@ export type TokenScope = 'isolated' | 'global' | 'contextual';
 
 export type Configuration = {
     tokenScope: TokenScope,
+    urlSanitizer?: UrlSanitizer,
     eventDispatcher: ContextEventDispatcher,
     cache: {
         tabId: LocalStorageCache,
@@ -43,7 +44,7 @@ export default class Context {
         this.syncToken = this.syncToken.bind(this);
     }
 
-    public static load({cache, tokenScope, eventDispatcher}: Configuration): Context {
+    public static load({cache, tokenScope, eventDispatcher, urlSanitizer}: Configuration): Context {
         let tabId: string | null = cache.tabId.get();
         let newTab = false;
 
@@ -52,7 +53,7 @@ export default class Context {
             newTab = true;
         }
 
-        const tab = new Tab(tabId, newTab);
+        const tab = new Tab(tabId, newTab, urlSanitizer);
 
         cache.tabId.clear();
 
