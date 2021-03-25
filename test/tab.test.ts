@@ -68,6 +68,20 @@ describe('A tab', () => {
         expect(sanitizer).toHaveBeenCalledWith(window.encodeURI(window.decodeURI(referrer)));
     });
 
+    test('should not sanitize an empty page referrer', () => {
+        Object.defineProperty(window.document, 'referrer', {
+            value: '',
+            configurable: true,
+        });
+
+        const sanitizer: UrlSanitizer = jest.fn().mockReturnValue(new URL('http://example.com'));
+        const tab = new Tab(tabId, true, sanitizer);
+
+        expect(tab.referrer).toBe('');
+
+        expect(sanitizer).not.toHaveBeenCalled();
+    });
+
     test('should determine whether the tab is visible', () => {
         const tab = new Tab(tabId, true);
 
