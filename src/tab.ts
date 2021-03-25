@@ -77,7 +77,7 @@ export default class Tab {
     }
 
     public get referrer(): string {
-        return this.sanitizeUrl(document.referrer);
+        return document.referrer === '' ? '' : this.sanitizeUrl(document.referrer);
     }
 
     public get isVisible(): boolean {
