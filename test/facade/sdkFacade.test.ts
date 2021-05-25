@@ -20,10 +20,10 @@ describe('A SDK facade', () => {
     const {default: ContextMock} = jest.genMockFromModule<{default: jest.Mock<Context>}>('../../src/context');
     const {default: TrackerMock} = jest.genMockFromModule<{default: jest.Mock<Tracker>}>('../../src/tracker');
 
-    function createContextMock(): Context {
+    function createContextMock(previousToken: Token|null = null): Context {
         const context = new ContextMock();
 
-        let token: Token|null = null;
+        let token: Token|null = previousToken;
         context.getToken = jest.fn().mockImplementation(() => token);
         context.setToken = jest.fn().mockImplementation(newToken => {
             token = newToken;
@@ -183,6 +183,31 @@ describe('A SDK facade', () => {
 
         expect(context.setToken).toBeCalledWith(Token.issue(appId, 'c4r0l'));
         expect(context.setToken).toBeCalledTimes(1);
+    });
+
+    test('should load the SDK and set a null a token if user ID is null', () => {
+        const context = createContextMock(Token.issue(appId, 'c4r0l'));
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+
+                return sdk;
+            });
+
+        const date = jest.spyOn(Date, 'now');
+        const now = Date.now();
+        date.mockReturnValue(now);
+
+        SdkFacade.init({
+            appId: appId,
+            userId: null,
+            track: false,
+        });
+
+        expect(context.setToken).toHaveBeenLastCalledWith(null);
     });
 
     test('should load the SDK with the tracker enabled if the flag "track" is true', () => {

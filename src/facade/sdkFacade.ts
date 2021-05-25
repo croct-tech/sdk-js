@@ -20,7 +20,7 @@ export type Configuration = {
     debug?: boolean,
     track?: boolean,
     token?: string | null,
-    userId?: string,
+    userId?: string | null,
     eventMetadata?: {[key: string]: string},
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
@@ -74,7 +74,11 @@ export default class SdkFacade {
         );
 
         if (userId !== undefined) {
-            sdk.identify(userId);
+            if (userId === null) {
+                sdk.anonymize();
+            } else {
+                sdk.identify(userId);
+            }
         } else if (token !== undefined) {
             if (token === null) {
                 sdk.unsetToken();
