@@ -1,4 +1,4 @@
-import {loggerSchema} from '../../src/schema/loggerSchema';
+import {loggerSchema} from '../../src/schema';
 
 describe('The logger schema', () => {
     test('should allow valid loggers', () => {
@@ -82,7 +82,7 @@ describe('The logger schema', () => {
             },
             "Expected value of type function at path '/error', actual integer.",
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             loggerSchema.validate(value);
         }

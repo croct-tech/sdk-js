@@ -1,4 +1,4 @@
-import {userProfileSchema} from '../../src/schema/userSchema';
+import {userProfileSchema} from '../../src/schema';
 
 describe('The user profile schema', () => {
     test.each([
@@ -101,7 +101,7 @@ describe('The user profile schema', () => {
         [{custom: {nestedArrayInMap: {foo: [1, 2, 3]}}}],
         [{custom: {nestedMapInArray: [{foo: 'bar'}]}}],
         [{custom: {nestedMapInMap: {foo: {bar: 'baz'}}}}],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             userProfileSchema.validate(value);
         }
@@ -277,7 +277,7 @@ describe('The user profile schema', () => {
             {custom: {array: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}},
             'Expected at most 10 items at path \'/custom/array\', actual 11.',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             userProfileSchema.validate(value);
         }

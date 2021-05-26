@@ -1,5 +1,4 @@
-import CapacityRestrictedQueue from '../../src/queue/capacityRestrictedQueue';
-import InMemoryQueue from '../../src/queue/inMemoryQueue';
+import {CapacityRestrictedQueue, InMemoryQueue} from '../../src/queue';
 
 describe('A capacity-restricted queue', () => {
     test('should provide all items', () => {

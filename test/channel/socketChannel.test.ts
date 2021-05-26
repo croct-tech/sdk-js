@@ -1,5 +1,5 @@
-import WS from 'jest-websocket-mock';
-import {SocketChannel} from '../../src/channel/socketChannel';
+import {WS} from 'jest-websocket-mock';
+import {SocketChannel} from '../../src/channel';
 import {Logger} from '../../src/logging';
 
 describe('A socket channel', () => {

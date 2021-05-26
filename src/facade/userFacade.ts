@@ -1,8 +1,8 @@
-import Tracker from '../tracker';
-import UserPatch from './userPatch';
-import Context from '../context';
+import {Tracker} from '../tracker';
+import {UserPatch} from './userPatch';
+import {Context} from '../context';
 
-export default class UserFacade {
+export class UserFacade {
     private readonly context: Context;
 
     private readonly tracker: Tracker;

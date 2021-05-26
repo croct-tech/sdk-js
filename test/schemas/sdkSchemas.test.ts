@@ -1,4 +1,4 @@
-import {configurationSchema, eventMetadataSchema} from '../../src/schema/sdkSchemas';
+import {sdkConfigurationSchema, eventMetadataSchema} from '../../src/schema';
 
 describe('The event metadata schema', () => {
     test.each([
@@ -10,7 +10,7 @@ describe('The event metadata schema', () => {
             fourthKey: 'someValue',
             fifthKey: 'someValue',
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             eventMetadataSchema.validate(value);
         }
@@ -54,7 +54,7 @@ describe('The event metadata schema', () => {
             },
             "Expected value of type string at path '/foo', actual integer.",
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             eventMetadataSchema.validate(value);
         }
@@ -90,9 +90,9 @@ describe('The SDK configuration schema', () => {
             },
             eventMetadata: {},
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
-            configurationSchema.validate(value);
+            sdkConfigurationSchema.validate(value);
         }
 
         expect(validate).not.toThrow(Error);
@@ -143,9 +143,9 @@ describe('The SDK configuration schema', () => {
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', logger: null},
             "Expected value of type object at path '/logger', actual null.",
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
-            configurationSchema.validate(value);
+            sdkConfigurationSchema.validate(value);
         }
 
         expect(validate).toThrow(Error);

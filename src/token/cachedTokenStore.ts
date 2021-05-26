@@ -1,7 +1,7 @@
-import Token, {TokenStore} from './index';
-import Cache from '../cache/index';
+import {Token, TokenStore} from './token';
+import {Cache} from '../cache';
 
-export default class CachedTokenStore implements TokenStore {
+export class CachedTokenStore implements TokenStore {
     private readonly cache: Cache;
 
     public constructor(cache: Cache) {

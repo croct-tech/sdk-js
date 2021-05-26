@@ -1,45 +1,12 @@
-export function formatPath(path: string[]): string {
-    return `/${path.join('/')}`;
-}
-
-export function describe(value: unknown): string {
-    if (value === null) {
-        return 'null';
-    }
-
-    if (Array.isArray(value)) {
-        return 'array';
-    }
-
-    if (typeof value === 'number') {
-        return Number.isInteger(value) ? 'integer' : 'number';
-    }
-
-    if (typeof value === 'object') {
-        return (value as object).constructor.name;
-    }
-
-    return typeof value;
-}
-
-export class Violation extends Error {
-    public readonly path: string[];
-
-    public readonly params: {[key: string]: unknown};
-
-    public constructor(message: string, path: string[], params: {[p: string]: unknown}) {
-        super(message);
-        this.path = path;
-        this.params = params;
-    }
-}
-
-export interface Schema {
-    validate(value: unknown, path?: string[]): void;
-}
-
-export interface TypeSchema extends Schema {
-    getTypes(): string[];
-
-    isValidType(value: unknown): boolean;
-}
+export * from './schema';
+export * from './violation';
+export {ArrayType} from './arrayType';
+export {BooleanType} from './booleanType';
+export {FunctionType} from './functionType';
+export {JsonType, JsonArrayType, JsonObjectType, JsonPrimitiveType} from './jsonType';
+export {MixedSchema} from './mixedSchema';
+export {NullType} from './nullType';
+export {NumberType} from './numberType';
+export {ObjectType} from './objectType';
+export {StringType} from './stringType';
+export {UnionType} from './unionType';

@@ -20,7 +20,7 @@ export function formatMessage(error: unknown): string {
     return message.charAt(0).toUpperCase() + message.slice(1);
 }
 
-export function formatCause(error: any): string {
+export function formatCause(error: unknown): string {
     const message = formatMessage(error);
 
     if (message.length === 0) {

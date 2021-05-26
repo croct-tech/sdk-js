@@ -1,7 +1,7 @@
-import {OutputChannel} from './index';
+import {OutputChannel} from './channel';
 import {Transformer} from '../transformer';
 
-export default class EncodedChannel<D, E> implements OutputChannel<D> {
+export class EncodedChannel<D, E> implements OutputChannel<D> {
     private readonly encode: Transformer<D, E>;
 
     private readonly channel: OutputChannel<E>;

@@ -1,4 +1,5 @@
-import {describe, formatPath, Schema, TypeSchema, Violation} from './index';
+import {Schema, TypeSchema, Violation} from './schema';
+import {describe, formatPath} from './violation';
 
 type ArrayDefinition = {
     minItems: number,
@@ -6,7 +7,7 @@ type ArrayDefinition = {
     items?: Schema,
 };
 
-export default class ArrayType implements TypeSchema {
+export class ArrayType implements TypeSchema {
     private readonly definition: ArrayDefinition;
 
     public constructor(definition: Partial<ArrayDefinition> = {}) {

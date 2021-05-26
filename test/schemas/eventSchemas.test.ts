@@ -9,7 +9,7 @@ import {
     testGroupAssigned,
     eventOccurred,
     goalCompleted,
-} from '../../src/schema/eventSchemas';
+} from '../../src/schema';
 import {Optional} from '../../src/utilityTypes';
 
 const minimalProductDetails: ProductDetails = {
@@ -83,7 +83,7 @@ describe('The "checkoutStarted" payload schema', () => {
     test.each([
         [{cart: minimalCart}],
         [{cart: minimalCart, orderId: 'b76c0ef6-9520-4107-9de3-11110829588e'}],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             checkoutStarted.validate(value);
         }
@@ -104,7 +104,7 @@ describe('The "checkoutStarted" payload schema', () => {
             {cart: minimalCart, orderId: 'x'.repeat(51)},
             'Expected at most 50 characters at path \'/orderId\', actual 51.',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             checkoutStarted.validate(value);
         }
@@ -161,7 +161,7 @@ describe('The "userSignedUp" payload schema', () => {
             userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
             profile: {firstName: 'John'},
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             userSignedUp.validate(value);
         }
@@ -186,7 +186,7 @@ describe('The "userSignedUp" payload schema', () => {
             {userId: 'username', profile: null},
             'Expected value of type object at path \'/profile\', actual null.',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             userSignedUp.validate(value);
         }
@@ -247,7 +247,7 @@ describe('The "testGroupAssigned" payload schema', () => {
             {testId: 'foo', groupId: null},
             'Expected value of type string at path \'/groupId\', actual null.',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             testGroupAssigned.validate(value);
         }
@@ -275,7 +275,7 @@ describe('The "eventOccurred" payload schema', () => {
                 boolean: true,
             },
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             eventOccurred.validate(value);
         }
@@ -391,7 +391,7 @@ describe('The "eventOccurred" payload schema', () => {
             },
             'Expected at most 10 entries at path \'/details\', actual 11.',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             eventOccurred.validate(value);
         }
@@ -411,7 +411,7 @@ describe('The "goalCompleted" payload schema', () => {
             value: 1,
             currency: 'brl',
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             goalCompleted.validate(value);
         }
@@ -456,7 +456,7 @@ describe('The "goalCompleted" payload schema', () => {
             {goalId: 'foo', currency: null},
             'Expected value of type string at path \'/currency\', actual null.',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             goalCompleted.validate(value);
         }

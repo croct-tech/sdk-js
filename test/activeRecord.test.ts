@@ -1,4 +1,4 @@
-import ActiveRecord from '../src/activeRecord';
+import {ActiveRecord} from '../src/activeRecord';
 import {Patch} from '../src/patch';
 
 class TestRecord extends ActiveRecord<any> {

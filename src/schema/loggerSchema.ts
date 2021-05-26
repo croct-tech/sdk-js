@@ -1,5 +1,4 @@
-import ObjectType from '../validation/objectType';
-import FunctionType from '../validation/functionType';
+import {ObjectType, FunctionType} from '../validation';
 
 export const loggerSchema = new ObjectType({
     required: ['debug', 'info', 'warn', 'error'],

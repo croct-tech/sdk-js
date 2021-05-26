@@ -1,6 +1,4 @@
-import ObjectType from '../../src/validation/objectType';
-import NumberType from '../../src/validation/numberType';
-import StringType from '../../src/validation/stringType';
+import {ObjectType, NumberType, StringType} from '../../src/validation';
 
 describe('An object type', () => {
     test('should provide the allowed type', () => {

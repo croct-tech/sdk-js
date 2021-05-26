@@ -1,4 +1,4 @@
 import {VERSION} from './constants';
-import Sdk, {Configuration} from './sdk';
+import {Sdk, Configuration} from './sdk';
 
-export {Sdk as default, Configuration, VERSION};
+export {Sdk, Configuration, VERSION};

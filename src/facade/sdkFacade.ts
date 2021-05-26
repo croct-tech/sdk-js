@@ -1,16 +1,16 @@
-import EvaluatorFacade, {TabContextFactory} from './evaluatorFacade';
-import TrackerFacade from './trackerFacade';
-import Context, {TokenScope} from '../context';
-import UserFacade from './userFacade';
-import Token from '../token';
+import {EvaluatorFacade, TabContextFactory} from './evaluatorFacade';
+import {TrackerFacade} from './trackerFacade';
+import {Context, TokenScope} from '../context';
+import {UserFacade} from './userFacade';
+import {Token} from '../token';
 import {formatCause} from '../error';
-import {configurationSchema} from '../schema/sdkFacadeSchemas';
-import Sdk from '../sdk';
-import SessionFacade from './sessionFacade';
+import {sdkFacadeConfigurationSchema} from '../schema';
+import {Sdk} from '../sdk';
+import {SessionFacade} from './sessionFacade';
 import {Logger} from '../logging';
 import {SdkEventMap} from '../sdkEvents';
 import {EventManager} from '../eventManager';
-import CidAssigner from '../cid/index';
+import {CidAssigner} from '../cid';
 import {PartialTrackingEvent} from '../trackingEvents';
 import {UrlSanitizer} from '../tab';
 
@@ -35,13 +35,13 @@ function validateConfiguration(configuration: unknown): asserts configuration is
     }
 
     try {
-        configurationSchema.validate(configuration);
+        sdkFacadeConfigurationSchema.validate(configuration);
     } catch (violation) {
         throw new Error(`Invalid configuration: ${formatCause(violation)}`);
     }
 }
 
-export default class SdkFacade {
+export class SdkFacade {
     private readonly sdk: Sdk;
 
     private trackerFacade?: TrackerFacade;
@@ -133,13 +133,13 @@ export default class SdkFacade {
         return this.evaluatorFacade;
     }
 
-    public get eventManager(): EventManager<Record<string, object>, SdkEventMap> {
+    public get eventManager(): EventManager<Record<string, Record<string, unknown>>, SdkEventMap> {
         const {eventManager} = this.sdk;
 
         return {
             addListener: eventManager.addListener.bind(eventManager),
             removeListener: eventManager.removeListener.bind(eventManager),
-            dispatch: (eventName: string, event: object): void => {
+            dispatch: (eventName: string, event: Record<string, unknown>): void => {
                 if (!/[a-z][a-z_]+\.[a-z][a-z_]+/i.test(eventName)) {
                     throw new Error(
                         'The event name must be in the form of "namespaced.eventName", where '

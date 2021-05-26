@@ -1,6 +1,7 @@
-import {describe, formatPath, TypeSchema, Violation} from './index';
+import {TypeSchema, Violation} from './schema';
+import {describe, formatPath} from './violation';
 
-export default class UnionType implements TypeSchema {
+export class UnionType implements TypeSchema {
     private readonly schemas: TypeSchema[];
 
     public constructor(first: TypeSchema, second: TypeSchema, ...others: TypeSchema[]) {

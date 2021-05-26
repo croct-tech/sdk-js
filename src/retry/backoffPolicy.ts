@@ -1,4 +1,4 @@
-import {RetryPolicy} from './index';
+import {RetryPolicy} from './policy';
 
 type Options = {
     minRetryDelay: number, // min retry delay in ms (used in exp. backoff calcs)
@@ -8,7 +8,7 @@ type Options = {
     maxAttempts: number,
 };
 
-export default class BackoffPolicy<T> implements RetryPolicy<T> {
+export class BackoffPolicy<T> implements RetryPolicy<T> {
     private readonly minRetryDelay: number = 1000;
 
     private readonly maxRetryDelay: number = 30000;

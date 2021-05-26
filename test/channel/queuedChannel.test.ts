@@ -1,7 +1,5 @@
-import InMemoryQueue from '../../src/queue/inMemoryQueue';
-import QueuedChannel from '../../src/channel/queuedChannel';
-import {OutputChannel} from '../../src/channel';
-import CapacityRestrictedQueue from '../../src/queue/capacityRestrictedQueue';
+import {InMemoryQueue, CapacityRestrictedQueue} from '../../src/queue';
+import {QueuedChannel, OutputChannel} from '../../src/channel';
 
 describe('A queued channel', () => {
     afterEach(() => {

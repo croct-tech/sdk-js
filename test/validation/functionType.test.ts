@@ -1,4 +1,4 @@
-import FunctionType from '../../src/validation/functionType';
+import {FunctionType} from '../../src/validation';
 
 describe('A function type', () => {
     test('should provide the allowed type', () => {

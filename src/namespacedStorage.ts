@@ -1,4 +1,4 @@
-export default class NamespacedStorage implements Storage {
+export class NamespacedStorage implements Storage {
     private readonly storage: Storage;
 
     private readonly namespace: string;

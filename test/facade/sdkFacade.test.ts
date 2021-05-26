@@ -1,27 +1,26 @@
-import SdkFacade, {Configuration} from '../../src/facade/sdkFacade';
-import Token from '../../src/token';
-import Sdk from '../../src/sdk';
-import Context from '../../src/context';
-import UserFacade from '../../src/facade/userFacade';
-import Tracker from '../../src/tracker';
-import SessionFacade from '../../src/facade/sessionFacade';
-import TrackerFacade from '../../src/facade/trackerFacade';
-import NullLogger from '../../src/logging/nullLogger';
+import {SdkFacade, Configuration} from '../../src/facade/sdkFacade';
+import {Token} from '../../src/token';
+import {Sdk} from '../../src';
+import {Context} from '../../src/context';
+import {UserFacade, SessionFacade, TrackerFacade} from '../../src/facade';
+import {Tracker} from '../../src/tracker';
+import {NullLogger} from '../../src/logging';
 import {DumbStorage} from '../utils/dumbStorage';
 import {EventManager} from '../../src/eventManager';
 import {SdkEventMap} from '../../src/sdkEvents';
-import CidAssigner from '../../src/cid';
-import Evaluator from '../../src/evaluator';
-import Tab, {UrlSanitizer} from '../../src/tab';
+import {CidAssigner} from '../../src/cid';
+import {Evaluator} from '../../src/evaluator';
+import {Tab, UrlSanitizer} from '../../src/tab';
 
 describe('A SDK facade', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
 
-    const {default: ContextMock} = jest.genMockFromModule<{default: jest.Mock<Context>}>('../../src/context');
-    const {default: TrackerMock} = jest.genMockFromModule<{default: jest.Mock<Tracker>}>('../../src/tracker');
+    function createTrackerMock(): Tracker {
+        return jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
+    }
 
     function createContextMock(): Context {
-        const context = new ContextMock();
+        const context = jest.createMockFromModule<{Context: Context}>('../../src/context').Context;
 
         let token: Token|null = null;
         context.getToken = jest.fn().mockImplementation(() => token);
@@ -186,7 +185,8 @@ describe('A SDK facade', () => {
     });
 
     test('should load the SDK with the tracker enabled if the flag "track" is true', () => {
-        const tracker = new TrackerMock();
+        const tracker = createTrackerMock();
+        tracker.enable = jest.fn();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -206,7 +206,7 @@ describe('A SDK facade', () => {
     });
 
     test('should load the SDK with the tracker disabled if the flag "track" is false', () => {
-        const tracker = new TrackerMock();
+        const tracker = createTrackerMock();
         tracker.enable = jest.fn();
 
         jest.spyOn(Sdk, 'init')
@@ -227,7 +227,7 @@ describe('A SDK facade', () => {
     });
 
     test('should provide a tracker facade', () => {
-        const tracker = new TrackerMock();
+        const tracker = createTrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -248,8 +248,8 @@ describe('A SDK facade', () => {
     });
 
     test('should provide an user facade', () => {
-        const tracker = new TrackerMock();
-        const context = new ContextMock();
+        const tracker = createTrackerMock();
+        const context = createContextMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -271,7 +271,7 @@ describe('A SDK facade', () => {
     });
 
     test('should provide a session facade', () => {
-        const tracker = new TrackerMock();
+        const tracker = createTrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -295,8 +295,7 @@ describe('A SDK facade', () => {
         const tab = new Tab('1', true);
         const result = '2';
 
-        const {default: EvaluatorMock} = jest.genMockFromModule<{default: jest.Mock<Evaluator>}>('../../src/evaluator');
-        const evaluator = new EvaluatorMock();
+        const evaluator = jest.createMockFromModule<{Evaluator: Evaluator}>('../../src/evaluator').Evaluator;
         evaluator.evaluate = jest.fn(() => Promise.resolve(result));
 
         const context = createContextMock();
@@ -483,7 +482,8 @@ describe('A SDK facade', () => {
 
     test('should allow to refresh the token of the current anonymous user', () => {
         const context = createContextMock();
-        const tracker = new TrackerMock();
+        const tracker = createTrackerMock();
+        tracker.track = jest.fn();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -519,7 +519,7 @@ describe('A SDK facade', () => {
 
     test('should allow to refresh the token of the current identified user', () => {
         const context = createContextMock();
-        const tracker = new TrackerMock();
+        const tracker = createTrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -564,7 +564,7 @@ describe('A SDK facade', () => {
 
     test('should track "userSignedIn" event when setting a token with an identified subject', () => {
         const context = createContextMock();
-        const tracker = new TrackerMock();
+        const tracker = createTrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -602,7 +602,8 @@ describe('A SDK facade', () => {
 
     test('should track "userSignedIn" event when replacing an anonymous token with an identified token', () => {
         const context = createContextMock();
-        const tracker = new TrackerMock();
+        const tracker = createTrackerMock();
+        tracker.track = jest.fn();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -640,7 +641,7 @@ describe('A SDK facade', () => {
 
     test('should track both "userSignedIn" and "userSignedOut" events when setting a token with a new subject', () => {
         const context = createContextMock();
-        const tracker = new TrackerMock();
+        const tracker = createTrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -699,7 +700,7 @@ describe('A SDK facade', () => {
 
     test('should track "userSignedOut" event when unsetting a token with an identified subject', () => {
         const context = createContextMock();
-        const tracker = new TrackerMock();
+        const tracker = createTrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -747,7 +748,7 @@ describe('A SDK facade', () => {
 
     test('should track "userSignedOut" event when setting an anonymous token', () => {
         const context = createContextMock();
-        const tracker = new TrackerMock();
+        const tracker = createTrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
@@ -889,7 +890,7 @@ describe('A SDK facade', () => {
     });
 
     test('should allow to subscribe and unsubscribe to events', () => {
-        const eventManager: EventManager<Record<string, object>, SdkEventMap> = {
+        const eventManager: EventManager<Record<string, Record<string, any>>, SdkEventMap> = {
             addListener: jest.fn(),
             removeListener: jest.fn(),
             dispatch: jest.fn(),
@@ -922,7 +923,7 @@ describe('A SDK facade', () => {
     });
 
     test('should allow external services to dispatch custom events', () => {
-        const eventManager: EventManager<Record<string, object>, SdkEventMap> = {
+        const eventManager: EventManager<Record<string, Record<string, any>>, SdkEventMap> = {
             addListener: jest.fn(),
             removeListener: jest.fn(),
             dispatch: jest.fn(),

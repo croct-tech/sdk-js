@@ -1,8 +1,8 @@
-import ActiveRecord from '../activeRecord';
-import Tracker from '../tracker';
+import {ActiveRecord} from '../activeRecord';
+import {Tracker} from '../tracker';
 import {UserProfileChanged} from '../trackingEvents';
 
-export default class UserPatch extends ActiveRecord<UserProfileChanged> {
+export class UserPatch extends ActiveRecord<UserProfileChanged> {
     private readonly tracker: Tracker;
 
     public constructor(tracker: Tracker) {

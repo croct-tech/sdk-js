@@ -1,7 +1,4 @@
-import ObjectType from '../validation/objectType';
-import StringType from '../validation/stringType';
-import NumberType from '../validation/numberType';
-import ArrayType from '../validation/arrayType';
+import {ObjectType, StringType, NumberType, ArrayType} from '../validation';
 
 export const productDetails = new ObjectType({
     required: ['productId', 'name', 'displayPrice'],

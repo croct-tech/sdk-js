@@ -1,6 +1,6 @@
-import {Queue} from './index';
+import {Queue} from './queue';
 
-export default class InMemoryQueue<T> implements Queue<T> {
+export class InMemoryQueue<T> implements Queue<T> {
     private queue: T[] = [];
 
     public constructor(...values: T[]) {

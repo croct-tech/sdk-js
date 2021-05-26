@@ -1,15 +1,12 @@
-import Tracker, {EventInfo, EventListener} from '../src/tracker';
-import SandboxChannel from '../src/channel/sandboxChannel';
-import TabEventEmulator from './utils/tabEventEmulator';
+import {Tracker, EventInfo, EventListener} from '../src/tracker';
+import {SandboxChannel, OutputChannel} from '../src/channel';
+import {TabEventEmulator} from './utils/tabEventEmulator';
 import {Beacon, BeaconPayload, TrackingEvent, PartialTrackingEvent} from '../src/trackingEvents';
-import {OutputChannel} from '../src/channel';
 import {Optional} from '../src/utilityTypes';
-import Token from '../src/token';
-import InMemoryTokenStore from '../src/token/inMemoryTokenStore';
-import Tab from '../src/tab';
+import {Token, InMemoryTokenStore} from '../src/token';
+import {Tab} from '../src/tab';
 import {uuid4} from '../src/uuid';
-import NeverPolicy from '../src/retry/neverPolicy';
-import {RetryPolicy} from '../src/retry';
+import {NeverPolicy, RetryPolicy} from '../src/retry';
 
 describe('A tracker', () => {
     const now = Date.now();

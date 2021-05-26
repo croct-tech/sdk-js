@@ -1,8 +1,6 @@
-import ObjectType from '../validation/objectType';
-import StringType from '../validation/stringType';
-import NumberType from '../validation/numberType';
+import {ObjectType, StringType, NumberType} from '../validation';
 
-export default new ObjectType({
+export const tokenSchema = new ObjectType({
     required: ['headers', 'claims'],
     properties: {
         headers: new ObjectType({

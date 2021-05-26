@@ -1,21 +1,20 @@
-import {Queue} from './index';
-import {Logger} from '../logging';
-import NullLogger from '../logging/nullLogger';
+import {Queue} from './queue';
+import {Logger, NullLogger} from '../logging';
 
-export type Status = 'halfEmpty' | 'almostEmpty' | 'empty' | 'halfFull' | 'almostFull' | 'full';
+export type QueueStatus = 'halfEmpty' | 'almostEmpty' | 'empty' | 'halfFull' | 'almostFull' | 'full';
 
-export type Callback<T> = {
+export type QueueCallback<T> = {
     (queue: Queue<T>): void,
 };
 
-export default class MonitoredQueue<T> implements Queue<T> {
+export class MonitoredQueue<T> implements Queue<T> {
     private readonly queue: Queue<T>;
 
     private readonly logger: Logger;
 
-    private readonly callbacks: Partial<{ [key in Status]: Callback<T>[] }> = {};
+    private readonly callbacks: Partial<{[key in QueueStatus]: QueueCallback<T>[]}> = {};
 
-    private status: Status;
+    private status: QueueStatus;
 
     public constructor(queue: Queue<T>, logger?: Logger) {
         this.queue = queue;
@@ -32,7 +31,7 @@ export default class MonitoredQueue<T> implements Queue<T> {
         return this.queue.getCapacity();
     }
 
-    public addCallback(status: Status, callback: Callback<T>): void {
+    public addCallback(status: QueueStatus, callback: QueueCallback<T>): void {
         const callbacks = this.callbacks[status] || [];
 
         if (!callbacks.includes(callback)) {
@@ -62,7 +61,7 @@ export default class MonitoredQueue<T> implements Queue<T> {
         }
     }
 
-    public removeCallback(type: Status, callback: Callback<T>): void {
+    public removeCallback(type: QueueStatus, callback: QueueCallback<T>): void {
         const callbacks = this.callbacks[type];
 
         if (!callbacks) {
@@ -76,7 +75,7 @@ export default class MonitoredQueue<T> implements Queue<T> {
         }
     }
 
-    private setStatus(status: Status): void {
+    private setStatus(status: QueueStatus): void {
         if (this.status === status) {
             return;
         }
@@ -88,7 +87,7 @@ export default class MonitoredQueue<T> implements Queue<T> {
         this.status = status;
     }
 
-    private report(status: Status): void {
+    private report(status: QueueStatus): void {
         const callbacks = this.callbacks[status];
 
         if (callbacks !== undefined) {

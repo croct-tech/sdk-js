@@ -1,4 +1,4 @@
-import ArbitraryPolicy from '../../src/retry/arbitraryPolicy';
+import {ArbitraryPolicy} from '../../src/retry';
 
 describe('An arbitrary policy', () => {
     test('should ensure the delay list is not empty', () => {

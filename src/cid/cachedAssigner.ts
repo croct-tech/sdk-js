@@ -1,16 +1,15 @@
-import {Logger} from '../logging/index';
-import NullLogger from '../logging/nullLogger';
-import CidCache from '../cache';
-import CidAssigner from './index';
+import {Logger, NullLogger} from '../logging';
+import {Cache} from '../cache';
+import {CidAssigner} from './assigner';
 
-export default class CachedAssigner implements CidAssigner {
+export class CachedAssigner implements CidAssigner {
     private readonly assigner: CidAssigner;
 
-    private readonly cache: CidCache;
+    private readonly cache: Cache;
 
     private readonly logger: Logger;
 
-    public constructor(assigner: CidAssigner, cache: CidCache, logger?: Logger) {
+    public constructor(assigner: CidAssigner, cache: Cache, logger?: Logger) {
         this.assigner = assigner;
         this.cache = cache;
         this.logger = logger ?? new NullLogger();

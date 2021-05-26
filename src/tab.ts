@@ -1,6 +1,6 @@
 import {SynchronousEventManager, EventListener} from './eventManager';
 
-export type TabEvent<T = {}> = CustomEvent<{tab: Tab} & T>;
+export type TabEvent<T = Record<string, unknown>> = CustomEvent<{tab: Tab} & T>;
 export type TabVisibilityChangeEvent = TabEvent<{visible: boolean}>;
 export type TabUrlChangeEvent = TabEvent<{url: string}>;
 
@@ -23,7 +23,7 @@ const EventMap: {[key: string]: keyof TabEventMap} = {
     visibilitychange: 'visibilityChange',
 };
 
-export default class Tab {
+export class Tab {
     public readonly id: string;
 
     public readonly isNew: boolean;

@@ -1,9 +1,7 @@
-import SandboxChannel from '../../src/channel/sandboxChannel';
-import BeaconSocketChannel, {DuplexChannelFactory} from '../../src/channel/beaconSocketChannel';
-import {DuplexChannel} from '../../src/channel';
+import {BeaconSocketChannel, DuplexChannelFactory, SandboxChannel, DuplexChannel} from '../../src/channel';
 import {Envelope} from '../../src/channel/guaranteedChannel';
 import {Beacon, BeaconPayload, TrackingEventContext} from '../../src/trackingEvents';
-import FixedCidAssigner from '../../src/cid/fixedCidAssigner';
+import {FixedAssigner} from '../../src/cid';
 
 describe('A beacon socket channel', () => {
     afterEach(() => {
@@ -36,7 +34,7 @@ describe('A beacon socket channel', () => {
             tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
             cidParameter: 'clientId',
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         const beacon: Beacon = {
@@ -84,7 +82,7 @@ describe('A beacon socket channel', () => {
             tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
             cidParameter: 'clientId',
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         const firstBeacon: Beacon = {
@@ -164,7 +162,7 @@ describe('A beacon socket channel', () => {
             tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
             cidParameter: 'clientId',
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         const firstBeacon: Beacon = {
@@ -245,7 +243,7 @@ describe('A beacon socket channel', () => {
             tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
             cidParameter: 'clientId',
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         channel.subscribe(listener);
@@ -282,7 +280,7 @@ describe('A beacon socket channel', () => {
             tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
             cidParameter: 'clientId',
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         channel.subscribe(listener);
@@ -312,7 +310,7 @@ describe('A beacon socket channel', () => {
             tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
             cidParameter: 'clientId',
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         await expect(channel.close()).resolves.toBeUndefined();
@@ -325,7 +323,7 @@ describe('A beacon socket channel', () => {
             tokenParameter: 'token',
             trackerEndpointUrl: 'ws://localhost:8080',
             cidParameter: 'clientId',
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         const beacon: Beacon = {

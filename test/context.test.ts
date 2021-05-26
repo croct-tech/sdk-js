@@ -1,7 +1,7 @@
-import Context, {TokenScope} from '../src/context';
-import Token from '../src/token';
-import TabEventEmulator from './utils/tabEventEmulator';
-import LocalStorageCache from '../src/cache/localStorageCache';
+import {Context, TokenScope} from '../src/context';
+import {Token} from '../src/token';
+import {TabEventEmulator} from './utils/tabEventEmulator';
+import {LocalStorageCache} from '../src/cache';
 import {DumbStorage} from './utils/dumbStorage';
 import {EventDispatcher} from '../src/eventManager';
 import {SdkEventMap} from '../src/sdkEvents';

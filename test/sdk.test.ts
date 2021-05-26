@@ -1,12 +1,11 @@
-import WS from 'jest-websocket-mock';
+import {WS} from 'jest-websocket-mock';
 import * as fetchMock from 'fetch-mock';
-import Sdk, {Configuration} from '../src/sdk';
-import NullLogger from '../src/logging/nullLogger';
-import Token from '../src/token';
-import TabEventEmulator from './utils/tabEventEmulator';
-import {Logger} from '../src/logging';
+import {Sdk, Configuration, VERSION} from '../src';
+import {NullLogger, Logger} from '../src/logging';
+import {Token} from '../src/token';
+import {TabEventEmulator} from './utils/tabEventEmulator';
+
 import {BeaconPayload, NothingChanged} from '../src/trackingEvents';
-import {VERSION} from '../src/constants';
 
 jest.mock('../src/constants', () => ({
     VERSION: '0.0.1-test',

@@ -7,7 +7,7 @@ import {
     mergeOperation,
     setOperation,
     unsetOperation,
-} from '../../src/schema/operationSchemas';
+} from '../../src/schema';
 
 const simpleArray = [1, 1.2, null, 'foo', true];
 

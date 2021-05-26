@@ -1,5 +1,4 @@
-import ArrayType from '../../src/validation/arrayType';
-import NumberType from '../../src/validation/numberType';
+import {ArrayType, NumberType} from '../../src/validation';
 
 describe('An array type', () => {
     test('should provide the allowed type', () => {

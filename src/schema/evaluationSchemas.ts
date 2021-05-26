@@ -1,6 +1,4 @@
-import ObjectType from '../validation/objectType';
-import NumberType from '../validation/numberType';
-import {JsonObjectType} from '../validation/jsonType';
+import {ObjectType, NumberType, JsonObjectType} from '../validation';
 
 export const optionsSchema = new ObjectType({
     properties: {

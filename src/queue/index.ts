@@ -1,15 +1,5 @@
-export interface Queue<T> {
-    getCapacity(): number;
-
-    all(): T[];
-
-    push(value: T): void;
-
-    shift(): T;
-
-    peek(): T | null;
-
-    isEmpty(): boolean;
-
-    length(): number;
-}
+export * from './queue';
+export {CapacityRestrictedQueue} from './capacityRestrictedQueue';
+export {InMemoryQueue} from './inMemoryQueue';
+export {MonitoredQueue} from './monitoredQueue';
+export {PersistentQueue} from './persistentQueue';

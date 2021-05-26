@@ -1,12 +1,9 @@
-import Token, {TokenStore} from './token';
-import Tab, {UrlSanitizer} from './tab';
-import CachedTokenStore from './token/cachedTokenStore';
-import ReplicatedTokenStore from './token/replicatedTokenStore';
-import InMemoryTokenStore from './token/inMemoryTokenStore';
+import {Token, TokenStore, CachedTokenStore, ReplicatedTokenStore, InMemoryTokenStore} from './token';
+import {Tab, UrlSanitizer} from './tab';
 import {uuid4} from './uuid';
 import {EventDispatcher} from './eventManager';
 import {SdkEventMap} from './sdkEvents';
-import LocalStorageCache from './cache/localStorageCache';
+import {LocalStorageCache} from './cache';
 
 export type TokenScope = 'isolated' | 'global' | 'contextual';
 
@@ -27,7 +24,7 @@ function tokenEquals(left: Token|null, right: Token|null): boolean {
     return left === right || (left !== null && right !== null && left.toString() === right.toString());
 }
 
-export default class Context {
+export class Context {
     private readonly tab: Tab;
 
     private readonly tokenStore: TokenStore;

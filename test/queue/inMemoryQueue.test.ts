@@ -1,4 +1,4 @@
-import InMemoryQueue from '../../src/queue/inMemoryQueue';
+import {InMemoryQueue} from '../../src/queue';
 
 describe('An in-memory queue', () => {
     let queue: InMemoryQueue<string>;

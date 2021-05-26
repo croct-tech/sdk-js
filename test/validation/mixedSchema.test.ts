@@ -1,4 +1,4 @@
-import MixedSchema from '../../src/validation/mixedSchema';
+import {MixedSchema} from '../../src/validation';
 
 describe('A mixed schema', () => {
     test('should allow anything', () => {

@@ -1,4 +1,4 @@
-import NullLogger from '../../src/logging/nullLogger';
+import {NullLogger} from '../../src/logging';
 
 describe('A null logger', () => {
     afterEach(() => {

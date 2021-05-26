@@ -1,5 +1,5 @@
-import Tracker from '../../src/tracker';
-import TrackerFacade from '../../src/facade/trackerFacade';
+import {Tracker} from '../../src/tracker';
+import {TrackerFacade} from '../../src/facade';
 import {
     ExternalTrackingEvent as ExternalEvent,
     ExternalTrackingEventPayload as ExternalEventPayload,
@@ -11,8 +11,12 @@ describe('A tracker facade', () => {
         jest.restoreAllMocks();
     });
 
+    function createTrackerMock(): Tracker {
+        return jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
+    }
+
     test('can enable the tracker', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = createTrackerMock();
         tracker.enable = jest.fn();
 
         const trackerFacade = new TrackerFacade(tracker);
@@ -22,7 +26,7 @@ describe('A tracker facade', () => {
     });
 
     test('can disable the tracker', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = createTrackerMock();
         tracker.disable = jest.fn();
 
         const trackerFacade = new TrackerFacade(tracker);
@@ -32,7 +36,7 @@ describe('A tracker facade', () => {
     });
 
     test('can add event listeners to the tracker', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = createTrackerMock();
         tracker.addListener = jest.fn();
 
         const listener = jest.fn();
@@ -44,7 +48,7 @@ describe('A tracker facade', () => {
     });
 
     test('can remove event listeners from the tracker', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = createTrackerMock();
         tracker.removeListener = jest.fn();
 
         const listener = jest.fn();
@@ -56,7 +60,7 @@ describe('A tracker facade', () => {
     });
 
     test('should provide a callback that is called when the current pending events are flushed', async () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = createTrackerMock();
         const batch = jest.fn().mockResolvedValue(undefined);
 
         Object.defineProperty(tracker, 'flushed', {
@@ -243,7 +247,7 @@ describe('A tracker facade', () => {
             },
         ],
     ])('should track events', (event: ExternalEvent) => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = createTrackerMock();
         tracker.track = jest.fn();
 
         const trackerFacade = new TrackerFacade(tracker);
@@ -256,7 +260,7 @@ describe('A tracker facade', () => {
     });
 
     test('should fail if the event type is not a string', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = createTrackerMock();
         tracker.track = jest.fn();
 
         const trackerFacade = new TrackerFacade(tracker);
@@ -270,7 +274,7 @@ describe('A tracker facade', () => {
     });
 
     test('should fail if the event type is unknown', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = createTrackerMock();
         tracker.track = jest.fn();
 
         const trackerFacade = new TrackerFacade(tracker);
@@ -284,7 +288,7 @@ describe('A tracker facade', () => {
     });
 
     test('should fail if the event payload is not an object', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = createTrackerMock();
         tracker.track = jest.fn();
 
         const trackerFacade = new TrackerFacade(tracker);
@@ -298,7 +302,7 @@ describe('A tracker facade', () => {
     });
 
     test('should fail if the event payload is invalid', () => {
-        const tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        const tracker = createTrackerMock();
         tracker.track = jest.fn();
 
         const trackerFacade = new TrackerFacade(tracker);

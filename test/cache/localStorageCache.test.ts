@@ -1,4 +1,4 @@
-import LocalStorageCache from '../../src/cache/localStorageCache';
+import {LocalStorageCache} from '../../src/cache';
 
 describe('A storage cache', () => {
     afterEach(() => {

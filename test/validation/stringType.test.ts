@@ -1,4 +1,4 @@
-import StringType from '../../src/validation/stringType';
+import {StringType} from '../../src/validation';
 
 describe('A string type', () => {
     test('should provide the allowed type', () => {

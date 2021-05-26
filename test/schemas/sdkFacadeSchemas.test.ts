@@ -1,4 +1,4 @@
-import {configurationSchema} from '../../src/schema/sdkFacadeSchemas';
+import {sdkFacadeConfigurationSchema} from '../../src/schema';
 
 describe('The SDK facade configuration schema', () => {
     test.each([
@@ -34,9 +34,9 @@ describe('The SDK facade configuration schema', () => {
                 error: jest.fn(),
             },
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
-            configurationSchema.validate(value);
+            sdkFacadeConfigurationSchema.validate(value);
         }
 
         expect(validate).not.toThrow(Error);
@@ -95,9 +95,9 @@ describe('The SDK facade configuration schema', () => {
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', logger: null},
             "Expected value of type object at path '/logger', actual null.",
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
-            configurationSchema.validate(value);
+            sdkFacadeConfigurationSchema.validate(value);
         }
 
         expect(validate).toThrow(Error);

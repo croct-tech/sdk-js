@@ -1,4 +1,4 @@
-import {JsonArrayType, JsonObjectType, JsonPrimitiveType, JsonType} from '../../src/validation/jsonType';
+import {JsonArrayType, JsonObjectType, JsonPrimitiveType, JsonType} from '../../src/validation';
 
 describe('A JSON array type', () => {
     test('should the allowed type', () => {

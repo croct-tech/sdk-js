@@ -1,6 +1,6 @@
-import {Logger} from './index';
+import {Logger} from './logger';
 
-export default class NullLogger implements Logger {
+export class NullLogger implements Logger {
     public debug(): void {
         // suppress debug logs
     }

@@ -1,11 +1,11 @@
-import Token from './token/index';
+import {Token} from './token';
 
 export interface TokenChanged {
     oldToken: Token|null;
     newToken: Token|null;
 }
 
-export type SdkEventMap = Record<string, object> & {
+export type SdkEventMap = Record<string, Record<string, unknown>> & {
     tokenChanged: TokenChanged,
 };
 

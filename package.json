@@ -8,8 +8,11 @@
     "email": "sdk-js+lib@croct.com",
     "url": "https://croct.com"
   },
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "engines": {
+    "node": ">=10"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/croct-tech/sdk-js.git"
@@ -25,24 +28,24 @@
     "build": "tsc"
   },
   "dependencies": {
-    "tslib": "^2.0.0"
+    "tslib": "^2.2.0"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.15",
-    "@typescript-eslint/eslint-plugin": "^2.19.0",
-    "@typescript-eslint/parser": "^2.19.0",
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.20.1",
-    "eslint-plugin-jest": "^23.7.0",
-    "fetch-mock": "^9.1.2",
-    "jest": "^25.5.4",
-    "jest-websocket-mock": "^1.5.1",
-    "mock-socket": "^8.1.1",
-    "node-fetch": "^2.6.0",
+    "@types/jest": "^26.0.23",
+    "@typescript-eslint/eslint-plugin": "^4.24.0",
+    "@typescript-eslint/parser": "^4.24.0",
+    "eslint": "^7.27.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.23.3",
+    "eslint-plugin-jest": "^24.3.6",
+    "fetch-mock": "^9.11.0",
+    "jest": "^26.6.3",
+    "jest-websocket-mock": "^2.2.0",
+    "mock-socket": "^9.0.3",
+    "node-fetch": "^2.6.1",
     "temp-dir": "^2.0.0",
-    "ts-jest": "^25.4.0",
-    "typescript": "^3.7.5"
+    "ts-jest": "^26.5.6",
+    "typescript": "^4.2.4"
   },
   "files": [
     "**/*.js",

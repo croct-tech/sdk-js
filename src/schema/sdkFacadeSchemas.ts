@@ -1,14 +1,9 @@
-import ObjectType from '../validation/objectType';
-import StringType from '../validation/stringType';
-import BooleanType from '../validation/booleanType';
+import {ObjectType, StringType, BooleanType, UnionType, NullType, FunctionType} from '../validation';
 import {tokenScopeSchema} from './contextSchemas';
 import {eventMetadataSchema} from './sdkSchemas';
 import {loggerSchema} from './loggerSchema';
-import UnionType from '../validation/unionType';
-import NullType from '../validation/nullType';
-import FunctionType from '../validation/functionType';
 
-export const configurationSchema = new ObjectType({
+export const sdkFacadeConfigurationSchema = new ObjectType({
     required: ['appId'],
     properties: {
         appId: new StringType({

@@ -1,5 +1,4 @@
-import Cache from '../../src/cache';
-import FallbackCache from '../../src/cache/fallbackCache';
+import {Cache, FallbackCache} from '../../src/cache';
 
 describe('An fallback cache', () => {
     test('should retrieve data from one of the underlying caches', async () => {

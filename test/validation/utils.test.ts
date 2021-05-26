@@ -1,8 +1,8 @@
-import {describe as describeValue, formatPath, Violation} from '../../src/validation';
+import {describe as describeValue, formatPath} from '../../src/validation/violation';
 
 class SomeClass {}
 
-describe('A validation', () => {
+describe('Validation utilities', () => {
     test('should provide a function for formatting paths', () => {
         expect(formatPath(['foo', 'bar', 'baz'])).toEqual('/foo/bar/baz');
     });
@@ -19,19 +19,5 @@ describe('A validation', () => {
         [new SomeClass(), 'SomeClass'],
     ])('should provide a function for describing %o as %p', (value: any, expected: string) => {
         expect(describeValue(value)).toBe(expected);
-    });
-});
-
-describe('A violation', () => {
-    test('should provide the value path', () => {
-        const violation = new Violation('This is a message.', ['foo', 'bar', 'baz'], {});
-
-        expect(violation.path).toEqual(['foo', 'bar', 'baz']);
-    });
-
-    test('should provide the violation parameters', () => {
-        const violation = new Violation('This is a message.', [], {first: '1', second: '2'});
-
-        expect(violation.params).toEqual({first: '1', second: '2'});
     });
 });

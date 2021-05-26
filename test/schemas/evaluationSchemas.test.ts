@@ -1,4 +1,4 @@
-import {optionsSchema} from '../../src/schema/evaluationSchemas';
+import {optionsSchema} from '../../src/schema';
 
 describe('The evaluation option schema', () => {
     test.each([
@@ -13,7 +13,7 @@ describe('The evaluation option schema', () => {
             timeout: 1,
             attributes: {foo: 'bar'},
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             optionsSchema.validate(value);
         }
@@ -34,7 +34,7 @@ describe('The evaluation option schema', () => {
             {attributes: 0},
             'Expected a JSON object at path \'/attributes\', actual integer.',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             optionsSchema.validate(value);
         }

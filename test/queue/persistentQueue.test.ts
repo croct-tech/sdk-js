@@ -1,4 +1,4 @@
-import PersistentQueue from '../../src/queue/persistentQueue';
+import {PersistentQueue} from '../../src/queue';
 import {DumbStorage} from '../utils/dumbStorage';
 
 describe('A persistent queue', () => {

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "ES2015",
+    "module": "CommonJS",
     "target": "ES5",
     "importHelpers": true,
     "moduleResolution": "Node",

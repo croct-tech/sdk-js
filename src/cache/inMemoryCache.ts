@@ -1,6 +1,6 @@
-import Cache from './index';
+import {Cache} from './cache';
 
-export default class InMemoryCache implements Cache {
+export class InMemoryCache implements Cache {
     private cache?: string;
 
     public constructor(cache?: string) {

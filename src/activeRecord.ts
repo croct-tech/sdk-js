@@ -10,7 +10,7 @@ import {
     mergeOperation,
     setOperation,
     unsetOperation,
-} from './schema/operationSchemas';
+} from './schema';
 
 const operationSchema = {
     add: addOperation,
@@ -23,7 +23,7 @@ const operationSchema = {
     unset: unsetOperation,
 };
 
-export default abstract class ActiveRecord<T extends TrackingEvent> {
+export abstract class ActiveRecord<T extends TrackingEvent> {
     private readonly operations: Operation[] = [];
 
     public set(value: JsonValue): this;

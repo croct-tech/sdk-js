@@ -1,5 +1,5 @@
 import {Envelope, GuaranteedChannel, MessageStamper, TimeStamper} from '../../src/channel/guaranteedChannel';
-import SandboxChannel from '../../src/channel/sandboxChannel';
+import {SandboxChannel} from '../../src/channel';
 
 describe('A guaranteed channel', () => {
     let stamper: MessageStamper<string, string>;

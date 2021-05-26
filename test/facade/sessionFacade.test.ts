@@ -1,5 +1,5 @@
-import Tracker from '../../src/tracker';
-import SessionFacade from '../../src/facade/sessionFacade';
+import {Tracker} from '../../src/tracker';
+import {SessionFacade} from '../../src/facade';
 import {SessionAttributesChanged} from '../../src/trackingEvents';
 
 describe('A session facade', () => {
@@ -7,7 +7,7 @@ describe('A session facade', () => {
     let sessionFacade: SessionFacade;
 
     beforeEach(() => {
-        tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        tracker = jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
         tracker.track = jest.fn(event => Promise.resolve(event));
 
         sessionFacade = new SessionFacade(tracker);

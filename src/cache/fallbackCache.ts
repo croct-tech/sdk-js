@@ -1,6 +1,6 @@
-import Cache from './index';
+import {Cache} from './cache';
 
-export default class FallbackCache implements Cache {
+export class FallbackCache implements Cache {
     private readonly caches: Cache[];
 
     public constructor(...caches: Cache[]) {

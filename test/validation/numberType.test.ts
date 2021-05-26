@@ -1,4 +1,4 @@
-import NumberType from '../../src/validation/numberType';
+import {NumberType} from '../../src/validation';
 
 describe('A number type', () => {
     test('should provide the allowed type', () => {
