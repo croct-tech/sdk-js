@@ -1,6 +1,6 @@
-import {Schema} from './index';
+import {Schema} from './schema';
 
-export default class MixedSchema implements Schema {
+export class MixedSchema implements Schema {
     public validate(): void {
         // always valid
     }

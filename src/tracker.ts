@@ -1,8 +1,9 @@
-import {Logger} from './logging';
-import Tab, {TabEvent, TabUrlChangeEvent, TabVisibilityChangeEvent} from './tab';
+import {Logger, NullLogger} from './logging';
+import {Tab, TabEvent, TabUrlChangeEvent, TabVisibilityChangeEvent} from './tab';
 import {OutputChannel} from './channel';
-import NullLogger from './logging/nullLogger';
 import {formatCause} from './error';
+import {TokenProvider} from './token';
+import {RetryPolicy} from './retry';
 import {
     Beacon,
     BeaconPayload,
@@ -12,8 +13,6 @@ import {
     isIdentifiedUserEvent,
     PartialTrackingEvent,
 } from './trackingEvents';
-import {TokenProvider} from './token';
-import {RetryPolicy} from './retry';
 
 type Options = {
     eventMetadata?: {[key: string]: string},
@@ -51,7 +50,7 @@ export interface EventListener {
 
 const trackedEvents: {[key: string]: {[key: string]: boolean}} = {};
 
-export default class Tracker {
+export class Tracker {
     private readonly options: Required<Options>;
 
     private tab: Tab;

@@ -1,11 +1,6 @@
-import ObjectType from '../validation/objectType';
-import StringType from '../validation/stringType';
+import {ObjectType, StringType, NumberType, UnionType, NullType, BooleanType} from '../validation';
 import {cart, order, productDetails} from './ecommerceSchemas';
 import {userProfileSchema} from './userSchema';
-import NumberType from '../validation/numberType';
-import UnionType from '../validation/unionType';
-import NullType from '../validation/nullType';
-import BooleanType from '../validation/booleanType';
 
 export const cartModified = new ObjectType({
     required: ['cart'],

@@ -1,8 +1,12 @@
-import ObjectType from '../validation/objectType';
-import StringType from '../validation/stringType';
-import NumberType from '../validation/numberType';
-import {JsonArrayType, JsonObjectType, JsonPrimitiveType} from '../validation/jsonType';
-import UnionType from '../validation/unionType';
+import {
+    ObjectType,
+    StringType,
+    NumberType,
+    JsonArrayType,
+    JsonObjectType,
+    JsonPrimitiveType,
+    UnionType,
+} from '../validation';
 
 const pointer = new StringType({
     format: 'pointer',

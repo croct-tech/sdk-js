@@ -1,9 +1,8 @@
-import {Logger} from '../logging/index';
-import NullLogger from '../logging/nullLogger';
+import {Logger, NullLogger} from '../logging';
 import {formatCause} from '../error';
-import CidAssigner from './index';
+import {CidAssigner} from './assigner';
 
-export default class RemoteAssigner implements CidAssigner {
+export class RemoteAssigner implements CidAssigner {
     private readonly logger: Logger;
 
     private readonly endpoint: string;

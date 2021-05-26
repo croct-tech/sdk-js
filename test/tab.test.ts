@@ -1,5 +1,5 @@
-import Tab, {UrlSanitizer} from '../src/tab';
-import TabEventEmulator from './utils/tabEventEmulator';
+import {Tab, UrlSanitizer} from '../src/tab';
+import {TabEventEmulator} from './utils/tabEventEmulator';
 
 describe('A tab', () => {
     const tabId = '289fe6a5-47d0-4e83-9454-f2e8e9022baf';

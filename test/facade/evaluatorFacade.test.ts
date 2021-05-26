@@ -1,6 +1,6 @@
-import EvaluatorFacade, {MinimalContextFactory, TabContextFactory} from '../../src/facade/evaluatorFacade';
-import Evaluator, {Campaign, EvaluationOptions, Page} from '../../src/evaluator';
-import Tab from '../../src/tab';
+import {EvaluatorFacade, MinimalContextFactory, TabContextFactory} from '../../src/facade';
+import {Evaluator, Campaign, EvaluationOptions, Page} from '../../src/evaluator';
+import {Tab} from '../../src/tab';
 import {JsonObject} from '../../src/json';
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -16,7 +16,8 @@ describe('An evaluator facade', () => {
     let evaluator: Evaluator;
 
     beforeEach(() => {
-        evaluator = jest.genMockFromModule<Evaluator>('../../src/evaluator');
+        evaluator = jest.createMockFromModule<{Evaluator: Evaluator}>('../../src/evaluator').Evaluator;
+
         evaluator.evaluate = jest.fn();
     });
 

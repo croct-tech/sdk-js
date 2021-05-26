@@ -1,4 +1,4 @@
-import tokenSchema from '../../src/schema/tokenSchema';
+import {tokenSchema} from '../../src/schema';
 
 describe('The token schema', () => {
     test.each([
@@ -31,7 +31,7 @@ describe('The token schema', () => {
                 iat: 1440982923,
             },
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             tokenSchema.validate(value);
         }
@@ -377,7 +377,7 @@ describe('The token schema', () => {
             },
             'Expected value of type string at path \'/signature\', actual integer',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             tokenSchema.validate(value);
         }

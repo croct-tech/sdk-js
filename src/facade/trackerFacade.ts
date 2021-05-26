@@ -4,7 +4,7 @@ import {
     ExternalTrackingEventType as ExternalEventType,
 } from '../trackingEvents';
 import {formatCause} from '../error';
-import Tracker, {EventListener} from '../tracker';
+import {Tracker, EventListener} from '../tracker';
 import {
     cartModified,
     cartViewed,
@@ -15,7 +15,7 @@ import {
     productViewed,
     testGroupAssigned,
     userSignedUp,
-} from '../schema/eventSchemas';
+} from '../schema';
 
 const eventSchemas = {
     cartViewed,
@@ -61,7 +61,7 @@ function validateEvent<T extends ExternalEventType>(event: UnknownEvent<T>): ass
     }
 }
 
-export default class TrackerFacade {
+export class TrackerFacade {
     private readonly tracker: Tracker;
 
     public constructor(tracker: Tracker) {

@@ -1,6 +1,5 @@
-import RetryChannel from '../../src/channel/retryChannel';
-import {OutputChannel} from '../../src/channel';
-import MaxAttemptsPolicy from '../../src/retry/maxAttemptsPolicy';
+import {RetryChannel, OutputChannel} from '../../src/channel';
+import {MaxAttemptsPolicy} from '../../src/retry';
 
 describe('A retry channel', () => {
     afterEach(() => {

@@ -1,4 +1,4 @@
-import NeverPolicy from '../../src/retry/neverPolicy';
+import {NeverPolicy} from '../../src/retry';
 
 describe('A never policy', () => {
     test('should impose an infinity delay', () => {

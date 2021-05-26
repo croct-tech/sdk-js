@@ -1,6 +1,6 @@
-import {RetryPolicy} from './index';
+import {RetryPolicy} from './policy';
 
-export default class ArbitraryPolicy<T> implements RetryPolicy<T> {
+export class ArbitraryPolicy<T> implements RetryPolicy<T> {
     private readonly delays: number[];
 
     public constructor(delays: number[]) {

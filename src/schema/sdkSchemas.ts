@@ -1,10 +1,6 @@
-import ObjectType from '../validation/objectType';
-import StringType from '../validation/stringType';
-import BooleanType from '../validation/booleanType';
+import {ObjectType, StringType, BooleanType, NumberType, FunctionType} from '../validation';
 import {tokenScopeSchema} from './contextSchemas';
-import NumberType from '../validation/numberType';
 import {loggerSchema} from './loggerSchema';
-import FunctionType from '../validation/functionType';
 
 export const eventMetadataSchema = new ObjectType({
     maxProperties: 5,
@@ -18,7 +14,7 @@ export const eventMetadataSchema = new ObjectType({
     }),
 });
 
-export const configurationSchema = new ObjectType({
+export const sdkConfigurationSchema = new ObjectType({
     required: ['appId'],
     properties: {
         appId: new StringType({

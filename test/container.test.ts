@@ -1,11 +1,11 @@
-import WS from 'jest-websocket-mock';
+import {WS} from 'jest-websocket-mock';
 import * as fetchMock from 'fetch-mock';
 import {Configuration, Container} from '../src/container';
-import NullLogger from '../src/logging/nullLogger';
-import {Logger} from '../src/logging';
+import {NullLogger, Logger} from '../src/logging';
+
 import {BeaconPayload} from '../src/trackingEvents';
-import LocalStorageCache from '../src/cache/localStorageCache';
-import Token from '../src/token';
+import {LocalStorageCache} from '../src/cache';
+import {Token} from '../src/token';
 
 beforeEach(() => {
     localStorage.clear();

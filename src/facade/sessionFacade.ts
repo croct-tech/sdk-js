@@ -1,7 +1,7 @@
-import Tracker from '../tracker';
-import SessionPatch from './sessionPatch';
+import {Tracker} from '../tracker';
+import {SessionPatch} from './sessionPatch';
 
-export default class SessionFacade {
+export class SessionFacade {
     private readonly tracker: Tracker;
 
     public constructor(tracker: Tracker) {

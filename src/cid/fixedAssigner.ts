@@ -1,6 +1,6 @@
-import CidAssigner from './index';
+import {CidAssigner} from './assigner';
 
-export default class FixedCidAssigner implements CidAssigner {
+export class FixedAssigner implements CidAssigner {
     private readonly cid: string;
 
     public constructor(cid: string) {

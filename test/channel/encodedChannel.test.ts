@@ -1,5 +1,4 @@
-import EncodedChannel from '../../src/channel/encodedChannel';
-import {OutputChannel} from '../../src/channel';
+import {EncodedChannel, OutputChannel} from '../../src/channel';
 
 describe('An encoded channel', () => {
     let outputChannel: OutputChannel<string>;

@@ -1,7 +1,7 @@
-import Evaluator, {Campaign, EvaluationContext, Page} from '../evaluator';
+import {Evaluator, Campaign, EvaluationContext, Page} from '../evaluator';
 import {JsonObject, JsonValue} from '../json';
-import Tab from '../tab';
-import {optionsSchema} from '../schema/evaluationSchemas';
+import {Tab} from '../tab';
+import {optionsSchema} from '../schema';
 import {formatCause} from '../error';
 
 export type EvaluationOptions = {
@@ -25,7 +25,7 @@ export interface ContextFactory {
     createContext(attributes?: JsonObject): EvaluationContext;
 }
 
-export default class EvaluatorFacade {
+export class EvaluatorFacade {
     private readonly evaluator: Evaluator;
 
     private readonly contextFactory: ContextFactory;

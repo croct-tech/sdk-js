@@ -1,6 +1,4 @@
-import Token from '../../src/token';
-import ReplicatedTokenStore from '../../src/token/replicatedTokenStore';
-import InMemoryTokenStore from '../../src/token/inMemoryTokenStore';
+import {Token, ReplicatedTokenStore, InMemoryTokenStore} from '../../src/token';
 
 describe('A replicated token store', () => {
     const token = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'c4r0l', 1440982923);

@@ -1,5 +1,5 @@
-export interface RetryPolicy<T> {
-    shouldRetry(attempt: number, subject?: T, failure?: any): boolean;
-
-    getDelay(attempt: number): number;
-}
+export * from './policy';
+export {ArbitraryPolicy} from './arbitraryPolicy';
+export {BackoffPolicy} from './backoffPolicy';
+export {MaxAttemptsPolicy} from './maxAttemptsPolicy';
+export {NeverPolicy} from './neverPolicy';

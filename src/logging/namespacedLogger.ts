@@ -1,6 +1,6 @@
-import {Logger} from './index';
+import {Logger} from './logger';
 
-export default class NamespacedLogger implements Logger {
+export class NamespacedLogger implements Logger {
     private readonly logger: Logger;
 
     private readonly namespace: string;

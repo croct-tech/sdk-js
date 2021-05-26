@@ -1,6 +1,6 @@
 import * as fetchMock from 'fetch-mock';
 import {MockOptions} from 'fetch-mock';
-import RemoteAssigner from '../../src/cid/remoteAssigner';
+import {RemoteAssigner} from '../../src/cid';
 
 describe('A remote CID assigner', () => {
     const ENDPOINT = 'https://localhost:8080/endpoint';

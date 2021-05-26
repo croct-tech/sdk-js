@@ -1,10 +1,4 @@
-import StringType from '../validation/stringType';
-import ObjectType from '../validation/objectType';
-import UnionType from '../validation/unionType';
-import BooleanType from '../validation/booleanType';
-import NullType from '../validation/nullType';
-import NumberType from '../validation/numberType';
-import ArrayType from '../validation/arrayType';
+import {StringType, ObjectType, UnionType, BooleanType, NullType, NumberType, ArrayType} from '../validation';
 
 export const userProfileSchema = new ObjectType({
     properties: {

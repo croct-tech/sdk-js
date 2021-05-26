@@ -1,13 +1,13 @@
-import Tracker from '../../src/tracker';
+import {Tracker} from '../../src/tracker';
 import {SessionAttributesChanged} from '../../src/trackingEvents';
-import SessionPatch from '../../src/facade/sessionPatch';
+import {SessionPatch} from '../../src/facade';
 
 describe('A session patch', () => {
     let tracker: Tracker;
     let patch: SessionPatch;
 
     beforeEach(() => {
-        tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        tracker = jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
         tracker.track = jest.fn(event => Promise.resolve(event));
 
         patch = new SessionPatch(tracker);

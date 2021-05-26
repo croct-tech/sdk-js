@@ -1,10 +1,10 @@
-import {Logger} from './index';
+import {Logger} from './logger';
 
 type ConsoleMethod = {
     (message?: any, ...optionalParams: any[]): void,
 };
 
-export default class ConsoleLogger implements Logger {
+export class ConsoleLogger implements Logger {
     private readonly namespace?: string;
 
     public constructor(namespace?: string) {

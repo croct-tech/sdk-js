@@ -1,4 +1,4 @@
-import NullType from '../../src/validation/nullType';
+import {NullType} from '../../src/validation';
 
 describe('A null type', () => {
     test('should provide the allowed type', () => {

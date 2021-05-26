@@ -1,6 +1,6 @@
-type Listener = (event: Event) => {};
+type Listener = (event: Event) => void;
 
-export default class TabEventEmulator {
+export class TabEventEmulator {
     private tabIndex = 0;
 
     private readonly listeners: {target: EventTarget, type: string, listener: Listener}[][] = [[]];

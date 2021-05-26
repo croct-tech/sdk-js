@@ -1,8 +1,6 @@
-import CidAssigner from '../../src/cid';
-import NullLogger from '../../src/logging/nullLogger';
-import InMemoryCache from '../../src/cache/inMemoryCache';
-import Cache from '../../src/cache';
-import CachedAssigner from '../../src/cid/cachedAssigner';
+import {CidAssigner, CachedAssigner} from '../../src/cid';
+import {NullLogger} from '../../src/logging';
+import {Cache, InMemoryCache} from '../../src/cache';
 
 describe('A cached CID assigner', () => {
     afterEach(() => {

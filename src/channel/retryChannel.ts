@@ -1,7 +1,6 @@
-import {OutputChannel} from './index';
-import {Logger} from '../logging';
+import {OutputChannel} from './channel';
+import {Logger, NullLogger} from '../logging';
 import {RetryPolicy} from '../retry';
-import NullLogger from '../logging/nullLogger';
 
 type Configuration<T> = {
     channel: OutputChannel<T>,
@@ -9,7 +8,7 @@ type Configuration<T> = {
     logger?: Logger,
 };
 
-export default class RetryChannel<T> implements OutputChannel<T> {
+export class RetryChannel<T> implements OutputChannel<T> {
     private readonly channel: OutputChannel<T>;
 
     private readonly retryPolicy: RetryPolicy<T>;
@@ -32,7 +31,7 @@ export default class RetryChannel<T> implements OutputChannel<T> {
         return this.channel.publish(message).catch(error => this.retry(message, error));
     }
 
-    public async retry(message: T, error: any): Promise<void> {
+    public async retry(message: T, error: unknown): Promise<void> {
         let attempt = 0;
 
         while (this.retryPolicy.shouldRetry(attempt, message, error)) {
@@ -47,7 +46,7 @@ export default class RetryChannel<T> implements OutputChannel<T> {
             if (delay > 0) {
                 this.logger.debug(`Retry attempt delayed in ${delay}ms`);
 
-                await new Promise((resolve, reject): void => {
+                await new Promise<void>((resolve, reject): void => {
                     const closeWatcher = window.setInterval(
                         () => {
                             if (this.closed) {

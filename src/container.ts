@@ -1,34 +1,28 @@
-import {Logger} from './logging';
-import Context, {TokenScope} from './context';
-import ConsoleLogger from './logging/consoleLogger';
-import NullLogger from './logging/nullLogger';
-import NamespacedStorage from './namespacedStorage';
-import BackoffPolicy from './retry/backoffPolicy';
-import {OutputChannel} from './channel';
-import PersistentQueue from './queue/persistentQueue';
-import {GuaranteedChannel, TimeStamper} from './channel/guaranteedChannel';
-import QueuedChannel from './channel/queuedChannel';
-import RetryChannel from './channel/retryChannel';
-import MonitoredQueue from './queue/monitoredQueue';
-import CapacityRestrictedQueue from './queue/capacityRestrictedQueue';
-import EncodedChannel from './channel/encodedChannel';
-import BeaconSocketChannel from './channel/beaconSocketChannel';
+import {Logger, ConsoleLogger, NullLogger, NamespacedLogger} from './logging';
+import {Context, TokenScope} from './context';
+import {NamespacedStorage} from './namespacedStorage';
+import {BackoffPolicy, ArbitraryPolicy} from './retry';
+import {PersistentQueue, MonitoredQueue, CapacityRestrictedQueue} from './queue';
 import {Beacon} from './trackingEvents';
-import {SocketChannel} from './channel/socketChannel';
 import {TokenProvider} from './token';
-import Tracker from './tracker';
-import Evaluator from './evaluator';
-import NamespacedLogger from './logging/namespacedLogger';
+import {Tracker} from './tracker';
+import {Evaluator} from './evaluator';
 import {encodeJson} from './transformer';
-import CidAssigner from './cid/index';
-import CachedAssigner from './cid/cachedAssigner';
-import RemoteAssigner from './cid/remoteAssigner';
-import FixedCidAssigner from './cid/fixedCidAssigner';
+import {CidAssigner, CachedAssigner, RemoteAssigner, FixedAssigner} from './cid';
 import {EventManager, SynchronousEventManager} from './eventManager';
 import {SdkEventMap} from './sdkEvents';
-import LocalStorageCache from './cache/localStorageCache';
-import ArbitraryPolicy from './retry/arbitraryPolicy';
+import {LocalStorageCache} from './cache';
 import {UrlSanitizer} from './tab';
+import {TimeStamper} from './channel/guaranteedChannel';
+import {
+    OutputChannel,
+    QueuedChannel,
+    RetryChannel,
+    GuaranteedChannel,
+    EncodedChannel,
+    BeaconSocketChannel,
+    SocketChannel,
+} from './channel';
 
 export type Configuration = {
     appId: string,
@@ -211,7 +205,7 @@ export class Container {
 
     private createCidAssigner(): CidAssigner {
         if (this.configuration.cid !== undefined) {
-            return new FixedCidAssigner(this.configuration.cid);
+            return new FixedAssigner(this.configuration.cid);
         }
 
         const logger = this.getLogger('CidAssigner');

@@ -1,6 +1,6 @@
-import {RetryPolicy} from './index';
+import {RetryPolicy} from './policy';
 
-export default class MaxAttemptsPolicy<T> implements RetryPolicy<T> {
+export class MaxAttemptsPolicy<T> implements RetryPolicy<T> {
     private readonly maxAttempts: number;
 
     private readonly delay: number;

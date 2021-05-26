@@ -1,6 +1,7 @@
 import * as fetchMock from 'fetch-mock';
 import {MockOptions} from 'fetch-mock';
-import Evaluator, {
+import {
+    Evaluator,
     ErrorResponse,
     EvaluationContext,
     EvaluationError,
@@ -8,9 +9,8 @@ import Evaluator, {
     ExpressionError,
     ExpressionErrorResponse,
 } from '../src/evaluator';
-import Token, {FixedTokenProvider} from '../src/token';
-import CidAssigner from '../src/cid';
-import FixedCidAssigner from '../src/cid/fixedCidAssigner';
+import {Token, FixedTokenProvider} from '../src/token';
+import {CidAssigner, FixedAssigner} from '../src/cid';
 
 jest.mock('../src/constants', () => ({
     MAX_EXPRESSION_LENGTH: 30,
@@ -42,7 +42,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         const result = 'Anonymous';
@@ -62,7 +62,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(token),
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         const result = 'Carol';
@@ -86,7 +86,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         fetchMock.mock({
@@ -116,7 +116,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         const context: Required<EvaluationContext> = {
@@ -159,7 +159,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         const response: ErrorResponse = {
@@ -193,7 +193,7 @@ describe('An evaluator', () => {
                 appId: appId,
                 endpointUrl: endpoint,
                 tokenProvider: new FixedTokenProvider(null),
-                cidAssigner: new FixedCidAssigner('123'),
+                cidAssigner: new FixedAssigner('123'),
             });
 
             const response: ExpressionErrorResponse = {
@@ -237,7 +237,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         const length = Evaluator.MAX_EXPRESSION_LENGTH + 1;
@@ -275,7 +275,7 @@ describe('An evaluator', () => {
             appId: appId,
             endpointUrl: endpoint,
             tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: new FixedCidAssigner('123'),
+            cidAssigner: new FixedAssigner('123'),
         });
 
         const response: ErrorResponse = {

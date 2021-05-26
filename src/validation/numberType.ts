@@ -1,4 +1,5 @@
-import {describe, formatPath, TypeSchema, Violation} from './index';
+import {TypeSchema, Violation} from './schema';
+import {describe, formatPath} from './violation';
 
 type NumberDefinition = {
     integer: boolean,
@@ -6,7 +7,7 @@ type NumberDefinition = {
     maximum: number,
 };
 
-export default class NumberType implements TypeSchema {
+export class NumberType implements TypeSchema {
     private readonly definition: NumberDefinition;
 
     public constructor(definition: Partial<NumberDefinition> = {}) {

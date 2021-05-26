@@ -1,5 +1,5 @@
 import {Cart, CartItem, Order, OrderItem, ProductDetails} from '../../src/trackingEvents';
-import {cart, cartItem, order, orderItem, productDetails} from '../../src/schema/ecommerceSchemas';
+import {cart, cartItem, order, orderItem, productDetails} from '../../src/schema';
 import {Optional} from '../../src/utilityTypes';
 
 const minimalProductDetails: ProductDetails = {
@@ -46,7 +46,7 @@ describe('The product details schema', () => {
             url: 'https://www.acme.com/product/smartphone9',
             imageUrl: 'https://www.acme.com/images/smartphone9-64gb-green',
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             productDetails.validate(value);
         }
@@ -131,7 +131,7 @@ describe('The product details schema', () => {
             {productId: '12345', name: 'Smartphone 9', displayPrice: 599.00, imageUrl: 'foo'},
             'Invalid url format at path \'/imageUrl\'.',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             productDetails.validate(value);
         }
@@ -152,7 +152,7 @@ describe('The cart item schema', () => {
             coupon: 'PROMO',
             product: minimalProductDetails,
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             cartItem.validate(value);
         }
@@ -250,7 +250,7 @@ describe('The cart item schema', () => {
             },
             'Expected at most 50 characters at path \'/coupon\', actual 51',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             cartItem.validate(value);
         }
@@ -298,7 +298,7 @@ describe('The cart schema', () => {
             coupon: 'FREE-SHIPPING',
             lastUpdateTime: 123456789,
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             cart.validate(value);
         }
@@ -460,7 +460,7 @@ describe('The cart schema', () => {
             },
             'Expected value of type number at path \'/lastUpdateTime\', actual string.',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             cart.validate(value);
         }
@@ -481,7 +481,7 @@ describe('The order item schema', () => {
             coupon: 'PROMO',
             product: minimalProductDetails,
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             orderItem.validate(value);
         }
@@ -579,7 +579,7 @@ describe('The order item schema', () => {
             },
             'Expected at most 50 characters at path \'/coupon\', actual 51',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             orderItem.validate(value);
         }
@@ -652,7 +652,7 @@ describe('The order schema', () => {
             installments: 1,
             status: 'paid',
         }],
-    ])('should allow %s', (value: object) => {
+    ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             order.validate(value);
         }
@@ -906,7 +906,7 @@ describe('The order schema', () => {
             },
             'Unexpected value at path \'/status\', expecting \'placed\', \'paid\' or \'complete\', found \'foo\'.',
         ],
-    ])('should not allow %s', (value: object, message: string) => {
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             order.validate(value);
         }

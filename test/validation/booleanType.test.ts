@@ -1,4 +1,4 @@
-import BooleanType from '../../src/validation/booleanType';
+import {BooleanType} from '../../src/validation';
 
 describe('A boolean type', () => {
     test('should provide the allowed type', () => {

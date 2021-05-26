@@ -1,6 +1,4 @@
-import NumberType from '../../src/validation/numberType';
-import StringType from '../../src/validation/stringType';
-import UnionType from '../../src/validation/unionType';
+import {NumberType, StringType, UnionType} from '../../src/validation';
 
 describe('An union type', () => {
     test('should provide the allowed types', () => {

@@ -1,8 +1,7 @@
-import {ChannelListener, DuplexChannel} from './index';
+import {ChannelListener, DuplexChannel} from './channel';
 import {Envelope} from './guaranteedChannel';
-import {Logger, LoggerFactory} from '../logging';
-import NullLogger from '../logging/nullLogger';
-import CidAssigner from '../cid';
+import {Logger, LoggerFactory, NullLogger} from '../logging';
+import {CidAssigner} from '../cid';
 
 export interface DuplexChannelFactory {
     (url: string, logger: Logger): DuplexChannel<string, string>;
@@ -28,7 +27,7 @@ type Confirmation = {
     violations?: Violation[],
 };
 
-export default class BeaconSocketChannel implements DuplexChannel<string, Envelope<string, string>> {
+export class BeaconSocketChannel implements DuplexChannel<string, Envelope<string, string>> {
     private readonly socketFactory: DuplexChannelFactory;
 
     private readonly logger: Logger;

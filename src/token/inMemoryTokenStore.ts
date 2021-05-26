@@ -1,6 +1,6 @@
-import Token, {TokenStore} from './index';
+import {Token, TokenStore} from './token';
 
-export default class InMemoryTokenStore implements TokenStore {
+export class InMemoryTokenStore implements TokenStore {
     private token: Token | null = null;
 
     public getToken(): Token | null {

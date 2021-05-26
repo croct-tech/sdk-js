@@ -1,4 +1,4 @@
-import NamespacedStorage from '../src/namespacedStorage';
+import {NamespacedStorage} from '../src/namespacedStorage';
 import {DumbStorage} from './utils/dumbStorage';
 
 describe('A namespaced storage', () => {

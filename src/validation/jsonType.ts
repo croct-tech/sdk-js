@@ -1,5 +1,6 @@
-import {describe, formatPath, Schema, TypeSchema, Violation} from './index';
+import {Schema, TypeSchema, Violation} from './schema';
 import {JsonArray, JsonObject, JsonPrimitive, JsonValue} from '../json';
+import {describe, formatPath} from './violation';
 
 function isJsonPrimitive(value: unknown): value is JsonPrimitive {
     return value === null || typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number';
@@ -17,6 +18,7 @@ function isJsonObject(value: unknown): value is JsonObject {
     return isPlainObject(value) && Object.values(value).every(isJsonValue);
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 function isPlainObject(value: unknown): value is object {
     return Object.prototype.toString.call(value) === '[object Object]';
 }

@@ -1,4 +1,4 @@
-import InMemoryCache from '../../src/cache/inMemoryCache';
+import {InMemoryCache} from '../../src/cache';
 
 describe('An in-memory cache', () => {
     test('should cache data in memory', async () => {

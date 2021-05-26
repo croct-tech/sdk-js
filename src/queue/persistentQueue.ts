@@ -1,6 +1,6 @@
-import {Queue} from './index';
+import {Queue} from './queue';
 
-export default class PersistentQueue<T> implements Queue<T> {
+export class PersistentQueue<T> implements Queue<T> {
     private cache: T[];
 
     private readonly storage: Storage;

@@ -1,7 +1,6 @@
-import MonitoredQueue, {Status} from '../../src/queue/monitoredQueue';
-import InMemoryQueue from '../../src/queue/inMemoryQueue';
-import NullLogger from '../../src/logging/nullLogger';
-import CapacityRestrictedQueue from '../../src/queue/capacityRestrictedQueue';
+import {MonitoredQueue, QueueStatus} from '../../src/queue/monitoredQueue';
+import {InMemoryQueue, CapacityRestrictedQueue} from '../../src/queue';
+import {NullLogger} from '../../src/logging';
 
 describe('A monitored queue', () => {
     afterEach(() => {
@@ -121,7 +120,7 @@ describe('A monitored queue', () => {
             'full',
             ['a', 'b', 'c', 'd', 'e', 'f'],
         ],
-    ])('should allow to add a callback to be notified when the queue is %s', (status: Status, items: string[]) => {
+    ])('should allow to add a callback to be notified when the queue is %s', (status: QueueStatus, items: string[]) => {
         const queue = new MonitoredQueue<string>(new CapacityRestrictedQueue(new InMemoryQueue(), 6), new NullLogger());
         const callback = jest.fn();
 

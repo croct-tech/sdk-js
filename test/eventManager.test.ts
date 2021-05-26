@@ -1,8 +1,8 @@
 import {SynchronousEventManager} from '../src/eventManager';
 
 type TestEventMap = {
-    foo: object,
-    bar: object,
+    foo: any,
+    bar: any,
 };
 
 describe('A synchronous event manager', () => {

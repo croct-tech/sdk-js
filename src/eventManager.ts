@@ -2,7 +2,7 @@ export interface EventListener<T> {
     (event: T): void;
 }
 
-export type EventMap = Record<string, object>;
+export type EventMap = Record<string, Record<string, any>>;
 
 export interface EventDispatcher<TEvents extends EventMap> {
     dispatch<T extends keyof TEvents>(eventName: T, event: TEvents[T]): void;

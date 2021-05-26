@@ -1,4 +1,4 @@
-import {tokenScopeSchema} from '../../src/schema/contextSchemas';
+import {tokenScopeSchema} from '../../src/schema';
 
 describe('The token schema', () => {
     test.each([

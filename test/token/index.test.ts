@@ -1,4 +1,4 @@
-import Token, {FixedTokenProvider} from '../../src/token';
+import {Token, FixedTokenProvider} from '../../src/token';
 import {base64UrlEncode} from '../../src/base64Url';
 
 describe('A token', () => {

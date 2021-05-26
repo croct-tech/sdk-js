@@ -1,6 +1,7 @@
-import {describe, formatPath, TypeSchema, Violation} from './index';
+import {TypeSchema, Violation} from './schema';
+import {describe, formatPath} from './violation';
 
-export default class FunctionType implements TypeSchema {
+export class FunctionType implements TypeSchema {
     public getTypes(): string[] {
         return ['function'];
     }

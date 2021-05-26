@@ -1,13 +1,13 @@
-import Tracker from '../../src/tracker';
+import {Tracker} from '../../src/tracker';
 import {UserProfileChanged} from '../../src/trackingEvents';
-import UserPatch from '../../src/facade/userPatch';
+import {UserPatch} from '../../src/facade';
 
 describe('A user patch', () => {
     let tracker: Tracker;
     let patch: UserPatch;
 
     beforeEach(() => {
-        tracker = jest.genMockFromModule<Tracker>('../../src/tracker');
+        tracker = jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
         tracker.track = jest.fn(event => Promise.resolve(event));
 
         patch = new UserPatch(tracker);

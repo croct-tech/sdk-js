@@ -1,6 +1,6 @@
-import Token, {TokenStore} from './index';
+import {Token, TokenStore} from './token';
 
-export default class ReplicatedTokenStore implements TokenStore {
+export class ReplicatedTokenStore implements TokenStore {
     private primary: TokenStore;
 
     private secondary: TokenStore;

@@ -1,8 +1,8 @@
-import ActiveRecord from '../activeRecord';
-import Tracker from '../tracker';
+import {ActiveRecord} from '../activeRecord';
+import {Tracker} from '../tracker';
 import {SessionAttributesChanged} from '../trackingEvents';
 
-export default class SessionPatch extends ActiveRecord<SessionAttributesChanged> {
+export class SessionPatch extends ActiveRecord<SessionAttributesChanged> {
     private readonly tracker: Tracker;
 
     public constructor(tracker: Tracker) {

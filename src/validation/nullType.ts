@@ -1,6 +1,7 @@
-import {describe, formatPath, TypeSchema, Violation} from './index';
+import {TypeSchema, Violation} from './schema';
+import {describe, formatPath} from './violation';
 
-export default class NullType implements TypeSchema {
+export class NullType implements TypeSchema {
     public getTypes(): string[] {
         return ['null'];
     }

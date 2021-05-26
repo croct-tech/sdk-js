@@ -1,14 +1,14 @@
 import {Container} from './container';
-import Context, {TokenScope} from './context';
+import {Context, TokenScope} from './context';
 import {Logger} from './logging';
 import {BOOTSTRAP_ENDPOINT_URL, EVALUATION_ENDPOINT_URL, TRACKER_ENDPOINT_URL, VERSION} from './constants';
-import {configurationSchema} from './schema/sdkSchemas';
+import {sdkConfigurationSchema} from './schema';
 import {formatCause} from './error';
-import Tracker from './tracker';
-import Evaluator from './evaluator';
+import {Tracker} from './tracker';
+import {Evaluator} from './evaluator';
 import {SdkEventMap} from './sdkEvents';
 import {EventManager} from './eventManager';
-import CidAssigner from './cid/index';
+import {CidAssigner} from './cid';
 import {UrlSanitizer} from './tab';
 
 export type Configuration = {
@@ -31,13 +31,13 @@ function validateConfiguration(configuration: unknown): asserts configuration is
     }
 
     try {
-        configurationSchema.validate(configuration);
+        sdkConfigurationSchema.validate(configuration);
     } catch (violation) {
         throw new Error(`Invalid configuration: ${formatCause(violation)}`);
     }
 }
 
-export default class Sdk {
+export class Sdk {
     private container: Container;
 
     private closed: boolean;

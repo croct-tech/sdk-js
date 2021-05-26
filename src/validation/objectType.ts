@@ -1,5 +1,6 @@
-import {describe, formatPath, Schema, TypeSchema, Violation} from './index';
-import MixedSchema from './mixedSchema';
+import {Schema, TypeSchema, Violation} from './schema';
+import {MixedSchema} from './mixedSchema';
+import {describe, formatPath} from './violation';
 
 type ObjectDefinition = {
     type?: {new (...args: any): any},
@@ -15,7 +16,7 @@ type ObjectDefinition = {
     maxProperties: number,
 };
 
-export default class ObjectType implements TypeSchema {
+export class ObjectType implements TypeSchema {
     private readonly definition: ObjectDefinition;
 
     public constructor(schema: Partial<ObjectDefinition> = {}) {
@@ -38,6 +39,7 @@ export default class ObjectType implements TypeSchema {
         return ['object'];
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     public isValidType(value: unknown): value is object {
         if (this.definition.type !== undefined) {
             return value instanceof this.definition.type;

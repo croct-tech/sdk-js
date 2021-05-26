@@ -1,4 +1,5 @@
-import {describe, formatPath, TypeSchema, Violation} from './index';
+import {TypeSchema, Violation} from './schema';
+import {describe, formatPath} from './violation';
 
 interface Format {
     (value: string): boolean;
@@ -37,7 +38,7 @@ type StringDefinition = {
     format?: keyof typeof FORMAT,
 };
 
-export default class StringType implements TypeSchema {
+export class StringType implements TypeSchema {
     private readonly definition: StringDefinition;
 
     public constructor(definition: Partial<StringDefinition> = {}) {
