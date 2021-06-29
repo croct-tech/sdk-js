@@ -113,6 +113,7 @@ describe('A SDK', () => {
 
     test('should configure the token storage with global scope', async () => {
         const token = Token.issue(configuration.appId, 'carol');
+        const key = `croct[${configuration.appId}].token`;
 
         const sdkTabA = Sdk.init({
             ...configuration,
@@ -133,7 +134,7 @@ describe('A SDK', () => {
             new StorageEvent('storage', {
                 bubbles: false,
                 cancelable: false,
-                key: 'croct.token',
+                key: key,
                 oldValue: null,
                 newValue: token.toString(),
                 storageArea: localStorage,
@@ -151,7 +152,7 @@ describe('A SDK', () => {
             new StorageEvent('storage', {
                 bubbles: false,
                 cancelable: false,
-                key: 'croct.token',
+                key: key,
                 oldValue: token.toString(),
                 newValue: null,
                 storageArea: localStorage,

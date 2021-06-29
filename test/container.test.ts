@@ -102,13 +102,15 @@ test('should configure the event manager to notify about token changes', () => {
     // Then simulate switching an account from another tab
     const thirdToken = Token.issue(configuration.appId, '3r1ck');
 
-    localStorage.setItem('croct.token', thirdToken.toString());
+    const key = `croct[${configuration.appId}].token`;
+
+    localStorage.setItem(key, thirdToken.toString());
 
     window.dispatchEvent(
         new StorageEvent('storage', {
             bubbles: false,
             cancelable: false,
-            key: 'croct.token',
+            key: key,
             oldValue: secondToken.toString(),
             newValue: thirdToken.toString(),
             storageArea: localStorage,

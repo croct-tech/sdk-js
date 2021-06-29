@@ -130,8 +130,10 @@ export class Container {
     }
 
     private createContext(): Context {
+        const tokenKey = this.resolveStorageNamespace('token');
+        const tabKey = this.resolveStorageNamespace('tab');
         const browserStorage = this.getLocalStorage();
-        const browserCache = new LocalStorageCache(browserStorage, 'croct.token');
+        const browserCache = new LocalStorageCache(browserStorage, tokenKey);
         const tabStorage = this.getSessionStorage();
 
         this.removeTokenSyncListener = LocalStorageCache.autoSync(browserCache);
@@ -141,8 +143,8 @@ export class Container {
             eventDispatcher: this.getEventManager(),
             urlSanitizer: this.configuration.urlSanitizer,
             cache: {
-                tabId: new LocalStorageCache(tabStorage, 'croct.tab'),
-                tabToken: new LocalStorageCache(tabStorage, 'croct.token'),
+                tabId: new LocalStorageCache(tabStorage, tabKey),
+                tabToken: new LocalStorageCache(tabStorage, tokenKey),
                 browserToken: browserCache,
             },
         });
