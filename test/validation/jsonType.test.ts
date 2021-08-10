@@ -1,4 +1,4 @@
-import {JsonArrayType, JsonObjectType, JsonPrimitiveType, JsonType} from '../../src/validation';
+import {JsonArrayType, JsonObjectType, JsonPrimitiveType, JsonType, StringType} from '../../src/validation';
 
 describe('A JSON array type', () => {
     test('should the allowed type', () => {
@@ -57,6 +57,24 @@ describe('A JSON array type', () => {
 describe('A JSON object type', () => {
     test('should provide the allowed type', () => {
         expect(new JsonObjectType().getTypes()).toEqual(['object']);
+    });
+
+    test('should determine whether the keys are valid if property names schema is provided', () => {
+        const objectType = new JsonObjectType({
+            propertyNames: new StringType({maxLength: 3}),
+        });
+
+        function validateValidValue(): void {
+            objectType.validate({foo: 'bar'});
+        }
+
+        function validateInvalidValue(): void {
+            objectType.validate({foobar: 'baz'});
+        }
+
+        expect(validateValidValue).not.toThrowError();
+        expect(validateInvalidValue).toThrow(Error);
+        expect(validateInvalidValue).toThrow('Expected at most 3 characters at path \'/foobar\', actual 6.');
     });
 
     test.each([

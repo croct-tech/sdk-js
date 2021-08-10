@@ -1,4 +1,5 @@
 import {StringType, ObjectType, UnionType, BooleanType, NullType, NumberType, ArrayType} from '../validation';
+import {attributeNameSchema} from './attributeSchema';
 
 export const userProfileSchema = new ObjectType({
     properties: {
@@ -91,10 +92,7 @@ export const userProfileSchema = new ObjectType({
             }),
         }),
         custom: new ObjectType({
-            propertyNames: new StringType({
-                maxLength: 50,
-                format: 'identifier',
-            }),
+            propertyNames: attributeNameSchema,
             maxProperties: 10,
             additionalProperties: new UnionType(
                 new BooleanType(),
@@ -124,10 +122,7 @@ export const userProfileSchema = new ObjectType({
                             ),
                         }),
                         new ObjectType({
-                            propertyNames: new StringType({
-                                maxLength: 50,
-                                format: 'identifier',
-                            }),
+                            propertyNames: attributeNameSchema,
                             maxProperties: 10,
                             additionalProperties: new UnionType(
                                 new BooleanType(),
@@ -141,10 +136,7 @@ export const userProfileSchema = new ObjectType({
                     ),
                 }),
                 new ObjectType({
-                    propertyNames: new StringType({
-                        maxLength: 50,
-                        format: 'identifier',
-                    }),
+                    propertyNames: attributeNameSchema,
                     maxProperties: 10,
                     additionalProperties: new UnionType(
                         new BooleanType(),
@@ -165,10 +157,7 @@ export const userProfileSchema = new ObjectType({
                             ),
                         }),
                         new ObjectType({
-                            propertyNames: new StringType({
-                                maxLength: 50,
-                                format: 'identifier',
-                            }),
+                            propertyNames: attributeNameSchema,
                             maxProperties: 10,
                             additionalProperties: new UnionType(
                                 new BooleanType(),

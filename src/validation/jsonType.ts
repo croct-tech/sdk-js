@@ -25,6 +25,7 @@ function isPlainObject(value: unknown): value is object {
 
 type JsonObjectDefinition = {
     properties?: Schema,
+    propertyNames?: Schema,
 };
 
 export class JsonObjectType implements TypeSchema {
@@ -51,12 +52,20 @@ export class JsonObjectType implements TypeSchema {
             );
         }
 
-        if (this.definition.properties === undefined) {
+        if (this.definition.properties === undefined && this.definition.propertyNames === undefined) {
             return;
         }
 
         for (const [entryName, entryValue] of Object.entries(value)) {
-            this.definition.properties.validate(entryValue, path.concat([entryName]));
+            const propertyPath = path.concat([entryName]);
+
+            if (this.definition.propertyNames !== undefined) {
+                this.definition.propertyNames.validate(entryName, propertyPath);
+            }
+
+            if (this.definition.properties !== undefined) {
+                this.definition.properties.validate(entryValue, path.concat([entryName]));
+            }
         }
     }
 }
