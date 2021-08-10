@@ -53,6 +53,14 @@ describe('An add operation schema', () => {
             'Expected a JSON primitive at path \'/value/0\', actual array.',
         ],
         [
+            {'0map': 'foo'},
+            'Invalid identifier format at path \'/value/0map\'.',
+        ],
+        [
+            {map: {'0map': 'foo'}},
+            'Invalid identifier format at path \'/value/map/0map\'.',
+        ],
+        [
             {map: {map: {foo: 1}}},
             'Expected a JSON primitive at path \'/value/map/map\', actual Object.',
         ],
@@ -105,6 +113,14 @@ describe('A set operation schema', () => {
         [
             [['foo']],
             'Expected a JSON primitive at path \'/value/0\', actual array.',
+        ],
+        [
+            {'0map': 'foo'},
+            'Invalid identifier format at path \'/value/0map\'.',
+        ],
+        [
+            {map: {'0map': 'foo'}},
+            'Invalid identifier format at path \'/value/map/0map\'.',
         ],
         [
             {map: {map: {foo: 1}}},
@@ -161,6 +177,14 @@ describe('A combine operation schema', () => {
             'Expected a JSON primitive at path \'/value/0\', actual array.',
         ],
         [
+            {'0map': 'foo'},
+            'Invalid identifier format at path \'/value/0map\'.',
+        ],
+        [
+            {map: {'0map': 'foo'}},
+            'Invalid identifier format at path \'/value/map/0map\'.',
+        ],
+        [
             {map: {map: {foo: 1}}},
             'Expected a JSON primitive at path \'/value/map/map\', actual Object.',
         ],
@@ -213,6 +237,14 @@ describe('A merge operation schema', () => {
         [
             [['foo']],
             'Expected a JSON primitive at path \'/value/0\', actual array.',
+        ],
+        [
+            {'0map': 'foo'},
+            'Invalid identifier format at path \'/value/0map\'.',
+        ],
+        [
+            {map: {'0map': 'foo'}},
+            'Invalid identifier format at path \'/value/map/0map\'.',
         ],
         [
             {map: {map: {foo: 1}}},

@@ -7,6 +7,7 @@ import {
     JsonPrimitiveType,
     UnionType,
 } from '../validation';
+import {attributeNameSchema} from './attributeSchema';
 
 const pointer = new StringType({
     format: 'pointer',
@@ -18,10 +19,12 @@ const simpleArray = new JsonArrayType({
 
 const simpleMap = new JsonObjectType({
     properties: new JsonPrimitiveType(),
+    propertyNames: attributeNameSchema,
 });
 
 const complexMap = new JsonObjectType({
     properties: new UnionType(new JsonPrimitiveType(), simpleArray, simpleMap),
+    propertyNames: attributeNameSchema,
 });
 
 const collectionValue = new UnionType(simpleArray, complexMap);
