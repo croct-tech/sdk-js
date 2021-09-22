@@ -52,20 +52,6 @@ export const userSignedUp = new ObjectType({
     },
 });
 
-export const testGroupAssigned = new ObjectType({
-    required: ['testId', 'groupId'],
-    properties: {
-        testId: new StringType({
-            minLength: 1,
-            maxLength: 50,
-        }),
-        groupId: new StringType({
-            minLength: 1,
-            maxLength: 50,
-        }),
-    },
-});
-
 export const goalCompleted = new ObjectType({
     required: ['goalId'],
     properties: {

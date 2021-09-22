@@ -6,7 +6,6 @@ import {
     orderPlaced,
     productViewed,
     userSignedUp,
-    testGroupAssigned,
     eventOccurred,
     goalCompleted,
 } from '../../src/schema';
@@ -189,67 +188,6 @@ describe('The "userSignedUp" payload schema', () => {
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             userSignedUp.validate(value);
-        }
-
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
-    });
-});
-
-describe('The "testGroupAssigned" payload schema', () => {
-    test('should allow %s', () => {
-        const value = {
-            testId: 'foo',
-            groupId: 'bar',
-        };
-
-        function validate(): void {
-            testGroupAssigned.validate(value);
-        }
-
-        expect(validate).not.toThrow(Error);
-    });
-
-    test.each([
-        [
-            {},
-            'Missing property \'/testId\'.',
-        ],
-        [
-            {groupId: 'bar'},
-            'Missing property \'/testId\'.',
-        ],
-        [
-            {testId: 'foo'},
-            'Missing property \'/groupId\'.',
-        ],
-        [
-            {testId: '', groupId: 'bar'},
-            'Expected at least 1 character at path \'/testId\', actual 0.',
-        ],
-        [
-            {testId: 'foo', groupId: ''},
-            'Expected at least 1 character at path \'/groupId\', actual 0.',
-        ],
-        [
-            {testId: 'x'.repeat(51), groupId: 'bar'},
-            'Expected at most 50 characters at path \'/testId\', actual 51.',
-        ],
-        [
-            {testId: 'foo', groupId: 'x'.repeat(51)},
-            'Expected at most 50 characters at path \'/groupId\', actual 51.',
-        ],
-        [
-            {testId: null, groupId: 'bar'},
-            'Expected value of type string at path \'/testId\', actual null.',
-        ],
-        [
-            {testId: 'foo', groupId: null},
-            'Expected value of type string at path \'/groupId\', actual null.',
-        ],
-    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
-        function validate(): void {
-            testGroupAssigned.validate(value);
         }
 
         expect(validate).toThrow(Error);
