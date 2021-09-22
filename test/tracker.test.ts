@@ -1122,6 +1122,24 @@ describe('A tracker', () => {
             },
             undefined,
         ],
+        [
+            {
+                type: 'interestShown',
+                interests: ['foo'],
+            },
+            undefined,
+        ],
+        [
+            {
+                type: 'postViewed',
+                post: {
+                    postId: 'post-id',
+                    title: 'post-title',
+                    publishTime: now,
+                },
+            },
+            undefined,
+        ],
     ])('can track event %#', async (partialEvent: PartialTrackingEvent, beaconPayload?: BeaconPayload) => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),

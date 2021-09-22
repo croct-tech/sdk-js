@@ -112,6 +112,8 @@ export const miscEventTypes = [
     'sessionAttributesChanged',
     'testGroupAssigned',
     'goalCompleted',
+    'interestShown',
+    'postViewed',
     'eventOccurred',
 ] as const;
 
@@ -305,6 +307,27 @@ export interface GoalCompleted extends BaseEvent {
     currency?: string;
 }
 
+export interface InterestShown extends BaseEvent {
+    type: 'interestShown';
+    interests: string[];
+}
+
+export interface PostDetails {
+    postId: string;
+    url?: string;
+    title: string;
+    tags?: string[];
+    categories?: string[];
+    authors?: string[];
+    publishTime: number;
+    updateTime?: number;
+}
+
+export interface PostViewed extends BaseEvent {
+    type: 'postViewed';
+    post: PostDetails;
+}
+
 export interface EventOccurred extends BaseEvent {
     type: 'eventOccurred';
     name: string;
@@ -320,7 +343,9 @@ export type MiscEvent =
     | SessionAttributesChanged
     | TestGroupAssigned
     | EventOccurred
-    | GoalCompleted;
+    | GoalCompleted
+    | InterestShown
+    | PostViewed;
 
 type EventMap = {
     // Tab events
@@ -346,6 +371,8 @@ type EventMap = {
     sessionAttributesChanged: SessionAttributesChanged,
     testGroupAssigned: TestGroupAssigned,
     goalCompleted: GoalCompleted,
+    interestShown: InterestShown,
+    postViewed: PostViewed,
     eventOccurred: EventOccurred,
 };
 
@@ -376,6 +403,8 @@ type ExternalEventMap = {
     userSignedUp: UserSignedUp,
     testGroupAssigned: TestGroupAssigned,
     goalCompleted: GoalCompleted,
+    interestShown: InterestShown,
+    postViewed: PostViewed,
     eventOccurred: EventOccurred,
 };
 
