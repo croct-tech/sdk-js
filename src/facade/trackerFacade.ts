@@ -13,7 +13,6 @@ import {
     goalCompleted,
     orderPlaced,
     productViewed,
-    testGroupAssigned,
     userSignedUp,
 } from '../schema';
 
@@ -24,7 +23,6 @@ const eventSchemas = {
     orderPlaced,
     productViewed,
     userSignedUp,
-    testGroupAssigned,
     eventOccurred,
     goalCompleted,
 };
