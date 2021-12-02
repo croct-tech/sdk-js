@@ -1093,14 +1093,6 @@ describe('A tracker', () => {
         ],
         [
             {
-                type: 'testGroupAssigned',
-                testId: 'foo',
-                groupId: 'bar',
-            },
-            undefined,
-        ],
-        [
-            {
                 type: 'eventOccurred',
                 name: 'event-name',
                 personalizationId: 'foo',

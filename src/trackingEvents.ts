@@ -110,7 +110,6 @@ export const userEventTypes = [
 export const miscEventTypes = [
     'nothingChanged',
     'sessionAttributesChanged',
-    'testGroupAssigned',
     'goalCompleted',
     'interestShown',
     'postViewed',
@@ -294,12 +293,6 @@ export interface SessionAttributesChanged extends BaseEvent {
     patch: Patch;
 }
 
-export interface TestGroupAssigned extends BaseEvent {
-    type: 'testGroupAssigned';
-    testId: string;
-    groupId: string;
-}
-
 export interface GoalCompleted extends BaseEvent {
     type: 'goalCompleted';
     goalId: string;
@@ -341,7 +334,6 @@ export interface EventOccurred extends BaseEvent {
 export type MiscEvent =
       NothingChanged
     | SessionAttributesChanged
-    | TestGroupAssigned
     | EventOccurred
     | GoalCompleted
     | InterestShown
@@ -369,7 +361,6 @@ type EventMap = {
     // Misc events
     nothingChanged: NothingChanged,
     sessionAttributesChanged: SessionAttributesChanged,
-    testGroupAssigned: TestGroupAssigned,
     goalCompleted: GoalCompleted,
     interestShown: InterestShown,
     postViewed: PostViewed,
@@ -401,7 +392,6 @@ type ExternalEventMap = {
     orderPlaced: OrderPlaced,
     productViewed: ProductViewed,
     userSignedUp: UserSignedUp,
-    testGroupAssigned: TestGroupAssigned,
     goalCompleted: GoalCompleted,
     interestShown: InterestShown,
     postViewed: PostViewed,
