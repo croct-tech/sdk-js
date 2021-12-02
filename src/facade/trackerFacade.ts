@@ -11,6 +11,8 @@ import {
     checkoutStarted,
     eventOccurred,
     goalCompleted,
+    interestShown,
+    postViewed,
     orderPlaced,
     productViewed,
     userSignedUp,
@@ -24,6 +26,8 @@ const eventSchemas = {
     productViewed,
     userSignedUp,
     eventOccurred,
+    interestShown,
+    postViewed,
     goalCompleted,
 };
 

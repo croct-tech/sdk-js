@@ -8,6 +8,8 @@ import {
     userSignedUp,
     eventOccurred,
     goalCompleted,
+    interestShown,
+    postViewed,
 } from '../../src/schema';
 import {Optional} from '../../src/utilityTypes';
 
@@ -397,6 +399,89 @@ describe('The "goalCompleted" payload schema', () => {
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             goalCompleted.validate(value);
+        }
+
+        expect(validate).toThrow(Error);
+        expect(validate).toThrow(message);
+    });
+});
+
+describe('The "interestShown" payload schema', () => {
+    test.each([
+        [{
+            interests: ['foo'],
+        }],
+        [{
+            interests: new Array(10).fill('x'),
+        }],
+    ])('should allow %s', (value: Record<string, unknown>) => {
+        function validate(): void {
+            interestShown.validate(value);
+        }
+
+        expect(validate).not.toThrow(Error);
+    });
+
+    test.each([
+        [
+            {},
+            'Missing property \'/interests\'.',
+        ],
+        [
+            {interests: [null]},
+            'Expected value of type string at path \'/interests/0\', actual null.',
+        ],
+        [
+            {interests: ['']},
+            'Expected at least 1 character at path \'/interests/0\', actual 0.',
+        ],
+        [
+            {interests: ['x'.repeat(51)]},
+            'Expected at most 50 characters at path \'/interests/0\', actual 51.',
+        ],
+        [
+            {interests: new Array(11).fill('x')},
+            'Expected at most 10 items at path \'/interests\', actual 11.',
+        ],
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
+        function validate(): void {
+            interestShown.validate(value);
+        }
+
+        expect(validate).toThrow(Error);
+        expect(validate).toThrow(message);
+    });
+});
+
+describe('The "postViewed" payload schema', () => {
+    test.each([
+        [{
+            post: {
+                postId: 'post-id',
+                title: 'post-title',
+                publishTime: 0,
+            },
+        }],
+    ])('should allow %s', (value: Record<string, unknown>) => {
+        function validate(): void {
+            postViewed.validate(value);
+        }
+
+        expect(validate).not.toThrow(Error);
+    });
+
+    test.each([
+        [
+            {},
+            'Missing property \'/post\'.',
+        ],
+        [
+            {post: null},
+            'Expected value of type object at path \'/post\', actual null.',
+        ],
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
+        function validate(): void {
+            postViewed.validate(value);
         }
 
         expect(validate).toThrow(Error);
