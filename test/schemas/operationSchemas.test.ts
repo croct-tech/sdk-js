@@ -82,9 +82,12 @@ describe('An add operation schema', () => {
         expect(validate).toThrow(message);
     });
 
-    test('should fail if path is invalid', () => {
+    test.each([
+        ['foo.'],
+        [''],
+    ])('should fail if path is invalid', (path: string) => {
         function validate(): void {
-            addOperation.validate({path: 'foo.', value: 'bar'});
+            addOperation.validate({path: path, value: 'bar'});
         }
 
         expect(validate).toThrow(Error);
@@ -144,9 +147,12 @@ describe('A set operation schema', () => {
         expect(validate).toThrow(message);
     });
 
-    test('should fail if path is invalid', () => {
+    test.each([
+        ['foo.'],
+        [''],
+    ])('should fail if path is invalid', (path: string) => {
         function validate(): void {
-            setOperation.validate({path: 'foo.', value: 'bar'});
+            setOperation.validate({path: path, value: 'bar'});
         }
 
         expect(validate).toThrow(Error);
@@ -206,9 +212,12 @@ describe('A combine operation schema', () => {
         expect(validate).toThrow(message);
     });
 
-    test('should fail if path is invalid', () => {
+    test.each([
+        ['foo.'],
+        [''],
+    ])('should fail if path is invalid', (path: string) => {
         function validate(): void {
-            combineOperation.validate({path: 'foo.', value: 'bar'});
+            combineOperation.validate({path: path, value: 'bar'});
         }
 
         expect(validate).toThrow(Error);
@@ -265,9 +274,12 @@ describe('A merge operation schema', () => {
         expect(validate).toThrow(message);
     });
 
-    test('should fail if path is invalid', () => {
+    test.each([
+        ['foo.'],
+        [''],
+    ])('should fail if path is invalid', (path: string) => {
         function validate(): void {
-            mergeOperation.validate({path: 'foo.', value: 'bar'});
+            mergeOperation.validate({path: path, value: 'bar'});
         }
 
         expect(validate).toThrow(Error);
@@ -304,9 +316,12 @@ describe('An increment operation schema', () => {
         expect(validate).toThrow(message);
     });
 
-    test('should fail if path is invalid', () => {
+    test.each([
+        ['foo.'],
+        [''],
+    ])('should fail if path is invalid', (path: string) => {
         function validate(): void {
-            incrementOperation.validate({path: 'foo.', value: 1});
+            incrementOperation.validate({path: path, value: 1});
         }
 
         expect(validate).toThrow(Error);
@@ -343,9 +358,12 @@ describe('A decrement operation schema', () => {
         expect(validate).toThrow(message);
     });
 
-    test('should fail if path is invalid', () => {
+    test.each([
+        ['foo.'],
+        [''],
+    ])('should fail if path is invalid', (path: string) => {
         function validate(): void {
-            decrementOperation.validate({path: 'foo.', value: 1});
+            decrementOperation.validate({path: path, value: 1});
         }
 
         expect(validate).toThrow(Error);
@@ -362,12 +380,50 @@ describe('A remove operation schema', () => {
         [simpleArray],
         [simpleMap],
         [complexMap],
-    ])('should remove value %s', (value: any) => {
+    ])('should allow value %s', (value: any) => {
         function validate(): void {
             removeOperation.validate({path: 'foo', value: value});
         }
 
         expect(validate).not.toThrow(Error);
+    });
+
+    test.each([
+        [
+            [['foo']],
+            'Expected a JSON primitive at path \'/value/0\', actual array.',
+        ],
+        [
+            {'0map': 'foo'},
+            'Invalid identifier format at path \'/value/0map\'.',
+        ],
+        [
+            {map: {'0map': 'foo'}},
+            'Invalid identifier format at path \'/value/map/0map\'.',
+        ],
+        [
+            {map: {map: {foo: 1}}},
+            'Expected a JSON primitive at path \'/value/map/map\', actual Object.',
+        ],
+        [
+            {map: {list: ['foo']}},
+            'Expected a JSON primitive at path \'/value/map/list\', actual array.',
+        ],
+        [
+            /not-a-json-value/,
+            'Expected value of type null, number, string, boolean, array or object at path \'/value\', actual RegExp.',
+        ],
+        [
+            undefined,
+            'Expected value of type null, number, string, boolean, array or object at path \'/value\', actual'
+            + ' undefined.',
+        ],
+    ])('should not allow value %s', (value: any, message: string) => {
+        function validate(): void {
+            removeOperation.validate({path: 'foo', value: value});
+        }
+        expect(validate).toThrow(Error);
+        expect(validate).toThrow(message);
     });
 
     test.each([
@@ -381,20 +437,15 @@ describe('A remove operation schema', () => {
         expect(validate).toThrow(Error);
         expect(validate).toThrow('Invalid pointer format at path \'/path\'.');
     });
-
-    test('should fail if value is invalid', () => {
-        function validate(): void {
-            removeOperation.validate({path: 'foo'});
-        }
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Missing property \'/value\'.');
-    });
 });
 
 describe('A clear operation schema', () => {
-    test('should fail if path is invalid', () => {
+    test.each([
+        ['foo.'],
+        [''],
+    ])('should fail if path is invalid', (path: string) => {
         function validate(): void {
-            clearOperation.validate({path: 'foo.'});
+            clearOperation.validate({path: path});
         }
 
         expect(validate).toThrow(Error);
@@ -403,9 +454,12 @@ describe('A clear operation schema', () => {
 });
 
 describe('An unset operation schema', () => {
-    test('should fail if path is invalid', () => {
+    test.each([
+        ['foo.'],
+        [''],
+    ])('should fail if path is invalid', (path: string) => {
         function validate(): void {
-            unsetOperation.validate({path: 'foo.'});
+            unsetOperation.validate({path: path});
         }
 
         expect(validate).toThrow(Error);
