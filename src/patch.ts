@@ -43,6 +43,11 @@ interface DecrementOperation extends AbstractOperation {
     value: LenientJsonValue;
 }
 
+interface removeOperation extends AbstractOperation {
+    type: 'remove';
+    value: LenientJsonValue;
+}
+
 export type Operation =
       UnsetOperation
     | ClearOperation
@@ -51,7 +56,8 @@ export type Operation =
     | CombineOperation
     | MergeOperation
     | IncrementOperation
-    | DecrementOperation;
+    | DecrementOperation
+    | removeOperation;
 
 export interface Patch {
     operations: Operation[];
