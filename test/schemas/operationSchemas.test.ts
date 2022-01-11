@@ -7,6 +7,7 @@ import {
     mergeOperation,
     setOperation,
     unsetOperation,
+    removeOperation,
 } from '../../src/schema';
 
 const simpleArray = [1, 1.2, null, 'foo', true];
@@ -349,6 +350,44 @@ describe('A decrement operation schema', () => {
 
         expect(validate).toThrow(Error);
         expect(validate).toThrow('Invalid pointer format at path \'/path\'.');
+    });
+});
+
+describe('A remove operation schema', () => {
+    test.each([
+        [1],
+        [1.5],
+        ['foo'],
+        [true],
+        [simpleArray],
+        [simpleMap],
+        [complexMap],
+    ])('should remove value %s', (value: any) => {
+        function validate(): void {
+            removeOperation.validate({path: 'foo', value: value});
+        }
+
+        expect(validate).not.toThrow(Error);
+    });
+
+    test.each([
+        ['foo.'],
+        [''],
+    ])('should fail if path is invalid', (path: string) => {
+        function validate(): void {
+            removeOperation.validate({path: path, value: 'bar'});
+        }
+
+        expect(validate).toThrow(Error);
+        expect(validate).toThrow('Invalid pointer format at path \'/path\'.');
+    });
+
+    test('should fail if value is invalid', () => {
+        function validate(): void {
+            removeOperation.validate({path: 'foo'});
+        }
+        expect(validate).toThrow(Error);
+        expect(validate).toThrow('Missing property \'/value\'.');
     });
 });
 
