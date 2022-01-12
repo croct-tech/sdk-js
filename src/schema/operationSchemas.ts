@@ -92,3 +92,11 @@ export const unsetOperation = new ObjectType({
         path: pointer,
     },
 });
+
+export const removeOperation = new ObjectType({
+    required: ['path', 'value'],
+    properties: {
+        path: pointer,
+        value: mixedValue,
+    },
+});

@@ -10,6 +10,7 @@ import {
     mergeOperation,
     setOperation,
     unsetOperation,
+    removeOperation,
 } from './schema';
 
 const operationSchema = {
@@ -21,6 +22,7 @@ const operationSchema = {
     decrement: decrementOperation,
     clear: clearOperation,
     unset: unsetOperation,
+    remove: removeOperation,
 };
 
 export abstract class ActiveRecord<T extends TrackingEvent> {
@@ -109,6 +111,14 @@ export abstract class ActiveRecord<T extends TrackingEvent> {
         return this.pushOperation({
             type: 'unset',
             path: property,
+        });
+    }
+
+    public remove(property: string, value: JsonValue): this {
+        return this.pushOperation({
+            type: 'remove',
+            path: property,
+            value: value,
         });
     }
 
