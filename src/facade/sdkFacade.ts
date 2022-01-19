@@ -18,6 +18,7 @@ export type Configuration = {
     appId: string,
     tokenScope?: TokenScope,
     debug?: boolean,
+    test?: boolean,
     track?: boolean,
     token?: string | null,
     userId?: string,
@@ -70,6 +71,7 @@ export class SdkFacade {
                 ...containerConfiguration,
                 tokenScope: containerConfiguration.tokenScope ?? 'global',
                 debug: containerConfiguration.debug ?? false,
+                test: containerConfiguration.test ?? false,
             }),
         );
 

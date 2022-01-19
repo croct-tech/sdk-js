@@ -3,7 +3,7 @@ import * as fetchMock from 'fetch-mock';
 import {Configuration, Container} from '../src/container';
 import {NullLogger, Logger} from '../src/logging';
 
-import {BeaconPayload} from '../src/trackingEvents';
+import {BeaconPayload, PartialTrackingEvent} from '../src/trackingEvents';
 import {LocalStorageCache} from '../src/cache';
 import {Token} from '../src/token';
 
@@ -23,6 +23,7 @@ const configuration: Configuration = {
     tokenScope: 'global',
     beaconQueueSize: 3,
     debug: false,
+    test: false,
     bootstrapEndpointUrl: 'https://localtest/boostrap',
     evaluationEndpointUrl: 'https://localtest/evaluate',
     trackerEndpointUrl: 'wss://localtest/connect',
@@ -165,18 +166,33 @@ test('should flush the beacon queue on initialization', async () => {
     expect(server).toReceiveMessage(expect.objectContaining({payload: payload}));
 });
 
-test('should configure a fixed CID assigner if a CID is specified', async () => {
+test.each([
+    [true],
+    [false],
+])('should configure a fixed CID assigner if a CID is specified', async (test: boolean) => {
     const cid = 'e6a133ffd3d2410681403d5e1bd95505';
 
     const container = new Container({
         ...configuration,
         cid: cid,
+        test: test,
     });
 
     const assigner = container.getCidAssigner();
 
     await expect(assigner.assignCid()).resolves.toBe(cid);
     await expect(assigner.assignCid()).resolves.toBe(cid);
+});
+
+test('should configure a fixed CID assigner in test mode', async () => {
+    const container = new Container({
+        ...configuration,
+        test: true,
+    });
+
+    const assigner = container.getCidAssigner();
+
+    await expect(assigner.assignCid()).resolves.toBe('00000000-0000-0000-0000-000000000000');
 });
 
 test('should configure the CID assigner if a CID is not specified', async () => {
@@ -192,6 +208,22 @@ test('should configure the CID assigner if a CID is not specified', async () => 
     await expect(assigner.assignCid()).resolves.toBe('123');
 
     expect(localStorage.getItem('croct.cid')).toBe('123');
+});
+
+test('should use a stub beacon channel in test mode', async () => {
+    const container = new Container({
+        ...configuration,
+        test: true,
+    });
+
+    const tracker = container.getTracker();
+
+    const event: PartialTrackingEvent = {
+        type: 'nothingChanged',
+        sinceTime: Date.now(),
+    };
+
+    await expect(tracker.track(event)).resolves.toBe(event);
 });
 
 test('should provide an isolated tab storage', () => {

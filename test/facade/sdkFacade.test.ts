@@ -77,6 +77,7 @@ describe('A SDK facade', () => {
             appId: appId,
             tokenScope: 'global',
             debug: false,
+            test: false,
         });
     });
 
@@ -93,6 +94,7 @@ describe('A SDK facade', () => {
             evaluationEndpointUrl: 'https://api.croct.io/evaluation',
             bootstrapEndpointUrl: 'https://api.croct.io/bootstrap',
             debug: false,
+            test: false,
             tokenScope: 'isolated',
             token: Token.issue(appId, 'c4r0l').toString(),
             logger: logger,
@@ -105,6 +107,7 @@ describe('A SDK facade', () => {
             evaluationEndpointUrl: 'https://api.croct.io/evaluation',
             bootstrapEndpointUrl: 'https://api.croct.io/bootstrap',
             debug: false,
+            test: false,
             tokenScope: 'isolated',
             logger: logger,
             urlSanitizer: urlSanitizer,
