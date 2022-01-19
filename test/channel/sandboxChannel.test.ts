@@ -5,22 +5,12 @@ describe('A sandbox channel', () => {
         jest.restoreAllMocks();
     });
 
-    test('should records the published messages', async () => {
+    test('should record published messages', async () => {
         const channel = new SandboxChannel<string, string>();
 
         await channel.publish('foo');
 
         expect(channel.messages).toEqual(['foo']);
-    });
-
-    test('should be closeable', async () => {
-        const channel = new SandboxChannel<string, string>();
-
-        expect(channel.isClosed()).toBe(false);
-
-        await channel.close();
-
-        expect(channel.isClosed()).toBe(true);
     });
 
     test('should notify registered listeners', async () => {
@@ -45,5 +35,15 @@ describe('A sandbox channel', () => {
         channel.notify('foo');
 
         expect(listener).toHaveBeenCalledTimes(0);
+    });
+
+    test('should be closeable', async () => {
+        const channel = new SandboxChannel<string, string>();
+
+        expect(channel.isClosed()).toBe(false);
+
+        await channel.close();
+
+        expect(channel.isClosed()).toBe(true);
     });
 });

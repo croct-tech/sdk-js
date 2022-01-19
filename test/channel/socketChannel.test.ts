@@ -71,7 +71,11 @@ describe('A socket channel', () => {
 
         const connection = await server.connected;
 
-        connection.close(1011, 'Server error');
+        connection.close({
+            code: 1011,
+            reason: 'Server error',
+            wasClean: true,
+        });
 
         await server.closed;
 
