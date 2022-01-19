@@ -1132,6 +1132,13 @@ describe('A tracker', () => {
             },
             undefined,
         ],
+        [
+            {
+                type: 'linkOpened',
+                link: 'http://www.foo.com.br',
+            },
+            undefined,
+        ],
     ])('can track event %#', async (partialEvent: PartialTrackingEvent, beaconPayload?: BeaconPayload) => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),
