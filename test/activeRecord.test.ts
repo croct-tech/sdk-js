@@ -32,6 +32,7 @@ describe('An active record', () => {
             .decrement('f', 6)
             .clear('g')
             .unset('h')
+            .remove('i', 1)
             .buildPatch();
 
         const operations: Patch = {
@@ -83,6 +84,11 @@ describe('An active record', () => {
                 {
                     type: 'unset',
                     path: 'h',
+                },
+                {
+                    type: 'remove',
+                    path: 'i',
+                    value: 1,
                 },
             ],
         };
