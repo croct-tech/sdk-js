@@ -114,6 +114,7 @@ export const miscEventTypes = [
     'interestShown',
     'postViewed',
     'eventOccurred',
+    'linkOpened',
 ] as const;
 
 export const eventTypes = [
@@ -331,13 +332,19 @@ export interface EventOccurred extends BaseEvent {
     details?: {[key: string]: string|number|boolean|null};
 }
 
+export interface LinkOpened extends BaseEvent {
+    type: 'linkOpened';
+    link: string;
+}
+
 export type MiscEvent =
       NothingChanged
     | SessionAttributesChanged
     | EventOccurred
     | GoalCompleted
     | InterestShown
-    | PostViewed;
+    | PostViewed
+    | LinkOpened;
 
 type EventMap = {
     // Tab events
@@ -365,6 +372,7 @@ type EventMap = {
     interestShown: InterestShown,
     postViewed: PostViewed,
     eventOccurred: EventOccurred,
+    linkOpened: LinkOpened,
 };
 
 export type TrackingEventType = keyof EventMap;
@@ -395,6 +403,7 @@ type ExternalEventMap = {
     goalCompleted: GoalCompleted,
     interestShown: InterestShown,
     postViewed: PostViewed,
+    linkOpened: LinkOpened,
     eventOccurred: EventOccurred,
 };
 
