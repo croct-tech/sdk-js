@@ -512,10 +512,6 @@ describe('The "linkOpened" payload schema', () => {
             {link: null},
             'Expected value of type string at path \'/link\', actual null.',
         ],
-        [
-            {link: ''},
-            'Invalid url format at path \'/link\'.',
-        ],
     ])('shout not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             linkOpened.validate(value);
