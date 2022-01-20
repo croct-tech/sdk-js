@@ -28,6 +28,15 @@ const FORMAT: {[key: string]: Format} = {
 
         return true;
     },
+    uri: function uri(value: string): boolean {
+        try {
+            // eslint-disable-next-line no-new
+            new URL(value, 'http://any.thing');
+        } catch {
+            return false;
+        }
+        return true;
+    },
 };
 
 type StringDefinition = {
