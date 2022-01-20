@@ -82,6 +82,7 @@ describe('The SDK configuration schema', () => {
             bootstrapEndpointUrl: 'http://www.baz.com',
             beaconQueueSize: 1,
             debug: true,
+            test: true,
             logger: {
                 debug: jest.fn(),
                 info: jest.fn(),
@@ -114,6 +115,10 @@ describe('The SDK configuration schema', () => {
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', debug: 'foo'},
             "Expected value of type boolean at path '/debug', actual string.",
+        ],
+        [
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', test: 'foo'},
+            "Expected value of type boolean at path '/test', actual string.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', trackerEndpointUrl: 'foo'},

@@ -26,6 +26,7 @@ describe('The SDK facade configuration schema', () => {
             userId: 'c4r0l',
             token: 'a.b.c',
             debug: true,
+            test: true,
             track: true,
             logger: {
                 debug: jest.fn(),
@@ -86,6 +87,10 @@ describe('The SDK facade configuration schema', () => {
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', debug: 'foo'},
             "Expected value of type boolean at path '/debug', actual string.",
+        ],
+        [
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', test: 'foo'},
+            "Expected value of type boolean at path '/test', actual string.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', track: 'foo'},

@@ -15,6 +15,7 @@ export type Configuration = {
     appId: string,
     tokenScope: TokenScope,
     debug: boolean,
+    test: boolean,
     cid?: string,
     trackerEndpointUrl?: string,
     evaluationEndpointUrl?: string,
@@ -91,6 +92,7 @@ export class Sdk {
         logger.debug(`${tab.isNew ? 'New' : 'Current'} tab: ${tab.id}`);
         logger.debug(`Token scope: ${tokenScope}`);
         logger.debug(`Current user: ${user !== null ? user : 'anonymous'}`);
+        logger.debug(`Test mode: ${containerConfiguration.test}`);
         logger.info('⚡ Croct SDK is ready!');
 
         return new Sdk(container);

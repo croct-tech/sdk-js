@@ -38,6 +38,7 @@ export const sdkConfigurationSchema = new ObjectType({
             integer: true,
         }),
         debug: new BooleanType(),
+        test: new BooleanType(),
         logger: loggerSchema,
         urlSanitizer: new FunctionType(),
         eventMetadata: eventMetadataSchema,
