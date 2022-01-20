@@ -22,6 +22,7 @@ import {
     EncodedChannel,
     BeaconSocketChannel,
     SocketChannel,
+    SandboxChannel,
 } from './channel';
 
 export type Configuration = {
@@ -29,6 +30,7 @@ export type Configuration = {
     tokenScope: TokenScope,
     cid?: string,
     debug: boolean,
+    test: boolean,
     trackerEndpointUrl: string,
     evaluationEndpointUrl: string,
     bootstrapEndpointUrl: string,
@@ -159,6 +161,10 @@ export class Container {
     }
 
     private createBeaconChannel(): OutputChannel<Beacon> {
+        if (this.configuration.test) {
+            return new SandboxChannel();
+        }
+
         const channelLogger = this.getLogger('BeaconChannel');
         const {appId, trackerEndpointUrl} = this.configuration;
 
@@ -208,6 +214,10 @@ export class Container {
     private createCidAssigner(): CidAssigner {
         if (this.configuration.cid !== undefined) {
             return new FixedAssigner(this.configuration.cid);
+        }
+
+        if (this.configuration.test) {
+            return new FixedAssigner('00000000-0000-0000-0000-000000000000');
         }
 
         const logger = this.getLogger('CidAssigner');

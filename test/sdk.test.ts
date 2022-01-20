@@ -19,6 +19,7 @@ describe('A SDK', () => {
         tokenScope: 'global',
         beaconQueueSize: 3,
         debug: true,
+        test: false,
         logger: new NullLogger(),
         urlSanitizer: jest.fn().mockImplementation((url: string) => new URL(url)),
         eventMetadata: {},

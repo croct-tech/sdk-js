@@ -14,6 +14,7 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
         }),
         tokenScope: tokenScopeSchema,
         debug: new BooleanType(),
+        test: new BooleanType(),
         track: new BooleanType(),
         logger: loggerSchema,
         urlSanitizer: new FunctionType(),
