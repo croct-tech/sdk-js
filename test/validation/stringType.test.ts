@@ -22,6 +22,7 @@ describe('A string type', () => {
         ['bd70aced-f238-4a06-b49d-0c96fe10c4f8', 'uuid'],
         ['2015-08-31', 'date'],
         ['http://www.foo.com.br', 'url'],
+        ['foo://example.com:3000/path?here=there#fragment', 'uri'],
         ['_', 'identifier'],
         ['a', 'identifier'],
         ['A', 'identifier'],
@@ -56,6 +57,7 @@ describe('A string type', () => {
         ['2015-08', 'date'],
         ['08-31', 'date'],
         ['foo.com', 'url'],
+        ['<', 'url'],
         ['', 'identifier'],
         ['@foo', 'identifier'],
         ['a@#$', 'identifier'],
@@ -96,6 +98,7 @@ describe('A string type', () => {
         ['bd70aced-f238-4a06-b49d-0c96fe10c4f8', new StringType({format: 'uuid'})],
         ['2015-08-31', new StringType({format: 'date'})],
         ['http://www.foo.com.br', new StringType({format: 'url'})],
+        ['foo://example.com:3000/path?key=value#fragment', new StringType({format: 'uri'})],
     ])('should allow %s with %o', (value: string, type: StringType) => {
         function validate(): void {
             type.validate(value);
