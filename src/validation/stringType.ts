@@ -6,7 +6,7 @@ interface Format {
 }
 
 const FORMAT: {[key: string]: Format} = {
-    pointer: function identifier(value: string): boolean {
+    pointer: function pointer(value: string): boolean {
         return /^(\.|([a-zA-Z_][a-zA-Z0-9_]*|\[[0-9]+])(\.[a-zA-Z_][a-zA-Z0-9_]*|\[[0-9]+])*)$/.test(value);
     },
     identifier: function identifier(value: string): boolean {
@@ -18,7 +18,7 @@ const FORMAT: {[key: string]: Format} = {
     date: function date(value: string): boolean {
         return /^(\d\d\d\d)-(\d\d)-(\d\d)$/.test(value);
     },
-    url: function date(value: string): boolean {
+    url: function url(value: string): boolean {
         try {
             // eslint-disable-next-line no-new
             new URL(value);
