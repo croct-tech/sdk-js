@@ -95,7 +95,7 @@ export const linkOpened = new ObjectType({
     required: ['link'],
     properties: {
         link: new StringType({
-            format: 'url',
+            format: 'uri',
         }),
     },
 });
