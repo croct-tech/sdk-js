@@ -22,6 +22,8 @@ describe('A string type', () => {
         ['bd70aced-f238-4a06-b49d-0c96fe10c4f8', 'uuid'],
         ['2015-08-31', 'date'],
         ['http://www.foo.com.br', 'url'],
+        ['foo://example.com:3000/path?here=there#fragment', 'url'],
+        ['http://www.foo.com.br', 'uri'],
         ['foo://example.com:3000/path?here=there#fragment', 'uri'],
         ['_', 'identifier'],
         ['a', 'identifier'],
