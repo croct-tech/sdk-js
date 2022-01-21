@@ -35,6 +35,7 @@ const FORMAT: {[key: string]: Format} = {
         } catch {
             return false;
         }
+
         return true;
     },
 };
