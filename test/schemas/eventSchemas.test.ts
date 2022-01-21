@@ -495,6 +495,9 @@ describe('The "linkOpened" payload schema', () => {
         [{
             link: 'http://www.foo.com.br',
         }],
+        [{
+            link: '/foo',
+        }],
     ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             linkOpened.validate(value);
