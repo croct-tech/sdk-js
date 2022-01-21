@@ -30,6 +30,7 @@ const FORMAT: {[key: string]: Format} = {
     },
     uri: function uri(value: string): boolean {
         try {
+            // This simplistic approach covers the most common cases without inflating the library with an RFC 3986-compliant parser.
             // eslint-disable-next-line no-new
             new URL(value, 'http://any.thing');
         } catch {
