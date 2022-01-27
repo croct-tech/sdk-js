@@ -10,6 +10,7 @@ import {
     goalCompleted,
     interestShown,
     postViewed,
+    linkOpened,
 } from '../../src/schema';
 import {Optional} from '../../src/utilityTypes';
 
@@ -482,6 +483,41 @@ describe('The "postViewed" payload schema', () => {
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             postViewed.validate(value);
+        }
+
+        expect(validate).toThrow(Error);
+        expect(validate).toThrow(message);
+    });
+});
+
+describe('The "linkOpened" payload schema', () => {
+    test.each([
+        [{
+            link: 'http://www.foo.com.br',
+        }],
+        [{
+            link: '/foo',
+        }],
+    ])('should allow %s', (value: Record<string, unknown>) => {
+        function validate(): void {
+            linkOpened.validate(value);
+        }
+
+        expect(validate).not.toThrow(Error);
+    });
+
+    test.each([
+        [
+            {},
+            'Missing property \'/link\'.',
+        ],
+        [
+            {link: null},
+            'Expected value of type string at path \'/link\', actual null.',
+        ],
+    ])('shout not allow %s', (value: Record<string, unknown>, message: string) => {
+        function validate(): void {
+            linkOpened.validate(value);
         }
 
         expect(validate).toThrow(Error);
