@@ -255,6 +255,12 @@ describe('A tracker facade', () => {
                 },
             },
         ],
+        [
+            {
+                type: 'linkOpened',
+                link: 'http://www.foo.com.br',
+            },
+        ],
     ])('should track events', (event: ExternalEvent) => {
         const tracker = createTrackerMock();
         tracker.track = jest.fn();

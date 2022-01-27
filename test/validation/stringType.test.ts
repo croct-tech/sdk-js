@@ -21,7 +21,11 @@ describe('A string type', () => {
     test.each([
         ['bd70aced-f238-4a06-b49d-0c96fe10c4f8', 'uuid'],
         ['2015-08-31', 'date'],
+        ['foo://example.com:3000/path?here=there#fragment', 'url'],
         ['http://www.foo.com.br', 'url'],
+        ['foo://example.com:3000/path?here=there#fragment', 'uri-reference'],
+        ['http://www.foo.com.br', 'uri-reference'],
+        ['/foo', 'uri-reference'],
         ['_', 'identifier'],
         ['a', 'identifier'],
         ['A', 'identifier'],
@@ -56,6 +60,8 @@ describe('A string type', () => {
         ['2015-08', 'date'],
         ['08-31', 'date'],
         ['foo.com', 'url'],
+        ['/foo', 'url'],
+        ['<', 'url'],
         ['', 'identifier'],
         ['@foo', 'identifier'],
         ['a@#$', 'identifier'],
@@ -96,6 +102,10 @@ describe('A string type', () => {
         ['bd70aced-f238-4a06-b49d-0c96fe10c4f8', new StringType({format: 'uuid'})],
         ['2015-08-31', new StringType({format: 'date'})],
         ['http://www.foo.com.br', new StringType({format: 'url'})],
+        ['foo://example.com:3000/path?key=value#fragment', new StringType({format: 'url'})],
+        ['foo://example.com:3000/path?key=value#fragment', new StringType({format: 'uri-reference'})],
+        ['http://www.foo.com.br', new StringType({format: 'uri-reference'})],
+        ['/foo', new StringType({format: 'uri-reference'})],
     ])('should allow %s with %o', (value: string, type: StringType) => {
         function validate(): void {
             type.validate(value);
@@ -118,7 +128,10 @@ describe('A string type', () => {
             "Unexpected value at path '/', expecting 'a' or 'b', found 'c'.",
         ],
         ['bar', new StringType({pattern: /fo+/}), "Invalid format at path '/'."],
+        ['foo.com', new StringType({format: 'url'}), "Invalid url format at path '/'."],
         ['foo', new StringType({format: 'url'}), "Invalid url format at path '/'."],
+        ['/foo', new StringType({format: 'url'}), "Invalid url format at path '/'."],
+        ['<', new StringType({format: 'url'}), "Invalid url format at path '/'."],
     ])('should not allow %s with %o', (value: any, type: StringType, message: string) => {
         function validate(): void {
             type.validate(value);

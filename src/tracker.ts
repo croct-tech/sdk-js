@@ -406,7 +406,7 @@ export class Tracker {
             timestamp: timestamp,
             ...(token !== null ? {token: token.toString()} : {}),
             context: context,
-            payload: this.createBeaconPayload(event),
+            payload: this.enrichBeaconPayload(this.createBeaconPayload(event)),
         };
     }
 
@@ -439,5 +439,18 @@ export class Tracker {
             ...payload,
             externalUserId: userId,
         };
+    }
+
+    private enrichBeaconPayload(event: BeaconPayload): BeaconPayload {
+        switch (event.type) {
+            case 'linkOpened':
+                return {
+                    ...event,
+                    link: new URL(event.link, this.tab.url).toString(),
+                };
+
+            default:
+                return event;
+        }
     }
 }

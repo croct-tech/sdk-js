@@ -16,6 +16,7 @@ import {
     orderPlaced,
     productViewed,
     userSignedUp,
+    linkOpened,
 } from '../schema';
 
 const eventSchemas = {
@@ -29,6 +30,7 @@ const eventSchemas = {
     interestShown,
     postViewed,
     goalCompleted,
+    linkOpened,
 };
 
 function createEvent<T extends ExternalEventType>(type: T, payload: unknown): ExternalEvent<T> {

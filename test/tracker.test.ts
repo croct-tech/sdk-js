@@ -1132,6 +1132,63 @@ describe('A tracker', () => {
             },
             undefined,
         ],
+        [
+            {
+                type: 'linkOpened',
+                link: 'http://www.foo.com.br/',
+            },
+            undefined,
+        ],
+        [
+            {
+                type: 'linkOpened',
+                link: '/',
+            },
+            {
+                type: 'linkOpened',
+                link: 'http://localhost/',
+            },
+        ],
+        [
+            {
+                type: 'linkOpened',
+                link: './',
+            },
+            {
+                type: 'linkOpened',
+                link: 'http://localhost/',
+            },
+        ],
+        [
+            {
+                type: 'linkOpened',
+                link: '/bar',
+            },
+            {
+                type: 'linkOpened',
+                link: 'http://localhost/bar',
+            },
+        ],
+        [
+            {
+                type: 'linkOpened',
+                link: '../bar',
+            },
+            {
+                type: 'linkOpened',
+                link: 'http://localhost/bar',
+            },
+        ],
+        [
+            {
+                type: 'linkOpened',
+                link: 'bar?foo=baz#qux',
+            },
+            {
+                type: 'linkOpened',
+                link: 'http://localhost/bar?foo=baz#qux',
+            },
+        ],
     ])('can track event %#', async (partialEvent: PartialTrackingEvent, beaconPayload?: BeaconPayload) => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),
