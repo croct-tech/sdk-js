@@ -1,4 +1,4 @@
-import {LenientJsonArray, LenientJsonObject, LenientJsonValue} from './json';
+import {JsonStructure, JsonValue} from '@croct/json';
 
 interface AbstractOperation {
     type: string;
@@ -15,37 +15,37 @@ interface ClearOperation extends AbstractOperation {
 
 interface SetOperation extends AbstractOperation {
     type: 'set';
-    value: LenientJsonValue;
+    value: JsonValue;
 }
 
 interface AddOperation extends AbstractOperation {
     type: 'add';
-    value: LenientJsonValue;
+    value: JsonValue;
 }
 
 interface CombineOperation extends AbstractOperation {
     type: 'combine';
-    value: LenientJsonValue;
+    value: JsonValue;
 }
 
 interface MergeOperation extends AbstractOperation {
     type: 'merge';
-    value: LenientJsonArray | LenientJsonObject;
+    value: JsonStructure;
 }
 
 interface IncrementOperation extends AbstractOperation {
     type: 'increment';
-    value: LenientJsonValue;
+    value: JsonValue;
 }
 
 interface DecrementOperation extends AbstractOperation {
     type: 'decrement';
-    value: LenientJsonValue;
+    value: JsonValue;
 }
 
 interface removeOperation extends AbstractOperation {
     type: 'remove';
-    value: LenientJsonValue;
+    value: JsonValue;
 }
 
 export type Operation =

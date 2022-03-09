@@ -1,7 +1,7 @@
+import {JsonObject} from '@croct/json';
 import {EvaluatorFacade, MinimalContextFactory, TabContextFactory} from '../../src/facade';
 import {Evaluator, Campaign, EvaluationOptions, Page} from '../../src/evaluator';
 import {Tab} from '../../src/tab';
-import {JsonObject} from '../../src/json';
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 

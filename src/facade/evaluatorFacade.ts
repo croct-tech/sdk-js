@@ -1,5 +1,5 @@
+import {JsonObject, JsonValue} from '@croct/json';
 import {Evaluator, Campaign, EvaluationContext, Page} from '../evaluator';
-import {JsonObject, JsonValue} from '../json';
 import {Tab} from '../tab';
 import {optionsSchema} from '../schema';
 import {formatCause} from '../error';

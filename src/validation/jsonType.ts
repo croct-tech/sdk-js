@@ -1,5 +1,5 @@
+import {JsonArray, JsonObject, JsonPrimitive, JsonValue} from '@croct/json';
 import {Schema, TypeSchema, Violation} from './schema';
-import {JsonArray, JsonObject, JsonPrimitive, JsonValue} from '../json';
 import {describe, formatPath} from './violation';
 
 function isJsonPrimitive(value: unknown): value is JsonPrimitive {

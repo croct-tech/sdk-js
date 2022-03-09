@@ -1,5 +1,5 @@
+import {JsonStructure, JsonValue} from '@croct/json';
 import {Operation, Patch} from './patch';
-import {JsonArray, JsonObject, JsonValue} from './json';
 import {TrackingEvent} from './trackingEvents';
 import {
     addOperation,
@@ -64,16 +64,16 @@ export abstract class ActiveRecord<T extends TrackingEvent> {
         });
     }
 
-    public merge(value: JsonObject | JsonArray): this;
+    public merge(value: JsonStructure): this;
 
-    public merge(property: string, value: JsonObject | JsonArray): this;
+    public merge(property: string, value: JsonStructure): this;
 
-    public merge(propertyOrValue: string | JsonObject | JsonArray, value?: JsonObject | JsonArray): this {
+    public merge(propertyOrValue: string | JsonStructure, value?: JsonStructure): this {
         if (typeof propertyOrValue === 'string') {
             return this.pushOperation({
                 type: 'merge',
                 path: propertyOrValue,
-                value: value as JsonObject | JsonArray,
+                value: value as JsonStructure,
             });
         }
 
