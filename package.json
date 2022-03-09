@@ -28,6 +28,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@croct/json": "^1.0",
     "tslib": "^2.3.1"
   },
   "devDependencies": {

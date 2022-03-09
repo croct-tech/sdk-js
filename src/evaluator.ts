@@ -1,4 +1,4 @@
-import {JsonObject, JsonValue} from './json';
+import {JsonObject, JsonValue} from '@croct/json';
 import {TokenProvider} from './token';
 import {EVALUATION_ENDPOINT_URL, MAX_EXPRESSION_LENGTH} from './constants';
 import {formatMessage} from './error';
