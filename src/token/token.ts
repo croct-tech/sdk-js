@@ -11,7 +11,7 @@ export type Headers = {
 
 export type Claims = {
     iss: string,
-    aud: string,
+    aud: string|string[],
     iat: number,
     exp?: number,
     sub?: string,

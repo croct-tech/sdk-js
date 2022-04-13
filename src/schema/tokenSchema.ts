@@ -1,4 +1,4 @@
-import {ObjectType, StringType, NumberType} from '../validation';
+import {ObjectType, StringType, NumberType, UnionType, ArrayType} from '../validation';
 
 export const tokenSchema = new ObjectType({
     required: ['headers', 'claims'],
@@ -18,7 +18,10 @@ export const tokenSchema = new ObjectType({
             required: ['iss', 'aud', 'iat'],
             properties: {
                 iss: new StringType(),
-                aud: new StringType(),
+                aud: new UnionType(
+                    new StringType(),
+                    new ArrayType({items: new StringType()}),
+                ),
                 iat: new NumberType({
                     minimum: 0,
                 }),

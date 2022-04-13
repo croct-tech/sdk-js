@@ -31,6 +31,18 @@ describe('The token schema', () => {
                 iat: 1440982923,
             },
         }],
+        [{
+            headers: {
+                typ: 'JWT',
+                alg: 'none',
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            },
+            claims: {
+                iss: 'croct.io',
+                aud: ['croct.io'],
+                iat: 1440982923,
+            },
+        }],
     ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
             tokenSchema.validate(value);
@@ -184,7 +196,7 @@ describe('The token schema', () => {
                     iat: 1440982923,
                 },
             },
-            'Expected value of type string at path \'/claims/aud\', actual integer.',
+            'Expected value of type string or array at path \'/claims/aud\', actual integer.',
         ],
         [
             {
