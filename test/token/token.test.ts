@@ -93,6 +93,27 @@ describe('A token', () => {
         expect(anonymousToken.toString()).toBe(encodedToken);
     });
 
+    test('should parse a token with a list of audiences', () => {
+        const token = Token.parse(
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIiwiYXBwSWQiOiI3ZTlkNTlhOS1lNGIzLTQ1ZDQtYjFjNy00OD'
+            + 'I4N2YxZTVlOGEifQ.eyJpc3MiOiJjcm9jdC5pbyIsImF1ZCI6WyJjcm9jdC5pbyJdLCJpYXQiOjE0NDA5'
+            + 'ODI5MjMsInN1YiI6ImM0cjBsIn0.',
+        );
+
+        expect(token.getHeaders()).toEqual({
+            typ: 'JWT',
+            alg: 'none',
+            appId: appId,
+        });
+
+        expect(token.getClaims()).toEqual({
+            sub: 'c4r0l',
+            iss: 'croct.io',
+            aud: ['croct.io'],
+            iat: 1440982923,
+        });
+    });
+
     test('should fail to parse an empty token', () => {
         function invalidToken(): void {
             Token.parse('');
