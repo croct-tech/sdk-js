@@ -338,7 +338,7 @@ describe('A SDK', () => {
         );
 
         // Wait a few milliseconds more to ensure no other message was sent
-        await new Promise(resolve => window.setTimeout(resolve, 30));
+        await new Promise(resolve => { window.setTimeout(resolve, 30); });
 
         expect(receiptIds.length).toBe(1);
 

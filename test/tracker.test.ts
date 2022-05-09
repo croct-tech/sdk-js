@@ -766,28 +766,28 @@ describe('A tracker', () => {
         };
 
         // First inactivity period
-        await new Promise(resolve => window.setTimeout(resolve, 3));
+        await new Promise(resolve => { window.setTimeout(resolve, 3); });
 
         expect(publish).toHaveBeenLastCalledWith(nothingChanged);
 
         expect(retryPolicy.shouldRetry).toHaveBeenCalledWith(0, now);
 
         // Second inactivity period
-        await new Promise(resolve => window.setTimeout(resolve, 4));
+        await new Promise(resolve => { window.setTimeout(resolve, 4); });
 
         expect(publish).toHaveBeenLastCalledWith(nothingChanged);
 
         expect(retryPolicy.shouldRetry).toHaveBeenCalledWith(1, now);
 
         // Third inactivity period
-        await new Promise(resolve => window.setTimeout(resolve, 6));
+        await new Promise(resolve => { window.setTimeout(resolve, 6); });
 
         expect(publish).toHaveBeenLastCalledWith(nothingChanged);
 
         expect(retryPolicy.shouldRetry).toHaveBeenCalledWith(2, now);
 
         // Fourth inactivity period
-        await new Promise(resolve => window.setTimeout(resolve, 6));
+        await new Promise(resolve => { window.setTimeout(resolve, 6); });
 
         expect(retryPolicy.shouldRetry).toHaveBeenCalledWith(3, now);
 
@@ -1221,7 +1221,7 @@ describe('A tracker', () => {
     });
 
     test('should provide a callback that is called when the current pending events are flushed', async () => {
-        const publish = jest.fn(event => new Promise<any>(resolve => setTimeout(() => resolve(event), 10)));
+        const publish = jest.fn(event => new Promise<any>(resolve => { setTimeout(() => resolve(event), 10); }));
 
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),

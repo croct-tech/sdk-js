@@ -51,7 +51,7 @@ describe('A queued channel', () => {
 
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
-            publish: jest.fn(() => new Promise(resolve => pending.push(resolve))),
+            publish: jest.fn(() => new Promise(resolve => { pending.push(resolve); })),
         };
         const channel = new QueuedChannel(outputChannel, new InMemoryQueue());
 
@@ -60,7 +60,7 @@ describe('A queued channel', () => {
 
         // Wait a few milliseconds to ensure that both messages
         // would have been delivered if they were not correctly queued
-        await new Promise(resolve => window.setTimeout(resolve, 30));
+        await new Promise(resolve => { window.setTimeout(resolve, 30); });
 
         expect(outputChannel.publish).toHaveBeenCalledWith('foo');
         expect(outputChannel.publish).not.toHaveBeenCalledWith('bar');

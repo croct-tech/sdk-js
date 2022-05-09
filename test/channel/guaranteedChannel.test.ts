@@ -60,7 +60,7 @@ describe('A guaranteed channel', () => {
     test('should stop waiting for confirmation if the channel is closed in the meanwhile', async () => {
         const promise = channel.publish('foo');
 
-        await new Promise(resolve => window.setTimeout(resolve, 1));
+        await new Promise(resolve => { window.setTimeout(resolve, 1); });
 
         await channel.close();
 
