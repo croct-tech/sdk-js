@@ -87,7 +87,7 @@ describe('A retry channel', () => {
 
         const promise = channel.publish('foo');
 
-        await new Promise(resolve => window.setTimeout(resolve, 10));
+        await new Promise(resolve => { window.setTimeout(resolve, 10); });
 
         await channel.close();
 
