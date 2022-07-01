@@ -370,8 +370,8 @@ describe('The "goalCompleted" payload schema', () => {
             'Expected at least 1 character at path \'/goalId\', actual 0.',
         ],
         [
-            {goalId: 'x'.repeat(51)},
-            'Expected at most 50 characters at path \'/goalId\', actual 51.',
+            {goalId: 'x'.repeat(101)},
+            'Expected at most 100 characters at path \'/goalId\', actual 101.',
         ],
         [
             {goalId: null},

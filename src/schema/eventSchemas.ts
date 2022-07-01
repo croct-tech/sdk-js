@@ -58,7 +58,7 @@ export const goalCompleted = new ObjectType({
     properties: {
         goalId: new StringType({
             minLength: 1,
-            maxLength: 50,
+            maxLength: 100,
         }),
         value: new NumberType({
             minimum: 0,
