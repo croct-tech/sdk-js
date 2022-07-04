@@ -397,6 +397,11 @@ describe('The "goalCompleted" payload schema', () => {
             {goalId: 'foo', currency: null},
             'Expected value of type string at path \'/currency\', actual null.',
         ],
+        [
+            {goalId: 'díàcrîtĩĉś'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             goalCompleted.validate(value);
