@@ -345,7 +345,7 @@ describe('The "eventOccurred" payload schema', () => {
 describe('The "goalCompleted" payload schema', () => {
     test.each([
         [{
-            goalId: 'foo',
+            goalId: 'foo:bar-baz_123',
         }],
         [{
             goalId: 'foo',
