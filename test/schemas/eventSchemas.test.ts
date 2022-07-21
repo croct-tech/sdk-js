@@ -367,7 +367,7 @@ describe('The "goalCompleted" payload schema', () => {
         ],
         [
             {goalId: ''},
-            'Expected at least 1 character at path \'/goalId\', actual 0.',
+            'Expected at least 3 characters at path \'/goalId\', actual 0.',
         ],
         [
             {goalId: 'x'.repeat(101)},
@@ -402,15 +402,7 @@ describe('The "goalCompleted" payload schema', () => {
             'Invalid format at path \'/goalId\'.',
         ],
         [
-            {goalId: '123foo'},
-            'Invalid format at path \'/goalId\'.',
-        ],
-        [
-            {goalId: '_foo'},
-            'Invalid format at path \'/goalId\'.',
-        ],
-        [
-            {goalId: '-foo'},
+            {goalId: 'foo*bar'},
             'Invalid format at path \'/goalId\'.',
         ],
         [
@@ -418,7 +410,7 @@ describe('The "goalCompleted" payload schema', () => {
             'Invalid format at path \'/goalId\'.',
         ],
         [
-            {goalId: 'foo*bar'},
+            {goalId: 'foo:'},
             'Invalid format at path \'/goalId\'.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
