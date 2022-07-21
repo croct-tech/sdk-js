@@ -348,6 +348,18 @@ describe('The "goalCompleted" payload schema', () => {
             goalId: 'foo:bar-baz_123',
         }],
         [{
+            goalId: 'foo::bar',
+        }],
+        [{
+            goalId: 'foo--bar',
+        }],
+        [{
+            goalId: 'foo__bar',
+        }],
+        [{
+            goalId: 'foo-:_bar',
+        }],
+        [{
             goalId: 'foo',
             value: 1,
             currency: 'brl',
@@ -411,6 +423,22 @@ describe('The "goalCompleted" payload schema', () => {
         ],
         [
             {goalId: 'foo:'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: '_foo'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: 'foo_'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: '-foo'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: 'foo-'},
             'Invalid format at path \'/goalId\'.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
