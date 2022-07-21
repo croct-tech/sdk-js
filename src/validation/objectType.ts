@@ -39,7 +39,6 @@ export class ObjectType implements TypeSchema {
         return ['object'];
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
     public isValidType(value: unknown): value is object {
         if (this.definition.type !== undefined) {
             return value instanceof this.definition.type;

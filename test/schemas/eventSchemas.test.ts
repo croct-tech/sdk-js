@@ -345,7 +345,19 @@ describe('The "eventOccurred" payload schema', () => {
 describe('The "goalCompleted" payload schema', () => {
     test.each([
         [{
-            goalId: 'foo',
+            goalId: 'foo:bar-baz_123',
+        }],
+        [{
+            goalId: 'foo::bar',
+        }],
+        [{
+            goalId: 'foo--bar',
+        }],
+        [{
+            goalId: 'foo__bar',
+        }],
+        [{
+            goalId: 'foo-:_bar',
         }],
         [{
             goalId: 'foo',
@@ -367,11 +379,11 @@ describe('The "goalCompleted" payload schema', () => {
         ],
         [
             {goalId: ''},
-            'Expected at least 1 character at path \'/goalId\', actual 0.',
+            'Expected at least 3 characters at path \'/goalId\', actual 0.',
         ],
         [
-            {goalId: 'x'.repeat(51)},
-            'Expected at most 50 characters at path \'/goalId\', actual 51.',
+            {goalId: 'x'.repeat(101)},
+            'Expected at most 100 characters at path \'/goalId\', actual 101.',
         ],
         [
             {goalId: null},
@@ -396,6 +408,38 @@ describe('The "goalCompleted" payload schema', () => {
         [
             {goalId: 'foo', currency: null},
             'Expected value of type string at path \'/currency\', actual null.',
+        ],
+        [
+            {goalId: 'díàcrîtĩĉś'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: 'foo*bar'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: ':foo'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: 'foo:'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: '_foo'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: 'foo_'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: '-foo'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: 'foo-'},
+            'Invalid format at path \'/goalId\'.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
