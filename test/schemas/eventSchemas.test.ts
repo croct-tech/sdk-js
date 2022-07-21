@@ -401,7 +401,26 @@ describe('The "goalCompleted" payload schema', () => {
             {goalId: 'díàcrîtĩĉś'},
             'Invalid format at path \'/goalId\'.',
         ],
-
+        [
+            {goalId: '123foo'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: '_foo'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: '-foo'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: ':foo'},
+            'Invalid format at path \'/goalId\'.',
+        ],
+        [
+            {goalId: 'foo*bar'},
+            'Invalid format at path \'/goalId\'.',
+        ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             goalCompleted.validate(value);

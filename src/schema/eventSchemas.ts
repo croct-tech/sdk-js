@@ -59,7 +59,7 @@ export const goalCompleted = new ObjectType({
         goalId: new StringType({
             minLength: 1,
             maxLength: 100,
-            pattern: /^(?=.{1,100}$)[\w:-]+$/,
+            pattern: /^[A-Za-z]+(-?:?_?[A-Za-z0-9]+)*$/,
         }),
         value: new NumberType({
             minimum: 0,
