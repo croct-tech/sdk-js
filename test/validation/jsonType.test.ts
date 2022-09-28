@@ -72,7 +72,7 @@ describe('A JSON object type', () => {
             objectType.validate({foobar: 'baz'});
         }
 
-        expect(validateValidValue).not.toThrowError();
+        expect(validateValidValue).not.toThrow();
         expect(validateInvalidValue).toThrow(Error);
         expect(validateInvalidValue).toThrow('Expected at most 3 characters at path \'/foobar\', actual 6.');
     });

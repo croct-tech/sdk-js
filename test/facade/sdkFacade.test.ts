@@ -73,7 +73,7 @@ describe('A SDK facade', () => {
 
         SdkFacade.init({appId: appId});
 
-        expect(initialize).toBeCalledWith({
+        expect(initialize).toHaveBeenCalledWith({
             appId: appId,
             tokenScope: 'global',
             debug: false,
@@ -101,7 +101,7 @@ describe('A SDK facade', () => {
             urlSanitizer: urlSanitizer,
         });
 
-        expect(initialize).toBeCalledWith({
+        expect(initialize).toHaveBeenCalledWith({
             appId: appId,
             trackerEndpointUrl: 'https://api.croct.io/tracker',
             evaluationEndpointUrl: 'https://api.croct.io/evaluation',
@@ -134,8 +134,8 @@ describe('A SDK facade', () => {
             track: false,
         });
 
-        expect(context.setToken).toBeCalledWith(carolToken);
-        expect(context.setToken).toBeCalledTimes(1);
+        expect(context.setToken).toHaveBeenCalledWith(carolToken);
+        expect(context.setToken).toHaveBeenCalledTimes(1);
     });
 
     test('should load the SDK and unset any existing token', () => {
@@ -158,7 +158,7 @@ describe('A SDK facade', () => {
             track: false,
         });
 
-        expect(context.setToken).toBeCalledWith(null);
+        expect(context.setToken).toHaveBeenCalledWith(null);
     });
 
     test('should load the SDK and set a token for the provided user ID', () => {
@@ -183,8 +183,8 @@ describe('A SDK facade', () => {
             track: false,
         });
 
-        expect(context.setToken).toBeCalledWith(Token.issue(appId, 'c4r0l'));
-        expect(context.setToken).toBeCalledTimes(1);
+        expect(context.setToken).toHaveBeenCalledWith(Token.issue(appId, 'c4r0l'));
+        expect(context.setToken).toHaveBeenCalledTimes(1);
     });
 
     test('should load the SDK with the tracker enabled if the flag "track" is true', () => {
@@ -205,7 +205,7 @@ describe('A SDK facade', () => {
             track: true,
         });
 
-        expect(tracker.enable).toBeCalledTimes(1);
+        expect(tracker.enable).toHaveBeenCalledTimes(1);
     });
 
     test('should load the SDK with the tracker disabled if the flag "track" is false', () => {
@@ -322,7 +322,7 @@ describe('A SDK facade', () => {
         await expect(sdkFacade.evaluator.evaluate('1 + 1', {timeout: 5})).resolves.toBe(result);
 
         expect(evaluator.evaluate).toHaveBeenCalledWith('1 + 1', expect.objectContaining({timeout: 5}));
-        expect(evaluator.evaluate).toBeCalledTimes(1);
+        expect(evaluator.evaluate).toHaveBeenCalledTimes(1);
     });
 
     test('should provide the context', () => {
@@ -369,8 +369,8 @@ describe('A SDK facade', () => {
 
         sdkFacade.identify('c4r0l');
 
-        expect(context.setToken).toBeCalledWith(Token.issue(appId, 'c4r0l'));
-        expect(context.setToken).toBeCalledTimes(1);
+        expect(context.setToken).toHaveBeenCalledWith(Token.issue(appId, 'c4r0l'));
+        expect(context.setToken).toHaveBeenCalledTimes(1);
     });
 
     test('should allow anonymizing a user', () => {
@@ -423,7 +423,7 @@ describe('A SDK facade', () => {
 
         sdkFacade.unsetToken();
 
-        expect(context.setToken).toBeCalledTimes(0);
+        expect(context.setToken).toHaveBeenCalledTimes(0);
 
         sdkFacade.setToken(Token.issue(appId, 'c4r0l'));
 
@@ -453,8 +453,8 @@ describe('A SDK facade', () => {
 
         sdkFacade.setToken(carolToken);
 
-        expect(context.setToken).toBeCalledWith(carolToken);
-        expect(context.setToken).toBeCalledTimes(1);
+        expect(context.setToken).toHaveBeenCalledWith(carolToken);
+        expect(context.setToken).toHaveBeenCalledTimes(1);
     });
 
     test('should provide the current token', () => {
@@ -517,7 +517,7 @@ describe('A SDK facade', () => {
 
         expect(sdkFacade.getToken()).toEqual(newToken);
 
-        expect(tracker.track).toBeCalledTimes(0);
+        expect(tracker.track).toHaveBeenCalledTimes(0);
     });
 
     test('should allow to refresh the token of the current identified user', () => {
@@ -558,8 +558,8 @@ describe('A SDK facade', () => {
 
         expect(sdkFacade.getToken()).toEqual(newCarolToken);
 
-        expect(tracker.track).toBeCalledTimes(1);
-        expect(tracker.track).toBeCalledWith({
+        expect(tracker.track).toHaveBeenCalledTimes(1);
+        expect(tracker.track).toHaveBeenCalledWith({
             type: 'userSignedIn',
             userId: 'c4r0l',
         });

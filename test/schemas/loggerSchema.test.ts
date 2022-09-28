@@ -10,7 +10,7 @@ describe('The logger schema', () => {
             extra: true,
         };
 
-        expect(() => loggerSchema.validate(logger)).not.toThrowError();
+        expect(() => loggerSchema.validate(logger)).not.toThrow();
     });
 
     test.each([

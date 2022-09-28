@@ -20,13 +20,13 @@ describe('An fallback cache', () => {
 
         expect(cache.get()).toBeNull();
 
-        expect(firstCache.get).toBeCalledTimes(1);
-        expect(secondCache.get).toBeCalledTimes(1);
+        expect(firstCache.get).toHaveBeenCalledTimes(1);
+        expect(secondCache.get).toHaveBeenCalledTimes(1);
 
         expect(cache.get()).toBe('foo');
 
-        expect(firstCache.get).toBeCalledTimes(2);
-        expect(secondCache.get).toBeCalledTimes(1);
+        expect(firstCache.get).toHaveBeenCalledTimes(2);
+        expect(secondCache.get).toHaveBeenCalledTimes(1);
     });
 
     test('should store data into all underlying caches', async () => {
@@ -46,10 +46,10 @@ describe('An fallback cache', () => {
 
         cache.put('bar');
 
-        expect(firstCache.put).toBeCalledTimes(1);
-        expect(firstCache.put).toBeCalledWith('bar');
-        expect(secondCache.put).toBeCalledTimes(1);
-        expect(secondCache.put).toBeCalledWith('bar');
+        expect(firstCache.put).toHaveBeenCalledTimes(1);
+        expect(firstCache.put).toHaveBeenCalledWith('bar');
+        expect(secondCache.put).toHaveBeenCalledTimes(1);
+        expect(secondCache.put).toHaveBeenCalledWith('bar');
     });
 
     test('should clear all underlying caches', async () => {
@@ -69,7 +69,7 @@ describe('An fallback cache', () => {
 
         cache.clear();
 
-        expect(firstCache.clear).toBeCalledTimes(1);
-        expect(secondCache.clear).toBeCalledTimes(1);
+        expect(firstCache.clear).toHaveBeenCalledTimes(1);
+        expect(secondCache.clear).toHaveBeenCalledTimes(1);
     });
 });

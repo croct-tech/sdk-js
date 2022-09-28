@@ -154,7 +154,7 @@ test('should flush the beacon queue on initialization', async () => {
     const promise = tracker.track(payload);
 
     await container.dispose();
-    await expect(promise).rejects.toThrowError();
+    await expect(promise).rejects.toThrow();
 
     const server = new WS(`${configuration.trackerEndpointUrl}/${configuration.appId}`, {jsonProtocol: true});
 
