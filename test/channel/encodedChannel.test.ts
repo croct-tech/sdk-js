@@ -20,12 +20,12 @@ describe('An encoded channel', () => {
     test('should encode and then publish the message', async () => {
         await channel.publish('ping');
 
-        expect(outputChannel.publish).toBeCalledWith('ping-pong');
+        expect(outputChannel.publish).toHaveBeenCalledWith('ping-pong');
     });
 
     test('should close the output channel on close', async () => {
         await channel.close();
 
-        expect(outputChannel.close).toBeCalled();
+        expect(outputChannel.close).toHaveBeenCalled();
     });
 });

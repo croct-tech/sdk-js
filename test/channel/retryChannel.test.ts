@@ -125,6 +125,6 @@ describe('A retry channel', () => {
 
         await channel.close();
 
-        expect(outputChannel.close).toBeCalled();
+        expect(outputChannel.close).toHaveBeenCalled();
     });
 });

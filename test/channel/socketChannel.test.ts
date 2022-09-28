@@ -43,7 +43,7 @@ describe('A socket channel', () => {
             socket.close({code: 1011, reason: 'Server error', wasClean: false});
         });
 
-        await expect(channel.publish('foo')).rejects.toThrowError();
+        await expect(channel.publish('foo')).rejects.toThrow();
     });
 
     test('should reconnect if the connection cannot be established', async () => {
@@ -59,7 +59,7 @@ describe('A socket channel', () => {
             attempt += 1;
         });
 
-        await expect(channel.publish('foo')).rejects.toThrowError();
+        await expect(channel.publish('foo')).rejects.toThrow();
         await expect(channel.publish('bar')).resolves.toBeUndefined();
     });
 
@@ -209,7 +209,7 @@ describe('A socket channel', () => {
     test('should close connection with error', async () => {
         const channel = new SocketChannel({url: url});
 
-        await expect(channel.publish('open connection')).rejects.toThrowError();
+        await expect(channel.publish('open connection')).rejects.toThrow();
 
         await expect(channel.close()).resolves.toBeUndefined();
     });

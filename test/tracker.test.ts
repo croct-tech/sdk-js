@@ -125,13 +125,13 @@ describe('A tracker', () => {
 
         tracker.suspend();
 
-        await expect(tracker.track(event, 1)).rejects.toThrowError();
+        await expect(tracker.track(event, 1)).rejects.toThrow();
 
         tracker.unsuspend();
 
         await expect(tracker.track(event, 2)).resolves.toBeDefined();
 
-        await expect(tracker.track(event, 3)).rejects.toThrowError();
+        await expect(tracker.track(event, 3)).rejects.toThrow();
 
         // Listeners can be added more than once, should remove both
         tracker.addListener(listener);
@@ -169,7 +169,7 @@ describe('A tracker', () => {
             ...eventInfo,
         });
 
-        expect(listener).toBeCalledTimes(5);
+        expect(listener).toHaveBeenCalledTimes(5);
     });
 
     test('should allow to be enabled even if it is suspended', () => {
@@ -389,7 +389,7 @@ describe('A tracker', () => {
             sinceTime: 0,
         });
 
-        expect(channel.publish).toBeCalledWith(
+        expect(channel.publish).toHaveBeenCalledWith(
             expect.objectContaining({
                 context: expect.objectContaining({
                     metadata: metadata,
@@ -421,7 +421,7 @@ describe('A tracker', () => {
             sinceTime: 0,
         });
 
-        expect(channel.publish).toBeCalledWith(
+        expect(channel.publish).toHaveBeenCalledWith(
             expect.objectContaining({
                 token: token.toString(),
             }),
@@ -1248,7 +1248,7 @@ describe('A tracker', () => {
 
         await expect(tracker.flushed).resolves.toBeUndefined();
 
-        expect(publish).toBeCalledWith({
+        expect(publish).toHaveBeenCalledWith({
             timestamp: now,
             context: {
                 tabId: tab.id,

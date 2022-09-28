@@ -130,7 +130,7 @@ describe('A monitored queue', () => {
 
         queue.addCallback(status, callback);
 
-        expect(callback).toBeCalledWith(queue);
+        expect(callback).toHaveBeenCalledWith(queue);
     });
 
     test('should allow to remove a callback', () => {
@@ -143,8 +143,8 @@ describe('A monitored queue', () => {
         queue.removeCallback('full', callback);
         queue.push('bar');
 
-        expect(callback).toBeCalledWith(queue);
-        expect(callback).toBeCalledTimes(1);
+        expect(callback).toHaveBeenCalledWith(queue);
+        expect(callback).toHaveBeenCalledTimes(1);
     });
 
     test('should not fail to remove an nonexistent callback', () => {
@@ -154,6 +154,6 @@ describe('A monitored queue', () => {
         queue.removeCallback('full', callback);
         queue.push('foo');
 
-        expect(callback).not.toBeCalled();
+        expect(callback).not.toHaveBeenCalled();
     });
 });
