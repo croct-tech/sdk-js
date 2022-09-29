@@ -9,7 +9,7 @@ env:
   BOOTSTRAP_ENDPOINT: https://api.croct.io/client/web/bootstrap
   TRACKER_ENDPOINT: wss://api.croct.io/client/web/connect
   EVALUATION_ENDPOINT: https://api.croct.io/client/web/evaluate
-  MAX_EXPRESSION_LENGHT: 300
+  MAX_EXPRESSION_LENGHT: 500
 
 jobs:
   deploy:
