@@ -6,29 +6,29 @@ import {
     EvaluationContext,
     EvaluationError,
     EvaluationErrorType,
-    ExpressionError,
-    ExpressionErrorResponse,
+    QueryError,
+    QueryErrorResponse,
 } from '../src/evaluator';
 import {Token, FixedTokenProvider} from '../src/token';
 import {CidAssigner, FixedAssigner} from '../src/cid';
 
 jest.mock('../src/constants', () => ({
-    MAX_EXPRESSION_LENGTH: 30,
+    MAX_QUERY_LENGTH: 30,
 }));
 
 describe('An evaluator', () => {
     const endpoint = 'https://croct.io/evaluate';
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
-    const expression = 'user\'s name';
+    const query = 'user\'s name';
     const requestMatcher: MockOptions = {
         matcher: endpoint,
-        method: 'GET',
-        query: {
-            expression: expression,
-        },
+        method: 'POST',
         headers: {
             'X-App-Id': appId,
             'X-Client-Id': '123',
+        },
+        body: {
+            query: query,
         },
     };
 
@@ -37,7 +37,7 @@ describe('An evaluator', () => {
         jest.clearAllMocks();
     });
 
-    test('should evaluate expressions without token when not provided', async () => {
+    test('should evaluate queries without token when not provided', async () => {
         const evaluator = new Evaluator({
             appId: appId,
             endpointUrl: endpoint,
@@ -52,10 +52,10 @@ describe('An evaluator', () => {
             response: JSON.stringify(result),
         });
 
-        await expect(evaluator.evaluate(expression)).resolves.toBe(result);
+        await expect(evaluator.evaluate(query)).resolves.toBe(result);
     });
 
-    test('should evaluate expressions with token when provided', async () => {
+    test('should evaluate queries with token when provided', async () => {
         const token = Token.issue(appId, 'foo', Date.now());
 
         const evaluator = new Evaluator({
@@ -76,7 +76,7 @@ describe('An evaluator', () => {
             response: JSON.stringify(result),
         });
 
-        const promise = evaluator.evaluate(expression);
+        const promise = evaluator.evaluate(query);
 
         await expect(promise).resolves.toBe(result);
     });
@@ -97,7 +97,7 @@ describe('An evaluator', () => {
             },
         });
 
-        const promise = evaluator.evaluate(expression, {
+        const promise = evaluator.evaluate(query, {
             timeout: 10,
         });
 
@@ -111,7 +111,7 @@ describe('An evaluator', () => {
         );
     });
 
-    test('should evaluate expressions using the provided context', async () => {
+    test('should evaluate queries using the provided context', async () => {
         const evaluator = new Evaluator({
             appId: appId,
             endpointUrl: endpoint,
@@ -142,14 +142,14 @@ describe('An evaluator', () => {
 
         fetchMock.mock({
             ...requestMatcher,
-            query: {
-                ...requestMatcher.query,
-                context: JSON.stringify(context),
+            body: {
+                ...requestMatcher.body,
+                context: context,
             },
             response: JSON.stringify(result),
         });
 
-        const promise = evaluator.evaluate(expression, {context: context});
+        const promise = evaluator.evaluate(query, {context: context});
 
         await expect(promise).resolves.toBe(result);
     });
@@ -176,7 +176,7 @@ describe('An evaluator', () => {
             },
         });
 
-        const promise = evaluator.evaluate(expression);
+        const promise = evaluator.evaluate(query);
 
         await expect(promise).rejects.toThrow(EvaluationError);
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
@@ -184,10 +184,10 @@ describe('An evaluator', () => {
 
     test.each([
         [EvaluationErrorType.EVALUATION_FAILED],
-        [EvaluationErrorType.INVALID_EXPRESSION],
-        [EvaluationErrorType.TOO_COMPLEX_EXPRESSION],
+        [EvaluationErrorType.INVALID_QUERY],
+        [EvaluationErrorType.TOO_COMPLEX_QUERY],
     ])(
-        'should report an expression error if the error that can be traced back to the offending input (%s)',
+        'should report an query error if the error that can be traced back to the offending input (%s)',
         async (errorType: EvaluationErrorType) => {
             const evaluator = new Evaluator({
                 appId: appId,
@@ -196,7 +196,7 @@ describe('An evaluator', () => {
                 cidAssigner: new FixedAssigner('123'),
             });
 
-            const response: ExpressionErrorResponse = {
+            const response: QueryErrorResponse = {
                 type: errorType,
                 title: 'Error title',
                 status: 422,
@@ -225,14 +225,14 @@ describe('An evaluator', () => {
                 },
             });
 
-            const promise = evaluator.evaluate(expression);
+            const promise = evaluator.evaluate(query);
 
-            await expect(promise).rejects.toThrow(ExpressionError);
+            await expect(promise).rejects.toThrow(QueryError);
             await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
         },
     );
 
-    test('should report an expression error if the expression exceeds the maximum allowed length', async () => {
+    test('should report an query error if the query exceeds the maximum allowed length', async () => {
         const evaluator = new Evaluator({
             appId: appId,
             endpointUrl: endpoint,
@@ -240,15 +240,15 @@ describe('An evaluator', () => {
             cidAssigner: new FixedAssigner('123'),
         });
 
-        const length = Evaluator.MAX_EXPRESSION_LENGTH + 1;
-        const response: ExpressionErrorResponse = {
-            title: 'The expression is too complex.',
+        const length = Evaluator.MAX_QUERY_LENGTH + 1;
+        const response: QueryErrorResponse = {
+            title: 'The query is too complex.',
             status: 422,
-            type: EvaluationErrorType.TOO_COMPLEX_EXPRESSION,
-            detail: `The expression must be at most ${Evaluator.MAX_EXPRESSION_LENGTH} `
+            type: EvaluationErrorType.TOO_COMPLEX_QUERY,
+            detail: `The query must be at most ${Evaluator.MAX_QUERY_LENGTH} `
                 + `characters long, but it is ${length} characters long.`,
             errors: [{
-                cause: 'The expression is longer than expected.',
+                cause: 'The query is longer than expected.',
                 location: {
                     start: {
                         index: 0,
@@ -266,7 +266,7 @@ describe('An evaluator', () => {
 
         const promise = evaluator.evaluate('_'.repeat(length));
 
-        await expect(promise).rejects.toThrow(ExpressionError);
+        await expect(promise).rejects.toThrow(QueryError);
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
@@ -292,7 +292,7 @@ describe('An evaluator', () => {
             },
         });
 
-        const promise = evaluator.evaluate(expression);
+        const promise = evaluator.evaluate(query);
 
         await expect(promise).rejects.toThrow(EvaluationError);
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
@@ -317,7 +317,7 @@ describe('An evaluator', () => {
             status: 500,
         };
 
-        const promise = evaluator.evaluate(expression);
+        const promise = evaluator.evaluate(query);
 
         await expect(promise).rejects.toThrow(EvaluationError);
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
@@ -338,9 +338,9 @@ describe('An evaluation error', () => {
     });
 });
 
-describe('An expression error', () => {
+describe('An query error', () => {
     test('should have a response', () => {
-        const response: ExpressionErrorResponse = {
+        const response: QueryErrorResponse = {
             type: EvaluationErrorType.TIMEOUT,
             title: 'Error title',
             status: 422,
@@ -361,7 +361,7 @@ describe('An expression error', () => {
             }],
         };
 
-        const error = new ExpressionError(response);
+        const error = new QueryError(response);
 
         expect(error.response).toEqual(response);
     });

@@ -35,14 +35,14 @@ export class EvaluatorFacade {
         this.contextFactory = contextFactory;
     }
 
-    public evaluate(expression: string, options: EvaluationOptions = {}): Promise<JsonValue> {
-        if (typeof expression !== 'string' || expression.length === 0) {
-            throw new Error('The expression must be a non-empty string.');
+    public evaluate(query: string, options: EvaluationOptions = {}): Promise<JsonValue> {
+        if (typeof query !== 'string' || query.length === 0) {
+            throw new Error('The query must be a non-empty string.');
         }
 
         validate(options);
 
-        return this.evaluator.evaluate(expression, {
+        return this.evaluator.evaluate(query, {
             timeout: options.timeout,
             context: this.contextFactory.createContext(options.attributes),
         });

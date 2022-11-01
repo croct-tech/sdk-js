@@ -366,7 +366,7 @@ describe('A SDK', () => {
     });
 
     test('should configure the evaluator', async () => {
-        const expression = '1 + 2';
+        const query = '1 + 2';
         const result = 3;
 
         fetchMock.mock({
@@ -376,16 +376,16 @@ describe('A SDK', () => {
         });
 
         fetchMock.mock({
-            method: 'GET',
+            method: 'POST',
             matcher: configuration.evaluationEndpointUrl,
-            query: {
-                expression: expression,
+            body: {
+                query: query,
             },
             response: JSON.stringify(result),
         });
 
         const sdk = Sdk.init(configuration);
-        const promise = sdk.evaluator.evaluate(expression);
+        const promise = sdk.evaluator.evaluate(query);
 
         await expect(promise).resolves.toBe(result);
     });

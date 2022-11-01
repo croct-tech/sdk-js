@@ -25,7 +25,7 @@ describe('An evaluator facade', () => {
         jest.restoreAllMocks();
     });
 
-    test('should fail if the expression is empty', () => {
+    test('should fail if the query is empty', () => {
         const factory = new MinimalContextFactory();
         const evaluationFacade = new EvaluatorFacade(evaluator, factory);
 
@@ -34,7 +34,7 @@ describe('An evaluator facade', () => {
         }
 
         expect(evaluate).toThrow(Error);
-        expect(evaluate).toThrow('The expression must be a non-empty string.');
+        expect(evaluate).toThrow('The query must be a non-empty string.');
     });
 
     test('should fail if the options are invalid', () => {
