@@ -47,6 +47,23 @@ test('should load the context only once', () => {
     expect(container.getContext()).toBe(container.getContext());
 });
 
+test('should initialize the preview token store only once', () => {
+    const container = new Container(configuration);
+
+    expect(container.getPreviewTokenStore()).toBe(container.getPreviewTokenStore());
+});
+
+test('should configure the preview token store to use the local storage', () => {
+    const container = new Container(configuration);
+    const previewTokenStore = container.getPreviewTokenStore();
+
+    expect(Object.keys(localStorage)).toHaveLength(0);
+
+    previewTokenStore.setToken(Token.issue(configuration.appId, 'c4r0l'));
+
+    expect(Object.keys(localStorage)).toHaveLength(1);
+});
+
 test('should configure the context with the specified URL sanitizer', () => {
     const sanitizedUrl = 'example://sanitized';
     const sanitizer = jest.fn().mockReturnValue(new URL(sanitizedUrl));
@@ -71,6 +88,12 @@ test('should load the evaluator only once', () => {
     const container = new Container(configuration);
 
     expect(container.getEvaluator()).toBe(container.getEvaluator());
+});
+
+test('should load the content fetcher only once', () => {
+    const container = new Container(configuration);
+
+    expect(container.getContentFetcher()).toBe(container.getContentFetcher());
 });
 
 test('should load the beacon queue only once', () => {
@@ -386,8 +409,10 @@ test('should release managed resources once disposed', async () => {
 
     const tracker = container.getTracker();
     const evaluator = container.getEvaluator();
+    const contentFetcher = container.getContentFetcher();
     const context = container.getContext();
-    const tokenProvider = container.getTokenProvider();
+    const userTokenProvider = container.getUserTokenProvider();
+    const previewTokenStore = container.getPreviewTokenStore();
     const beaconQueue = container.getBeaconQueue();
     const cidAssigner = container.getCidAssigner();
 
@@ -401,8 +426,10 @@ test('should release managed resources once disposed', async () => {
 
     expect(tracker).not.toBe(container.getTracker());
     expect(evaluator).not.toBe(container.getEvaluator());
+    expect(contentFetcher).not.toBe(container.getContentFetcher());
     expect(context).not.toBe(container.getContext());
-    expect(tokenProvider).not.toBe(container.getTokenProvider());
+    expect(userTokenProvider).not.toBe(container.getUserTokenProvider());
+    expect(previewTokenStore).not.toBe(container.getPreviewTokenStore());
     expect(beaconQueue).not.toBe(container.getBeaconQueue());
     expect(cidAssigner).not.toBe(container.getCidAssigner());
 });

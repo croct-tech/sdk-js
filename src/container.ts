@@ -4,7 +4,7 @@ import {NamespacedStorage} from './namespacedStorage';
 import {BackoffPolicy, ArbitraryPolicy} from './retry';
 import {PersistentQueue, MonitoredQueue, CapacityRestrictedQueue} from './queue';
 import {Beacon} from './trackingEvents';
-import {TokenProvider} from './token';
+import {CachedTokenStore, TokenProvider, TokenStore} from './token';
 import {Tracker} from './tracker';
 import {Evaluator} from './evaluator';
 import {encodeJson} from './transformer';
@@ -24,6 +24,7 @@ import {
     SocketChannel,
     SandboxChannel,
 } from './channel';
+import {ContentFetcher} from './contentFetcher';
 
 export type Configuration = {
     appId: string,
@@ -45,11 +46,15 @@ export class Container {
 
     private context?: Context;
 
-    private tokenProvider?: TokenProvider;
+    private userTokenProvider?: TokenProvider;
+
+    private previewTokenStore?: TokenStore;
 
     private tracker?: Tracker;
 
     private evaluator?: Evaluator;
+
+    private contentFetcher?: ContentFetcher;
 
     private cidAssigner?: CidAssigner;
 
@@ -81,9 +86,37 @@ export class Container {
         return new Evaluator({
             appId: this.configuration.appId,
             endpointUrl: this.configuration.evaluationEndpointUrl,
-            tokenProvider: this.getTokenProvider(),
+            tokenProvider: this.getUserTokenProvider(),
             cidAssigner: this.getCidAssigner(),
         });
+    }
+
+    public getContentFetcher(): ContentFetcher {
+        if (this.contentFetcher === undefined) {
+            this.contentFetcher = this.createContentFetcher();
+        }
+
+        return this.contentFetcher;
+    }
+
+    private createContentFetcher(): ContentFetcher {
+        return new ContentFetcher({
+            appId: this.configuration.appId,
+            endpointUrl: this.configuration.bootstrapEndpointUrl,
+            userTokenProvider: this.getUserTokenProvider(),
+            previewTokenProvider: this.getPreviewTokenStore(),
+            cidAssigner: this.getCidAssigner(),
+        });
+    }
+
+    public getPreviewTokenStore(): TokenStore {
+        if (this.previewTokenStore === undefined) {
+            this.previewTokenStore = new CachedTokenStore(
+                new LocalStorageCache(this.getGlobalBrowserStorage('preview'), 'token'),
+            );
+        }
+
+        return this.previewTokenStore;
     }
 
     public getTracker(): Tracker {
@@ -99,7 +132,7 @@ export class Container {
 
         const tracker = new Tracker({
             tab: context.getTab(),
-            tokenProvider: this.getTokenProvider(),
+            tokenProvider: this.getUserTokenProvider(),
             inactivityRetryPolicy: new ArbitraryPolicy([30_000, 30_000, 120_000, 120_000, 300_000, 300_000, 900_000]),
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
@@ -114,13 +147,13 @@ export class Container {
         return tracker;
     }
 
-    public getTokenProvider(): TokenProvider {
-        if (this.tokenProvider === undefined) {
+    public getUserTokenProvider(): TokenProvider {
+        if (this.userTokenProvider === undefined) {
             const context = this.getContext();
-            this.tokenProvider = {getToken: context.getToken.bind(context)};
+            this.userTokenProvider = {getToken: context.getToken.bind(context)};
         }
 
-        return this.tokenProvider;
+        return this.userTokenProvider;
     }
 
     public getContext(): Context {
@@ -336,10 +369,12 @@ export class Container {
         }
 
         delete this.context;
-        delete this.tokenProvider;
+        delete this.userTokenProvider;
+        delete this.previewTokenStore;
         delete this.cidAssigner;
         delete this.tracker;
         delete this.evaluator;
+        delete this.contentFetcher;
         delete this.beaconChannel;
         delete this.beaconQueue;
         delete this.removeTokenSyncListener;
