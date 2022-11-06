@@ -1,4 +1,4 @@
-import {optionsSchema} from '../../src/schema';
+import {evaluationOptionsSchema} from '../../src/schema';
 
 describe('The evaluation option schema', () => {
     test.each([
@@ -15,7 +15,7 @@ describe('The evaluation option schema', () => {
         }],
     ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
-            optionsSchema.validate(value);
+            evaluationOptionsSchema.validate(value);
         }
 
         expect(validate).not.toThrow(Error);
@@ -36,7 +36,7 @@ describe('The evaluation option schema', () => {
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
-            optionsSchema.validate(value);
+            evaluationOptionsSchema.validate(value);
         }
 
         expect(validate).toThrow(Error);
