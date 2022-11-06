@@ -124,6 +124,8 @@ export class Evaluator {
         }
 
         return new Promise((resolve, reject) => {
+            const abortController = new AbortController();
+
             if (options.timeout !== undefined) {
                 window.setTimeout(
                     () => {
@@ -134,13 +136,15 @@ export class Evaluator {
                             status: 408, // Request Timeout
                         };
 
+                        abortController.abort();
+
                         reject(new EvaluationError(response));
                     },
                     options.timeout,
                 );
             }
 
-            const promise = this.fetch(this.configuration.endpointUrl, body);
+            const promise = this.fetch(this.configuration.endpointUrl, body, abortController.signal);
 
             promise.then(
                 response => {
@@ -167,20 +171,22 @@ export class Evaluator {
                     });
                 },
                 error => {
-                    const errorResponse: ErrorResponse = {
-                        title: formatMessage(error),
-                        type: EvaluationErrorType.UNEXPECTED_ERROR,
-                        detail: 'Please try again or contact Croct support if the error persists.',
-                        status: 500, // Internal Server Error
-                    };
-
-                    reject(new EvaluationError(errorResponse));
+                    if (!abortController.signal.aborted) {
+                        reject(
+                            new EvaluationError({
+                                title: formatMessage(error),
+                                type: EvaluationErrorType.UNEXPECTED_ERROR,
+                                detail: 'Please try again or contact Croct support if the error persists.',
+                                status: 500, // Internal Server Error
+                            }),
+                        );
+                    }
                 },
             );
         });
     }
 
-    private async fetch(endpoint: string, body: JsonObject): Promise<Response> {
+    private async fetch(endpoint: string, body: JsonObject, signal: AbortSignal): Promise<Response> {
         const {tokenProvider, cidAssigner, appId} = this.configuration;
         const token = tokenProvider.getToken();
         const cid = await cidAssigner.assignCid();
@@ -194,6 +200,7 @@ export class Evaluator {
         return window.fetch(endpoint, {
             method: 'POST',
             headers: headers,
+            signal: signal,
             credentials: 'include',
             body: JSON.stringify(body),
         });
