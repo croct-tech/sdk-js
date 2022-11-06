@@ -3,7 +3,7 @@ import {EvaluatorFacade, MinimalContextFactory, TabContextFactory} from '../../s
 import {Evaluator, Campaign, EvaluationOptions, Page} from '../../src/evaluator';
 import {Tab} from '../../src/tab';
 
-const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const {timeZone} = Intl.DateTimeFormat().resolvedOptions();
 
 beforeEach(() => {
     Object.defineProperty(window.document, 'referrer', {
@@ -25,7 +25,7 @@ describe('An evaluator facade', () => {
         jest.restoreAllMocks();
     });
 
-    test('should fail if the expression is empty', () => {
+    test('should fail if the query is empty', () => {
         const factory = new MinimalContextFactory();
         const evaluationFacade = new EvaluatorFacade(evaluator, factory);
 
@@ -34,7 +34,7 @@ describe('An evaluator facade', () => {
         }
 
         expect(evaluate).toThrow(Error);
-        expect(evaluate).toThrow('The expression must be a non-empty string.');
+        expect(evaluate).toThrow('The query must be a non-empty string.');
     });
 
     test('should fail if the options are invalid', () => {
@@ -94,7 +94,7 @@ describe('An evaluator facade', () => {
                     url: url.toString(),
                     referrer: referrer,
                 },
-                timezone: timezone,
+                timeZone: timeZone,
                 campaign: {
                     name: 'campaign',
                     source: 'source',
@@ -122,7 +122,7 @@ describe('A minimal context factory', () => {
         expect(context.attributes).toEqual(attributes);
         expect(context.campaign).toBeUndefined();
         expect(context.page).toBeUndefined();
-        expect(context.timezone).toBeUndefined();
+        expect(context.timeZone).toBeUndefined();
     });
 
     test('can load an empty context', () => {
@@ -177,6 +177,6 @@ describe('A tab context factory', () => {
         expect(context.attributes).toEqual(attributes);
         expect(context.campaign).toEqual(campaign);
         expect(context.page).toEqual(page);
-        expect(context.timezone).toBe(timezone);
+        expect(context.timeZone).toBe(timeZone);
     });
 });

@@ -1,7 +1,7 @@
 import {JsonObject, JsonValue} from '@croct/json';
 import {Evaluator, Campaign, EvaluationContext, Page} from '../evaluator';
 import {Tab} from '../tab';
-import {optionsSchema} from '../schema';
+import {evaluationOptionsSchema as optionsSchema} from '../schema';
 import {formatCause} from '../error';
 
 export type EvaluationOptions = {
@@ -35,14 +35,14 @@ export class EvaluatorFacade {
         this.contextFactory = contextFactory;
     }
 
-    public evaluate(expression: string, options: EvaluationOptions = {}): Promise<JsonValue> {
-        if (typeof expression !== 'string' || expression.length === 0) {
-            throw new Error('The expression must be a non-empty string.');
+    public evaluate(query: string, options: EvaluationOptions = {}): Promise<JsonValue> {
+        if (typeof query !== 'string' || query.length === 0) {
+            throw new Error('The query must be a non-empty string.');
         }
 
         validate(options);
 
-        return this.evaluator.evaluate(expression, {
+        return this.evaluator.evaluate(query, {
             timeout: options.timeout,
             context: this.contextFactory.createContext(options.attributes),
         });
@@ -83,10 +83,10 @@ export class TabContextFactory implements ContextFactory {
 
         context.page = page;
 
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || null;
 
-        if (timezone !== null) {
-            context.timezone = timezone;
+        if (timeZone !== null) {
+            context.timeZone = timeZone;
         }
 
         const campaign = TabContextFactory.createCampaign(url);
