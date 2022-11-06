@@ -1,3 +1,4 @@
+import {JsonObject} from '@croct/json';
 import {base64UrlDecode, base64UrlEncode} from '../base64Url';
 import {tokenSchema} from '../schema';
 import {formatCause} from '../error';
@@ -9,7 +10,7 @@ export type Headers = {
     appId: string,
 };
 
-export type Claims = {
+type Claims = {
     iss: string,
     aud: string|string[],
     iat: number,
@@ -18,16 +19,18 @@ export type Claims = {
     jid?: string,
 };
 
+export type TokenPayload = JsonObject & Claims;
+
 export class Token {
     private readonly headers: Headers;
 
-    private readonly claims: Claims;
+    private readonly payload: TokenPayload;
 
     private readonly signature: string;
 
-    private constructor(headers: Headers, claims: Claims, signature = '') {
+    private constructor(headers: Headers, payload: TokenPayload, signature = '') {
         this.headers = headers;
-        this.claims = claims;
+        this.payload = payload;
         this.signature = signature;
     }
 
@@ -72,13 +75,13 @@ export class Token {
         }
 
         let headers;
-        let claims;
+        let payload;
         let
             signature;
 
         try {
             headers = JSON.parse(base64UrlDecode(parts[0]));
-            claims = JSON.parse(base64UrlDecode(parts[1]));
+            payload = JSON.parse(base64UrlDecode(parts[1]));
 
             if (parts.length === 3) {
                 signature = base64UrlDecode(parts[2]);
@@ -88,20 +91,24 @@ export class Token {
         }
 
         try {
-            tokenSchema.validate({headers, claims, signature});
+            tokenSchema.validate({
+                headers: headers,
+                payload: payload,
+                signature: signature,
+            });
         } catch (violation) {
             throw new Error(`The token is invalid: ${formatCause(violation)}`);
         }
 
-        return new Token(headers as Headers, claims as Claims, signature as string);
+        return new Token(headers as Headers, payload as TokenPayload, signature as string);
     }
 
     public getHeaders(): Headers {
         return {...this.headers};
     }
 
-    public getClaims(): Claims {
-        return {...this.claims};
+    public getPayload(): TokenPayload {
+        return {...this.payload};
     }
 
     public getSignature(): string {
@@ -109,15 +116,15 @@ export class Token {
     }
 
     public isAnonymous(): boolean {
-        return this.claims.sub === undefined;
+        return this.payload.sub === undefined;
     }
 
     public getSubject(): string | null {
-        return this.claims.sub !== undefined ? this.claims.sub : null;
+        return this.payload.sub !== undefined ? this.payload.sub : null;
     }
 
     public getIssueTime(): number {
-        return this.claims.iat;
+        return this.payload.iat;
     }
 
     public toJSON(): string {
@@ -126,10 +133,10 @@ export class Token {
 
     public toString(): string {
         const headers = base64UrlEncode(JSON.stringify(this.headers));
-        const claims = base64UrlEncode(JSON.stringify(this.claims));
+        const payload = base64UrlEncode(JSON.stringify(this.payload));
         const signature = base64UrlEncode(this.signature);
 
-        return `${headers}.${claims}.${signature}`;
+        return `${headers}.${payload}.${signature}`;
     }
 }
 

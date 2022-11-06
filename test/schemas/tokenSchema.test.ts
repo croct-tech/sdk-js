@@ -9,7 +9,7 @@ describe('The token schema', () => {
                 kid: 'key-id',
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             },
-            claims: {
+            payload: {
                 iss: 'croct.io',
                 aud: 'croct.io',
                 iat: 1440982923,
@@ -25,7 +25,7 @@ describe('The token schema', () => {
                 alg: 'none',
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             },
-            claims: {
+            payload: {
                 iss: 'croct.io',
                 aud: 'croct.io',
                 iat: 1440982923,
@@ -37,10 +37,25 @@ describe('The token schema', () => {
                 alg: 'none',
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             },
-            claims: {
+            payload: {
                 iss: 'croct.io',
                 aud: ['croct.io'],
                 iat: 1440982923,
+            },
+        }],
+        [{
+            headers: {
+                typ: 'JWT',
+                alg: 'none',
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            },
+            payload: {
+                iss: 'croct.io',
+                aud: ['croct.io'],
+                iat: 1440982923,
+                metadata: {
+                    foo: 'bar',
+                },
             },
         }],
     ])('should allow %s', (value: Record<string, unknown>) => {
@@ -58,7 +73,7 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
@@ -73,7 +88,7 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
@@ -88,7 +103,7 @@ describe('The token schema', () => {
                     alg: 0,
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
@@ -102,7 +117,7 @@ describe('The token schema', () => {
                     typ: 'JWT',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
@@ -117,7 +132,7 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: 0,
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
@@ -132,7 +147,7 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: 'foo',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
@@ -146,7 +161,7 @@ describe('The token schema', () => {
                     typ: 'JWT',
                     alg: 'none',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
@@ -161,12 +176,12 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     aud: 'croct.io',
                     iat: 1440982923,
                 },
             },
-            'Missing property \'/claims/iss\'.',
+            'Missing property \'/payload/iss\'.',
         ],
         [
             {
@@ -175,13 +190,13 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 0,
                     aud: 'croct.io',
                     iat: 1440982923,
                 },
             },
-            'Expected value of type string at path \'/claims/iss\', actual integer.',
+            'Expected value of type string at path \'/payload/iss\', actual integer.',
         ],
         [
             {
@@ -190,13 +205,13 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 0,
                     iat: 1440982923,
                 },
             },
-            'Expected value of type string or array at path \'/claims/aud\', actual integer.',
+            'Expected value of type string or array at path \'/payload/aud\', actual integer.',
         ],
         [
             {
@@ -205,12 +220,12 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     iat: 1440982923,
                 },
             },
-            'Missing property \'/claims/aud\'.',
+            'Missing property \'/payload/aud\'.',
         ],
         [
             {
@@ -219,13 +234,13 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: -1,
                 },
             },
-            'Expected a value greater than or equal to 0 at path \'/claims/iat\', actual -1.',
+            'Expected a value greater than or equal to 0 at path \'/payload/iat\', actual -1.',
         ],
         [
             {
@@ -234,13 +249,13 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 'foo',
                 },
             },
-            'Expected value of type number at path \'/claims/iat\', actual string.',
+            'Expected value of type number at path \'/payload/iat\', actual string.',
         ],
         [
             {
@@ -249,12 +264,12 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                 },
             },
-            'Missing property \'/claims/iat\'.',
+            'Missing property \'/payload/iat\'.',
         ],
         [
             {
@@ -263,14 +278,14 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
                     sub: '',
                 },
             },
-            'Expected at least 1 character at path \'/claims/sub\', actual 0.',
+            'Expected at least 1 character at path \'/payload/sub\', actual 0.',
         ],
         [
             {
@@ -279,14 +294,14 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
                     sub: 0,
                 },
             },
-            'Expected value of type string at path \'/claims/sub\', actual integer.',
+            'Expected value of type string at path \'/payload/sub\', actual integer.',
         ],
         [
             {
@@ -295,14 +310,14 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
                     exp: -1,
                 },
             },
-            'Expected a value greater than or equal to 0 at path \'/claims/exp\', actual -1.',
+            'Expected a value greater than or equal to 0 at path \'/payload/exp\', actual -1.',
         ],
         [
             {
@@ -311,14 +326,14 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
                     exp: 'foo',
                 },
             },
-            'Expected value of type number at path \'/claims/exp\', actual string.',
+            'Expected value of type number at path \'/payload/exp\', actual string.',
         ],
         [
             {
@@ -327,14 +342,14 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
                     jti: 'foo',
                 },
             },
-            'Invalid uuid format at path \'/claims/jti\'.',
+            'Invalid uuid format at path \'/payload/jti\'.',
         ],
         [
             {
@@ -343,18 +358,18 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
                     jti: 0,
                 },
             },
-            'Expected value of type string at path \'/claims/jti\', actual integer',
+            'Expected value of type string at path \'/payload/jti\', actual integer',
         ],
         [
             {
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,
@@ -370,7 +385,7 @@ describe('The token schema', () => {
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
             },
-            'Missing property \'/claims\'.',
+            'Missing property \'/payload\'.',
         ],
 
         [
@@ -380,7 +395,7 @@ describe('The token schema', () => {
                     alg: 'none',
                     appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 },
-                claims: {
+                payload: {
                     iss: 'croct.io',
                     aud: 'croct.io',
                     iat: 1440982923,

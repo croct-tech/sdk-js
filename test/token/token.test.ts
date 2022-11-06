@@ -20,7 +20,7 @@ describe('A token', () => {
     test('may contain claims', () => {
         const token = Token.issue(appId, 'c4r0l', 1440982923);
 
-        expect(token.getClaims()).toEqual({
+        expect(token.getPayload()).toEqual({
             iss: 'croct.io',
             aud: 'croct.io',
             iat: 1440982923,
@@ -84,7 +84,7 @@ describe('A token', () => {
             alg: 'none',
             appId: appId,
         });
-        expect(anonymousToken.getClaims()).toEqual({
+        expect(anonymousToken.getPayload()).toEqual({
             iss: 'croct.io',
             aud: 'croct.io',
             iat: 1440982923,
@@ -106,7 +106,7 @@ describe('A token', () => {
             appId: appId,
         });
 
-        expect(token.getClaims()).toEqual({
+        expect(token.getPayload()).toEqual({
             sub: 'c4r0l',
             iss: 'croct.io',
             aud: ['croct.io'],

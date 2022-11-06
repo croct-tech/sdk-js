@@ -1,7 +1,7 @@
 import {ObjectType, StringType, NumberType, UnionType, ArrayType} from '../validation';
 
 export const tokenSchema = new ObjectType({
-    required: ['headers', 'claims'],
+    required: ['headers', 'payload'],
     properties: {
         headers: new ObjectType({
             required: ['typ', 'alg', 'appId'],
@@ -14,7 +14,7 @@ export const tokenSchema = new ObjectType({
                 }),
             },
         }),
-        claims: new ObjectType({
+        payload: new ObjectType({
             required: ['iss', 'aud', 'iat'],
             properties: {
                 iss: new StringType(),
@@ -35,6 +35,7 @@ export const tokenSchema = new ObjectType({
                     format: 'uuid',
                 }),
             },
+            additionalProperties: true,
         }),
         signature: new StringType(),
     },
