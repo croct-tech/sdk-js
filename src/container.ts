@@ -34,6 +34,7 @@ export type Configuration = {
     test: boolean,
     trackerEndpointUrl: string,
     evaluationEndpointUrl: string,
+    contentEndpointUrl: string,
     bootstrapEndpointUrl: string,
     beaconQueueSize: number,
     logger?: Logger,
@@ -102,7 +103,7 @@ export class Container {
     private createContentFetcher(): ContentFetcher {
         return new ContentFetcher({
             appId: this.configuration.appId,
-            endpointUrl: this.configuration.bootstrapEndpointUrl,
+            endpointUrl: this.configuration.contentEndpointUrl,
             userTokenProvider: this.getUserTokenProvider(),
             previewTokenProvider: this.getPreviewTokenStore(),
             cidAssigner: this.getCidAssigner(),

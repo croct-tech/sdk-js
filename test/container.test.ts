@@ -25,6 +25,7 @@ const configuration: Configuration = {
     debug: false,
     test: false,
     bootstrapEndpointUrl: 'https://localtest/boostrap',
+    contentEndpointUrl: 'https://localtest/content',
     evaluationEndpointUrl: 'https://localtest/evaluate',
     trackerEndpointUrl: 'wss://localtest/connect',
 };

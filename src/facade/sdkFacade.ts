@@ -2,7 +2,7 @@ import {EvaluatorFacade, TabContextFactory} from './evaluatorFacade';
 import {TrackerFacade} from './trackerFacade';
 import {Context, TokenScope} from '../context';
 import {UserFacade} from './userFacade';
-import {Token} from '../token';
+import {Token, TokenStore} from '../token';
 import {formatCause} from '../error';
 import {sdkFacadeConfigurationSchema} from '../schema';
 import {Sdk} from '../sdk';
@@ -13,6 +13,7 @@ import {EventManager} from '../eventManager';
 import {CidAssigner} from '../cid';
 import {PartialTrackingEvent} from '../trackingEvents';
 import {UrlSanitizer} from '../tab';
+import {ContentFetcherFacade} from './contentFetcherFacade';
 
 export type Configuration = {
     appId: string,
@@ -27,6 +28,7 @@ export type Configuration = {
     urlSanitizer?: UrlSanitizer,
     trackerEndpointUrl?: string,
     evaluationEndpointUrl?: string,
+    contentEndpointUrl?: string,
     bootstrapEndpointUrl?: string,
 };
 
@@ -52,6 +54,8 @@ export class SdkFacade {
     private sessionFacade?: SessionFacade;
 
     private evaluatorFacade?: EvaluatorFacade;
+
+    private contentFetcherFacade?: ContentFetcherFacade;
 
     private constructor(sdk: Sdk) {
         this.sdk = sdk;
@@ -100,6 +104,10 @@ export class SdkFacade {
         return this.sdk.cidAssigner;
     }
 
+    public get previewTokenStore(): TokenStore {
+        return this.sdk.previewTokenStore;
+    }
+
     public get tracker(): TrackerFacade {
         if (this.trackerFacade === undefined) {
             this.trackerFacade = new TrackerFacade(this.sdk.tracker);
@@ -133,6 +141,17 @@ export class SdkFacade {
         }
 
         return this.evaluatorFacade;
+    }
+
+    public get contentFetcher(): ContentFetcherFacade {
+        if (this.contentFetcherFacade === undefined) {
+            this.contentFetcherFacade = new ContentFetcherFacade(
+                this.sdk.contentFetcher,
+                new TabContextFactory(this.sdk.context.getTab()),
+            );
+        }
+
+        return this.contentFetcherFacade;
     }
 
     public get eventManager(): EventManager<Record<string, Record<string, unknown>>, SdkEventMap> {

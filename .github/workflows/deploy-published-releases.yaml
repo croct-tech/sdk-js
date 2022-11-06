@@ -9,7 +9,8 @@ env:
   BOOTSTRAP_ENDPOINT: https://api.croct.io/client/web/bootstrap
   TRACKER_ENDPOINT: wss://api.croct.io/client/web/connect
   EVALUATION_ENDPOINT: https://api.croct.io/client/web/evaluate
-  MAX_EXPRESSION_LENGHT: 500
+  CONTENT_ENDPOINT: https://api.croct.io/content/web/evaluate
+  MAX_QUERY_LENGTH: 500
 
 jobs:
   deploy:
@@ -46,8 +47,9 @@ jobs:
           sed -i -e "s~<@version@>~${GITHUB_REF##*/}~" constants.js
           sed -i -e "s~<@trackerEndpointUrl@>~${TRACKER_ENDPOINT}~" constants.js
           sed -i -e "s~<@evaluationEndpointUrl@>~${EVALUATION_ENDPOINT}~" constants.js
+          sed -i -e "s~<@contentEndpointUrl@>~${CONTENT_ENDPOINT}~" constants.js
           sed -i -e "s~<@bootstrapEndpointUrl@>~${BOOTSTRAP_ENDPOINT}~" constants.js
-          sed -i -e "s~parseInt('<@maxExpressionLength@>', 10)~${MAX_EXPRESSION_LENGHT}~" constants.js
+          sed -i -e "s~parseInt('<@maxQueryLength@>', 10)~${MAX_QUERY_LENGTH}~" constants.js
 
       - name: Publish pre-release to NPM
         if: ${{ github.event.release.prerelease }}

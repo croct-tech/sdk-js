@@ -44,7 +44,7 @@ export type FetchOptions = {
     context?: EvaluationContext,
 };
 
-export type FetchResponse<P extends JsonObject> = {
+export type FetchResponse<P extends JsonObject = JsonObject> = {
     content: P,
 };
 

@@ -82,8 +82,6 @@ describe('An evaluator facade', () => {
         const tab = new Tab('1', true);
         const evaluationFacade = new EvaluatorFacade(evaluator, new TabContextFactory(tab));
 
-        evaluationFacade.evaluate('foo', {timeout: 5, attributes: {foo: 'bar'}});
-
         const options: EvaluationOptions = {
             context: {
                 attributes: {
@@ -106,7 +104,14 @@ describe('An evaluator facade', () => {
             timeout: 5,
         };
 
-        expect(evaluator.evaluate).toHaveBeenNthCalledWith(1, 'foo', options);
+        const query = 'foo';
+
+        evaluationFacade.evaluate(query, {
+            timeout: options.timeout,
+            attributes: options?.context?.attributes,
+        });
+
+        expect(evaluator.evaluate).toHaveBeenNthCalledWith(1, query, options);
     });
 });
 

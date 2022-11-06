@@ -1,5 +1,5 @@
 import {SdkFacade, Configuration} from '../../src/facade/sdkFacade';
-import {Token} from '../../src/token';
+import {InMemoryTokenStore, Token} from '../../src/token';
 import {Sdk} from '../../src';
 import {Context} from '../../src/context';
 import {UserFacade, SessionFacade, TrackerFacade} from '../../src/facade';
@@ -11,6 +11,8 @@ import {SdkEventMap} from '../../src/sdkEvents';
 import {CidAssigner} from '../../src/cid';
 import {Evaluator} from '../../src/evaluator';
 import {Tab, UrlSanitizer} from '../../src/tab';
+import {ContentFetcher, FetchResponse} from '../../src/contentFetcher';
+import {FetchOptions} from '../../src/facade/contentFetcherFacade';
 
 describe('A SDK facade', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
@@ -92,6 +94,7 @@ describe('A SDK facade', () => {
             track: false,
             trackerEndpointUrl: 'https://api.croct.io/tracker',
             evaluationEndpointUrl: 'https://api.croct.io/evaluation',
+            contentEndpointUrl: 'https://api.croct.io/content',
             bootstrapEndpointUrl: 'https://api.croct.io/bootstrap',
             debug: false,
             test: false,
@@ -105,6 +108,7 @@ describe('A SDK facade', () => {
             appId: appId,
             trackerEndpointUrl: 'https://api.croct.io/tracker',
             evaluationEndpointUrl: 'https://api.croct.io/evaluation',
+            contentEndpointUrl: 'https://api.croct.io/content',
             bootstrapEndpointUrl: 'https://api.croct.io/bootstrap',
             debug: false,
             test: false,
@@ -323,6 +327,46 @@ describe('A SDK facade', () => {
 
         expect(evaluator.evaluate).toHaveBeenCalledWith('1 + 1', expect.objectContaining({timeout: 5}));
         expect(evaluator.evaluate).toHaveBeenCalledTimes(1);
+    });
+
+    test('should provide a content fetcher facade', async () => {
+        const tab = new Tab('1', true);
+        const result: FetchResponse<{example: string}> = {
+            content: {
+                example: 'example',
+            },
+        };
+
+        const fetcher = jest.createMockFromModule<{ContentFetcher: ContentFetcher}>('../../src/contentFetcher')
+            .ContentFetcher;
+
+        fetcher.fetch = jest.fn(() => Promise.resolve(result)) as typeof fetcher.fetch;
+
+        const context = createContextMock();
+        context.getTab = jest.fn(() => tab);
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'contentFetcher', 'get').mockReturnValue(fetcher);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        const slotId = 'home-banner';
+        const options: FetchOptions = {timeout: 5};
+
+        await expect(sdkFacade.contentFetcher.fetch(slotId, options)).resolves.toBe(result);
+
+        expect(fetcher.fetch).toHaveBeenCalledWith(slotId, expect.objectContaining(options));
+        expect(fetcher.fetch).toHaveBeenCalledTimes(1);
     });
 
     test('should provide the context', () => {
@@ -890,6 +934,26 @@ describe('A SDK facade', () => {
         await expect(sdkFacade.cidAssigner.assignCid()).resolves.toEqual('123');
 
         expect(cidAssigner.assignCid).toHaveBeenCalled();
+    });
+
+    test('should provide a preview token store', async () => {
+        const tokenStore = new InMemoryTokenStore();
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'previewTokenStore', 'get').mockReturnValue(tokenStore);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        await expect(sdkFacade.previewTokenStore).toBe(tokenStore);
     });
 
     test('should allow to subscribe and unsubscribe to events', () => {

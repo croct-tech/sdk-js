@@ -25,6 +25,7 @@ describe('A string type', () => {
         ['http://www.foo.com.br', 'url'],
         ['foo://example.com:3000/path?here=there#fragment', 'uri-reference'],
         ['http://www.foo.com.br', 'uri-reference'],
+        ['http://www.foo.com.br', 'uri-reference'],
         ['/foo', 'uri-reference'],
         ['_', 'identifier'],
         ['a', 'identifier'],

@@ -6,6 +6,7 @@ import {Token} from '../src/token';
 import {TabEventEmulator} from './utils/tabEventEmulator';
 
 import {BeaconPayload, NothingChanged} from '../src/trackingEvents';
+import {FetchResponse} from '../src/contentFetcher';
 
 jest.mock('../src/constants', () => ({
     VERSION: '0.0.1-test',
@@ -24,6 +25,7 @@ describe('A SDK', () => {
         urlSanitizer: jest.fn().mockImplementation((url: string) => new URL(url)),
         eventMetadata: {},
         bootstrapEndpointUrl: 'https://localtest/boostrap',
+        contentEndpointUrl: 'https://localtest/content',
         evaluationEndpointUrl: 'https://localtest/evaluate',
         trackerEndpointUrl: 'wss://localtest/connect',
     };
@@ -366,7 +368,7 @@ describe('A SDK', () => {
     });
 
     test('should configure the evaluator', async () => {
-        const expression = '1 + 2';
+        const query = '1 + 2';
         const result = 3;
 
         fetchMock.mock({
@@ -376,24 +378,60 @@ describe('A SDK', () => {
         });
 
         fetchMock.mock({
-            method: 'GET',
+            method: 'POST',
             matcher: configuration.evaluationEndpointUrl,
-            query: {
-                expression: expression,
+            body: {
+                query: query,
             },
             response: JSON.stringify(result),
         });
 
         const sdk = Sdk.init(configuration);
-        const promise = sdk.evaluator.evaluate(expression);
+        const promise = sdk.evaluator.evaluate(query);
 
         await expect(promise).resolves.toBe(result);
+    });
+
+    test('should configure the content fetcher', async () => {
+        const slotId = 'home-banner';
+        const result: FetchResponse = {
+            content: {
+                title: 'Hello world',
+            },
+        };
+
+        fetchMock.mock({
+            method: 'GET',
+            matcher: configuration.bootstrapEndpointUrl,
+            response: '123',
+        });
+
+        fetchMock.mock({
+            method: 'POST',
+            matcher: configuration.contentEndpointUrl,
+            response: result,
+        });
+
+        const sdk = Sdk.init(configuration);
+        const promise = sdk.contentFetcher.fetch(slotId);
+
+        await expect(promise).resolves.toEqual(result);
     });
 
     test('should provide a CID assigner', async () => {
         const sdk = Sdk.init(configuration);
 
         await expect(sdk.cidAssigner.assignCid()).resolves.toEqual(configuration.cid);
+    });
+
+    test('should provide a preview token store', async () => {
+        const sdk = Sdk.init(configuration);
+
+        expect(Object.keys(localStorage)).toHaveLength(0);
+
+        sdk.previewTokenStore.setToken(Token.issue(configuration.appId, 'c4r0l'));
+
+        expect(Object.keys(localStorage)).toHaveLength(1);
     });
 
     test('should provide an event manager to allow inter-service communication', () => {

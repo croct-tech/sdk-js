@@ -30,6 +30,9 @@ export const sdkConfigurationSchema = new ObjectType({
         evaluationEndpointUrl: new StringType({
             format: 'url',
         }),
+        contentEndpointUrl: new StringType({
+            format: 'url',
+        }),
         bootstrapEndpointUrl: new StringType({
             format: 'url',
         }),

@@ -1,7 +1,12 @@
 import {Container} from './container';
 import {Context, TokenScope} from './context';
 import {Logger} from './logging';
-import {BOOTSTRAP_ENDPOINT_URL, EVALUATION_ENDPOINT_URL, TRACKER_ENDPOINT_URL, VERSION} from './constants';
+import {
+    BOOTSTRAP_ENDPOINT_URL, CONTENT_ENDPOINT_URL,
+    EVALUATION_ENDPOINT_URL,
+    TRACKER_ENDPOINT_URL,
+    VERSION,
+} from './constants';
 import {sdkConfigurationSchema} from './schema';
 import {formatCause} from './error';
 import {Tracker} from './tracker';
@@ -10,6 +15,8 @@ import {SdkEventMap} from './sdkEvents';
 import {EventManager} from './eventManager';
 import {CidAssigner} from './cid';
 import {UrlSanitizer} from './tab';
+import {ContentFetcher} from './contentFetcher';
+import {TokenStore} from './token';
 
 export type Configuration = {
     appId: string,
@@ -19,6 +26,7 @@ export type Configuration = {
     cid?: string,
     trackerEndpointUrl?: string,
     evaluationEndpointUrl?: string,
+    contentEndpointUrl?: string,
     bootstrapEndpointUrl?: string,
     beaconQueueSize?: number,
     urlSanitizer?: UrlSanitizer,
@@ -63,6 +71,7 @@ export class Sdk {
         const container = new Container({
             ...containerConfiguration,
             evaluationEndpointUrl: containerConfiguration.evaluationEndpointUrl ?? EVALUATION_ENDPOINT_URL,
+            contentEndpointUrl: containerConfiguration.contentEndpointUrl ?? CONTENT_ENDPOINT_URL,
             trackerEndpointUrl: containerConfiguration.trackerEndpointUrl ?? TRACKER_ENDPOINT_URL,
             bootstrapEndpointUrl: containerConfiguration.bootstrapEndpointUrl ?? BOOTSTRAP_ENDPOINT_URL,
             beaconQueueSize: containerConfiguration.beaconQueueSize ?? 100,
@@ -108,6 +117,10 @@ export class Sdk {
         return this.container.getCidAssigner();
     }
 
+    public get previewTokenStore(): TokenStore {
+        return this.container.getPreviewTokenStore();
+    }
+
     public get context(): Context {
         return this.container.getContext();
     }
@@ -118,6 +131,10 @@ export class Sdk {
 
     public get evaluator(): Evaluator {
         return this.container.getEvaluator();
+    }
+
+    public get contentFetcher(): ContentFetcher {
+        return this.container.getContentFetcher();
     }
 
     public get eventManager(): EventManager<SdkEventMap> {
