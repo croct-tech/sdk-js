@@ -2,7 +2,8 @@ import {Container} from './container';
 import {Context, TokenScope} from './context';
 import {Logger} from './logging';
 import {
-    BOOTSTRAP_ENDPOINT_URL, CONTENT_ENDPOINT_URL,
+    BOOTSTRAP_ENDPOINT_URL,
+    CONTENT_ENDPOINT_URL,
     EVALUATION_ENDPOINT_URL,
     TRACKER_ENDPOINT_URL,
     VERSION,

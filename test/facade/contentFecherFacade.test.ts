@@ -14,7 +14,7 @@ beforeEach(() => {
     });
 });
 
-describe('An content fetcher facade', () => {
+describe('A content fetcher facade', () => {
     let fetcher: ContentFetcher;
 
     beforeEach(() => {
@@ -59,7 +59,8 @@ describe('An content fetcher facade', () => {
             fetcherFacade.fetch('home-banner', null as unknown as FetchFacadeOptions);
         }
 
-        expect(evaluate).toThrow(new Error('The options must be an object.'));
+        expect(evaluate)
+            .toThrow(new Error('Invalid options: expected value of type object at path \'/\', actual null.'));
     });
 
     test('should delegate the fetching to the content fetcher', () => {

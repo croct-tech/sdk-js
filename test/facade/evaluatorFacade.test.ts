@@ -58,7 +58,8 @@ describe('An evaluator facade', () => {
         }
 
         expect(evaluate).toThrow(Error);
-        expect(evaluate).toThrow('The options must be an object.');
+        expect(evaluate)
+            .toThrow('Invalid options: expected value of type object at path \'/\', actual null.');
     });
 
     test('should delegate the evaluation to the evaluator', () => {

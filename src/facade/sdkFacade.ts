@@ -33,10 +33,6 @@ export type Configuration = {
 };
 
 function validateConfiguration(configuration: unknown): asserts configuration is Configuration {
-    if (typeof configuration !== 'object' || configuration === null) {
-        throw new Error('The configuration must be a key-value map.');
-    }
-
     try {
         sdkFacadeConfigurationSchema.validate(configuration);
     } catch (violation) {

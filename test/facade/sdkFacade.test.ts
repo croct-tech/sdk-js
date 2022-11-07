@@ -45,7 +45,8 @@ describe('A SDK facade', () => {
         }
 
         expect(initialize).toThrow(Error);
-        expect(initialize).toThrow('The configuration must be a key-value map.');
+        expect(initialize)
+            .toThrow('Invalid configuration: expected value of type object at path \'/\', actual null.');
     });
 
     test('should fail if the configuration is invalid', () => {

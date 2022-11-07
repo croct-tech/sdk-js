@@ -10,10 +10,6 @@ export type EvaluationOptions = {
 };
 
 function validate(options: unknown): asserts options is EvaluationOptions {
-    if (typeof options !== 'object' || options === null) {
-        throw new Error('The options must be an object.');
-    }
-
     try {
         optionsSchema.validate(options);
     } catch (violation) {

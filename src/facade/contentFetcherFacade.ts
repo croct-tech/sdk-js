@@ -9,10 +9,6 @@ export type FetchOptions = Omit<BaseOptions, 'context'> & {
 };
 
 function validate(options: unknown): asserts options is FetchOptions {
-    if (typeof options !== 'object' || options === null) {
-        throw new Error('The options must be an object.');
-    }
-
     try {
         optionsSchema.validate(options);
     } catch (violation) {
