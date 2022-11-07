@@ -76,8 +76,7 @@ export class Token {
 
         let headers;
         let payload;
-        let
-            signature;
+        let signature;
 
         try {
             headers = JSON.parse(base64UrlDecode(parts[0]));
@@ -90,6 +89,10 @@ export class Token {
             throw new Error('The token is corrupted.');
         }
 
+        return Token.of(headers, payload, signature);
+    }
+
+    public static of(headers: Headers, payload: TokenPayload, signature = ''): Token {
         try {
             tokenSchema.validate({
                 headers: headers,
