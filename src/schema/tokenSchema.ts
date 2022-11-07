@@ -4,7 +4,7 @@ export const tokenSchema = new ObjectType({
     required: ['headers', 'payload'],
     properties: {
         headers: new ObjectType({
-            required: ['typ', 'alg', 'appId'],
+            required: ['typ', 'alg'],
             properties: {
                 typ: new StringType(),
                 alg: new StringType(),

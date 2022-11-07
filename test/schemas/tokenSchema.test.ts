@@ -23,7 +23,6 @@ describe('The token schema', () => {
             headers: {
                 typ: 'JWT',
                 alg: 'none',
-                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             },
             payload: {
                 iss: 'croct.io',
@@ -35,7 +34,6 @@ describe('The token schema', () => {
             headers: {
                 typ: 'JWT',
                 alg: 'none',
-                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             },
             payload: {
                 iss: 'croct.io',
@@ -47,7 +45,6 @@ describe('The token schema', () => {
             headers: {
                 typ: 'JWT',
                 alg: 'none',
-                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             },
             payload: {
                 iss: 'croct.io',
