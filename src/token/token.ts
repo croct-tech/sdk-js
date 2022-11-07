@@ -7,7 +7,7 @@ export type Headers = {
     typ: string,
     alg: string,
     kid?: string,
-    appId: string,
+    appId?: string,
 };
 
 type Claims = {
