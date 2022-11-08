@@ -12,6 +12,8 @@ jest.mock('../src/constants', () => ({
 
 describe('A content fetcher', () => {
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
+    const apiKey = '00000000-0000-0000-0000-000000000000';
+
     const contentId = 'hero-banner';
     const content = {
         content: {
@@ -29,6 +31,16 @@ describe('A content fetcher', () => {
     afterEach(() => {
         fetchMock.reset();
         jest.clearAllMocks();
+    });
+
+    test('should require either an application ID or API key', async () => {
+        await expect(() => new ContentFetcher({}))
+            .toThrow(new Error('Either the application ID or the API key must be provided.'));
+    });
+
+    test('should require either an application ID or API key, but not both', async () => {
+        await expect(() => new ContentFetcher({apiKey: apiKey, appId: appId}))
+            .toThrow(new Error('Either the application ID or the API key must be provided.'));
     });
 
     test('should use the specified base endpoint', async () => {
@@ -50,19 +62,18 @@ describe('A content fetcher', () => {
 
     test('should use the external endpoint for static content', async () => {
         const fetcher = new ContentFetcher({
-            appId: appId,
+            apiKey: apiKey,
         });
 
         const options: FetchOptions = {
             static: true,
-            apiKey: '00000000-0000-0000-0000-000000000000',
         };
 
         fetchMock.mock({
             ...requestMatcher,
             matcher: `${CONTENT_ENDPOINT_URL}/external/web/static-content`,
             headers: {
-                'X-Api-Key': options.apiKey,
+                'X-Api-Key': apiKey,
             },
             response: content,
         });
@@ -70,16 +81,19 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    test('should use the external endpoint when specifying an API key', async () => {
+    test('should requite an API key to fetch static content', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
 
-        const apiKey = '00000000-0000-0000-0000-000000000000';
+        await expect(() => fetcher.fetch(contentId, {static: true}))
+            .toThrow(new Error('The API key must be provided to fetch static content.'));
+    });
 
-        const options: FetchOptions = {
+    test('should use the external endpoint when specifying an API key', async () => {
+        const fetcher = new ContentFetcher({
             apiKey: apiKey,
-        };
+        });
 
         fetchMock.mock({
             ...requestMatcher,
@@ -90,7 +104,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(contentId)).resolves.toEqual(content);
     });
 
     test('should fetch content using the provided client ID', async () => {
@@ -328,6 +342,11 @@ describe('A content fetcher', () => {
 
         await expect(promise).rejects.toThrow(ContentError);
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+    });
+
+    test('should not be serializable', async () => {
+        expect(() => new ContentFetcher({appId: appId}).toJSON())
+            .toThrow(new Error('Unserializable value.'));
     });
 });
 

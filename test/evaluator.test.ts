@@ -21,6 +21,7 @@ jest.mock('../src/constants', () => ({
 
 describe('An evaluator', () => {
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
+    const apiKey = '00000000-0000-0000-0000-000000000000';
     const query = 'user\'s name';
     const requestMatcher: MockOptions = {
         method: 'POST',
@@ -32,6 +33,16 @@ describe('An evaluator', () => {
     afterEach(() => {
         fetchMock.reset();
         jest.clearAllMocks();
+    });
+
+    test('should require either an application ID or API key', async () => {
+        await expect(() => new Evaluator({}))
+            .toThrow(new Error('Either the application ID or the API key must be provided.'));
+    });
+
+    test('should require either an application ID or API key, but not both', async () => {
+        await expect(() => new Evaluator({apiKey: apiKey, appId: appId}))
+            .toThrow(new Error('Either the application ID or the API key must be provided.'));
     });
 
     test('should use the specified base endpoint', async () => {
@@ -55,15 +66,8 @@ describe('An evaluator', () => {
 
     test('should use the external endpoint when specifying an API key', async () => {
         const evaluator = new Evaluator({
-            appId: appId,
-
-        });
-
-        const apiKey = '00000000-0000-0000-0000-000000000000';
-
-        const options: EvaluationOptions = {
             apiKey: apiKey,
-        };
+        });
 
         const result = 'Anonymous';
 
@@ -76,7 +80,7 @@ describe('An evaluator', () => {
             response: JSON.stringify(result),
         });
 
-        await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
+        await expect(evaluator.evaluate(query)).resolves.toBe(result);
     });
 
     test('should evaluate queries without token when not provided', async () => {
@@ -351,6 +355,11 @@ describe('An evaluator', () => {
 
         await expect(promise).rejects.toThrow(EvaluationError);
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+    });
+
+    test('should not be serializable', async () => {
+        expect(() => new Evaluator({appId: appId}).toJSON())
+            .toThrow(new Error('Unserializable value.'));
     });
 });
 

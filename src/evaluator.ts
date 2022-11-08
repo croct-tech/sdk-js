@@ -4,11 +4,6 @@ import {EVALUATION_ENDPOINT_URL, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
 
-export type Configuration = {
-    appId: string,
-    endpointUrl?: string,
-};
-
 export type Campaign = {
     name?: string,
     source?: string,
@@ -31,7 +26,6 @@ export type EvaluationContext = {
 };
 
 export type EvaluationOptions = {
-    apiKey?: string,
     clientId?: string,
     userToken?: Token|string,
     timeout?: number,
@@ -84,12 +78,28 @@ export class QueryError extends EvaluationError<QueryErrorResponse> {
     }
 }
 
+export type Configuration = {
+    appId?: string,
+    apiKey?: string,
+    endpointUrl?: string,
+};
+
+type NormalizedConfiguration = {
+    appId?: string,
+    apiKey?: string,
+    endpointUrl: string,
+};
+
 export class Evaluator {
     public static readonly MAX_QUERY_LENGTH = MAX_QUERY_LENGTH;
 
-    private readonly configuration: Required<Configuration>;
+    private readonly configuration: NormalizedConfiguration;
 
     public constructor(configuration: Configuration) {
+        if ((configuration.appId === undefined) === (configuration.apiKey === undefined)) {
+            throw new Error('Either the application ID or the API key must be provided.');
+        }
+
         this.configuration = {
             ...configuration,
             endpointUrl: configuration.endpointUrl ?? EVALUATION_ENDPOINT_URL,
@@ -187,8 +197,8 @@ export class Evaluator {
     }
 
     private async fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
-        const {appId} = this.configuration;
-        const {clientId, userToken, apiKey} = options;
+        const {appId, apiKey} = this.configuration;
+        const {clientId, userToken} = options;
 
         const headers = {
             ...(apiKey === undefined && {'X-App-Id': appId}),
@@ -210,5 +220,10 @@ export class Evaluator {
             cache: 'no-cache',
             body: JSON.stringify(body),
         });
+    }
+
+    public toJSON(): never {
+        // Prevent sensitive configuration from being serialized
+        throw new Error('Unserializable value.');
     }
 }

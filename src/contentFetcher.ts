@@ -38,12 +38,10 @@ export class ContentError<T extends ErrorResponse = ErrorResponse> extends Error
 
 type StaticContentOptions = {
     static: true,
-    apiKey: string,
 };
 
 type DynamicContentOptions = {
     static?: false,
-    apiKey?: string,
     clientId?: string,
     userToken?: Token|string,
     previewToken?: Token|string,
@@ -51,7 +49,6 @@ type DynamicContentOptions = {
 };
 
 export type FetchOptions = (StaticContentOptions | DynamicContentOptions) & {
-    appId?: string,
     version?: `${number}`|number,
     preferredLocale?: string,
     timeout?: number,
@@ -62,21 +59,36 @@ export type FetchResponse<P extends JsonObject = JsonObject> = {
 };
 
 export type Configuration = {
-    appId: string,
+    appId?: string,
+    apiKey?: string,
     endpointUrl?: string,
 };
 
+type NormalizedConfiguration = {
+    appId?: string,
+    apiKey?: string,
+    endpointUrl: string,
+};
+
 export class ContentFetcher {
-    private readonly configuration: Required<Configuration>;
+    private readonly configuration: NormalizedConfiguration;
 
     public constructor(configuration: Configuration) {
+        if ((configuration.appId === undefined) === (configuration.apiKey === undefined)) {
+            throw new Error('Either the application ID or the API key must be provided.');
+        }
+
         this.configuration = {
             ...configuration,
             endpointUrl: configuration.endpointUrl ?? CONTENT_ENDPOINT_URL,
         };
     }
 
-    public async fetch<P extends JsonObject>(slotId: string, options: FetchOptions = {}): Promise<FetchResponse<P>> {
+    public fetch<P extends JsonObject>(slotId: string, options: FetchOptions = {}): Promise<FetchResponse<P>> {
+        if (options.static && this.configuration.apiKey === undefined) {
+            throw new Error('The API key must be provided to fetch static content.');
+        }
+
         return new Promise((resolve, reject) => {
             const abortController = new AbortController();
 
@@ -127,14 +139,16 @@ export class ContentFetcher {
 
     private async load(slotId: string, signal: AbortSignal, options: FetchOptions): Promise<Response> {
         const dynamic = ContentFetcher.isDynamicContent(options);
+        const {apiKey, appId} = this.configuration;
 
-        const headers: Record<string, string> = options.apiKey === undefined
-            ? {'X-App-Id': this.configuration.appId}
-            : {'X-Api-Key': options.apiKey};
+        const headers: Record<string, string> = {
+            ...(appId && {'X-App-Id': appId}),
+            ...(apiKey && {'X-Api-Key': apiKey}),
+        };
 
         // eslint-disable-next-line prefer-template -- Better readability
         const endpoint = this.configuration.endpointUrl.replace(/\/+$/, '')
-            + (options.apiKey !== undefined ? '/external' : '/client')
+            + (apiKey !== undefined ? '/external' : '/client')
             + '/web'
             + (dynamic ? '/content' : '/static-content');
 
@@ -180,5 +194,10 @@ export class ContentFetcher {
 
     private static isDynamicContent(options: FetchOptions): options is DynamicContentOptions {
         return options.static !== true;
+    }
+
+    public toJSON(): never {
+        // Prevent sensitive configuration from being serialized
+        throw new Error('Unserializable value.');
     }
 }
