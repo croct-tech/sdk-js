@@ -51,6 +51,7 @@ type DynamicContentOptions = {
 };
 
 export type FetchOptions = (StaticContentOptions | DynamicContentOptions) & {
+    appId?: string,
     version?: `${number}`|number,
     preferredLocale?: string,
     timeout?: number,

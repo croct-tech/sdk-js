@@ -199,7 +199,7 @@ export class Evaluator {
 
         // eslint-disable-next-line prefer-template -- Better readability
         const endpoint = this.configuration.endpointUrl.replace(/\/+$/, '')
-            + (options.apiKey !== undefined ? '/external' : '/client')
+            + (apiKey !== undefined ? '/external' : '/client')
             + '/web/evaluate';
 
         return fetch(endpoint, {
