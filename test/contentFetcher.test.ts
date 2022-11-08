@@ -1,19 +1,17 @@
 import * as fetchMock from 'fetch-mock';
 import {MockOptions} from 'fetch-mock';
 import {EvaluationContext} from '../src/evaluator';
-import {Token, FixedTokenProvider} from '../src/token';
-import {CidAssigner, FixedAssigner} from '../src/cid';
-import {ContentFetcher, ContentError, ContentErrorType, ErrorResponse} from '../src/contentFetcher';
+import {Token} from '../src/token';
+import {ContentFetcher, ContentError, ContentErrorType, ErrorResponse, FetchOptions} from '../src/contentFetcher';
 import {CONTENT_ENDPOINT_URL} from '../src/constants';
 
 jest.mock('../src/constants', () => ({
     ...jest.requireActual('../src/constants'),
-    CONTENT_ENDPOINT_URL: 'https://croct.io/content',
+    CONTENT_ENDPOINT_URL: 'https://croct.io',
 }));
 
 describe('A content fetcher', () => {
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
-    const clientId = 'c3b5b9f0-5f9a-4b3c-8c9c-8b5c8b5c8b5c';
     const contentId = 'hero-banner';
     const content = {
         content: {
@@ -22,12 +20,7 @@ describe('A content fetcher', () => {
     };
 
     const requestMatcher: MockOptions = {
-        matcher: CONTENT_ENDPOINT_URL,
         method: 'POST',
-        headers: {
-            'X-App-Id': appId,
-            'X-Client-Id': clientId,
-        },
         body: {
             slotId: contentId,
         },
@@ -38,50 +31,96 @@ describe('A content fetcher', () => {
         jest.clearAllMocks();
     });
 
-    test('should use the specified endpoint', async () => {
-        const customEndpoint = 'https://custom.endpoint.com/content';
+    test('should use the specified base endpoint', async () => {
+        const customEndpoint = 'https://custom.endpoint.com';
 
         const fetcher = new ContentFetcher({
             appId: appId,
             endpointUrl: customEndpoint,
-            cidAssigner: new FixedAssigner(clientId),
-            userTokenProvider: new FixedTokenProvider(null),
-            previewTokenProvider: new FixedTokenProvider(null),
         });
 
         fetchMock.mock({
             ...requestMatcher,
-            matcher: customEndpoint,
+            matcher: `${customEndpoint}/client/web/content`,
             response: content,
         });
 
         await expect(fetcher.fetch(contentId)).resolves.toEqual(content);
     });
 
-    test('should fetch content without token when not provided', async () => {
+    test('should use the external endpoint for static content', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
-            cidAssigner: new FixedAssigner(clientId),
-            userTokenProvider: new FixedTokenProvider(null),
-            previewTokenProvider: new FixedTokenProvider(null),
         });
+
+        const options: FetchOptions = {
+            static: true,
+            apiKey: '00000000-0000-0000-0000-000000000000',
+        };
 
         fetchMock.mock({
             ...requestMatcher,
+            matcher: `${CONTENT_ENDPOINT_URL}/external/web/static-content`,
+            headers: {
+                'X-Api-Key': options.apiKey,
+            },
             response: content,
         });
 
-        await expect(fetcher.fetch(contentId)).resolves.toEqual(content);
+        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    test('should fetch content with user token when provided', async () => {
+    test('should use the external endpoint when specifying an API key', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+        });
+
+        const apiKey = '00000000-0000-0000-0000-000000000000';
+
+        const options: FetchOptions = {
+            apiKey: apiKey,
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            matcher: `${CONTENT_ENDPOINT_URL}/external/web/content`,
+            headers: {
+                'X-Api-Key': apiKey,
+            },
+            response: content,
+        });
+
+        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+    });
+
+    test('should fetch content using the provided client ID', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+        });
+
+        const clientId = 'c3b5b9f0-5f9a-4b3c-8c9c-8b5c8b5c8b5c';
+
+        const options: FetchOptions = {
+            clientId: clientId,
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            headers: {
+                ...requestMatcher.headers,
+                'X-Client-Id': clientId,
+            },
+            response: content,
+        });
+
+        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+    });
+
+    test('should fetch content using the provided user token', async () => {
         const token = Token.issue(appId, 'foo', Date.now());
 
         const fetcher = new ContentFetcher({
             appId: appId,
-            cidAssigner: new FixedAssigner(clientId),
-            userTokenProvider: new FixedTokenProvider(token),
-            previewTokenProvider: new FixedTokenProvider(null),
         });
 
         fetchMock.mock({
@@ -93,17 +132,18 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        await expect(fetcher.fetch(contentId)).resolves.toEqual(content);
+        const options: FetchOptions = {
+            userToken: token,
+        };
+
+        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    test('should fetch content with preview token when provided', async () => {
+    test('should fetch content using the provided preview token', async () => {
         const token = Token.issue(appId, 'foo', Date.now());
 
         const fetcher = new ContentFetcher({
             appId: appId,
-            cidAssigner: new FixedAssigner(clientId),
-            userTokenProvider: new FixedTokenProvider(null),
-            previewTokenProvider: new FixedTokenProvider(token),
         });
 
         fetchMock.mock({
@@ -115,15 +155,16 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        await expect(fetcher.fetch(contentId)).resolves.toEqual(content);
+        const options: FetchOptions = {
+            previewToken: token,
+        };
+
+        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
     test('should abort after reaching the timeout', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
-            cidAssigner: new FixedAssigner(clientId),
-            userTokenProvider: new FixedTokenProvider(null),
-            previewTokenProvider: new FixedTokenProvider(null),
         });
 
         fetchMock.mock({
@@ -162,9 +203,6 @@ describe('A content fetcher', () => {
     test('should fetch content using the provided context', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
-            cidAssigner: new FixedAssigner(clientId),
-            userTokenProvider: new FixedTokenProvider(null),
-            previewTokenProvider: new FixedTokenProvider(null),
         });
 
         const context: Required<EvaluationContext> = {
@@ -203,9 +241,6 @@ describe('A content fetcher', () => {
     test('should fetch content for the specified slot version', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
-            cidAssigner: new FixedAssigner(clientId),
-            userTokenProvider: new FixedTokenProvider(null),
-            previewTokenProvider: new FixedTokenProvider(null),
         });
 
         const version = 2;
@@ -227,9 +262,6 @@ describe('A content fetcher', () => {
     test('should fetch content for the specified preferred locale', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
-            cidAssigner: new FixedAssigner(clientId),
-            userTokenProvider: new FixedTokenProvider(null),
-            previewTokenProvider: new FixedTokenProvider(null),
         });
 
         const preferredLocale = 'pt_BR';
@@ -251,9 +283,6 @@ describe('A content fetcher', () => {
     test('should report errors if the fetch fails', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
-            cidAssigner: new FixedAssigner(clientId),
-            userTokenProvider: new FixedTokenProvider(null),
-            previewTokenProvider: new FixedTokenProvider(null),
         });
 
         const response: ErrorResponse = {
@@ -279,9 +308,6 @@ describe('A content fetcher', () => {
     test('should report unexpected errors when the cause of the fetch failure is unknown', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
-            cidAssigner: new FixedAssigner(clientId),
-            userTokenProvider: new FixedTokenProvider(null),
-            previewTokenProvider: new FixedTokenProvider(null),
         });
 
         const response: ErrorResponse = {
@@ -297,31 +323,6 @@ describe('A content fetcher', () => {
                 throws: new Error(response.title),
             },
         });
-
-        const promise = fetcher.fetch(contentId);
-
-        await expect(promise).rejects.toThrow(ContentError);
-        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
-    });
-
-    test('should report an unexpected error occurring while assigning a CID', async () => {
-        const cidAssigner: CidAssigner = {
-            assignCid: jest.fn().mockRejectedValue(new Error('Unexpected CID error.')),
-        };
-
-        const fetcher = new ContentFetcher({
-            appId: appId,
-            cidAssigner: cidAssigner,
-            userTokenProvider: new FixedTokenProvider(null),
-            previewTokenProvider: new FixedTokenProvider(null),
-        });
-
-        const response: ErrorResponse = {
-            title: 'Unexpected CID error.',
-            type: ContentErrorType.UNEXPECTED_ERROR,
-            detail: 'Please try again or contact Croct support if the error persists.',
-            status: 500,
-        };
 
         const promise = fetcher.fetch(contentId);
 

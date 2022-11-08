@@ -28,18 +28,6 @@ const FORMAT: {[key: string]: Format} = {
 
         return true;
     },
-    'uri-reference': function uriReference(value: string): boolean {
-        try {
-            // This simplistic approach covers the most common cases
-            // without inflating the library with an RFC 3986-compliant parser.
-            // eslint-disable-next-line no-new
-            new URL(value, 'http://any.thing');
-        } catch {
-            return false;
-        }
-
-        return true;
-    },
 };
 
 type StringDefinition = {

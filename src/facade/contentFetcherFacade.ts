@@ -1,10 +1,15 @@
 import {JsonObject} from '@croct/json';
 import {formatCause} from '../error';
-import {ContentFetcher, FetchResponse, FetchOptions as BaseOptions} from '../contentFetcher';
+import {ContentFetcher, FetchResponse} from '../contentFetcher';
 import {ContextFactory} from './evaluatorFacade';
 import {fetchOptionsSchema as optionsSchema} from '../schema';
+import {TokenProvider} from '../token';
+import {CidAssigner} from '../cid';
 
-export type FetchOptions = Omit<BaseOptions, 'context'> & {
+export type FetchOptions = {
+    version?: `${number}`|number,
+    preferredLocale?: string,
+    timeout?: number,
     attributes?: JsonObject,
 };
 
@@ -16,17 +21,34 @@ function validate(options: unknown): asserts options is FetchOptions {
     }
 }
 
+export type Configuration = {
+    contentFetcher: ContentFetcher,
+    contextFactory: ContextFactory,
+    previewTokenProvider: TokenProvider,
+    userTokenProvider: TokenProvider,
+    cidAssigner: CidAssigner,
+};
+
 export class ContentFetcherFacade {
     private readonly fetcher: ContentFetcher;
 
     private readonly contextFactory: ContextFactory;
 
-    public constructor(fetcher: ContentFetcher, contextFactory: ContextFactory) {
-        this.fetcher = fetcher;
-        this.contextFactory = contextFactory;
+    private readonly previewTokenProvider: TokenProvider;
+
+    private readonly userTokenProvider: TokenProvider;
+
+    private readonly cidAssigner: CidAssigner;
+
+    public constructor(configuration: Configuration) {
+        this.fetcher = configuration.contentFetcher;
+        this.previewTokenProvider = configuration.previewTokenProvider;
+        this.userTokenProvider = configuration.userTokenProvider;
+        this.cidAssigner = configuration.cidAssigner;
+        this.contextFactory = configuration.contextFactory;
     }
 
-    public fetch<P extends JsonObject>(slotId: string, options: FetchOptions = {}): Promise<FetchResponse<P>> {
+    public async fetch<P extends JsonObject>(slotId: string, options: FetchOptions = {}): Promise<FetchResponse<P>> {
         if (typeof slotId !== 'string' || slotId.length === 0) {
             throw new Error('The slot ID must be a non-empty string.');
         }
@@ -34,10 +56,14 @@ export class ContentFetcherFacade {
         validate(options);
 
         return this.fetcher.fetch(slotId, {
-            timeout: options.timeout,
+            static: false,
+            clientId: await this.cidAssigner.assignCid(),
+            userToken: this.userTokenProvider.getToken() ?? undefined,
+            previewToken: this.previewTokenProvider.getToken() ?? undefined,
             version: options.version,
             preferredLocale: options.preferredLocale,
             context: this.contextFactory.createContext(options.attributes),
+            timeout: options.timeout,
         });
     }
 }

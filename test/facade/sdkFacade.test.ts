@@ -8,7 +8,7 @@ import {NullLogger} from '../../src/logging';
 import {DumbStorage} from '../utils/dumbStorage';
 import {EventManager} from '../../src/eventManager';
 import {SdkEventMap} from '../../src/sdkEvents';
-import {CidAssigner} from '../../src/cid';
+import {CidAssigner, FixedAssigner} from '../../src/cid';
 import {Evaluator} from '../../src/evaluator';
 import {Tab, UrlSanitizer} from '../../src/tab';
 import {ContentFetcher, FetchResponse} from '../../src/contentFetcher';
@@ -16,6 +16,7 @@ import {FetchOptions} from '../../src/facade/contentFetcherFacade';
 
 describe('A SDK facade', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
+    const clientId = '8e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
 
     function createTrackerMock(): Tracker {
         return jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
@@ -315,6 +316,7 @@ describe('A SDK facade', () => {
 
                 jest.spyOn(sdk, 'evaluator', 'get').mockReturnValue(evaluator);
                 jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'cidAssigner', 'get').mockReturnValue(new FixedAssigner(clientId));
 
                 return sdk;
             });
@@ -352,6 +354,7 @@ describe('A SDK facade', () => {
 
                 jest.spyOn(sdk, 'contentFetcher', 'get').mockReturnValue(fetcher);
                 jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'cidAssigner', 'get').mockReturnValue(new FixedAssigner(clientId));
 
                 return sdk;
             });
@@ -935,6 +938,26 @@ describe('A SDK facade', () => {
         await expect(sdkFacade.cidAssigner.assignCid()).resolves.toEqual('123');
 
         expect(cidAssigner.assignCid).toHaveBeenCalled();
+    });
+
+    test('should provide a user token store', async () => {
+        const tokenStore = new InMemoryTokenStore();
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'userTokenStore', 'get').mockReturnValue(tokenStore);
+
+                return sdk;
+            });
+
+        const sdkFacade = SdkFacade.init({
+            appId: appId,
+            track: false,
+        });
+
+        await expect(sdkFacade.userTokenStore).toBe(tokenStore);
     });
 
     test('should provide a preview token store', async () => {

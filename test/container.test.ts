@@ -412,7 +412,7 @@ test('should release managed resources once disposed', async () => {
     const evaluator = container.getEvaluator();
     const contentFetcher = container.getContentFetcher();
     const context = container.getContext();
-    const userTokenProvider = container.getUserTokenProvider();
+    const userTokenProvider = container.getUserTokenStore();
     const previewTokenStore = container.getPreviewTokenStore();
     const beaconQueue = container.getBeaconQueue();
     const cidAssigner = container.getCidAssigner();
@@ -429,7 +429,7 @@ test('should release managed resources once disposed', async () => {
     expect(evaluator).not.toBe(container.getEvaluator());
     expect(contentFetcher).not.toBe(container.getContentFetcher());
     expect(context).not.toBe(container.getContext());
-    expect(userTokenProvider).not.toBe(container.getUserTokenProvider());
+    expect(userTokenProvider).not.toBe(container.getUserTokenStore());
     expect(previewTokenStore).not.toBe(container.getPreviewTokenStore());
     expect(beaconQueue).not.toBe(container.getBeaconQueue());
     expect(cidAssigner).not.toBe(container.getCidAssigner());

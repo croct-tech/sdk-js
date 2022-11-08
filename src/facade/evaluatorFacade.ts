@@ -3,6 +3,8 @@ import {Evaluator, Campaign, EvaluationContext, Page} from '../evaluator';
 import {Tab} from '../tab';
 import {evaluationOptionsSchema as optionsSchema} from '../schema';
 import {formatCause} from '../error';
+import {TokenProvider} from '../token';
+import {CidAssigner} from '../cid';
 
 export type EvaluationOptions = {
     timeout?: number,
@@ -21,17 +23,30 @@ export interface ContextFactory {
     createContext(attributes?: JsonObject): EvaluationContext;
 }
 
+export type Configuration = {
+    evaluator: Evaluator,
+    contextFactory: ContextFactory,
+    userTokenProvider: TokenProvider,
+    cidAssigner: CidAssigner,
+};
+
 export class EvaluatorFacade {
     private readonly evaluator: Evaluator;
 
     private readonly contextFactory: ContextFactory;
 
-    public constructor(evaluator: Evaluator, contextFactory: ContextFactory) {
-        this.evaluator = evaluator;
-        this.contextFactory = contextFactory;
+    private readonly tokenProvider: TokenProvider;
+
+    private readonly cidAssigner: CidAssigner;
+
+    public constructor(configuration: Configuration) {
+        this.evaluator = configuration.evaluator;
+        this.contextFactory = configuration.contextFactory;
+        this.tokenProvider = configuration.userTokenProvider;
+        this.cidAssigner = configuration.cidAssigner;
     }
 
-    public evaluate(query: string, options: EvaluationOptions = {}): Promise<JsonValue> {
+    public async evaluate(query: string, options: EvaluationOptions = {}): Promise<JsonValue> {
         if (typeof query !== 'string' || query.length === 0) {
             throw new Error('The query must be a non-empty string.');
         }
@@ -39,6 +54,8 @@ export class EvaluatorFacade {
         validate(options);
 
         return this.evaluator.evaluate(query, {
+            clientId: await this.cidAssigner.assignCid(),
+            userToken: this.tokenProvider.getToken() ?? undefined,
             timeout: options.timeout,
             context: this.contextFactory.createContext(options.attributes),
         });

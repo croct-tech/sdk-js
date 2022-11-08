@@ -95,9 +95,7 @@ export const postViewed = new ObjectType({
 export const linkOpened = new ObjectType({
     required: ['link'],
     properties: {
-        link: new StringType({
-            format: 'uri-reference',
-        }),
+        link: new StringType(),
     },
 });
 

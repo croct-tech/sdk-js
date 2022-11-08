@@ -2,6 +2,8 @@ import {JsonObject} from '@croct/json';
 import {EvaluatorFacade, MinimalContextFactory, TabContextFactory} from '../../src/facade';
 import {Evaluator, Campaign, EvaluationOptions, Page} from '../../src/evaluator';
 import {Tab} from '../../src/tab';
+import {FixedAssigner} from '../../src/cid';
+import {InMemoryTokenStore, FixedTokenProvider, Token} from '../../src/token';
 
 const {timeZone} = Intl.DateTimeFormat().resolvedOptions();
 
@@ -25,44 +27,48 @@ describe('An evaluator facade', () => {
         jest.restoreAllMocks();
     });
 
-    test('should fail if the query is empty', () => {
-        const factory = new MinimalContextFactory();
-        const evaluationFacade = new EvaluatorFacade(evaluator, factory);
+    const clientId = '11111111-1111-1111-1111-111111111111';
 
-        function evaluate(): void {
-            evaluationFacade.evaluate('');
-        }
+    test('should fail if the query is empty', async () => {
+        const evaluationFacade = new EvaluatorFacade({
+            evaluator: evaluator,
+            cidAssigner: new FixedAssigner(clientId),
+            userTokenProvider: new InMemoryTokenStore(),
+            contextFactory: new MinimalContextFactory(),
+        });
 
-        expect(evaluate).toThrow();
-        expect(evaluate).toThrow('The query must be a non-empty string.');
+        await expect(evaluationFacade.evaluate(''))
+            .rejects
+            .toThrow(new Error('The query must be a non-empty string.'));
     });
 
-    test('should fail if the options are invalid', () => {
-        const factory = new MinimalContextFactory();
-        const evaluationFacade = new EvaluatorFacade(evaluator, factory);
+    test('should fail if the options are invalid', async () => {
+        const evaluationFacade = new EvaluatorFacade({
+            evaluator: evaluator,
+            cidAssigner: new FixedAssigner(clientId),
+            userTokenProvider: new InMemoryTokenStore(),
+            contextFactory: new MinimalContextFactory(),
+        });
 
-        function evaluate(): void {
-            evaluationFacade.evaluate('1 + 1', {timeout: 1.2});
-        }
-
-        expect(evaluate).toThrow();
-        expect(evaluate).toThrow('Invalid options');
+        await expect(evaluationFacade.evaluate('1 + 1', {timeout: 1.2}))
+            .rejects
+            .toThrow(new Error('Invalid options: expected value of type integer at path \'/timeout\', actual number.'));
     });
 
-    test('should fail if the options are not a key-value map', () => {
-        const factory = new MinimalContextFactory();
-        const evaluationFacade = new EvaluatorFacade(evaluator, factory);
+    test('should fail if the options are not a key-value map', async () => {
+        const evaluationFacade = new EvaluatorFacade({
+            evaluator: evaluator,
+            cidAssigner: new FixedAssigner(clientId),
+            userTokenProvider: new InMemoryTokenStore(),
+            contextFactory: new MinimalContextFactory(),
+        });
 
-        function evaluate(): void {
-            evaluationFacade.evaluate('1 + 1', null as unknown as EvaluationOptions);
-        }
-
-        expect(evaluate).toThrow();
-        expect(evaluate)
-            .toThrow('Invalid options: expected value of type object at path \'/\', actual null.');
+        await expect(evaluationFacade.evaluate('1 + 1', null as unknown as EvaluationOptions))
+            .rejects
+            .toThrow(new Error('Invalid options: expected value of type object at path \'/\', actual null.'));
     });
 
-    test('should delegate the evaluation to the evaluator', () => {
+    test('should delegate the evaluation to the evaluator', async () => {
         const url = new URL('http://localhost');
         url.searchParams.append('utm_campaign', 'campaign');
         url.searchParams.append('utm_source', 'source');
@@ -81,9 +87,18 @@ describe('An evaluator facade', () => {
         });
 
         const tab = new Tab('1', true);
-        const evaluationFacade = new EvaluatorFacade(evaluator, new TabContextFactory(tab));
+        const token = Token.issue('00000000-0000-0000-0000-000000000000', 'foo', Date.now());
+
+        const evaluationFacade = new EvaluatorFacade({
+            evaluator: evaluator,
+            cidAssigner: new FixedAssigner(clientId),
+            userTokenProvider: new FixedTokenProvider(token),
+            contextFactory: new TabContextFactory(tab),
+        });
 
         const options: EvaluationOptions = {
+            clientId: clientId,
+            userToken: token,
             context: {
                 attributes: {
                     foo: 'bar',
@@ -107,7 +122,7 @@ describe('An evaluator facade', () => {
 
         const query = 'foo';
 
-        evaluationFacade.evaluate(query, {
+        await evaluationFacade.evaluate(query, {
             timeout: options.timeout,
             attributes: options?.context?.attributes,
         });

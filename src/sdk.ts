@@ -122,6 +122,10 @@ export class Sdk {
         return this.container.getPreviewTokenStore();
     }
 
+    public get userTokenStore(): TokenStore {
+        return this.container.getUserTokenStore();
+    }
+
     public get context(): Context {
         return this.container.getContext();
     }

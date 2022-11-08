@@ -104,6 +104,10 @@ export class SdkFacade {
         return this.sdk.previewTokenStore;
     }
 
+    public get userTokenStore(): TokenStore {
+        return this.sdk.userTokenStore;
+    }
+
     public get tracker(): TrackerFacade {
         if (this.trackerFacade === undefined) {
             this.trackerFacade = new TrackerFacade(this.sdk.tracker);
@@ -130,10 +134,12 @@ export class SdkFacade {
 
     public get evaluator(): EvaluatorFacade {
         if (this.evaluatorFacade === undefined) {
-            this.evaluatorFacade = new EvaluatorFacade(
-                this.sdk.evaluator,
-                new TabContextFactory(this.sdk.context.getTab()),
-            );
+            this.evaluatorFacade = new EvaluatorFacade({
+                evaluator: this.sdk.evaluator,
+                contextFactory: new TabContextFactory(this.sdk.context.getTab()),
+                cidAssigner: this.sdk.cidAssigner,
+                userTokenProvider: this.sdk.userTokenStore,
+            });
         }
 
         return this.evaluatorFacade;
@@ -141,10 +147,13 @@ export class SdkFacade {
 
     public get contentFetcher(): ContentFetcherFacade {
         if (this.contentFetcherFacade === undefined) {
-            this.contentFetcherFacade = new ContentFetcherFacade(
-                this.sdk.contentFetcher,
-                new TabContextFactory(this.sdk.context.getTab()),
-            );
+            this.contentFetcherFacade = new ContentFetcherFacade({
+                contentFetcher: this.sdk.contentFetcher,
+                contextFactory: new TabContextFactory(this.sdk.context.getTab()),
+                cidAssigner: this.sdk.cidAssigner,
+                previewTokenProvider: this.sdk.previewTokenStore,
+                userTokenProvider: this.sdk.userTokenStore,
+            });
         }
 
         return this.contentFetcherFacade;

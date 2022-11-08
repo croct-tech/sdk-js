@@ -4,6 +4,8 @@ import {ContentFetcher, FetchOptions} from '../../src/contentFetcher';
 import {
     ContentFetcherFacade, FetchOptions as FetchFacadeOptions,
 } from '../../src/facade/contentFetcherFacade';
+import {FixedAssigner} from '../../src/cid';
+import {InMemoryTokenStore, FixedTokenProvider, Token} from '../../src/token';
 
 const {timeZone} = Intl.DateTimeFormat().resolvedOptions();
 
@@ -28,42 +30,51 @@ describe('A content fetcher facade', () => {
         jest.restoreAllMocks();
     });
 
-    test('should fail if the slot ID is empty', () => {
-        const factory = new MinimalContextFactory();
-        const fetcherFacade = new ContentFetcherFacade(fetcher, factory);
+    const clientId = '11111111-1111-1111-1111-111111111111';
 
-        function fetch(): void {
-            fetcherFacade.fetch('');
-        }
+    test('should fail if the slot ID is empty', async () => {
+        const fetcherFacade = new ContentFetcherFacade({
+            contentFetcher: fetcher,
+            cidAssigner: new FixedAssigner(clientId),
+            userTokenProvider: new InMemoryTokenStore(),
+            previewTokenProvider: new InMemoryTokenStore(),
+            contextFactory: new MinimalContextFactory(),
+        });
 
-        expect(fetch).toThrow(new Error('The slot ID must be a non-empty string.'));
+        await expect(fetcherFacade.fetch(''))
+            .rejects
+            .toThrow(new Error('The slot ID must be a non-empty string.'));
     });
 
-    test('should fail if the options are invalid', () => {
-        const factory = new MinimalContextFactory();
-        const fetcherFacade = new ContentFetcherFacade(fetcher, factory);
+    test('should fail if the options are invalid', async () => {
+        const fetcherFacade = new ContentFetcherFacade({
+            contentFetcher: fetcher,
+            cidAssigner: new FixedAssigner(clientId),
+            userTokenProvider: new InMemoryTokenStore(),
+            previewTokenProvider: new InMemoryTokenStore(),
+            contextFactory: new MinimalContextFactory(),
+        });
 
-        function evaluate(): void {
-            fetcherFacade.fetch('home-banner', {timeout: 1.2});
-        }
-
-        expect(evaluate).toThrow();
-        expect(evaluate).toThrow('Invalid options');
+        await expect(fetcherFacade.fetch('home-banner', {timeout: 1.2}))
+            .rejects
+            .toThrow('Invalid options');
     });
 
-    test('should fail if the options are not a key-value map', () => {
-        const factory = new MinimalContextFactory();
-        const fetcherFacade = new ContentFetcherFacade(fetcher, factory);
+    test('should fail if the options are not a key-value map', async () => {
+        const fetcherFacade = new ContentFetcherFacade({
+            contentFetcher: fetcher,
+            cidAssigner: new FixedAssigner(clientId),
+            userTokenProvider: new InMemoryTokenStore(),
+            previewTokenProvider: new InMemoryTokenStore(),
+            contextFactory: new MinimalContextFactory(),
+        });
 
-        function evaluate(): void {
-            fetcherFacade.fetch('home-banner', null as unknown as FetchFacadeOptions);
-        }
-
-        expect(evaluate)
+        await expect(() => fetcherFacade.fetch('home-banner', null as unknown as FetchFacadeOptions))
+            .rejects
             .toThrow(new Error('Invalid options: expected value of type object at path \'/\', actual null.'));
     });
 
-    test('should delegate the fetching to the content fetcher', () => {
+    test('should delegate the fetching to the content fetcher', async () => {
         const url = new URL('http://localhost');
         url.searchParams.append('utm_campaign', 'campaign');
         url.searchParams.append('utm_source', 'source');
@@ -82,9 +93,22 @@ describe('A content fetcher facade', () => {
         });
 
         const tab = new Tab('1', true);
-        const evaluationFacade = new ContentFetcherFacade(fetcher, new TabContextFactory(tab));
+        const userToken = Token.issue('00000000-0000-0000-0000-000000000000', 'foo', Date.now());
+        const previewToken = Token.issue('11111111-1111-1111-1111-111111111111', 'bar', Date.now());
+
+        const evaluationFacade = new ContentFetcherFacade({
+            contentFetcher: fetcher,
+            cidAssigner: new FixedAssigner(clientId),
+            userTokenProvider: new FixedTokenProvider(userToken),
+            previewTokenProvider: new FixedTokenProvider(previewToken),
+            contextFactory: new TabContextFactory(tab),
+        });
 
         const options: FetchOptions = {
+            static: false,
+            clientId: clientId,
+            userToken: userToken,
+            previewToken: previewToken,
             timeout: 5,
             version: 1,
             preferredLocale: 'en-US',
@@ -110,7 +134,7 @@ describe('A content fetcher facade', () => {
 
         const slotId = 'home-banner';
 
-        evaluationFacade.fetch(slotId, {
+        await evaluationFacade.fetch(slotId, {
             timeout: options.timeout,
             version: options.version,
             preferredLocale: options.preferredLocale,

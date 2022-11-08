@@ -1,7 +1,6 @@
 import {JsonObject} from '@croct/json';
 import {EvaluationContext} from './evaluator';
-import {TokenProvider} from './token';
-import {CidAssigner} from './cid';
+import {Token} from './token';
 import {CONTENT_ENDPOINT_URL} from './constants';
 import {formatMessage} from './error';
 
@@ -37,11 +36,24 @@ export class ContentError<T extends ErrorResponse = ErrorResponse> extends Error
     }
 }
 
-export type FetchOptions = {
-    timeout?: number,
+type StaticContentOptions = {
+    static: true,
+    apiKey: string,
+};
+
+type DynamicContentOptions = {
+    static?: false,
+    apiKey?: string,
+    clientId?: string,
+    userToken?: Token|string,
+    previewToken?: Token|string,
+    context?: EvaluationContext,
+};
+
+export type FetchOptions = (StaticContentOptions | DynamicContentOptions) & {
     version?: `${number}`|number,
     preferredLocale?: string,
-    context?: EvaluationContext,
+    timeout?: number,
 };
 
 export type FetchResponse<P extends JsonObject = JsonObject> = {
@@ -51,9 +63,6 @@ export type FetchResponse<P extends JsonObject = JsonObject> = {
 export type Configuration = {
     appId: string,
     endpointUrl?: string,
-    previewTokenProvider: TokenProvider,
-    userTokenProvider: TokenProvider,
-    cidAssigner: CidAssigner,
 };
 
 export class ContentFetcher {
@@ -71,7 +80,7 @@ export class ContentFetcher {
             const abortController = new AbortController();
 
             if (options.timeout !== undefined) {
-                window.setTimeout(
+                setTimeout(
                     () => {
                         const response: ErrorResponse = {
                             title: 'Maximum timeout reached before content could be loaded.',
@@ -88,7 +97,7 @@ export class ContentFetcher {
                 );
             }
 
-            this.load(slotId, options, abortController.signal)
+            this.load(slotId, abortController.signal, options)
                 .then(response => {
                     if (response.ok) {
                         response.json().then(resolve);
@@ -115,44 +124,60 @@ export class ContentFetcher {
         });
     }
 
-    private async load(slotId: string, options: FetchOptions, signal: AbortSignal): Promise<Response> {
-        const {userTokenProvider, previewTokenProvider, cidAssigner, endpointUrl} = this.configuration;
-        const userToken = userTokenProvider.getToken();
-        const previewToken = previewTokenProvider.getToken();
-        const cid = await cidAssigner.assignCid();
+    private async load(slotId: string, signal: AbortSignal, options: FetchOptions): Promise<Response> {
+        const dynamic = ContentFetcher.isDynamicContent(options);
 
-        const headers = {
-            'X-App-Id': this.configuration.appId,
-            'X-Client-Id': cid,
-            ...(userToken !== null && {'X-Token': userToken.toString()}),
-        };
+        const headers: Record<string, string> = options.apiKey === undefined
+            ? {'X-App-Id': this.configuration.appId}
+            : {'X-Api-Key': options.apiKey};
+
+        // eslint-disable-next-line prefer-template -- Better readability
+        const endpoint = this.configuration.endpointUrl.replace(/\/+$/, '')
+            + (options.apiKey !== undefined ? '/external' : '/client')
+            + '/web'
+            + (dynamic ? '/content' : '/static-content');
 
         const payload: FetchPayload = {
             slotId: slotId,
         };
 
-        if (options.version !== undefined) {
-            payload.version = `${options.version}`;
+        if (dynamic) {
+            if (options.clientId !== undefined) {
+                headers['X-Client-Id'] = options.clientId;
+            }
+
+            if (options.userToken !== undefined) {
+                headers['X-Token'] = `${options.userToken}`;
+            }
+
+            if (options.version !== undefined) {
+                payload.version = `${options.version}`;
+            }
+
+            if (options.preferredLocale !== undefined) {
+                payload.preferredLocale = options.preferredLocale;
+            }
+
+            if (options.context !== undefined) {
+                payload.context = options.context;
+            }
+
+            if (options.previewToken !== undefined) {
+                payload.previewToken = `${options.previewToken}`;
+            }
         }
 
-        if (options.preferredLocale !== undefined) {
-            payload.preferredLocale = options.preferredLocale;
-        }
-
-        if (options.context !== undefined) {
-            payload.context = options.context;
-        }
-
-        if (previewToken !== null) {
-            payload.previewToken = previewToken.toString();
-        }
-
-        return fetch(endpointUrl, {
+        return fetch(endpoint, {
             method: 'POST',
             headers: headers,
             signal: signal,
             credentials: 'include',
+            cache: 'no-cache',
             body: JSON.stringify(payload),
         });
+    }
+
+    private static isDynamicContent(options: FetchOptions): options is DynamicContentOptions {
+        return options.static !== true;
     }
 }

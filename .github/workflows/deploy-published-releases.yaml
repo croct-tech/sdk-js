@@ -8,8 +8,8 @@ on:
 env:
   BOOTSTRAP_ENDPOINT: https://api.croct.io/client/web/bootstrap
   TRACKER_ENDPOINT: wss://api.croct.io/client/web/connect
-  EVALUATION_ENDPOINT: https://api.croct.io/client/web/evaluate
-  CONTENT_ENDPOINT: https://api.croct.io/client/web/content
+  EVALUATION_ENDPOINT: https://api.croct.io
+  CONTENT_ENDPOINT: https://api.croct.io
   MAX_QUERY_LENGTH: 500
 
 jobs:

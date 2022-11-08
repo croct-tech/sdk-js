@@ -379,7 +379,7 @@ describe('A SDK', () => {
 
         fetchMock.mock({
             method: 'POST',
-            matcher: configuration.evaluationEndpointUrl,
+            matcher: `begin:${configuration.evaluationEndpointUrl}`,
             body: {
                 query: query,
             },
@@ -408,7 +408,7 @@ describe('A SDK', () => {
 
         fetchMock.mock({
             method: 'POST',
-            matcher: configuration.contentEndpointUrl,
+            matcher: `begin:${configuration.contentEndpointUrl}`,
             response: result,
         });
 
@@ -422,6 +422,16 @@ describe('A SDK', () => {
         const sdk = Sdk.init(configuration);
 
         await expect(sdk.cidAssigner.assignCid()).resolves.toEqual(configuration.cid);
+    });
+
+    test('should provide a user token store', async () => {
+        const sdk = Sdk.init(configuration);
+
+        expect(Object.keys(localStorage)).toHaveLength(0);
+
+        sdk.userTokenStore.setToken(Token.issue(configuration.appId, 'c4r0l'));
+
+        expect(Object.keys(localStorage)).toHaveLength(1);
     });
 
     test('should provide a preview token store', async () => {

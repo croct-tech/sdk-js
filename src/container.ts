@@ -4,7 +4,7 @@ import {NamespacedStorage} from './namespacedStorage';
 import {BackoffPolicy, ArbitraryPolicy} from './retry';
 import {PersistentQueue, MonitoredQueue, CapacityRestrictedQueue} from './queue';
 import {Beacon} from './trackingEvents';
-import {CachedTokenStore, TokenProvider, TokenStore} from './token';
+import {CachedTokenStore, TokenStore} from './token';
 import {Tracker} from './tracker';
 import {Evaluator} from './evaluator';
 import {encodeJson} from './transformer';
@@ -47,7 +47,7 @@ export class Container {
 
     private context?: Context;
 
-    private userTokenProvider?: TokenProvider;
+    private userTokenProvider?: TokenStore;
 
     private previewTokenStore?: TokenStore;
 
@@ -87,8 +87,6 @@ export class Container {
         return new Evaluator({
             appId: this.configuration.appId,
             endpointUrl: this.configuration.evaluationEndpointUrl,
-            tokenProvider: this.getUserTokenProvider(),
-            cidAssigner: this.getCidAssigner(),
         });
     }
 
@@ -104,9 +102,6 @@ export class Container {
         return new ContentFetcher({
             appId: this.configuration.appId,
             endpointUrl: this.configuration.contentEndpointUrl,
-            userTokenProvider: this.getUserTokenProvider(),
-            previewTokenProvider: this.getPreviewTokenStore(),
-            cidAssigner: this.getCidAssigner(),
         });
     }
 
@@ -133,7 +128,7 @@ export class Container {
 
         const tracker = new Tracker({
             tab: context.getTab(),
-            tokenProvider: this.getUserTokenProvider(),
+            tokenProvider: this.getUserTokenStore(),
             inactivityRetryPolicy: new ArbitraryPolicy([30_000, 30_000, 120_000, 120_000, 300_000, 300_000, 900_000]),
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
@@ -148,10 +143,13 @@ export class Container {
         return tracker;
     }
 
-    public getUserTokenProvider(): TokenProvider {
+    public getUserTokenStore(): TokenStore {
         if (this.userTokenProvider === undefined) {
             const context = this.getContext();
-            this.userTokenProvider = {getToken: context.getToken.bind(context)};
+            this.userTokenProvider = {
+                getToken: context.getToken.bind(context),
+                setToken: context.setToken.bind(context),
+            };
         }
 
         return this.userTokenProvider;

@@ -1,15 +1,12 @@
 import {JsonObject, JsonValue} from '@croct/json';
-import {TokenProvider} from './token';
+import {Token} from './token';
 import {EVALUATION_ENDPOINT_URL, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
-import {CidAssigner} from './cid';
 
 export type Configuration = {
     appId: string,
     endpointUrl?: string,
-    tokenProvider: TokenProvider,
-    cidAssigner: CidAssigner,
 };
 
 export type Campaign = {
@@ -34,6 +31,9 @@ export type EvaluationContext = {
 };
 
 export type EvaluationOptions = {
+    apiKey?: string,
+    clientId?: string,
+    userToken?: Token|string,
     timeout?: number,
     context?: EvaluationContext,
 };
@@ -127,7 +127,7 @@ export class Evaluator {
             const abortController = new AbortController();
 
             if (options.timeout !== undefined) {
-                window.setTimeout(
+                setTimeout(
                     () => {
                         const response: ErrorResponse = {
                             title: 'Maximum evaluation timeout reached before evaluation could complete.',
@@ -144,7 +144,7 @@ export class Evaluator {
                 );
             }
 
-            const promise = this.fetch(this.configuration.endpointUrl, body, abortController.signal);
+            const promise = this.fetch(body, abortController.signal, options);
 
             promise.then(
                 response => {
@@ -186,22 +186,28 @@ export class Evaluator {
         });
     }
 
-    private async fetch(endpoint: string, body: JsonObject, signal: AbortSignal): Promise<Response> {
-        const {tokenProvider, cidAssigner, appId} = this.configuration;
-        const token = tokenProvider.getToken();
-        const cid = await cidAssigner.assignCid();
+    private async fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
+        const {appId} = this.configuration;
+        const {clientId, userToken, apiKey} = options;
 
         const headers = {
-            'X-App-Id': appId,
-            'X-Client-Id': cid,
-            ...(token !== null && {'X-Token': token.toString()}),
+            ...(apiKey === undefined && {'X-App-Id': appId}),
+            ...(apiKey !== undefined && {'X-Api-Key': apiKey}),
+            ...(clientId !== undefined && {'X-Client-Id': clientId}),
+            ...(userToken !== undefined && {'X-Token': `${userToken}`}),
         };
 
-        return window.fetch(endpoint, {
+        // eslint-disable-next-line prefer-template -- Better readability
+        const endpoint = this.configuration.endpointUrl.replace(/\/+$/, '')
+            + (options.apiKey !== undefined ? '/external' : '/client')
+            + '/web/evaluate';
+
+        return fetch(endpoint, {
             method: 'POST',
             headers: headers,
             signal: signal,
             credentials: 'include',
+            cache: 'no-cache',
             body: JSON.stringify(body),
         });
     }
