@@ -49,16 +49,15 @@ describe('The "cartModified" payload schema', () => {
             cartModified.validate({cart: minimalCart});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test('should not allow %s', () => {
         function validate(): void {
-            expect((): void => cartModified.validate({})).not.toThrow(Error);
+            cartModified.validate({});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Missing property \'/cart\'.');
+        expect(validate).toThrow(new Error('Missing property \'/cart\'.'));
     });
 });
 
@@ -68,7 +67,7 @@ describe('The "cartViewed" payload schema', () => {
             cartViewed.validate({cart: minimalCart});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test('should not allow %s', () => {
@@ -76,8 +75,7 @@ describe('The "cartViewed" payload schema', () => {
             cartViewed.validate({});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Missing property \'/cart\'.');
+        expect(validate).toThrow(new Error('Missing property \'/cart\'.'));
     });
 });
 
@@ -90,7 +88,7 @@ describe('The "checkoutStarted" payload schema', () => {
             checkoutStarted.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -111,8 +109,7 @@ describe('The "checkoutStarted" payload schema', () => {
             checkoutStarted.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -122,7 +119,7 @@ describe('The "orderPlaced" payload schema', () => {
             orderPlaced.validate({order: minimalOrder});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test('should not allow %s', () => {
@@ -130,8 +127,7 @@ describe('The "orderPlaced" payload schema', () => {
             orderPlaced.validate({});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Missing property \'/order\'.');
+        expect(validate).toThrow(new Error('Missing property \'/order\'.'));
     });
 });
 
@@ -141,7 +137,7 @@ describe('The "productViewed" payload schema', () => {
             productViewed.validate({product: minimalProductDetails});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test('should not allow %s', () => {
@@ -149,8 +145,7 @@ describe('The "productViewed" payload schema', () => {
             productViewed.validate({});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Missing property \'/product\'.');
+        expect(validate).toThrow(new Error('Missing property \'/product\'.'));
     });
 });
 
@@ -168,7 +163,7 @@ describe('The "userSignedUp" payload schema', () => {
             userSignedUp.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -193,8 +188,7 @@ describe('The "userSignedUp" payload schema', () => {
             userSignedUp.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -221,7 +215,7 @@ describe('The "eventOccurred" payload schema', () => {
             eventOccurred.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -337,8 +331,7 @@ describe('The "eventOccurred" payload schema', () => {
             eventOccurred.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -369,7 +362,7 @@ describe('The "goalCompleted" payload schema', () => {
             goalCompleted.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -446,8 +439,7 @@ describe('The "goalCompleted" payload schema', () => {
             goalCompleted.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -464,7 +456,7 @@ describe('The "interestShown" payload schema', () => {
             interestShown.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -493,8 +485,7 @@ describe('The "interestShown" payload schema', () => {
             interestShown.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -512,7 +503,7 @@ describe('The "postViewed" payload schema', () => {
             postViewed.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -529,8 +520,7 @@ describe('The "postViewed" payload schema', () => {
             postViewed.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -547,7 +537,7 @@ describe('The "linkOpened" payload schema', () => {
             linkOpened.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -564,7 +554,6 @@ describe('The "linkOpened" payload schema', () => {
             linkOpened.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });

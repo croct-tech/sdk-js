@@ -56,7 +56,7 @@ describe('An in-memory queue', () => {
             queue.shift();
         }
 
-        expect(shift).toThrow(Error);
+        expect(shift).toThrow();
         expect(shift).toThrow('The queue is empty.');
     });
 

@@ -33,7 +33,7 @@ describe('An evaluator facade', () => {
             evaluationFacade.evaluate('');
         }
 
-        expect(evaluate).toThrow(Error);
+        expect(evaluate).toThrow();
         expect(evaluate).toThrow('The query must be a non-empty string.');
     });
 
@@ -45,7 +45,7 @@ describe('An evaluator facade', () => {
             evaluationFacade.evaluate('1 + 1', {timeout: 1.2});
         }
 
-        expect(evaluate).toThrow(Error);
+        expect(evaluate).toThrow();
         expect(evaluate).toThrow('Invalid options');
     });
 
@@ -57,7 +57,7 @@ describe('An evaluator facade', () => {
             evaluationFacade.evaluate('1 + 1', null as unknown as EvaluationOptions);
         }
 
-        expect(evaluate).toThrow(Error);
+        expect(evaluate).toThrow();
         expect(evaluate)
             .toThrow('Invalid options: expected value of type object at path \'/\', actual null.');
     });

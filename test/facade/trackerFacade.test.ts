@@ -284,7 +284,7 @@ describe('A tracker facade', () => {
             trackerFacade.track(null as unknown as 'userSignedUp', {} as ExternalEventPayload<'userSignedUp'>);
         }
 
-        expect(track).toThrow(Error);
+        expect(track).toThrow();
         expect(track).toThrow('The event type must of type string.');
     });
 
@@ -298,7 +298,7 @@ describe('A tracker facade', () => {
             trackerFacade.track('invalidType' as ExternalEventType, {} as ExternalEventPayload<'userSignedUp'>);
         }
 
-        expect(track).toThrow(Error);
+        expect(track).toThrow();
         expect(track).toThrow('Unknown event type \'invalidType\'.');
     });
 
@@ -312,7 +312,7 @@ describe('A tracker facade', () => {
             trackerFacade.track('userSignedUp', null as unknown as ExternalEventPayload<'userSignedUp'>);
         }
 
-        expect(track).toThrow(Error);
+        expect(track).toThrow();
         expect(track).toThrow('The event payload must of type object.');
     });
 
@@ -326,7 +326,7 @@ describe('A tracker facade', () => {
             trackerFacade.track('userSignedUp', {} as ExternalEventPayload<'userSignedUp'>);
         }
 
-        expect(track).toThrow(Error);
+        expect(track).toThrow();
         expect(track).toThrow('Invalid event payload');
     });
 });

@@ -6,7 +6,7 @@ describe('A max-attempts policy', () => {
             return new MaxAttemptsPolicy(-1, 1);
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('Delay must be non-negative.');
     });
 
@@ -15,7 +15,7 @@ describe('A max-attempts policy', () => {
             return new MaxAttemptsPolicy(1, -1);
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('Max attempts must be non-negative.');
     });
 

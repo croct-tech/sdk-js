@@ -7,7 +7,7 @@ describe('A namespaced storage', () => {
             return new NamespacedStorage(new DumbStorage(), '');
         }
 
-        expect(invalidToken).toThrow(Error);
+        expect(invalidToken).toThrow();
         expect(invalidToken).toThrow('The namespace cannot be empty.');
     });
 

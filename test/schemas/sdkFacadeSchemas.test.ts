@@ -41,7 +41,7 @@ describe('The SDK facade configuration schema', () => {
             sdkFacadeConfigurationSchema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -71,7 +71,7 @@ describe('The SDK facade configuration schema', () => {
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', tokenScope: 'x'},
-            "Unexpected value at path '/tokenScope'",
+            "Unexpected value at path '/tokenScope', expecting 'global', 'contextual' or 'isolated', found 'x'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', userId: ''},
@@ -110,7 +110,6 @@ describe('The SDK facade configuration schema', () => {
             sdkFacadeConfigurationSchema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });

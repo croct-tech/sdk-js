@@ -15,7 +15,7 @@ describe('The event metadata schema', () => {
             eventMetadataSchema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -59,8 +59,7 @@ describe('The event metadata schema', () => {
             eventMetadataSchema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -97,7 +96,7 @@ describe('The SDK configuration schema', () => {
             sdkConfigurationSchema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -107,11 +106,11 @@ describe('The SDK configuration schema', () => {
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', cid: '7e9d59a9'},
-            "Invalid format at path '/cid'",
+            "Invalid format at path '/cid'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', tokenScope: 'x'},
-            "Unexpected value at path '/tokenScope'",
+            "Unexpected value at path '/tokenScope', expecting 'global', 'contextual' or 'isolated', found 'x'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', debug: 'foo'},
@@ -158,7 +157,6 @@ describe('The SDK configuration schema', () => {
             sdkConfigurationSchema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });

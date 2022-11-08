@@ -200,7 +200,7 @@ describe('A beacon socket channel', () => {
             message: JSON.stringify(secondBeacon),
         };
 
-        await expect(channel.publish(secondMessage)).rejects.toThrow(error);
+        await expect(channel.publish(secondMessage)).rejects.toThrow();
     });
 
     test('should fail if an unexpected error occurs assigning a CID', async () => {
@@ -232,7 +232,7 @@ describe('A beacon socket channel', () => {
             message: JSON.stringify(beacon),
         };
 
-        await expect(channel.publish(message)).rejects.toThrow(error);
+        await expect(channel.publish(message)).rejects.toThrow();
     });
 
     test('should allow subscribing and unsubscribing listeners', async () => {

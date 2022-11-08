@@ -21,8 +21,8 @@ describe('A boolean type', () => {
     test('should allow boolean values', () => {
         const type = new BooleanType();
 
-        expect((): void => type.validate(true)).not.toThrow(Error);
-        expect((): void => type.validate(false)).not.toThrow(Error);
+        expect((): void => type.validate(true)).not.toThrow();
+        expect((): void => type.validate(false)).not.toThrow();
     });
 
     test.each([
@@ -38,7 +38,6 @@ describe('A boolean type', () => {
             type.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });

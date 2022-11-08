@@ -12,7 +12,7 @@ describe('A backoff policy', () => {
             });
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The minimum retry delay must be non-negative.');
     });
 
@@ -27,7 +27,7 @@ describe('A backoff policy', () => {
             });
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The maximum retry delay must be greater than the minimum.');
     });
 
@@ -42,7 +42,7 @@ describe('A backoff policy', () => {
             });
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The backoff factor must be greater than zero.');
     });
 
@@ -57,7 +57,7 @@ describe('A backoff policy', () => {
             });
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The backoff jitter must be non-negative.');
     });
 
@@ -72,7 +72,7 @@ describe('A backoff policy', () => {
             });
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The maximum attempts must be non-negative.');
     });
 
@@ -87,7 +87,7 @@ describe('A backoff policy', () => {
             });
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The minimum retry delay must be non-negative.');
     });
 

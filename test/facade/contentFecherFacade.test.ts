@@ -47,7 +47,7 @@ describe('A content fetcher facade', () => {
             fetcherFacade.fetch('home-banner', {timeout: 1.2});
         }
 
-        expect(evaluate).toThrow(Error);
+        expect(evaluate).toThrow();
         expect(evaluate).toThrow('Invalid options');
     });
 

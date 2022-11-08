@@ -27,18 +27,18 @@ describe('A JSON array type', () => {
             schema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
-        [null, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual null'],
-        ['foo', new JsonArrayType(), 'Expected a JSON array at path \'/\', actual string'],
-        [true, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual boolean'],
-        [1, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual integer'],
-        [1.23, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual number'],
-        [new Object('foo'), new JsonArrayType(), 'Expected a JSON array at path \'/\', actual String'],
-        [{foo: 1}, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual Object'],
-        [{bar: 2}, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual Object'],
+        [null, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual null.'],
+        ['foo', new JsonArrayType(), 'Expected a JSON array at path \'/\', actual string.'],
+        [true, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual boolean.'],
+        [1, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual integer.'],
+        [1.23, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual number.'],
+        [new Object('foo'), new JsonArrayType(), 'Expected a JSON array at path \'/\', actual String.'],
+        [{foo: 1}, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual Object.'],
+        [{bar: 2}, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual Object.'],
         [
             ['foo', {bar: 1}],
             new JsonArrayType({items: new JsonPrimitiveType()}),
@@ -49,8 +49,7 @@ describe('A JSON array type', () => {
             schema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -73,7 +72,7 @@ describe('A JSON object type', () => {
         }
 
         expect(validateValidValue).not.toThrow();
-        expect(validateInvalidValue).toThrow(Error);
+        expect(validateInvalidValue).toThrow();
         expect(validateInvalidValue).toThrow('Expected at most 3 characters at path \'/foobar\', actual 6.');
     });
 
@@ -100,7 +99,7 @@ describe('A JSON object type', () => {
             schema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -122,8 +121,7 @@ describe('A JSON object type', () => {
             schema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -156,7 +154,7 @@ describe('A JSON primitive type', () => {
             new JsonPrimitiveType().validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -170,8 +168,7 @@ describe('A JSON primitive type', () => {
             new JsonPrimitiveType().validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -208,7 +205,7 @@ describe('A JSON value type', () => {
             new JsonType().validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -218,7 +215,6 @@ describe('A JSON value type', () => {
             new JsonType().validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });

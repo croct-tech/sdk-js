@@ -51,7 +51,7 @@ describe('The product details schema', () => {
             productDetails.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -73,7 +73,7 @@ describe('The product details schema', () => {
         ],
         [
             {productId: 'x'.repeat(51), name: 'Smartphone 9', displayPrice: 599.00},
-            'Expected at most 50 characters at path \'/productId\', actual 51',
+            'Expected at most 50 characters at path \'/productId\', actual 51.',
         ],
         [
             {productId: '12345', name: 'Smartphone 9', displayPrice: 599.00, sku: ''},
@@ -81,7 +81,7 @@ describe('The product details schema', () => {
         ],
         [
             {productId: '12345', name: 'Smartphone 9', displayPrice: 599.00, sku: 'x'.repeat(51)},
-            'Expected at most 50 characters at path \'/sku\', actual 51',
+            'Expected at most 50 characters at path \'/sku\', actual 51.',
         ],
         [
             {productId: '12345', name: '', displayPrice: 599.00},
@@ -136,8 +136,7 @@ describe('The product details schema', () => {
             productDetails.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -157,7 +156,7 @@ describe('The cart item schema', () => {
             cartItem.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -248,15 +247,14 @@ describe('The cart item schema', () => {
                 product: minimalProductDetails,
                 coupon: 'x'.repeat(51),
             },
-            'Expected at most 50 characters at path \'/coupon\', actual 51',
+            'Expected at most 50 characters at path \'/coupon\', actual 51.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             cartItem.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -303,7 +301,7 @@ describe('The cart schema', () => {
             cart.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -465,8 +463,7 @@ describe('The cart schema', () => {
             cart.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -486,7 +483,7 @@ describe('The order item schema', () => {
             orderItem.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -577,15 +574,14 @@ describe('The order item schema', () => {
                 product: minimalProductDetails,
                 coupon: 'x'.repeat(51),
             },
-            'Expected at most 50 characters at path \'/coupon\', actual 51',
+            'Expected at most 50 characters at path \'/coupon\', actual 51.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             orderItem.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });
 
@@ -657,7 +653,7 @@ describe('The order schema', () => {
             order.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -709,7 +705,7 @@ describe('The order schema', () => {
                 total: 776.49,
                 items: [minimalOrderItem],
             },
-            'Expected at most 50 characters at path \'/orderId\', actual 51',
+            'Expected at most 50 characters at path \'/orderId\', actual 51.',
         ],
         [
             {
@@ -911,7 +907,6 @@ describe('The order schema', () => {
             order.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });

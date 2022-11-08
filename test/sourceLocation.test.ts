@@ -82,7 +82,7 @@ describe('The string location function', () => {
             getLocation('foo', -1, 0);
         }
 
-        expect(location).toThrow(Error);
+        expect(location).toThrow();
         expect(location).toThrow('The start index cannot be negative.');
     });
 
@@ -91,7 +91,7 @@ describe('The string location function', () => {
             getLocation('foo', 1, 0);
         }
 
-        expect(location).toThrow(Error);
+        expect(location).toThrow();
         expect(location).toThrow('The end index must greater than or equal to the start index.');
     });
 });

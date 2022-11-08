@@ -6,7 +6,7 @@ describe('An arbitrary policy', () => {
             return new ArbitraryPolicy([]);
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The list of delays cannot be empty.');
     });
 

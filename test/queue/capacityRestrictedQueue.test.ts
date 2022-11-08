@@ -45,7 +45,7 @@ describe('A capacity-restricted queue', () => {
             queue.push('bar');
         }
 
-        expect(push).toThrow(Error);
+        expect(push).toThrow();
         expect(push).toThrow('Maximum queue capacity reached.');
     });
 
@@ -77,7 +77,7 @@ describe('A capacity-restricted queue', () => {
             queue.shift();
         }
 
-        expect(shift).toThrow(Error);
+        expect(shift).toThrow();
         expect(shift).toThrow('The queue is empty.');
     });
 

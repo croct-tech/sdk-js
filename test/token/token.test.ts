@@ -53,7 +53,7 @@ describe('A token', () => {
             Token.issue(appId, '', 1440982923);
         }
 
-        expect(invalidToken).toThrow(Error);
+        expect(invalidToken).toThrow();
         expect(invalidToken).toThrow('The subject must be non-empty.');
     });
 
@@ -70,7 +70,7 @@ describe('A token', () => {
             Token.issue(appId, 'c4r0l', -1);
         }
 
-        expect(invalidToken).toThrow(Error);
+        expect(invalidToken).toThrow();
         expect(invalidToken).toThrow('The timestamp must be non-negative.');
     });
 
@@ -119,7 +119,7 @@ describe('A token', () => {
             Token.parse('');
         }
 
-        expect(invalidToken).toThrow(Error);
+        expect(invalidToken).toThrow();
         expect(invalidToken).toThrow('The token cannot be empty.');
     });
 
@@ -128,7 +128,7 @@ describe('A token', () => {
             Token.parse('a');
         }
 
-        expect(invalidToken).toThrow(Error);
+        expect(invalidToken).toThrow();
         expect(invalidToken).toThrow('The token is malformed.');
     });
 
@@ -137,7 +137,7 @@ describe('A token', () => {
             Token.parse('a.b');
         }
 
-        expect(invalidToken).toThrow(Error);
+        expect(invalidToken).toThrow();
         expect(invalidToken).toThrow('The token is corrupted.');
     });
 
@@ -147,7 +147,7 @@ describe('A token', () => {
                 + 'eyJpc3MiOiJjcm9jdC5pbyIsImF1ZCI6ImNyb2N0LmlvIiwiaWF0IjowfQ.');
         }
 
-        expect(invalidToken).toThrow(Error);
+        expect(invalidToken).toThrow();
         expect(invalidToken).toThrow('The token is invalid: invalid uuid format at path \'/headers/appId\'.');
     });
 

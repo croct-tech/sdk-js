@@ -18,7 +18,7 @@ describe('The evaluation option schema', () => {
             evaluationOptionsSchema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -39,7 +39,6 @@ describe('The evaluation option schema', () => {
             evaluationOptionsSchema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });

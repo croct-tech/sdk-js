@@ -8,6 +8,6 @@ describe('A mixed schema', () => {
             type.validate();
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 });

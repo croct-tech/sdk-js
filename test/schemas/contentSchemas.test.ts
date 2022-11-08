@@ -22,7 +22,7 @@ describe('The product details schema', () => {
             postDetails.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -56,7 +56,7 @@ describe('The product details schema', () => {
         ],
         [
             {postId: 'post-id', title: 'x'.repeat(101), publishTime: 0},
-            'Expected at most 100 characters at path \'/title\', actual 101',
+            'Expected at most 100 characters at path \'/title\', actual 101.',
         ],
         [
             {postId: 'post-id', title: null, publishTime: 0},
@@ -143,7 +143,6 @@ describe('The product details schema', () => {
             postDetails.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });

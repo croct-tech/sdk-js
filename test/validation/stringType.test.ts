@@ -51,7 +51,7 @@ describe('A string type', () => {
             new StringType({format: format}).validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -91,8 +91,7 @@ describe('A string type', () => {
             new StringType({format: format}).validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(`Invalid ${format} format at path '/'.`);
+        expect(validate).toThrow(new Error(`Invalid ${format} format at path '/'.`));
     });
 
     test.each([
@@ -112,7 +111,7 @@ describe('A string type', () => {
             type.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -138,7 +137,6 @@ describe('A string type', () => {
             type.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });

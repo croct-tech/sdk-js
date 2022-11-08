@@ -44,7 +44,7 @@ describe('A SDK facade', () => {
             SdkFacade.init(null as unknown as Configuration);
         }
 
-        expect(initialize).toThrow(Error);
+        expect(initialize).toThrow();
         expect(initialize)
             .toThrow('Invalid configuration: expected value of type object at path \'/\', actual null.');
     });
@@ -54,7 +54,7 @@ describe('A SDK facade', () => {
             SdkFacade.init({appId: 'foo'});
         }
 
-        expect(initialize).toThrow(Error);
+        expect(initialize).toThrow();
         expect(initialize).toThrow('Invalid configuration:');
     });
 
@@ -67,7 +67,7 @@ describe('A SDK facade', () => {
             });
         }
 
-        expect(initialize).toThrow(Error);
+        expect(initialize).toThrow();
         expect(initialize).toThrow('Either the user ID or token can be specified, but not both.');
     });
 

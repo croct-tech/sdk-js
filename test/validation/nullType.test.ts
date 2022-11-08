@@ -21,7 +21,7 @@ describe('A null type', () => {
     test('should allow a null value', () => {
         const type = new NullType();
 
-        expect((): void => type.validate(null)).not.toThrow(Error);
+        expect((): void => type.validate(null)).not.toThrow();
     });
 
     test.each([
@@ -37,7 +37,6 @@ describe('A null type', () => {
             type.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });

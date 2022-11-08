@@ -60,7 +60,7 @@ describe('The token schema', () => {
             tokenSchema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test.each([
@@ -151,20 +151,6 @@ describe('The token schema', () => {
                 },
             },
             'Invalid uuid format at path \'/headers/appId\'.',
-        ],
-        [
-            {
-                headers: {
-                    typ: 'JWT',
-                    alg: 'none',
-                },
-                payload: {
-                    iss: 'croct.io',
-                    aud: 'croct.io',
-                    iat: 1440982923,
-                },
-            },
-            'Missing property \'/headers/appId\'.',
         ],
         [
             {
@@ -362,7 +348,7 @@ describe('The token schema', () => {
                     jti: 0,
                 },
             },
-            'Expected value of type string at path \'/payload/jti\', actual integer',
+            'Expected value of type string at path \'/payload/jti\', actual integer.',
         ],
         [
             {
@@ -399,14 +385,13 @@ describe('The token schema', () => {
                 },
                 signature: 0,
             },
-            'Expected value of type string at path \'/signature\', actual integer',
+            'Expected value of type string at path \'/signature\', actual integer.',
         ],
-    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
+    ])('should not allow %o', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             tokenSchema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });

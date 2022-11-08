@@ -20,8 +20,8 @@ describe('A function type', () => {
     test('should allow functions', () => {
         const type = new FunctionType();
 
-        expect((): void => type.validate(() => {})).not.toThrow(Error);
-        expect((): void => type.validate(jest.fn())).not.toThrow(Error);
+        expect((): void => type.validate(() => {})).not.toThrow();
+        expect((): void => type.validate(jest.fn())).not.toThrow();
     });
 
     test.each([
@@ -37,7 +37,6 @@ describe('A function type', () => {
             type.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrow(new Error(message));
     });
 });

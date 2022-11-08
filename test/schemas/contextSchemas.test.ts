@@ -10,7 +10,7 @@ describe('The token schema', () => {
             tokenScopeSchema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
     test('should not allow values other than the defined', () => {
@@ -18,9 +18,8 @@ describe('The token schema', () => {
             tokenScopeSchema.validate('foo');
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(
+        expect(validate).toThrow(new Error(
             'Unexpected value at path \'/\', expecting \'global\', \'contextual\' or \'isolated\', found \'foo\'.',
-        );
+        ));
     });
 });
