@@ -130,6 +130,52 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
+    test('should fetch content passing the provided client IP', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+        });
+
+        const clientIp = '192.168.0.1';
+
+        const options: FetchOptions = {
+            clientIp: clientIp,
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            headers: {
+                ...requestMatcher.headers,
+                'X-Client-Ip': clientIp,
+            },
+            response: content,
+        });
+
+        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+    });
+
+    test('should fetch content passing the provided user agent', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+        });
+
+        const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
+
+        const options: FetchOptions = {
+            userAgent: userAgent,
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            headers: {
+                ...requestMatcher.headers,
+                'User-Agent': userAgent,
+            },
+            response: content,
+        });
+
+        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+    });
+
     test('should fetch content using the provided user token', async () => {
         const token = Token.issue(appId, 'foo', Date.now());
 

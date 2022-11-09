@@ -33,6 +33,8 @@ type ExtraFetchOptions<T extends keyof RequestInit = AllowedFetchOptions> = Pick
 
 export type EvaluationOptions = {
     clientId?: string,
+    clientIp?: string,
+    userAgent?: string,
     userToken?: Token|string,
     timeout?: number,
     context?: EvaluationContext,
@@ -205,13 +207,15 @@ export class Evaluator {
 
     private async fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
         const {appId, apiKey} = this.configuration;
-        const {clientId, userToken} = options;
+        const {clientId, clientIp, userAgent, userToken} = options;
 
         const headers = {
             ...(apiKey === undefined && {'X-App-Id': appId}),
             ...(apiKey !== undefined && {'X-Api-Key': apiKey}),
             ...(clientId !== undefined && {'X-Client-Id': clientId}),
+            ...(clientIp !== undefined && {'X-Client-Ip': clientIp}),
             ...(userToken !== undefined && {'X-Token': `${userToken}`}),
+            ...(userAgent !== undefined && {'User-Agent': userAgent}),
         };
 
         // eslint-disable-next-line prefer-template -- Better readability

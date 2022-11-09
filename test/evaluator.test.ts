@@ -148,6 +148,56 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
     });
 
+    test('should evaluate queries using the provided client IP', async () => {
+        const evaluator = new Evaluator({
+            appId: appId,
+        });
+
+        const clientIp = '192.168.0.1';
+
+        const result = 'Carol';
+
+        fetchMock.mock({
+            ...requestMatcher,
+            headers: {
+                ...requestMatcher.headers,
+                'X-Client-IP': clientIp,
+            },
+            response: JSON.stringify(result),
+        });
+
+        const options: EvaluationOptions = {
+            clientIp: clientIp,
+        };
+
+        await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
+    });
+
+    test('should evaluate queries using the provided user agent', async () => {
+        const evaluator = new Evaluator({
+            appId: appId,
+        });
+
+        const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
+
+        const result = 'Carol';
+
+        fetchMock.mock({
+            ...requestMatcher,
+            headers: {
+                ...requestMatcher.headers,
+                'User-Agent': userAgent,
+            },
+            response: JSON.stringify(result),
+        });
+
+        const options: EvaluationOptions = {
+            userAgent: userAgent,
+        };
+
+        await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
+    });
+
     test('should fetch using the extra options', async () => {
         const evaluator = new Evaluator({
             appId: appId,

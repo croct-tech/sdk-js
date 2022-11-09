@@ -36,13 +36,22 @@ export class ContentError<T extends ErrorResponse = ErrorResponse> extends Error
     }
 }
 
-type StaticContentOptions = {
+type BasicOptions = {
+    version?: `${number}`|number,
+    preferredLocale?: string,
+    timeout?: number,
+    extra?: ExtraFetchOptions,
+};
+
+export type StaticContentOptions = BasicOptions & {
     static: true,
 };
 
-type DynamicContentOptions = {
+export type DynamicContentOptions = BasicOptions & {
     static?: false,
     clientId?: string,
+    clientIp?: string,
+    userAgent?: string,
     userToken?: Token|string,
     previewToken?: Token|string,
     context?: EvaluationContext,
@@ -54,12 +63,7 @@ type ExtraFetchOptions<T extends keyof RequestInit = AllowedFetchOptions> = Pick
     & {[key in Exclude<keyof RequestInit, T>]?: never}
     & Record<string, any>;
 
-export type FetchOptions = (StaticContentOptions | DynamicContentOptions) & {
-    version?: `${number}`|number,
-    preferredLocale?: string,
-    timeout?: number,
-    extra?: ExtraFetchOptions,
-};
+export type FetchOptions = StaticContentOptions | DynamicContentOptions;
 
 export type FetchResponse<P extends JsonObject = JsonObject> = {
     content: P,
@@ -170,6 +174,14 @@ export class ContentFetcher {
 
             if (options.userToken !== undefined) {
                 headers['X-Token'] = `${options.userToken}`;
+            }
+
+            if (options.clientIp !== undefined) {
+                headers['X-Client-Ip'] = options.clientIp;
+            }
+
+            if (options.userAgent !== undefined) {
+                headers['User-Agent'] = options.userAgent;
             }
 
             if (options.version !== undefined) {
