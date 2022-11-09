@@ -148,6 +148,27 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
     });
 
+    test('should fetch using the extra options', async () => {
+        const evaluator = new Evaluator({
+            appId: appId,
+        });
+
+        const result = 'Carol';
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: JSON.stringify(result),
+        });
+
+        const extraOptions = {
+            extra: true,
+        };
+
+        await evaluator.evaluate(query, {extra: extraOptions});
+
+        expect(fetchMock.lastOptions()).toEqual(expect.objectContaining(extraOptions));
+    });
+
     test('should abort the evaluation if the timeout is reached', async () => {
         const evaluator = new Evaluator({
             appId: appId,
@@ -164,9 +185,6 @@ describe('An evaluator', () => {
         const promise = evaluator.evaluate(query, {
             timeout: 10,
         });
-
-        // Flush promises
-        await Promise.resolve();
 
         const fetchOptions = fetchMock.lastOptions() as MockOptions & {signal: AbortSignal} | undefined;
 

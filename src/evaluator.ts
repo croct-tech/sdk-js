@@ -25,11 +25,16 @@ export type EvaluationContext = {
     attributes?: JsonObject,
 };
 
+type ExtraFetchOptions<T extends keyof RequestInit> = Pick<RequestInit, T>
+    & Partial<Record<keyof Omit<RequestInit, T>, never>>
+    & Record<string, any>;
+
 export type EvaluationOptions = {
     clientId?: string,
     userToken?: Token|string,
     timeout?: number,
     context?: EvaluationContext,
+    extra?: ExtraFetchOptions<'cache'>,
 };
 
 export enum EvaluationErrorType {
@@ -213,11 +218,11 @@ export class Evaluator {
             + '/web/evaluate';
 
         return fetch(endpoint, {
+            ...options.extra,
             method: 'POST',
             headers: headers,
             signal: signal,
             credentials: 'include',
-            cache: 'no-cache',
             body: JSON.stringify(body),
         });
     }

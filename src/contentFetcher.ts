@@ -48,10 +48,15 @@ type DynamicContentOptions = {
     context?: EvaluationContext,
 };
 
+type ExtraFetchOptions<T extends keyof RequestInit> = Pick<RequestInit, T>
+    & Partial<Record<keyof Omit<RequestInit, T>, never>>
+    & Record<string, any>;
+
 export type FetchOptions = (StaticContentOptions | DynamicContentOptions) & {
     version?: `${number}`|number,
     preferredLocale?: string,
     timeout?: number,
+    extra?: ExtraFetchOptions<'cache'>,
 };
 
 export type FetchResponse<P extends JsonObject = JsonObject> = {
@@ -183,11 +188,11 @@ export class ContentFetcher {
         }
 
         return fetch(endpoint, {
+            ...options.extra,
             method: 'POST',
             headers: headers,
             signal: signal,
             credentials: 'include',
-            cache: 'no-cache',
             body: JSON.stringify(payload),
         });
     }

@@ -176,6 +176,27 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
+    test('should fetch using the extra options', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+        });
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                result: 'Carol',
+            },
+        });
+
+        const extraOptions = {
+            extra: true,
+        };
+
+        await fetcher.fetch(contentId, {extra: extraOptions});
+
+        expect(fetchMock.lastOptions()).toEqual(expect.objectContaining(extraOptions));
+    });
+
     test('should abort after reaching the timeout', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
@@ -192,9 +213,6 @@ describe('A content fetcher', () => {
         const promise = fetcher.fetch(contentId, {
             timeout: 10,
         });
-
-        // Flush promises
-        await Promise.resolve();
 
         const fetchOptions = fetchMock.lastOptions() as MockOptions & {signal: AbortSignal} | undefined;
 
