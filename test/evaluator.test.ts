@@ -160,13 +160,28 @@ describe('An evaluator', () => {
             response: JSON.stringify(result),
         });
 
-        const extraOptions = {
-            extra: true,
+        const overridableOptions: RequestInit = {
+            credentials: 'omit',
         };
 
-        await evaluator.evaluate(query, {extra: extraOptions});
+        const nonOverridableOptions: RequestInit = {
+            method: 'GET',
+            headers: {
+                invalid: 'header',
+            },
+            signal: undefined,
+            body: 'invalid body',
+        };
 
-        expect(fetchMock.lastOptions()).toEqual(expect.objectContaining(extraOptions));
+        const extraOptions: RequestInit = {
+            ...overridableOptions,
+            ...nonOverridableOptions,
+        };
+
+        await evaluator.evaluate(query, {extra: extraOptions as EvaluationOptions['extra']});
+
+        expect(fetchMock.lastOptions()).toEqual(expect.objectContaining(overridableOptions));
+        expect(fetchMock.lastOptions()).not.toEqual(expect.objectContaining(nonOverridableOptions));
     });
 
     test('should abort the evaluation if the timeout is reached', async () => {

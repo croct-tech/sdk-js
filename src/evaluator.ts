@@ -25,8 +25,10 @@ export type EvaluationContext = {
     attributes?: JsonObject,
 };
 
-type ExtraFetchOptions<T extends keyof RequestInit> = Pick<RequestInit, T>
-    & Partial<Record<keyof Omit<RequestInit, T>, never>>
+type AllowedFetchOptions = Exclude<keyof RequestInit, 'method' | 'body' | 'headers' | 'signal'>;
+
+type ExtraFetchOptions<T extends keyof RequestInit = AllowedFetchOptions> = Pick<RequestInit, T>
+    & {[key in Exclude<keyof RequestInit, T>]?: never}
     & Record<string, any>;
 
 export type EvaluationOptions = {
@@ -34,7 +36,7 @@ export type EvaluationOptions = {
     userToken?: Token|string,
     timeout?: number,
     context?: EvaluationContext,
-    extra?: ExtraFetchOptions<'cache'>,
+    extra?: ExtraFetchOptions,
 };
 
 export enum EvaluationErrorType {
@@ -218,11 +220,11 @@ export class Evaluator {
             + '/web/evaluate';
 
         return fetch(endpoint, {
+            credentials: 'include',
             ...options.extra,
             method: 'POST',
             headers: headers,
             signal: signal,
-            credentials: 'include',
             body: JSON.stringify(body),
         });
     }

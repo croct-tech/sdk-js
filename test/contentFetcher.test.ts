@@ -188,13 +188,28 @@ describe('A content fetcher', () => {
             },
         });
 
-        const extraOptions = {
-            extra: true,
+        const overridableOptions: RequestInit = {
+            credentials: 'omit',
         };
 
-        await fetcher.fetch(contentId, {extra: extraOptions});
+        const nonOverridableOptions: RequestInit = {
+            method: 'GET',
+            headers: {
+                invalid: 'header',
+            },
+            signal: undefined,
+            body: 'invalid body',
+        };
 
-        expect(fetchMock.lastOptions()).toEqual(expect.objectContaining(extraOptions));
+        const extraOptions: RequestInit = {
+            ...overridableOptions,
+            ...nonOverridableOptions,
+        };
+
+        await fetcher.fetch(contentId, {extra: extraOptions as FetchOptions['extra']});
+
+        expect(fetchMock.lastOptions()).toEqual(expect.objectContaining(overridableOptions));
+        expect(fetchMock.lastOptions()).not.toEqual(expect.objectContaining(nonOverridableOptions));
     });
 
     test('should abort after reaching the timeout', async () => {
