@@ -29,13 +29,13 @@ import {ContentFetcher} from './contentFetcher';
 export type Configuration = {
     appId: string,
     tokenScope: TokenScope,
-    cid?: string,
+    clientId?: string,
     debug: boolean,
     test: boolean,
     trackerEndpointUrl: string,
     evaluationEndpointUrl: string,
     contentEndpointUrl: string,
-    bootstrapEndpointUrl: string,
+    cidAssignerEndpointUrl: string,
     beaconQueueSize: number,
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
@@ -244,8 +244,8 @@ export class Container {
     }
 
     private createCidAssigner(): CidAssigner {
-        if (this.configuration.cid !== undefined) {
-            return new FixedAssigner(this.configuration.cid);
+        if (this.configuration.clientId !== undefined) {
+            return new FixedAssigner(this.configuration.clientId);
         }
 
         if (this.configuration.test) {
@@ -256,7 +256,7 @@ export class Container {
 
         return new CachedAssigner(
             new RemoteAssigner(
-                this.configuration.bootstrapEndpointUrl,
+                this.configuration.cidAssignerEndpointUrl,
                 logger,
             ),
             new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),

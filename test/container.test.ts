@@ -24,7 +24,7 @@ const configuration: Configuration = {
     beaconQueueSize: 3,
     debug: false,
     test: false,
-    bootstrapEndpointUrl: 'https://localtest/boostrap',
+    cidAssignerEndpointUrl: 'https://localtest/boostrap',
     contentEndpointUrl: 'https://localtest/content',
     evaluationEndpointUrl: 'https://localtest/evaluate',
     trackerEndpointUrl: 'wss://localtest/connect',
@@ -163,7 +163,7 @@ test('should configure the event manager to notify about token changes', () => {
 test('should flush the beacon queue on initialization', async () => {
     fetchMock.mock({
         method: 'GET',
-        matcher: configuration.bootstrapEndpointUrl,
+        matcher: configuration.cidAssignerEndpointUrl,
         response: '123',
     });
 
@@ -198,7 +198,7 @@ test.each([
 
     const container = new Container({
         ...configuration,
-        cid: cid,
+        clientId: cid,
         test: test,
     });
 
@@ -222,7 +222,7 @@ test('should configure a fixed CID assigner in test mode', async () => {
 test('should configure the CID assigner if a CID is not specified', async () => {
     fetchMock.mock({
         method: 'GET',
-        matcher: configuration.bootstrapEndpointUrl,
+        matcher: configuration.cidAssignerEndpointUrl,
         response: '123',
     });
 

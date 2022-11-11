@@ -16,7 +16,7 @@ describe('A SDK', () => {
     const tabEventEmulator = new TabEventEmulator();
     const configuration: Required<Configuration> = {
         appId: '00000000-0000-0000-0000-000000000000',
-        cid: 'e6a133ffd3d2410681403d5e1bd95505',
+        clientId: 'e6a133ffd3d2410681403d5e1bd95505',
         tokenScope: 'global',
         beaconQueueSize: 3,
         debug: true,
@@ -24,7 +24,7 @@ describe('A SDK', () => {
         logger: new NullLogger(),
         urlSanitizer: jest.fn().mockImplementation((url: string) => new URL(url)),
         eventMetadata: {},
-        bootstrapEndpointUrl: 'https://localtest/boostrap',
+        cidAssignerEndpointUrl: 'https://localtest/boostrap',
         contentEndpointUrl: 'https://localtest/content',
         evaluationEndpointUrl: 'https://localtest/evaluate',
         trackerEndpointUrl: 'wss://localtest/connect',
@@ -250,7 +250,7 @@ describe('A SDK', () => {
     test('should configure the tracker', async () => {
         fetchMock.mock({
             method: 'GET',
-            matcher: configuration.bootstrapEndpointUrl,
+            matcher: configuration.cidAssignerEndpointUrl,
             response: '123',
         });
 
@@ -302,7 +302,7 @@ describe('A SDK', () => {
     test('should ensure that events are delivered one at a time and in order', async () => {
         fetchMock.mock({
             method: 'GET',
-            matcher: configuration.bootstrapEndpointUrl,
+            matcher: configuration.cidAssignerEndpointUrl,
             response: '123',
         });
 
@@ -373,7 +373,7 @@ describe('A SDK', () => {
 
         fetchMock.mock({
             method: 'GET',
-            matcher: configuration.bootstrapEndpointUrl,
+            matcher: configuration.cidAssignerEndpointUrl,
             response: '123',
         });
 
@@ -402,7 +402,7 @@ describe('A SDK', () => {
 
         fetchMock.mock({
             method: 'GET',
-            matcher: configuration.bootstrapEndpointUrl,
+            matcher: configuration.cidAssignerEndpointUrl,
             response: '123',
         });
 
@@ -421,7 +421,7 @@ describe('A SDK', () => {
     test('should provide a CID assigner', async () => {
         const sdk = Sdk.init(configuration);
 
-        await expect(sdk.cidAssigner.assignCid()).resolves.toEqual(configuration.cid);
+        await expect(sdk.cidAssigner.assignCid()).resolves.toEqual(configuration.clientId);
     });
 
     test('should provide a user token store', async () => {
@@ -483,7 +483,7 @@ describe('A SDK', () => {
     test('should clean up resources on close', async () => {
         fetchMock.mock({
             method: 'GET',
-            matcher: configuration.bootstrapEndpointUrl,
+            matcher: configuration.cidAssignerEndpointUrl,
             response: '123',
         });
 

@@ -2,7 +2,7 @@ import {Container} from './container';
 import {Context, TokenScope} from './context';
 import {Logger} from './logging';
 import {
-    BOOTSTRAP_ENDPOINT_URL,
+    CID_ASSIGNER_ENDPOINT_URL,
     CONTENT_ENDPOINT_URL,
     EVALUATION_ENDPOINT_URL,
     TRACKER_ENDPOINT_URL,
@@ -24,11 +24,11 @@ export type Configuration = {
     tokenScope: TokenScope,
     debug: boolean,
     test: boolean,
-    cid?: string,
+    clientId?: string,
     trackerEndpointUrl?: string,
     evaluationEndpointUrl?: string,
     contentEndpointUrl?: string,
-    bootstrapEndpointUrl?: string,
+    cidAssignerEndpointUrl?: string,
     beaconQueueSize?: number,
     urlSanitizer?: UrlSanitizer,
     logger?: Logger,
@@ -74,7 +74,7 @@ export class Sdk {
             evaluationEndpointUrl: containerConfiguration.evaluationEndpointUrl ?? EVALUATION_ENDPOINT_URL,
             contentEndpointUrl: containerConfiguration.contentEndpointUrl ?? CONTENT_ENDPOINT_URL,
             trackerEndpointUrl: containerConfiguration.trackerEndpointUrl ?? TRACKER_ENDPOINT_URL,
-            bootstrapEndpointUrl: containerConfiguration.bootstrapEndpointUrl ?? BOOTSTRAP_ENDPOINT_URL,
+            cidAssignerEndpointUrl: containerConfiguration.cidAssignerEndpointUrl ?? CID_ASSIGNER_ENDPOINT_URL,
             beaconQueueSize: containerConfiguration.beaconQueueSize ?? 100,
             eventMetadata: eventMetadata,
         });

@@ -23,13 +23,14 @@ export type Configuration = {
     track?: boolean,
     token?: string | null,
     userId?: string,
+    clientId?: string,
     eventMetadata?: {[key: string]: string},
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
     trackerEndpointUrl?: string,
     evaluationEndpointUrl?: string,
     contentEndpointUrl?: string,
-    bootstrapEndpointUrl?: string,
+    cidAssignerEndpointUrl?: string,
 };
 
 function validateConfiguration(configuration: unknown): asserts configuration is Configuration {

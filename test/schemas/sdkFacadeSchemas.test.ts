@@ -7,7 +7,7 @@ describe('The SDK facade configuration schema', () => {
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            cid: '9f62d6343c8742028df3e9e3ec596526',
+            clientId: '9f62d6343c8742028df3e9e3ec596526',
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
@@ -22,7 +22,7 @@ describe('The SDK facade configuration schema', () => {
             trackerEndpointUrl: 'https://api.croct.io/tracker',
             evaluationEndpointUrl: 'https://api.croct.io/evaluation',
             contentEndpointUrl: 'https://api.croct.io/content',
-            bootstrapEndpointUrl: 'https://api.croct.io/bootstrap',
+            cidAssignerEndpointUrl: 'https://api.croct.io/cid',
             tokenScope: 'isolated',
             userId: 'c4r0l',
             token: 'a.b.c',
@@ -50,12 +50,12 @@ describe('The SDK facade configuration schema', () => {
             "Missing property '/appId'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', cid: '7e9d59a9'},
-            "Invalid format at path '/cid'.",
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', clientId: '7e9d59a9'},
+            "Invalid format at path '/clientId'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', bootstrapEndpointUrl: 'x'},
-            "Invalid url format at path '/bootstrapEndpointUrl'.",
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', cidAssignerEndpointUrl: 'x'},
+            "Invalid url format at path '/cidAssignerEndpointUrl'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', evaluationEndpointUrl: 'x'},
