@@ -122,17 +122,14 @@ export class ContentFetcher {
             }
 
             this.load(slotId, abortController.signal, options)
-                .then(response => {
-                    if (response.ok) {
-                        response.json().then(resolve);
-
-                        return;
-                    }
-
-                    response.json().then(result => {
-                        reject(new ContentError(result));
-                    });
-                })
+                .then(response => response.json()
+                    .then(body => {
+                        if (response.ok) {
+                            resolve(body);
+                        } else {
+                            reject(new ContentError(body));
+                        }
+                    }))
                 .catch(error => {
                     if (!abortController.signal.aborted) {
                         reject(

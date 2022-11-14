@@ -415,6 +415,31 @@ describe('An evaluator', () => {
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
+    test('should catch deserialization errors', async () => {
+        const evaluator = new Evaluator({
+            appId: appId,
+        });
+
+        const response: ErrorResponse = {
+            title: expect.stringMatching('Invalid json response body'),
+            type: EvaluationErrorType.UNEXPECTED_ERROR,
+            detail: 'Please try again or contact Croct support if the error persists.',
+            status: 500,
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                body: 'non-json',
+            },
+        });
+
+        const promise = evaluator.evaluate(query);
+
+        await expect(promise).rejects.toThrow(EvaluationError);
+        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+    });
+
     test('should report unexpected errors when the cause of the evaluation failure is unknown', async () => {
         const evaluator = new Evaluator({
             appId: appId,

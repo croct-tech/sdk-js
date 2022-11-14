@@ -165,43 +165,40 @@ export class Evaluator {
 
             const promise = this.fetch(body, abortController.signal, options);
 
-            promise.then(
-                response => {
+            promise.then(response => response.json()
+                .then(body => {
                     if (response.ok) {
-                        response.json().then(resolve);
-
-                        return;
+                        return resolve(body);
                     }
 
-                    response.json().then(result => {
-                        const errorResponse: ErrorResponse = result;
+                    const errorResponse: ErrorResponse = body;
 
-                        switch (errorResponse.type) {
-                            case EvaluationErrorType.INVALID_QUERY:
-                            case EvaluationErrorType.EVALUATION_FAILED:
-                            case EvaluationErrorType.TOO_COMPLEX_QUERY:
-                                reject(new QueryError(errorResponse as QueryErrorResponse));
-                                break;
+                    switch (errorResponse.type) {
+                        case EvaluationErrorType.INVALID_QUERY:
+                        case EvaluationErrorType.EVALUATION_FAILED:
+                        case EvaluationErrorType.TOO_COMPLEX_QUERY:
+                            reject(new QueryError(errorResponse as QueryErrorResponse));
+                            break;
 
-                            default:
-                                reject(new EvaluationError(errorResponse));
-                                break;
+                        default:
+                            reject(new EvaluationError(errorResponse));
+                            break;
+                    }
+                }))
+                .catch(
+                    error => {
+                        if (!abortController.signal.aborted) {
+                            reject(
+                                new EvaluationError({
+                                    title: formatMessage(error),
+                                    type: EvaluationErrorType.UNEXPECTED_ERROR,
+                                    detail: 'Please try again or contact Croct support if the error persists.',
+                                    status: 500, // Internal Server Error
+                                }),
+                            );
                         }
-                    });
-                },
-                error => {
-                    if (!abortController.signal.aborted) {
-                        reject(
-                            new EvaluationError({
-                                title: formatMessage(error),
-                                type: EvaluationErrorType.UNEXPECTED_ERROR,
-                                detail: 'Please try again or contact Croct support if the error persists.',
-                                status: 500, // Internal Server Error
-                            }),
-                        );
-                    }
-                },
-            );
+                    },
+                );
         });
     }
 

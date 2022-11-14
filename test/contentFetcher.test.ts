@@ -398,6 +398,31 @@ describe('A content fetcher', () => {
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
+    test('should catch deserialization errors', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+        });
+
+        const response: ErrorResponse = {
+            title: expect.stringMatching('Invalid json response body'),
+            type: ContentErrorType.UNEXPECTED_ERROR,
+            detail: 'Please try again or contact Croct support if the error persists.',
+            status: 500,
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                body: 'non-json',
+            },
+        });
+
+        const promise = fetcher.fetch(contentId);
+
+        await expect(promise).rejects.toThrow(ContentError);
+        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+    });
+
     test('should report unexpected errors when the cause of the fetch failure is unknown', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
