@@ -17,11 +17,11 @@
     "outDir": "build",
     "downlevelIteration": true,
     "declaration": true,
-    "lib": ["es2017", "dom"]
+    "lib": ["dom"]
   },
   "include": [
     "src/**/*.ts",
     "test/**/*.ts"
   ],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "build"]
 }
