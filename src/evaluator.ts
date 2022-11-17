@@ -13,8 +13,8 @@ export type Campaign = {
 };
 
 export type Page = {
-    title: string,
     url: string,
+    title?: string,
     referrer?: string,
 };
 
