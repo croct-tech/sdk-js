@@ -1,13 +1,13 @@
 import {NeverPolicy} from '../../src/retry';
 
 describe('A never policy', () => {
-    test('should impose an infinity delay', () => {
+    it('should impose an infinity delay', () => {
         const policy = new NeverPolicy();
 
         expect(policy.getDelay()).toBe(Infinity);
     });
 
-    test('should never retry', () => {
+    it('should never retry', () => {
         const policy = new NeverPolicy();
 
         expect(policy.shouldRetry()).toBeFalsy();

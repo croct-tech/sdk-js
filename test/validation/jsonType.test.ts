@@ -1,11 +1,11 @@
 import {JsonArrayType, JsonObjectType, JsonPrimitiveType, JsonType, StringType} from '../../src/validation';
 
 describe('A JSON array type', () => {
-    test('should the allowed type', () => {
+    it('should the allowed type', () => {
         expect(new JsonArrayType().getTypes()).toEqual(['array']);
     });
 
-    test.each([
+    it.each([
         [null, false],
         ['foo', false],
         [true, false],
@@ -18,7 +18,7 @@ describe('A JSON array type', () => {
         expect(new JsonArrayType().isValidType(value)).toBe(expected);
     });
 
-    test.each([
+    it.each([
         [['foo', 'bar'], new JsonArrayType()],
         [['foo', {bar: 1}], new JsonArrayType()],
         [['foo', 'bar', 'baz'], new JsonArrayType({items: new JsonPrimitiveType()})],
@@ -27,18 +27,18 @@ describe('A JSON array type', () => {
             schema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
-        [null, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual null'],
-        ['foo', new JsonArrayType(), 'Expected a JSON array at path \'/\', actual string'],
-        [true, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual boolean'],
-        [1, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual integer'],
-        [1.23, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual number'],
-        [new Object('foo'), new JsonArrayType(), 'Expected a JSON array at path \'/\', actual String'],
-        [{foo: 1}, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual Object'],
-        [{bar: 2}, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual Object'],
+    it.each([
+        [null, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual null.'],
+        ['foo', new JsonArrayType(), 'Expected a JSON array at path \'/\', actual string.'],
+        [true, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual boolean.'],
+        [1, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual integer.'],
+        [1.23, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual number.'],
+        [new Object('foo'), new JsonArrayType(), 'Expected a JSON array at path \'/\', actual String.'],
+        [{foo: 1}, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual Object.'],
+        [{bar: 2}, new JsonArrayType(), 'Expected a JSON array at path \'/\', actual Object.'],
         [
             ['foo', {bar: 1}],
             new JsonArrayType({items: new JsonPrimitiveType()}),
@@ -49,17 +49,16 @@ describe('A JSON array type', () => {
             schema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('A JSON object type', () => {
-    test('should provide the allowed type', () => {
+    it('should provide the allowed type', () => {
         expect(new JsonObjectType().getTypes()).toEqual(['object']);
     });
 
-    test('should determine whether the keys are valid if property names schema is provided', () => {
+    it('should determine whether the keys are valid if property names schema is provided', () => {
         const objectType = new JsonObjectType({
             propertyNames: new StringType({maxLength: 3}),
         });
@@ -73,11 +72,11 @@ describe('A JSON object type', () => {
         }
 
         expect(validateValidValue).not.toThrow();
-        expect(validateInvalidValue).toThrow(Error);
+        expect(validateInvalidValue).toThrow();
         expect(validateInvalidValue).toThrow('Expected at most 3 characters at path \'/foobar\', actual 6.');
     });
 
-    test.each([
+    it.each([
         [null, false],
         ['foo', false],
         [true, false],
@@ -91,7 +90,7 @@ describe('A JSON object type', () => {
         expect(new JsonObjectType().isValidType(value)).toBe(expected);
     });
 
-    test.each([
+    it.each([
         [{foo: 1}, new JsonObjectType()],
         [{bar: 2}, new JsonObjectType()],
         [{bar: 2}, new JsonObjectType({properties: new JsonPrimitiveType()})],
@@ -100,10 +99,10 @@ describe('A JSON object type', () => {
             schema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [null, new JsonObjectType(), 'Expected a JSON object at path \'/\', actual null.'],
         ['foo', new JsonObjectType(), 'Expected a JSON object at path \'/\', actual string.'],
         [true, new JsonObjectType(), 'Expected a JSON object at path \'/\', actual boolean.'],
@@ -122,17 +121,16 @@ describe('A JSON object type', () => {
             schema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('A JSON primitive type', () => {
-    test('should provide the allowed types', () => {
+    it('should provide the allowed types', () => {
         expect(new JsonPrimitiveType().getTypes()).toEqual(['null', 'number', 'string', 'boolean']);
     });
 
-    test.each([
+    it.each([
         [null, true],
         ['foo', true],
         [true, true],
@@ -145,7 +143,7 @@ describe('A JSON primitive type', () => {
         expect(new JsonPrimitiveType().isValidType(value)).toBe(expected);
     });
 
-    test.each([
+    it.each([
         [null],
         ['foo'],
         [true],
@@ -156,10 +154,10 @@ describe('A JSON primitive type', () => {
             new JsonPrimitiveType().validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [['foo', 'bar'], 'Expected a JSON primitive at path \'/\', actual array.'],
         [['foo', {bar: 1}], 'Expected a JSON primitive at path \'/\', actual array.'],
         [new Object('foo'), 'Expected a JSON primitive at path \'/\', actual String.'],
@@ -170,17 +168,16 @@ describe('A JSON primitive type', () => {
             new JsonPrimitiveType().validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('A JSON value type', () => {
-    test('should provide the allowed types', () => {
+    it('should provide the allowed types', () => {
         expect(new JsonType().getTypes()).toEqual(['null', 'number', 'string', 'boolean', 'array', 'object']);
     });
 
-    test.each([
+    it.each([
         [null, true],
         ['foo', true],
         [true, true],
@@ -193,7 +190,7 @@ describe('A JSON value type', () => {
         expect(new JsonType().isValidType(value)).toBe(expected);
     });
 
-    test.each([
+    it.each([
         [null],
         ['foo'],
         [true],
@@ -208,17 +205,16 @@ describe('A JSON value type', () => {
             new JsonType().validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [new Object('foo'), 'Expected a JSON value at path \'/\', actual String.'],
     ])('should not allow %s', (value: any, message: string) => {
         function validate(): void {
             new JsonType().validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

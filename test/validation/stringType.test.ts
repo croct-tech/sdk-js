@@ -1,11 +1,11 @@
 import {StringType} from '../../src/validation';
 
 describe('A string type', () => {
-    test('should provide the allowed type', () => {
+    it('should provide the allowed type', () => {
         expect(new StringType().getTypes()).toEqual(['string']);
     });
 
-    test.each([
+    it.each([
         [null, false],
         ['foo', true],
         [true, false],
@@ -18,14 +18,11 @@ describe('A string type', () => {
         expect(new StringType().isValidType(value)).toBe(expected);
     });
 
-    test.each([
+    it.each([
         ['bd70aced-f238-4a06-b49d-0c96fe10c4f8', 'uuid'],
         ['2015-08-31', 'date'],
         ['foo://example.com:3000/path?here=there#fragment', 'url'],
         ['http://www.foo.com.br', 'url'],
-        ['foo://example.com:3000/path?here=there#fragment', 'uri-reference'],
-        ['http://www.foo.com.br', 'uri-reference'],
-        ['/foo', 'uri-reference'],
         ['_', 'identifier'],
         ['a', 'identifier'],
         ['A', 'identifier'],
@@ -50,10 +47,10 @@ describe('A string type', () => {
             new StringType({format: format}).validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         ['bd70acedf2384a06b49d0c96fe10c4f8', 'uuid'],
         ['bd70aced-zzzz-4a06-b49d-0c96fe10c4f8', 'uuid'],
         ['20150831', 'date'],
@@ -90,11 +87,10 @@ describe('A string type', () => {
             new StringType({format: format}).validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(`Invalid ${format} format at path '/'.`);
+        expect(validate).toThrowWithMessage(Error, `Invalid ${format} format at path '/'.`);
     });
 
-    test.each([
+    it.each([
         ['foo', new StringType({minLength: 2})],
         ['foo', new StringType({maxLength: 4})],
         ['foo', new StringType({enumeration: ['foo']})],
@@ -103,18 +99,15 @@ describe('A string type', () => {
         ['2015-08-31', new StringType({format: 'date'})],
         ['http://www.foo.com.br', new StringType({format: 'url'})],
         ['foo://example.com:3000/path?key=value#fragment', new StringType({format: 'url'})],
-        ['foo://example.com:3000/path?key=value#fragment', new StringType({format: 'uri-reference'})],
-        ['http://www.foo.com.br', new StringType({format: 'uri-reference'})],
-        ['/foo', new StringType({format: 'uri-reference'})],
     ])('should allow %s with %o', (value: string, type: StringType) => {
         function validate(): void {
             type.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [null, new StringType({}), 'Expected value of type string at path \'/\', actual null.'],
         [1, new StringType({}), 'Expected value of type string at path \'/\', actual integer.'],
         [[], new StringType({}), 'Expected value of type string at path \'/\', actual array.'],
@@ -137,7 +130,6 @@ describe('A string type', () => {
             type.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

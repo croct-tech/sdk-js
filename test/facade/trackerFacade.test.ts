@@ -12,54 +12,64 @@ describe('A tracker facade', () => {
     });
 
     function createTrackerMock(): Tracker {
-        return jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
+        const mock = jest.createMockFromModule<{Tracker: new() => Tracker}>('../../src/tracker');
+
+        return new mock.Tracker();
     }
 
-    test('can enable the tracker', () => {
+    it('can enable the tracker', () => {
         const tracker = createTrackerMock();
-        tracker.enable = jest.fn();
+
+        jest.spyOn(tracker, 'enable').mockImplementation();
 
         const trackerFacade = new TrackerFacade(tracker);
+
         trackerFacade.enable();
 
         expect(tracker.enable).toHaveBeenCalledTimes(1);
     });
 
-    test('can disable the tracker', () => {
+    it('can disable the tracker', () => {
         const tracker = createTrackerMock();
-        tracker.disable = jest.fn();
+
+        jest.spyOn(tracker, 'disable').mockImplementation();
 
         const trackerFacade = new TrackerFacade(tracker);
+
         trackerFacade.disable();
 
         expect(tracker.disable).toHaveBeenCalledTimes(1);
     });
 
-    test('can add event listeners to the tracker', () => {
+    it('can add event listeners to the tracker', () => {
         const tracker = createTrackerMock();
-        tracker.addListener = jest.fn();
+
+        jest.spyOn(tracker, 'addListener').mockImplementation();
 
         const listener = jest.fn();
         const trackerFacade = new TrackerFacade(tracker);
+
         trackerFacade.addListener(listener);
 
         expect(tracker.addListener).toHaveBeenCalledWith(listener);
         expect(tracker.addListener).toHaveBeenCalledTimes(1);
     });
 
-    test('can remove event listeners from the tracker', () => {
+    it('can remove event listeners from the tracker', () => {
         const tracker = createTrackerMock();
-        tracker.removeListener = jest.fn();
+
+        jest.spyOn(tracker, 'removeListener').mockImplementation();
 
         const listener = jest.fn();
         const trackerFacade = new TrackerFacade(tracker);
+
         trackerFacade.removeListener(listener);
 
         expect(tracker.removeListener).toHaveBeenCalledWith(listener);
         expect(tracker.removeListener).toHaveBeenCalledTimes(1);
     });
 
-    test('should provide a callback that is called when the current pending events are flushed', async () => {
+    it('should provide a callback that is called when the current pending events are flushed', async () => {
         const tracker = createTrackerMock();
         const batch = jest.fn().mockResolvedValue(undefined);
 
@@ -74,7 +84,7 @@ describe('A tracker facade', () => {
         expect(batch).toHaveBeenCalledTimes(1);
     });
 
-    test.each<ExternalEvent[]>([
+    it.each<ExternalEvent[]>([
         [
             {
                 type: 'productViewed',
@@ -263,7 +273,8 @@ describe('A tracker facade', () => {
         ],
     ])('should track events', (event: ExternalEvent) => {
         const tracker = createTrackerMock();
-        tracker.track = jest.fn();
+
+        jest.spyOn(tracker, 'track').mockImplementation();
 
         const trackerFacade = new TrackerFacade(tracker);
 
@@ -274,9 +285,10 @@ describe('A tracker facade', () => {
         expect(tracker.track).toHaveBeenNthCalledWith(1, event);
     });
 
-    test('should fail if the event type is not a string', () => {
+    it('should fail if the event type is not a string', () => {
         const tracker = createTrackerMock();
-        tracker.track = jest.fn();
+
+        jest.spyOn(tracker, 'track').mockImplementation();
 
         const trackerFacade = new TrackerFacade(tracker);
 
@@ -284,13 +296,14 @@ describe('A tracker facade', () => {
             trackerFacade.track(null as unknown as 'userSignedUp', {} as ExternalEventPayload<'userSignedUp'>);
         }
 
-        expect(track).toThrow(Error);
+        expect(track).toThrow();
         expect(track).toThrow('The event type must of type string.');
     });
 
-    test('should fail if the event type is unknown', () => {
+    it('should fail if the event type is unknown', () => {
         const tracker = createTrackerMock();
-        tracker.track = jest.fn();
+
+        jest.spyOn(tracker, 'track').mockImplementation();
 
         const trackerFacade = new TrackerFacade(tracker);
 
@@ -298,13 +311,14 @@ describe('A tracker facade', () => {
             trackerFacade.track('invalidType' as ExternalEventType, {} as ExternalEventPayload<'userSignedUp'>);
         }
 
-        expect(track).toThrow(Error);
+        expect(track).toThrow();
         expect(track).toThrow('Unknown event type \'invalidType\'.');
     });
 
-    test('should fail if the event payload is not an object', () => {
+    it('should fail if the event payload is not an object', () => {
         const tracker = createTrackerMock();
-        tracker.track = jest.fn();
+
+        jest.spyOn(tracker, 'track').mockImplementation();
 
         const trackerFacade = new TrackerFacade(tracker);
 
@@ -312,13 +326,14 @@ describe('A tracker facade', () => {
             trackerFacade.track('userSignedUp', null as unknown as ExternalEventPayload<'userSignedUp'>);
         }
 
-        expect(track).toThrow(Error);
+        expect(track).toThrow();
         expect(track).toThrow('The event payload must of type object.');
     });
 
-    test('should fail if the event payload is invalid', () => {
+    it('should fail if the event payload is invalid', () => {
         const tracker = createTrackerMock();
-        tracker.track = jest.fn();
+
+        jest.spyOn(tracker, 'track').mockImplementation();
 
         const trackerFacade = new TrackerFacade(tracker);
 
@@ -326,7 +341,7 @@ describe('A tracker facade', () => {
             trackerFacade.track('userSignedUp', {} as ExternalEventPayload<'userSignedUp'>);
         }
 
-        expect(track).toThrow(Error);
+        expect(track).toThrow();
         expect(track).toThrow('Invalid event payload');
     });
 });

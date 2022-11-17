@@ -4,7 +4,7 @@ import {NamespacedStorage} from './namespacedStorage';
 import {BackoffPolicy, ArbitraryPolicy} from './retry';
 import {PersistentQueue, MonitoredQueue, CapacityRestrictedQueue} from './queue';
 import {Beacon} from './trackingEvents';
-import {TokenProvider} from './token';
+import {CachedTokenStore, TokenStore} from './token';
 import {Tracker} from './tracker';
 import {Evaluator} from './evaluator';
 import {encodeJson} from './transformer';
@@ -24,16 +24,18 @@ import {
     SocketChannel,
     SandboxChannel,
 } from './channel';
+import {ContentFetcher} from './contentFetcher';
 
 export type Configuration = {
     appId: string,
     tokenScope: TokenScope,
-    cid?: string,
+    clientId?: string,
     debug: boolean,
     test: boolean,
     trackerEndpointUrl: string,
     evaluationEndpointUrl: string,
-    bootstrapEndpointUrl: string,
+    contentEndpointUrl: string,
+    cidAssignerEndpointUrl: string,
     beaconQueueSize: number,
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
@@ -45,11 +47,15 @@ export class Container {
 
     private context?: Context;
 
-    private tokenProvider?: TokenProvider;
+    private userTokenProvider?: TokenStore;
+
+    private previewTokenStore?: TokenStore;
 
     private tracker?: Tracker;
 
     private evaluator?: Evaluator;
+
+    private contentFetcher?: ContentFetcher;
 
     private cidAssigner?: CidAssigner;
 
@@ -81,9 +87,32 @@ export class Container {
         return new Evaluator({
             appId: this.configuration.appId,
             endpointUrl: this.configuration.evaluationEndpointUrl,
-            tokenProvider: this.getTokenProvider(),
-            cidAssigner: this.getCidAssigner(),
         });
+    }
+
+    public getContentFetcher(): ContentFetcher {
+        if (this.contentFetcher === undefined) {
+            this.contentFetcher = this.createContentFetcher();
+        }
+
+        return this.contentFetcher;
+    }
+
+    private createContentFetcher(): ContentFetcher {
+        return new ContentFetcher({
+            appId: this.configuration.appId,
+            endpointUrl: this.configuration.contentEndpointUrl,
+        });
+    }
+
+    public getPreviewTokenStore(): TokenStore {
+        if (this.previewTokenStore === undefined) {
+            this.previewTokenStore = new CachedTokenStore(
+                new LocalStorageCache(this.getGlobalBrowserStorage('preview'), 'token'),
+            );
+        }
+
+        return this.previewTokenStore;
     }
 
     public getTracker(): Tracker {
@@ -99,11 +128,11 @@ export class Container {
 
         const tracker = new Tracker({
             tab: context.getTab(),
-            tokenProvider: this.getTokenProvider(),
+            tokenProvider: this.getUserTokenStore(),
             inactivityRetryPolicy: new ArbitraryPolicy([30_000, 30_000, 120_000, 120_000, 300_000, 300_000, 900_000]),
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
-            eventMetadata: this.configuration.eventMetadata || {},
+            eventMetadata: this.configuration.eventMetadata,
         });
 
         const queue = this.getBeaconQueue();
@@ -114,13 +143,17 @@ export class Container {
         return tracker;
     }
 
-    public getTokenProvider(): TokenProvider {
-        if (this.tokenProvider === undefined) {
+    public getUserTokenStore(): TokenStore {
+        if (this.userTokenProvider === undefined) {
             const context = this.getContext();
-            this.tokenProvider = {getToken: context.getToken.bind(context)};
+
+            this.userTokenProvider = {
+                getToken: context.getToken.bind(context),
+                setToken: context.setToken.bind(context),
+            };
         }
 
-        return this.tokenProvider;
+        return this.userTokenProvider;
     }
 
     public getContext(): Context {
@@ -176,7 +209,9 @@ export class Container {
                         tokenParameter: 'token',
                         loggerFactory: this.getLogger.bind(this),
                         logger: channelLogger,
-                        channelFactory: (url, logger): SocketChannel<any, any> => new SocketChannel({url, logger}),
+                        channelFactory: (url, logger): SocketChannel<any, any> => (
+                            new SocketChannel({url: url, logger: logger})
+                        ),
                         cidAssigner: this.getCidAssigner(),
                         cidParameter: 'clientId',
                     }),
@@ -212,8 +247,8 @@ export class Container {
     }
 
     private createCidAssigner(): CidAssigner {
-        if (this.configuration.cid !== undefined) {
-            return new FixedAssigner(this.configuration.cid);
+        if (this.configuration.clientId !== undefined) {
+            return new FixedAssigner(this.configuration.clientId);
         }
 
         if (this.configuration.test) {
@@ -224,7 +259,7 @@ export class Container {
 
         return new CachedAssigner(
             new RemoteAssigner(
-                this.configuration.bootstrapEndpointUrl,
+                this.configuration.cidAssignerEndpointUrl,
                 logger,
             ),
             new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),
@@ -290,7 +325,9 @@ export class Container {
     }
 
     private resolveStorageNamespace(namespace: string, ...subnamespace: string[]): string {
-        return `croct[${this.configuration.appId.toLowerCase()}].${[namespace].concat(subnamespace).join('.')}`;
+        return `croct[${this.configuration
+            .appId
+            .toLowerCase()}].${[namespace].concat(subnamespace).join('.')}`;
     }
 
     private getLocalStorage(): Storage {
@@ -308,20 +345,20 @@ export class Container {
     public async dispose(): Promise<void> {
         const logger = this.getLogger();
 
-        if (this.beaconChannel) {
+        if (this.beaconChannel !== undefined) {
             logger.debug('Closing beacon channel...');
 
             await this.beaconChannel.close();
         }
 
-        if (this.removeTokenSyncListener) {
+        if (this.removeTokenSyncListener !== undefined) {
             logger.debug('Removing token sync listener...');
 
             this.removeTokenSyncListener();
         }
 
-        if (this.tracker) {
-            if (this.beaconQueue) {
+        if (this.tracker !== undefined) {
+            if (this.beaconQueue !== undefined) {
                 logger.debug('Removing queue listeners...');
 
                 this.beaconQueue.removeCallback('halfEmpty', this.tracker.unsuspend);
@@ -336,10 +373,12 @@ export class Container {
         }
 
         delete this.context;
-        delete this.tokenProvider;
+        delete this.userTokenProvider;
+        delete this.previewTokenStore;
         delete this.cidAssigner;
         delete this.tracker;
         delete this.evaluator;
+        delete this.contentFetcher;
         delete this.beaconChannel;
         delete this.beaconQueue;
         delete this.removeTokenSyncListener;

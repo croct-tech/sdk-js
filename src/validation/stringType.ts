@@ -20,20 +20,8 @@ const FORMAT: {[key: string]: Format} = {
     },
     url: function url(value: string): boolean {
         try {
-            // eslint-disable-next-line no-new
+            // eslint-disable-next-line no-new -- Easier way to validate a URL
             new URL(value);
-        } catch {
-            return false;
-        }
-
-        return true;
-    },
-    'uri-reference': function uriReference(value: string): boolean {
-        try {
-            // This simplistic approach covers the most common cases
-            // without inflating the library with an RFC 3986-compliant parser.
-            // eslint-disable-next-line no-new
-            new URL(value, 'http://any.thing');
         } catch {
             return false;
         }
@@ -113,18 +101,18 @@ export class StringType implements TypeSchema {
                 }', `
                 + `found '${value}'.`,
                 path,
-                {enumeration},
+                {enumeration: enumeration},
             );
         }
 
         const {format, pattern} = this.definition;
 
         if (format !== undefined && !FORMAT[format](value)) {
-            throw new Violation(`Invalid ${format} format at path '${formatPath(path)}'.`, path, {format});
+            throw new Violation(`Invalid ${format} format at path '${formatPath(path)}'.`, path, {format: format});
         }
 
         if (pattern !== undefined && !pattern.test(value)) {
-            throw new Violation(`Invalid format at path '${formatPath(path)}'.`, path, {pattern});
+            throw new Violation(`Invalid format at path '${formatPath(path)}'.`, path, {pattern: pattern});
         }
     }
 }

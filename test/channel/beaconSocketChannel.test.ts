@@ -21,9 +21,10 @@ describe('A beacon socket channel', () => {
         sinceTime: 0,
     };
 
-    test('should publish messages on the output channel', async () => {
+    it('should publish messages on the output channel', async () => {
         const date = jest.spyOn(Date, 'now');
         const now = Date.now();
+
         date.mockReturnValue(now);
 
         const socketChannel = new SandboxChannel<string, string>();
@@ -65,9 +66,10 @@ describe('A beacon socket channel', () => {
         expect(JSON.parse(publishedMessage)).toStrictEqual(expectedMessage);
     });
 
-    test('should establish a new connection when the token changes', async () => {
+    it('should establish a new connection when the token changes', async () => {
         const date = jest.spyOn(Date, 'now');
         const now = Date.now();
+
         date.mockReturnValue(now);
 
         const firstSocketChannel = new SandboxChannel<string, string>();
@@ -143,9 +145,10 @@ describe('A beacon socket channel', () => {
         expect(JSON.parse(secondPublishedMessage)).toStrictEqual(secondExpectedMessage);
     });
 
-    test('should fail if an error occurs while closing the current connection', async () => {
+    it('should fail if an error occurs while closing the current connection', async () => {
         const date = jest.spyOn(Date, 'now');
         const now = Date.now();
+
         date.mockReturnValue(now);
 
         const error = new Error('Error while closing.');
@@ -200,10 +203,10 @@ describe('A beacon socket channel', () => {
             message: JSON.stringify(secondBeacon),
         };
 
-        await expect(channel.publish(secondMessage)).rejects.toThrow(error);
+        await expect(channel.publish(secondMessage)).rejects.toThrow();
     });
 
-    test('should fail if an unexpected error occurs assigning a CID', async () => {
+    it('should fail if an unexpected error occurs assigning a CID', async () => {
         const error = new Error('Unexpected error');
 
         const duplexChannel: DuplexChannel<string, string> = {
@@ -232,10 +235,10 @@ describe('A beacon socket channel', () => {
             message: JSON.stringify(beacon),
         };
 
-        await expect(channel.publish(message)).rejects.toThrow(error);
+        await expect(channel.publish(message)).rejects.toThrow();
     });
 
-    test('should allow subscribing and unsubscribing listeners', async () => {
+    it('should allow subscribing and unsubscribing listeners', async () => {
         const socketChannel = new SandboxChannel<string, string>();
         const listener = jest.fn();
         const channel = new BeaconSocketChannel({
@@ -272,7 +275,7 @@ describe('A beacon socket channel', () => {
         expect(listener).toHaveBeenCalledTimes(1);
     });
 
-    test('should not notify listeners about invalid messages', async () => {
+    it('should not notify listeners about invalid messages', async () => {
         const socketChannel = new SandboxChannel<string, string>();
         const listener = jest.fn();
         const channel = new BeaconSocketChannel({
@@ -303,7 +306,7 @@ describe('A beacon socket channel', () => {
         expect(listener).not.toHaveBeenCalled();
     });
 
-    test('should be able to be closed even if never used', async () => {
+    it('should be able to be closed even if never used', async () => {
         const socketChannel = new SandboxChannel<string, string>();
         const channel = new BeaconSocketChannel({
             channelFactory: (): SandboxChannel<string, string> => socketChannel,
@@ -316,7 +319,7 @@ describe('A beacon socket channel', () => {
         await expect(channel.close()).resolves.toBeUndefined();
     });
 
-    test('should close the socket channel on close', async () => {
+    it('should close the socket channel on close', async () => {
         const socketChannel = new SandboxChannel<string, string>();
         const channel = new BeaconSocketChannel({
             channelFactory: (): SandboxChannel<string, string> => socketChannel,

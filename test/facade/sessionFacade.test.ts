@@ -7,8 +7,11 @@ describe('A session facade', () => {
     let sessionFacade: SessionFacade;
 
     beforeEach(() => {
-        tracker = jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
-        tracker.track = jest.fn(event => Promise.resolve(event));
+        const mock = jest.createMockFromModule<{Tracker: new() => Tracker}>('../../src/tracker');
+
+        tracker = new mock.Tracker();
+
+        jest.spyOn(tracker, 'track').mockImplementation(event => Promise.resolve(event));
 
         sessionFacade = new SessionFacade(tracker);
     });
@@ -17,11 +20,11 @@ describe('A session facade', () => {
         jest.restoreAllMocks();
     });
 
-    test('should always start a new patch', async () => {
+    it('should always start a new patch', () => {
         expect(sessionFacade.edit()).not.toBe(sessionFacade.edit());
     });
 
-    test('should initialize the patch with the tracker', async () => {
+    it('should initialize the patch with the tracker', async () => {
         const promise = sessionFacade.edit()
             .add('foo', 'bar')
             .save();

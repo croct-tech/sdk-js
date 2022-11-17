@@ -1,7 +1,7 @@
 import {BackoffPolicy} from '../../src/retry';
 
 describe('A backoff policy', () => {
-    test('should not allow a negative minimum retry delay', () => {
+    it('should not allow a negative minimum retry delay', () => {
         function invalidPolicy(): BackoffPolicy<any> {
             return new BackoffPolicy({
                 minRetryDelay: -1,
@@ -12,11 +12,11 @@ describe('A backoff policy', () => {
             });
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The minimum retry delay must be non-negative.');
     });
 
-    test('should not allow a retry delay greater than the minimum retry delay', () => {
+    it('should not allow a retry delay greater than the minimum retry delay', () => {
         function invalidPolicy(): BackoffPolicy<any> {
             return new BackoffPolicy({
                 minRetryDelay: 1,
@@ -27,11 +27,11 @@ describe('A backoff policy', () => {
             });
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The maximum retry delay must be greater than the minimum.');
     });
 
-    test('should not allow a negative backoff factor', () => {
+    it('should not allow a negative backoff factor', () => {
         function invalidPolicy(): BackoffPolicy<any> {
             return new BackoffPolicy({
                 minRetryDelay: 0,
@@ -42,11 +42,11 @@ describe('A backoff policy', () => {
             });
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The backoff factor must be greater than zero.');
     });
 
-    test('should not allow a negative backoff jitter', () => {
+    it('should not allow a negative backoff jitter', () => {
         function invalidPolicy(): BackoffPolicy<any> {
             return new BackoffPolicy({
                 minRetryDelay: 0,
@@ -57,11 +57,11 @@ describe('A backoff policy', () => {
             });
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The backoff jitter must be non-negative.');
     });
 
-    test('should not allow a negative maximum number of attempts', () => {
+    it('should not allow a negative maximum number of attempts', () => {
         function invalidPolicy(): BackoffPolicy<any> {
             return new BackoffPolicy({
                 minRetryDelay: 0,
@@ -72,11 +72,11 @@ describe('A backoff policy', () => {
             });
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The maximum attempts must be non-negative.');
     });
 
-    test('should not have a negative minimum retry delay', () => {
+    it('should not have a negative minimum retry delay', () => {
         function invalidPolicy(): BackoffPolicy<any> {
             return new BackoffPolicy({
                 minRetryDelay: -1,
@@ -87,11 +87,11 @@ describe('A backoff policy', () => {
             });
         }
 
-        expect(invalidPolicy).toThrow(Error);
+        expect(invalidPolicy).toThrow();
         expect(invalidPolicy).toThrow('The minimum retry delay must be non-negative.');
     });
 
-    test('should compute a delay for a given attempt between the allowed minimum and maximum values', () => {
+    it('should compute a delay for a given attempt between the allowed minimum and maximum values', () => {
         const policy = new BackoffPolicy({
             minRetryDelay: 10,
             maxRetryDelay: 100000,
@@ -108,7 +108,7 @@ describe('A backoff policy', () => {
         }
     });
 
-    test('should vary the delay between each attempts based on backoff factor', () => {
+    it('should vary the delay between each attempts based on backoff factor', () => {
         const policy = new BackoffPolicy({
             minRetryDelay: 10,
             maxRetryDelay: 100,
@@ -125,7 +125,7 @@ describe('A backoff policy', () => {
         expect(policy.getDelay(6)).toBe(100);
     });
 
-    test('should allow specifying a fractional backoff factor', () => {
+    it('should allow specifying a fractional backoff factor', () => {
         const policy = new BackoffPolicy({
             minRetryDelay: 1,
             maxRetryDelay: 5,
@@ -141,7 +141,7 @@ describe('A backoff policy', () => {
         expect(policy.getDelay(5)).toBe(5);
     });
 
-    test('should allow retries until the maximum number of attempts is reached', () => {
+    it('should allow retries until the maximum number of attempts is reached', () => {
         const policy = new BackoffPolicy({
             minRetryDelay: 1,
             maxRetryDelay: 2,

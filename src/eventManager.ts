@@ -19,10 +19,11 @@ export interface EventManager<DEvents extends EventMap, SEvents extends EventMap
 }
 
 export class SynchronousEventManager<TEvents extends EventMap> implements EventManager<TEvents> {
-    private readonly listeners: {[type in keyof TEvents]?: EventListener<TEvents[type]>[]} = {};
+    private readonly listeners: {[type in keyof TEvents]?: Array<EventListener<TEvents[type]>>} = {};
 
     public addListener<T extends keyof TEvents>(type: T, listener: EventListener<TEvents[T]>): void {
-        const listeners: EventListener<TEvents[T]>[] = this.listeners[type] ?? [];
+        const listeners: Array<EventListener<TEvents[T]>> = this.listeners[type] ?? [];
+
         listeners.push(listener);
 
         this.listeners[type] = listeners;
@@ -50,4 +51,3 @@ export class SynchronousEventManager<TEvents extends EventMap> implements EventM
         }
     }
 }
-

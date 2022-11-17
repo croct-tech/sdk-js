@@ -10,20 +10,23 @@ describe('An encoded channel', () => {
             publish: jest.fn(),
         };
 
-        channel = new EncodedChannel<string, string>(outputChannel, async (input: string) => `${input}-pong`);
+        channel = new EncodedChannel<string, string>(
+            outputChannel,
+            (input: string) => Promise.resolve(`${input}-pong`),
+        );
     });
 
     afterEach(() => {
         jest.restoreAllMocks();
     });
 
-    test('should encode and then publish the message', async () => {
+    it('should encode and then publish the message', async () => {
         await channel.publish('ping');
 
         expect(outputChannel.publish).toHaveBeenCalledWith('ping-pong');
     });
 
-    test('should close the output channel on close', async () => {
+    it('should close the output channel on close', async () => {
         await channel.close();
 
         expect(outputChannel.close).toHaveBeenCalled();

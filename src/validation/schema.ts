@@ -19,4 +19,3 @@ export class Violation extends Error {
         this.params = params;
     }
 }
-

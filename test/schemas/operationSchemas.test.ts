@@ -31,7 +31,7 @@ const complexMap = {
 };
 
 describe('An add operation schema', () => {
-    test.each([
+    it.each([
         [1],
         [1.2],
         [null],
@@ -45,10 +45,10 @@ describe('An add operation schema', () => {
             addOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             [['foo']],
             'Expected a JSON primitive at path \'/value/0\', actual array.',
@@ -78,11 +78,10 @@ describe('An add operation schema', () => {
             addOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -90,13 +89,12 @@ describe('An add operation schema', () => {
             addOperation.validate({path: path, value: 'bar'});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Invalid pointer format at path \'/path\'.');
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
 describe('A set operation schema', () => {
-    test.each([
+    it.each([
         [1],
         [1.2],
         [null],
@@ -110,10 +108,10 @@ describe('A set operation schema', () => {
             setOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             [['foo']],
             'Expected a JSON primitive at path \'/value/0\', actual array.',
@@ -143,11 +141,10 @@ describe('A set operation schema', () => {
             setOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -155,13 +152,12 @@ describe('A set operation schema', () => {
             setOperation.validate({path: path, value: 'bar'});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Invalid pointer format at path \'/path\'.');
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
 describe('A combine operation schema', () => {
-    test.each([
+    it.each([
         [1],
         [1.2],
         [null],
@@ -175,10 +171,10 @@ describe('A combine operation schema', () => {
             combineOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             [['foo']],
             'Expected a JSON primitive at path \'/value/0\', actual array.',
@@ -208,11 +204,10 @@ describe('A combine operation schema', () => {
             combineOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -220,13 +215,12 @@ describe('A combine operation schema', () => {
             combineOperation.validate({path: path, value: 'bar'});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Invalid pointer format at path \'/path\'.');
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
 describe('A merge operation schema', () => {
-    test.each([
+    it.each([
         [simpleArray],
         [simpleMap],
         [complexMap],
@@ -235,10 +229,10 @@ describe('A merge operation schema', () => {
             mergeOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [1, 'Expected value of type array or object at path \'/value\', actual integer.'],
         [1.2, 'Expected value of type array or object at path \'/value\', actual number.'],
         [null, 'Expected value of type array or object at path \'/value\', actual null.'],
@@ -270,11 +264,10 @@ describe('A merge operation schema', () => {
             mergeOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -282,13 +275,12 @@ describe('A merge operation schema', () => {
             mergeOperation.validate({path: path, value: 'bar'});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Invalid pointer format at path \'/path\'.');
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
 describe('An increment operation schema', () => {
-    test.each([
+    it.each([
         [1],
         [1.2],
     ])('should allow value %s', (value: any) => {
@@ -296,10 +288,10 @@ describe('An increment operation schema', () => {
             incrementOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [null, 'Expected value of type number at path \'/value\', actual null.'],
         ['foo', 'Expected value of type number at path \'/value\', actual string.'],
         [true, 'Expected value of type number at path \'/value\', actual boolean.'],
@@ -312,11 +304,10 @@ describe('An increment operation schema', () => {
             incrementOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -324,13 +315,12 @@ describe('An increment operation schema', () => {
             incrementOperation.validate({path: path, value: 1});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Invalid pointer format at path \'/path\'.');
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
 describe('A decrement operation schema', () => {
-    test.each([
+    it.each([
         [1],
         [1.2],
     ])('should allow value %s', (value: any) => {
@@ -338,10 +328,10 @@ describe('A decrement operation schema', () => {
             decrementOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [null, 'Expected value of type number at path \'/value\', actual null.'],
         ['foo', 'Expected value of type number at path \'/value\', actual string.'],
         [true, 'Expected value of type number at path \'/value\', actual boolean.'],
@@ -354,11 +344,10 @@ describe('A decrement operation schema', () => {
             decrementOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -366,13 +355,12 @@ describe('A decrement operation schema', () => {
             decrementOperation.validate({path: path, value: 1});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Invalid pointer format at path \'/path\'.');
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
 describe('A remove operation schema', () => {
-    test.each([
+    it.each([
         [1],
         [1.5],
         ['foo'],
@@ -385,10 +373,10 @@ describe('A remove operation schema', () => {
             removeOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             [['foo']],
             'Expected a JSON primitive at path \'/value/0\', actual array.',
@@ -422,11 +410,10 @@ describe('A remove operation schema', () => {
         function validate(): void {
             removeOperation.validate({path: 'foo', value: value});
         }
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -434,13 +421,12 @@ describe('A remove operation schema', () => {
             removeOperation.validate({path: path, value: 'bar'});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Invalid pointer format at path \'/path\'.');
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
 describe('A clear operation schema', () => {
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -448,13 +434,12 @@ describe('A clear operation schema', () => {
             clearOperation.validate({path: path});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Invalid pointer format at path \'/path\'.');
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
 describe('An unset operation schema', () => {
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -462,7 +447,6 @@ describe('An unset operation schema', () => {
             unsetOperation.validate({path: path});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Invalid pointer format at path \'/path\'.');
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });

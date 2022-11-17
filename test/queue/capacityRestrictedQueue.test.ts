@@ -1,7 +1,7 @@
 import {CapacityRestrictedQueue, InMemoryQueue} from '../../src/queue';
 
 describe('A capacity-restricted queue', () => {
-    test('should provide all items', () => {
+    it('should provide all items', () => {
         const queue = new CapacityRestrictedQueue<string>(new InMemoryQueue(), 3);
 
         queue.push('foo');
@@ -10,13 +10,13 @@ describe('A capacity-restricted queue', () => {
         expect(queue.all()).toEqual(['foo', 'bar']);
     });
 
-    test('should have predefined capacity', () => {
+    it('should have predefined capacity', () => {
         const queue = new CapacityRestrictedQueue<string>(new InMemoryQueue(), 3);
 
         expect(queue.getCapacity()).toBe(3);
     });
 
-    test('should determine whether the queue is empty', () => {
+    it('should determine whether the queue is empty', () => {
         const queue = new CapacityRestrictedQueue<string>(new InMemoryQueue(), 3);
 
         expect(queue.isEmpty()).toBeTruthy();
@@ -26,7 +26,7 @@ describe('A capacity-restricted queue', () => {
         expect(queue.isEmpty()).toBeFalsy();
     });
 
-    test('should allow to enqueue new items', () => {
+    it('should allow to enqueue new items', () => {
         const queue = new CapacityRestrictedQueue<string>(new InMemoryQueue(), 3);
 
         expect(queue.isEmpty()).toBeTruthy();
@@ -36,7 +36,7 @@ describe('A capacity-restricted queue', () => {
         expect(queue.isEmpty()).toBeFalsy();
     });
 
-    test('should not allow to enqueue new items after the maximum capacity is reached', () => {
+    it('should not allow to enqueue new items after the maximum capacity is reached', () => {
         const queue = new CapacityRestrictedQueue<string>(new InMemoryQueue(), 1);
 
         queue.push('foo');
@@ -45,11 +45,11 @@ describe('A capacity-restricted queue', () => {
             queue.push('bar');
         }
 
-        expect(push).toThrow(Error);
+        expect(push).toThrow();
         expect(push).toThrow('Maximum queue capacity reached.');
     });
 
-    test('should allow retrieving the item at the beginning of the queue without removing it', () => {
+    it('should allow retrieving the item at the beginning of the queue without removing it', () => {
         const queue = new CapacityRestrictedQueue<string>(new InMemoryQueue(), 3);
 
         queue.push('foo');
@@ -58,7 +58,7 @@ describe('A capacity-restricted queue', () => {
         expect(queue.length()).toBe(1);
     });
 
-    test('should allow removing the item at the beginning of the queue', () => {
+    it('should allow removing the item at the beginning of the queue', () => {
         const queue = new CapacityRestrictedQueue<string>(new InMemoryQueue(), 3);
 
         queue.push('1');
@@ -70,18 +70,18 @@ describe('A capacity-restricted queue', () => {
         expect(queue.shift()).toBe('3');
     });
 
-    test('should fail to remove an item if it is empty', () => {
+    it('should fail to remove an item if it is empty', () => {
         const queue = new CapacityRestrictedQueue<string>(new InMemoryQueue(), 3);
 
         function shift(): void {
             queue.shift();
         }
 
-        expect(shift).toThrow(Error);
+        expect(shift).toThrow();
         expect(shift).toThrow('The queue is empty.');
     });
 
-    test('should provide its length', () => {
+    it('should provide its length', () => {
         const queue = new CapacityRestrictedQueue<string>(new InMemoryQueue(), 3);
 
         queue.push('foo');

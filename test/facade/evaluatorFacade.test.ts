@@ -2,67 +2,79 @@ import {JsonObject} from '@croct/json';
 import {EvaluatorFacade, MinimalContextFactory, TabContextFactory} from '../../src/facade';
 import {Evaluator, Campaign, EvaluationOptions, Page} from '../../src/evaluator';
 import {Tab} from '../../src/tab';
-
-const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-beforeEach(() => {
-    Object.defineProperty(window.document, 'referrer', {
-        value: '',
-        configurable: true,
-    });
-});
+import {FixedAssigner} from '../../src/cid';
+import {InMemoryTokenStore, FixedTokenProvider, Token} from '../../src/token';
 
 describe('An evaluator facade', () => {
     let evaluator: Evaluator;
 
-    beforeEach(() => {
-        evaluator = jest.createMockFromModule<{Evaluator: Evaluator}>('../../src/evaluator').Evaluator;
+    const {timeZone} = Intl.DateTimeFormat().resolvedOptions();
 
-        evaluator.evaluate = jest.fn();
+    beforeEach(() => {
+        Object.defineProperty(window.document, 'referrer', {
+            value: '',
+            configurable: true,
+        });
+    });
+
+    beforeEach(() => {
+        const mock = jest.createMockFromModule<{Evaluator: new() => Evaluator}>('../../src/evaluator');
+
+        evaluator = new mock.Evaluator();
+
+        jest.spyOn(evaluator, 'evaluate').mockImplementation();
     });
 
     afterEach(() => {
         jest.restoreAllMocks();
     });
 
-    test('should fail if the expression is empty', () => {
-        const factory = new MinimalContextFactory();
-        const evaluationFacade = new EvaluatorFacade(evaluator, factory);
+    const clientId = '11111111-1111-1111-1111-111111111111';
 
-        function evaluate(): void {
-            evaluationFacade.evaluate('');
-        }
+    it('should fail if the query is empty', async () => {
+        const evaluationFacade = new EvaluatorFacade({
+            evaluator: evaluator,
+            cidAssigner: new FixedAssigner(clientId),
+            userTokenProvider: new InMemoryTokenStore(),
+            contextFactory: new MinimalContextFactory(),
+        });
 
-        expect(evaluate).toThrow(Error);
-        expect(evaluate).toThrow('The expression must be a non-empty string.');
+        await expect(evaluationFacade.evaluate('')).rejects
+            .toThrowWithMessage(Error, 'The query must be a non-empty string.');
     });
 
-    test('should fail if the options are invalid', () => {
-        const factory = new MinimalContextFactory();
-        const evaluationFacade = new EvaluatorFacade(evaluator, factory);
+    it('should fail if the options are invalid', async () => {
+        const evaluationFacade = new EvaluatorFacade({
+            evaluator: evaluator,
+            cidAssigner: new FixedAssigner(clientId),
+            userTokenProvider: new InMemoryTokenStore(),
+            contextFactory: new MinimalContextFactory(),
+        });
 
-        function evaluate(): void {
-            evaluationFacade.evaluate('1 + 1', {timeout: 1.2});
-        }
-
-        expect(evaluate).toThrow(Error);
-        expect(evaluate).toThrow('Invalid options');
+        await expect(evaluationFacade.evaluate('1 + 1', {timeout: 1.2})).rejects
+            .toThrowWithMessage(
+                Error,
+                'Invalid options: expected value of type integer '
+                + 'at path \'/timeout\', actual number.',
+            );
     });
 
-    test('should fail if the options are not a key-value map', () => {
-        const factory = new MinimalContextFactory();
-        const evaluationFacade = new EvaluatorFacade(evaluator, factory);
+    it('should fail if the options are not a key-value map', async () => {
+        const evaluationFacade = new EvaluatorFacade({
+            evaluator: evaluator,
+            cidAssigner: new FixedAssigner(clientId),
+            userTokenProvider: new InMemoryTokenStore(),
+            contextFactory: new MinimalContextFactory(),
+        });
 
-        function evaluate(): void {
-            evaluationFacade.evaluate('1 + 1', null as unknown as EvaluationOptions);
-        }
-
-        expect(evaluate).toThrow(Error);
-        expect(evaluate).toThrow('The options must be an object.');
+        await expect(evaluationFacade.evaluate('1 + 1', null as unknown as EvaluationOptions))
+            .rejects
+            .toThrowWithMessage(Error, 'Invalid options: expected value of type object at path \'/\', actual null.');
     });
 
-    test('should delegate the evaluation to the evaluator', () => {
+    it('should delegate the evaluation to the evaluator', async () => {
         const url = new URL('http://localhost');
+
         url.searchParams.append('utm_campaign', 'campaign');
         url.searchParams.append('utm_source', 'source');
         url.searchParams.append('utm_medium', 'medium');
@@ -80,11 +92,18 @@ describe('An evaluator facade', () => {
         });
 
         const tab = new Tab('1', true);
-        const evaluationFacade = new EvaluatorFacade(evaluator, new TabContextFactory(tab));
+        const token = Token.issue('00000000-0000-0000-0000-000000000000', 'foo', Date.now());
 
-        evaluationFacade.evaluate('foo', {timeout: 5, attributes: {foo: 'bar'}});
+        const evaluationFacade = new EvaluatorFacade({
+            evaluator: evaluator,
+            cidAssigner: new FixedAssigner(clientId),
+            userTokenProvider: new FixedTokenProvider(token),
+            contextFactory: new TabContextFactory(tab),
+        });
 
         const options: EvaluationOptions = {
+            clientId: clientId,
+            userToken: token,
             context: {
                 attributes: {
                     foo: 'bar',
@@ -94,7 +113,7 @@ describe('An evaluator facade', () => {
                     url: url.toString(),
                     referrer: referrer,
                 },
-                timezone: timezone,
+                timeZone: timeZone,
                 campaign: {
                     name: 'campaign',
                     source: 'source',
@@ -106,12 +125,19 @@ describe('An evaluator facade', () => {
             timeout: 5,
         };
 
-        expect(evaluator.evaluate).toHaveBeenNthCalledWith(1, 'foo', options);
+        const query = 'foo';
+
+        await evaluationFacade.evaluate(query, {
+            timeout: options.timeout,
+            attributes: options?.context?.attributes,
+        });
+
+        expect(evaluator.evaluate).toHaveBeenNthCalledWith(1, query, options);
     });
 });
 
 describe('A minimal context factory', () => {
-    test('should load a context containing attributes only', () => {
+    it('should load a context containing attributes only', () => {
         const factory = new MinimalContextFactory();
         const attributes: JsonObject = {
             foo: 1,
@@ -122,10 +148,10 @@ describe('A minimal context factory', () => {
         expect(context.attributes).toEqual(attributes);
         expect(context.campaign).toBeUndefined();
         expect(context.page).toBeUndefined();
-        expect(context.timezone).toBeUndefined();
+        expect(context.timeZone).toBeUndefined();
     });
 
-    test('can load an empty context', () => {
+    it('can load an empty context', () => {
         const factory = new MinimalContextFactory();
 
         expect(factory.createContext()).toEqual({});
@@ -133,8 +159,11 @@ describe('A minimal context factory', () => {
 });
 
 describe('A tab context factory', () => {
-    test('should load a context containing tab information and attributes', () => {
+    const {timeZone} = Intl.DateTimeFormat().resolvedOptions();
+
+    it('should load a context containing tab information and attributes', () => {
         const url = new URL('http://localhost');
+
         url.searchParams.append('UTM_campaign', 'campaign');
         url.searchParams.append('utm_SOURCE', 'source');
         url.searchParams.append('utm_mediuM', 'medium');
@@ -177,6 +206,6 @@ describe('A tab context factory', () => {
         expect(context.attributes).toEqual(attributes);
         expect(context.campaign).toEqual(campaign);
         expect(context.page).toEqual(page);
-        expect(context.timezone).toBe(timezone);
+        expect(context.timeZone).toBe(timeZone);
     });
 });

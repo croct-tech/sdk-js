@@ -1,11 +1,11 @@
 import {ObjectType, NumberType, StringType} from '../../src/validation';
 
 describe('An object type', () => {
-    test('should provide the allowed type', () => {
+    it('should provide the allowed type', () => {
         expect(new ObjectType().getTypes()).toEqual(['object']);
     });
 
-    test.each([
+    it.each([
         [null, false],
         ['foo', false],
         [true, false],
@@ -19,7 +19,7 @@ describe('An object type', () => {
         expect(new ObjectType().isValidType(value)).toBe(expected);
     });
 
-    test.each([
+    it.each([
         [
             {foo: 1},
             new ObjectType({properties: {foo: new NumberType({})}}),
@@ -94,10 +94,10 @@ describe('An object type', () => {
             type.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             null,
             new ObjectType({}),
@@ -255,7 +255,6 @@ describe('An object type', () => {
             type.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

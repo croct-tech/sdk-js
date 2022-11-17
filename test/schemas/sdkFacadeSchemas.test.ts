@@ -1,13 +1,13 @@
 import {sdkFacadeConfigurationSchema} from '../../src/schema';
 
 describe('The SDK facade configuration schema', () => {
-    test.each([
+    it.each([
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            cid: '9f62d6343c8742028df3e9e3ec596526',
+            clientId: '9f62d6343c8742028df3e9e3ec596526',
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
@@ -21,7 +21,8 @@ describe('The SDK facade configuration schema', () => {
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             trackerEndpointUrl: 'https://api.croct.io/tracker',
             evaluationEndpointUrl: 'https://api.croct.io/evaluation',
-            bootstrapEndpointUrl: 'https://api.croct.io/bootstrap',
+            contentEndpointUrl: 'https://api.croct.io/content',
+            cidAssignerEndpointUrl: 'https://api.croct.io/cid',
             tokenScope: 'isolated',
             userId: 'c4r0l',
             token: 'a.b.c',
@@ -40,25 +41,29 @@ describe('The SDK facade configuration schema', () => {
             sdkFacadeConfigurationSchema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {},
             "Missing property '/appId'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', cid: '7e9d59a9'},
-            "Invalid format at path '/cid'.",
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', clientId: '7e9d59a9'},
+            "Invalid format at path '/clientId'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', bootstrapEndpointUrl: 'x'},
-            "Invalid url format at path '/bootstrapEndpointUrl'.",
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', cidAssignerEndpointUrl: 'x'},
+            "Invalid url format at path '/cidAssignerEndpointUrl'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', evaluationEndpointUrl: 'x'},
             "Invalid url format at path '/evaluationEndpointUrl'.",
+        ],
+        [
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', contentEndpointUrl: 'x'},
+            "Invalid url format at path '/contentEndpointUrl'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', trackerEndpointUrl: 'x'},
@@ -66,7 +71,7 @@ describe('The SDK facade configuration schema', () => {
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', tokenScope: 'x'},
-            "Unexpected value at path '/tokenScope'",
+            "Unexpected value at path '/tokenScope', expecting 'global', 'contextual' or 'isolated', found 'x'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', userId: ''},
@@ -105,7 +110,6 @@ describe('The SDK facade configuration schema', () => {
             sdkFacadeConfigurationSchema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

@@ -1,7 +1,7 @@
 import {postDetails} from '../../src/schema/contentSchemas';
 
 describe('The product details schema', () => {
-    test.each([
+    it.each([
         [{
             postId: 'post-id',
             title: 'post-title',
@@ -22,10 +22,10 @@ describe('The product details schema', () => {
             postDetails.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {title: 'post-title', publishTime: 0},
             'Missing property \'/postId\'.',
@@ -56,7 +56,7 @@ describe('The product details schema', () => {
         ],
         [
             {postId: 'post-id', title: 'x'.repeat(101), publishTime: 0},
-            'Expected at most 100 characters at path \'/title\', actual 101',
+            'Expected at most 100 characters at path \'/title\', actual 101.',
         ],
         [
             {postId: 'post-id', title: null, publishTime: 0},
@@ -143,7 +143,6 @@ describe('The product details schema', () => {
             postDetails.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

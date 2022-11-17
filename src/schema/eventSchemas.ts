@@ -1,4 +1,12 @@
-import {ObjectType, StringType, NumberType, UnionType, NullType, BooleanType, ArrayType} from '../validation';
+import {
+    ObjectType,
+    StringType,
+    NumberType,
+    UnionType,
+    NullType,
+    BooleanType,
+    ArrayType,
+} from '../validation';
 import {cart, order, productDetails} from './ecommerceSchemas';
 import {userProfileSchema} from './userSchema';
 import {postDetails} from './contentSchemas';
@@ -95,9 +103,7 @@ export const postViewed = new ObjectType({
 export const linkOpened = new ObjectType({
     required: ['link'],
     properties: {
-        link: new StringType({
-            format: 'uri-reference',
-        }),
+        link: new StringType(),
     },
 });
 

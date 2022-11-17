@@ -3,7 +3,7 @@ type Listener = (event: Event) => void;
 export class TabEventEmulator {
     private tabIndex = 0;
 
-    private readonly listeners: {target: EventTarget, type: string, listener: Listener}[][] = [[]];
+    private readonly listeners: Array<Array<{target: EventTarget, type: string, listener: Listener}>> = [[]];
 
     private documentAddEventListener?: (...args: any) => void;
 

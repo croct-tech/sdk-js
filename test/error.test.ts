@@ -1,7 +1,7 @@
 import {formatCause, formatMessage} from '../src/error';
 
 describe('A error formatter', () => {
-    test.each([
+    it.each([
         [new Error('Error message.'), 'Error message.'],
         [new Error(''), ''],
         ['foo', 'Foo'],
@@ -13,7 +13,7 @@ describe('A error formatter', () => {
         expect(formatMessage(error)).toBe(message);
     });
 
-    test.each([
+    it.each([
         [new Error('Error message.'), 'error message.'],
         [new Error(''), ''],
         ['Foo', 'foo'],

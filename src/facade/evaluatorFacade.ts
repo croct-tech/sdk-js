@@ -1,8 +1,10 @@
 import {JsonObject, JsonValue} from '@croct/json';
 import {Evaluator, Campaign, EvaluationContext, Page} from '../evaluator';
 import {Tab} from '../tab';
-import {optionsSchema} from '../schema';
+import {evaluationOptionsSchema as optionsSchema} from '../schema';
 import {formatCause} from '../error';
+import {TokenProvider} from '../token';
+import {CidAssigner} from '../cid';
 
 export type EvaluationOptions = {
     timeout?: number,
@@ -10,10 +12,6 @@ export type EvaluationOptions = {
 };
 
 function validate(options: unknown): asserts options is EvaluationOptions {
-    if (typeof options !== 'object' || options === null) {
-        throw new Error('The options must be an object.');
-    }
-
     try {
         optionsSchema.validate(options);
     } catch (violation) {
@@ -25,24 +23,39 @@ export interface ContextFactory {
     createContext(attributes?: JsonObject): EvaluationContext;
 }
 
+export type Configuration = {
+    evaluator: Evaluator,
+    contextFactory: ContextFactory,
+    userTokenProvider: TokenProvider,
+    cidAssigner: CidAssigner,
+};
+
 export class EvaluatorFacade {
     private readonly evaluator: Evaluator;
 
     private readonly contextFactory: ContextFactory;
 
-    public constructor(evaluator: Evaluator, contextFactory: ContextFactory) {
-        this.evaluator = evaluator;
-        this.contextFactory = contextFactory;
+    private readonly tokenProvider: TokenProvider;
+
+    private readonly cidAssigner: CidAssigner;
+
+    public constructor(configuration: Configuration) {
+        this.evaluator = configuration.evaluator;
+        this.contextFactory = configuration.contextFactory;
+        this.tokenProvider = configuration.userTokenProvider;
+        this.cidAssigner = configuration.cidAssigner;
     }
 
-    public evaluate(expression: string, options: EvaluationOptions = {}): Promise<JsonValue> {
-        if (typeof expression !== 'string' || expression.length === 0) {
-            throw new Error('The expression must be a non-empty string.');
+    public async evaluate(query: string, options: EvaluationOptions = {}): Promise<JsonValue> {
+        if (typeof query !== 'string' || query.length === 0) {
+            throw new Error('The query must be a non-empty string.');
         }
 
         validate(options);
 
-        return this.evaluator.evaluate(expression, {
+        return this.evaluator.evaluate(query, {
+            clientId: await this.cidAssigner.assignCid(),
+            userToken: this.tokenProvider.getToken() ?? undefined,
             timeout: options.timeout,
             context: this.contextFactory.createContext(options.attributes),
         });
@@ -83,10 +96,10 @@ export class TabContextFactory implements ContextFactory {
 
         context.page = page;
 
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? null;
 
-        if (timezone !== null) {
-            context.timezone = timezone;
+        if (timeZone !== null) {
+            context.timeZone = timeZone;
         }
 
         const campaign = TabContextFactory.createCampaign(url);
@@ -109,22 +122,27 @@ export class TabContextFactory implements ContextFactory {
             switch (parameter.toLowerCase()) {
                 case 'utm_campaign':
                     campaign.name = value;
+
                     break;
 
                 case 'utm_source':
                     campaign.source = value;
+
                     break;
 
                 case 'utm_term':
                     campaign.term = value;
+
                     break;
 
                 case 'utm_medium':
                     campaign.medium = value;
+
                     break;
 
                 case 'utm_content':
                     campaign.content = value;
+
                     break;
             }
         }

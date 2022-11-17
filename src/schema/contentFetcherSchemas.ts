@@ -1,0 +1,23 @@
+import {ObjectType, NumberType, JsonObjectType, StringType, UnionType} from '../validation';
+
+export const fetchOptionsSchema = new ObjectType({
+    properties: {
+        timeout: new NumberType({
+            integer: true,
+            minimum: 0,
+        }),
+        version: new UnionType(
+            new StringType({
+                pattern: /^\d+$/,
+            }),
+            new NumberType({
+                integer: true,
+                minimum: 1,
+            }),
+        ),
+        preferredLocale: new StringType({
+            pattern: /^[a-z]{2,3}([-_][a-z]{2,3})?$/i,
+        }),
+        attributes: new JsonObjectType(),
+    },
+});

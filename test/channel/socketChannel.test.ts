@@ -10,7 +10,7 @@ describe('A socket channel', () => {
         jest.restoreAllMocks();
     });
 
-    test('should publish messages in order', async () => {
+    it('should publish messages in order', async () => {
         const server = new WS(url);
         const channel = new SocketChannel({url: url});
 
@@ -23,7 +23,7 @@ describe('A socket channel', () => {
         expect(server).toHaveReceivedMessages(['foo', 'bar']);
     });
 
-    test('should fail to publish messages if the connection is closed', async () => {
+    it('should fail to publish messages if the connection is closed', async () => {
         const server = new WS(url);
         const channel = new SocketChannel({url: url});
 
@@ -35,7 +35,7 @@ describe('A socket channel', () => {
         await expect(channel.publish('bar')).rejects.toThrow('Channel has been closed.');
     });
 
-    test('should fail to publish messages if an error occurs in the meanwhile', async () => {
+    it('should fail to publish messages if an error occurs in the meanwhile', async () => {
         const server = new WS(url);
         const channel = new SocketChannel({url: url});
 
@@ -46,11 +46,12 @@ describe('A socket channel', () => {
         await expect(channel.publish('foo')).rejects.toThrow();
     });
 
-    test('should reconnect if the connection cannot be established', async () => {
+    it('should reconnect if the connection cannot be established', async () => {
         const server = new WS(url);
         const channel = new SocketChannel({url: url});
 
         let attempt = 0;
+
         server.on('connection', socket => {
             if (attempt === 0) {
                 socket.close({code: 1011, reason: 'Server error', wasClean: false});
@@ -63,7 +64,7 @@ describe('A socket channel', () => {
         await expect(channel.publish('bar')).resolves.toBeUndefined();
     });
 
-    test('should reconnect when receiving a message after the connection is closed', async () => {
+    it('should reconnect when receiving a message after the connection is closed', async () => {
         const server = new WS(url);
         const channel = new SocketChannel({url: url});
 
@@ -82,7 +83,7 @@ describe('A socket channel', () => {
         await expect(channel.publish('bar')).resolves.toBeUndefined();
     });
 
-    test('should allow to subscribe and unsubscribe listeners', async () => {
+    it('should allow to subscribe and unsubscribe listeners', async () => {
         const server = new WS(url);
         const channel = new SocketChannel({url: url});
         const listener = jest.fn();
@@ -106,7 +107,7 @@ describe('A socket channel', () => {
         expect(listener).toHaveBeenCalledTimes(1);
     });
 
-    test('should determine whether it is connected to the server or not', async () => {
+    it('should determine whether it is connected to the server or not', async () => {
         const server = new WS(url);
         const channel = new SocketChannel({url: url});
 
@@ -119,7 +120,7 @@ describe('A socket channel', () => {
         await expect(channel.connected).resolves.toBeTruthy();
     });
 
-    test('should configure the connection to use binary data type', async () => {
+    it('should configure the connection to use binary data type', async () => {
         const server = new WS(url);
         const channel = new SocketChannel({url: url, binaryType: 'blob'});
 
@@ -131,7 +132,7 @@ describe('A socket channel', () => {
         expect(connection.binaryType).toBe('blob');
     });
 
-    test('should allow to close the web socket connection', async () => {
+    it('should allow to close the web socket connection', async () => {
         const server = new WS(url);
         const channel = new SocketChannel({url: url});
 
@@ -146,13 +147,13 @@ describe('A socket channel', () => {
         expect(connection.readyState).toBe(WebSocket.CLOSED);
     });
 
-    test('should be able to close the channel even before establishing a connection', async () => {
+    it('should be able to close the channel even before establishing a connection', async () => {
         const channel = new SocketChannel({url: url});
 
         await expect(channel.close()).resolves.toBeUndefined();
     });
 
-    test('should close the web socket connection if timeout is reached', async () => {
+    it('should close the web socket connection if timeout is reached', async () => {
         const close = jest.fn();
 
         window.WebSocket = class MockedSocket extends WebSocket {
@@ -196,7 +197,7 @@ describe('A socket channel', () => {
         expect(close).toHaveBeenCalledWith(1000, 'Maximum connection timeout reached.');
     });
 
-    test('should abort closing the channel if the timeout is reached', async () => {
+    it('should abort closing the channel if the timeout is reached', async () => {
         const server = new WS(url);
         const channel = new SocketChannel({url: url, closeTimeout: 0});
 
@@ -206,7 +207,7 @@ describe('A socket channel', () => {
         await expect(channel.close()).rejects.toThrow('Maximum close timeout reached.');
     });
 
-    test('should close connection with error', async () => {
+    it('should close connection with error', async () => {
         const channel = new SocketChannel({url: url});
 
         await expect(channel.publish('open connection')).rejects.toThrow();
@@ -214,7 +215,7 @@ describe('A socket channel', () => {
         await expect(channel.close()).resolves.toBeUndefined();
     });
 
-    test('should close the connection if an error occurs', async () => {
+    it('should close the connection if an error occurs', async () => {
         const logger: Logger = {
             debug: jest.fn(),
             warn: jest.fn(),

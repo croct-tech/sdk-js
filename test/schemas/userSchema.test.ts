@@ -1,7 +1,7 @@
 import {userProfileSchema} from '../../src/schema';
 
 describe('The user profile schema', () => {
-    test.each([
+    it.each([
         [{firstName: 'x'}],
         [{firstName: 'x'.repeat(50)}],
         [{lastName: 'x'}],
@@ -106,10 +106,10 @@ describe('The user profile schema', () => {
             userProfileSchema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [{firstName: ''}, 'Expected at least 1 character at path \'/firstName\', actual 0.'],
         [{firstName: 'x'.repeat(51)}, 'Expected at most 50 characters at path \'/firstName\', actual 51.'],
         [{lastName: ''}, 'Expected at least 1 character at path \'/lastName\', actual 0.'],
@@ -282,7 +282,6 @@ describe('The user profile schema', () => {
             userProfileSchema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

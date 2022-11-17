@@ -7,8 +7,11 @@ describe('A session patch', () => {
     let patch: SessionPatch;
 
     beforeEach(() => {
-        tracker = jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
-        tracker.track = jest.fn(event => Promise.resolve(event));
+        const mock = jest.createMockFromModule<{Tracker: new() => Tracker}>('../../src/tracker');
+
+        tracker = new mock.Tracker();
+
+        jest.spyOn(tracker, 'track').mockImplementation(event => Promise.resolve(event));
 
         patch = new SessionPatch(tracker);
     });
@@ -17,7 +20,7 @@ describe('A session patch', () => {
         jest.restoreAllMocks();
     });
 
-    test('should not track a "sessionAttributesChanged" event if the patch is empty', async () => {
+    it('should not track a "sessionAttributesChanged" event if the patch is empty', async () => {
         const promise = patch.save();
 
         const expectedEvent: SessionAttributesChanged = {
@@ -32,9 +35,8 @@ describe('A session patch', () => {
         expect(tracker.track).not.toHaveBeenCalled();
     });
 
-    test('should track a "sessionAttributesChanged" event and reset itself', async () => {
-        const promise = patch
-            .add('foo', 'bar')
+    it('should track a "sessionAttributesChanged" event and reset itself', async () => {
+        const promise = patch.add('foo', 'bar')
             .save();
 
         const nonEmptyEmpty: SessionAttributesChanged = {

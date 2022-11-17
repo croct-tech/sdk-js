@@ -20,7 +20,7 @@ export const sdkConfigurationSchema = new ObjectType({
         appId: new StringType({
             format: 'uuid',
         }),
-        cid: new StringType({
+        clientId: new StringType({
             pattern: /^[0-9a-f]{32}$/i,
         }),
         tokenScope: tokenScopeSchema,
@@ -30,7 +30,10 @@ export const sdkConfigurationSchema = new ObjectType({
         evaluationEndpointUrl: new StringType({
             format: 'url',
         }),
-        bootstrapEndpointUrl: new StringType({
+        contentEndpointUrl: new StringType({
+            format: 'url',
+        }),
+        cidAssignerEndpointUrl: new StringType({
             format: 'url',
         }),
         beaconQueueSize: new NumberType({

@@ -7,7 +7,7 @@ describe('A monitored queue', () => {
         jest.clearAllMocks();
     });
 
-    test('should provide all items', () => {
+    it('should provide all items', () => {
         const queue = new MonitoredQueue<string>(new InMemoryQueue(), new NullLogger());
 
         queue.push('foo');
@@ -16,13 +16,13 @@ describe('A monitored queue', () => {
         expect(queue.all()).toEqual(['foo', 'bar']);
     });
 
-    test('should have a capacity', () => {
+    it('should have a capacity', () => {
         const queue = new MonitoredQueue<string>(new CapacityRestrictedQueue(new InMemoryQueue(), 3), new NullLogger());
 
         expect(queue.getCapacity()).toBe(3);
     });
 
-    test('should determine whether the queue is empty', () => {
+    it('should determine whether the queue is empty', () => {
         const queue = new MonitoredQueue<string>(new InMemoryQueue(), new NullLogger());
 
         expect(queue.isEmpty()).toBeTruthy();
@@ -32,7 +32,7 @@ describe('A monitored queue', () => {
         expect(queue.isEmpty()).toBeFalsy();
     });
 
-    test('should allow to enqueue new items', () => {
+    it('should allow to enqueue new items', () => {
         const queue = new MonitoredQueue<string>(new InMemoryQueue(), new NullLogger());
 
         expect(queue.isEmpty()).toBeTruthy();
@@ -42,7 +42,7 @@ describe('A monitored queue', () => {
         expect(queue.isEmpty()).toBeFalsy();
     });
 
-    test('should allow retrieving the item at the beginning of the queue without removing it', () => {
+    it('should allow retrieving the item at the beginning of the queue without removing it', () => {
         const queue = new MonitoredQueue<string>(new InMemoryQueue(), new NullLogger());
 
         queue.push('foo');
@@ -51,7 +51,7 @@ describe('A monitored queue', () => {
         expect(queue.length()).toBe(1);
     });
 
-    test('should allow removing the item at the beginning of the queue', () => {
+    it('should allow removing the item at the beginning of the queue', () => {
         const queue = new MonitoredQueue<string>(new InMemoryQueue(), new NullLogger());
 
         queue.push('1');
@@ -63,18 +63,18 @@ describe('A monitored queue', () => {
         expect(queue.shift()).toBe('3');
     });
 
-    test('should fail to remove an item if it is empty', () => {
+    it('should fail to remove an item if it is empty', () => {
         const queue = new MonitoredQueue<string>(new InMemoryQueue(), new NullLogger());
 
         function shift(): void {
             queue.shift();
         }
 
-        expect(shift).toThrow(Error);
+        expect(shift).toThrow();
         expect(shift).toThrow('The queue is empty.');
     });
 
-    test('should provide its length', () => {
+    it('should provide its length', () => {
         const queue = new MonitoredQueue<string>(new InMemoryQueue(), new NullLogger());
 
         queue.push('foo');
@@ -83,7 +83,7 @@ describe('A monitored queue', () => {
         expect(queue.length()).toBe(2);
     });
 
-    test.each([
+    it.each([
         [
             'empty',
             [],
@@ -133,7 +133,7 @@ describe('A monitored queue', () => {
         expect(callback).toHaveBeenCalledWith(queue);
     });
 
-    test('should allow to remove a callback', () => {
+    it('should allow to remove a callback', () => {
         const queue = new MonitoredQueue<string>(new CapacityRestrictedQueue(new InMemoryQueue(), 1), new NullLogger());
         const callback = jest.fn();
 
@@ -147,7 +147,7 @@ describe('A monitored queue', () => {
         expect(callback).toHaveBeenCalledTimes(1);
     });
 
-    test('should not fail to remove an nonexistent callback', () => {
+    it('should not fail to remove an nonexistent callback', () => {
         const queue = new MonitoredQueue<string>(new CapacityRestrictedQueue(new InMemoryQueue(), 1), new NullLogger());
         const callback = jest.fn();
 

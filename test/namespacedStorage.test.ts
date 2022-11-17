@@ -2,16 +2,16 @@ import {NamespacedStorage} from '../src/namespacedStorage';
 import {DumbStorage} from './utils/dumbStorage';
 
 describe('A namespaced storage', () => {
-    test('should not allow an empty namespace', () => {
+    it('should not allow an empty namespace', () => {
         function invalidToken(): NamespacedStorage {
             return new NamespacedStorage(new DumbStorage(), '');
         }
 
-        expect(invalidToken).toThrow(Error);
+        expect(invalidToken).toThrow();
         expect(invalidToken).toThrow('The namespace cannot be empty.');
     });
 
-    test('should provide the number of stored items', () => {
+    it('should provide the number of stored items', () => {
         const innerStorage = new DumbStorage();
 
         innerStorage.setItem('foo', 'bar');
@@ -27,7 +27,7 @@ describe('A namespaced storage', () => {
         expect(innerStorage.length).toBe(2);
     });
 
-    test('should allow to remove all items', () => {
+    it('should allow to remove all items', () => {
         const innerStorage = new DumbStorage();
 
         innerStorage.setItem('foo', 'bar');
@@ -47,7 +47,7 @@ describe('A namespaced storage', () => {
         expect(innerStorage.getItem('foo')).toBe('bar');
     });
 
-    test('should allow to retrieve the value associated with a given key', () => {
+    it('should allow to retrieve the value associated with a given key', () => {
         const innerStorage = new DumbStorage();
 
         innerStorage.setItem('foo', 'inner bar');
@@ -61,7 +61,7 @@ describe('A namespaced storage', () => {
         expect(innerStorage.getItem('foo')).toBe('inner bar');
     });
 
-    test('should allow to retrieve the value at a given index', () => {
+    it('should allow to retrieve the value at a given index', () => {
         const innerStorage = new DumbStorage();
 
         innerStorage.setItem('foo', 'inner bar');
@@ -78,7 +78,7 @@ describe('A namespaced storage', () => {
         expect(innerStorage.key(2)).toBeNull();
     });
 
-    test('should allow to set a value to a given key', () => {
+    it('should allow to set a value to a given key', () => {
         const innerStorage = new DumbStorage();
 
         innerStorage.setItem('foo', 'inner bar');
@@ -93,7 +93,7 @@ describe('A namespaced storage', () => {
         expect(innerStorage.getItem('foo')).toBe('inner bar');
     });
 
-    test('should allow to remove an item associated with a given key', () => {
+    it('should allow to remove an item associated with a given key', () => {
         const innerStorage = new DumbStorage();
 
         innerStorage.setItem('foo', 'inner bar');

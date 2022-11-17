@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
-    "target": "ES5",
+    "target": "ES2019",
     "importHelpers": true,
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
@@ -17,10 +17,11 @@
     "outDir": "build",
     "downlevelIteration": true,
     "declaration": true,
-    "lib": ["es2017", "dom", "dom.iterable", "es2018.promise"]
+    "lib": ["dom"]
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "test/**/*.ts"
   ],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "build"]
 }

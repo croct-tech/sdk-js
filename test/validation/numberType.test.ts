@@ -1,11 +1,11 @@
 import {NumberType} from '../../src/validation';
 
 describe('A number type', () => {
-    test('should provide the allowed type', () => {
+    it('should provide the allowed type', () => {
         expect(new NumberType({}).getTypes()).toEqual(['number']);
     });
 
-    test.each([
+    it.each([
         [null, false],
         ['foo', false],
         [true, false],
@@ -18,7 +18,7 @@ describe('A number type', () => {
         expect(new NumberType().isValidType(value)).toBe(expected);
     });
 
-    test.each([
+    it.each([
         [1, new NumberType({integer: true})],
         [1.23, new NumberType({integer: false})],
         [2, new NumberType({minimum: 1})],
@@ -28,10 +28,10 @@ describe('A number type', () => {
             type.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [null, new NumberType({}), 'Expected value of type number at path \'/\', actual null.'],
         ['foo', new NumberType({}), 'Expected value of type number at path \'/\', actual string.'],
         [[], new NumberType({}), 'Expected value of type number at path \'/\', actual array.'],
@@ -48,7 +48,6 @@ describe('A number type', () => {
             type.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

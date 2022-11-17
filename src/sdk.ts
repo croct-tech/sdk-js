@@ -1,7 +1,13 @@
 import {Container} from './container';
 import {Context, TokenScope} from './context';
 import {Logger} from './logging';
-import {BOOTSTRAP_ENDPOINT_URL, EVALUATION_ENDPOINT_URL, TRACKER_ENDPOINT_URL, VERSION} from './constants';
+import {
+    CID_ASSIGNER_ENDPOINT_URL,
+    CONTENT_ENDPOINT_URL,
+    EVALUATION_ENDPOINT_URL,
+    TRACKER_ENDPOINT_URL,
+    VERSION,
+} from './constants';
 import {sdkConfigurationSchema} from './schema';
 import {formatCause} from './error';
 import {Tracker} from './tracker';
@@ -10,16 +16,19 @@ import {SdkEventMap} from './sdkEvents';
 import {EventManager} from './eventManager';
 import {CidAssigner} from './cid';
 import {UrlSanitizer} from './tab';
+import {ContentFetcher} from './contentFetcher';
+import {TokenStore} from './token';
 
 export type Configuration = {
     appId: string,
     tokenScope: TokenScope,
     debug: boolean,
     test: boolean,
-    cid?: string,
+    clientId?: string,
     trackerEndpointUrl?: string,
     evaluationEndpointUrl?: string,
-    bootstrapEndpointUrl?: string,
+    contentEndpointUrl?: string,
+    cidAssignerEndpointUrl?: string,
     beaconQueueSize?: number,
     urlSanitizer?: UrlSanitizer,
     logger?: Logger,
@@ -63,8 +72,9 @@ export class Sdk {
         const container = new Container({
             ...containerConfiguration,
             evaluationEndpointUrl: containerConfiguration.evaluationEndpointUrl ?? EVALUATION_ENDPOINT_URL,
+            contentEndpointUrl: containerConfiguration.contentEndpointUrl ?? CONTENT_ENDPOINT_URL,
             trackerEndpointUrl: containerConfiguration.trackerEndpointUrl ?? TRACKER_ENDPOINT_URL,
-            bootstrapEndpointUrl: containerConfiguration.bootstrapEndpointUrl ?? BOOTSTRAP_ENDPOINT_URL,
+            cidAssignerEndpointUrl: containerConfiguration.cidAssignerEndpointUrl ?? CID_ASSIGNER_ENDPOINT_URL,
             beaconQueueSize: containerConfiguration.beaconQueueSize ?? 100,
             eventMetadata: eventMetadata,
         });
@@ -108,6 +118,14 @@ export class Sdk {
         return this.container.getCidAssigner();
     }
 
+    public get previewTokenStore(): TokenStore {
+        return this.container.getPreviewTokenStore();
+    }
+
+    public get userTokenStore(): TokenStore {
+        return this.container.getUserTokenStore();
+    }
+
     public get context(): Context {
         return this.container.getContext();
     }
@@ -118,6 +136,10 @@ export class Sdk {
 
     public get evaluator(): Evaluator {
         return this.container.getEvaluator();
+    }
+
+    public get contentFetcher(): ContentFetcher {
+        return this.container.getContentFetcher();
     }
 
     public get eventManager(): EventManager<SdkEventMap> {

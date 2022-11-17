@@ -1,11 +1,11 @@
 import {BooleanType} from '../../src/validation';
 
 describe('A boolean type', () => {
-    test('should provide the allowed type', () => {
+    it('should provide the allowed type', () => {
         expect(new BooleanType().getTypes()).toEqual(['boolean']);
     });
 
-    test.each([
+    it.each([
         [null, false],
         ['foo', false],
         [true, true],
@@ -18,14 +18,14 @@ describe('A boolean type', () => {
         expect(new BooleanType().isValidType(value)).toBe(expected);
     });
 
-    test('should allow boolean values', () => {
+    it('should allow boolean values', () => {
         const type = new BooleanType();
 
-        expect((): void => type.validate(true)).not.toThrow(Error);
-        expect((): void => type.validate(false)).not.toThrow(Error);
+        expect((): void => type.validate(true)).not.toThrow();
+        expect((): void => type.validate(false)).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [null, 'Expected value of type boolean at path \'/\', actual null.'],
         ['foo', 'Expected value of type boolean at path \'/\', actual string.'],
         [1, 'Expected value of type boolean at path \'/\', actual integer.'],
@@ -38,7 +38,6 @@ describe('A boolean type', () => {
             type.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

@@ -6,14 +6,15 @@ on:
       - published
 
 env:
-  BOOTSTRAP_ENDPOINT: https://api.croct.io/client/web/bootstrap
+  CID_ASSIGNER_ENDPOINT: https://api.croct.io/client/web/bootstrap
   TRACKER_ENDPOINT: wss://api.croct.io/client/web/connect
-  EVALUATION_ENDPOINT: https://api.croct.io/client/web/evaluate
-  MAX_EXPRESSION_LENGHT: 500
+  EVALUATION_ENDPOINT: https://api.croct.io
+  CONTENT_ENDPOINT: https://api.croct.io
+  MAX_QUERY_LENGTH: 500
 
 jobs:
   deploy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -44,10 +45,11 @@ jobs:
           cd build
           sed -i -e "s~\"version\": \"0.0.0-dev\"~\"version\": \"${GITHUB_REF##*/}\"~" package.json
           sed -i -e "s~<@version@>~${GITHUB_REF##*/}~" constants.js
+          sed -i -e "s~<@cidAssignerEndpointUrl@>~${CID_ASSIGNER_ENDPOINT}~" constants.js
           sed -i -e "s~<@trackerEndpointUrl@>~${TRACKER_ENDPOINT}~" constants.js
           sed -i -e "s~<@evaluationEndpointUrl@>~${EVALUATION_ENDPOINT}~" constants.js
-          sed -i -e "s~<@bootstrapEndpointUrl@>~${BOOTSTRAP_ENDPOINT}~" constants.js
-          sed -i -e "s~parseInt('<@maxExpressionLength@>', 10)~${MAX_EXPRESSION_LENGHT}~" constants.js
+          sed -i -e "s~<@contentEndpointUrl@>~${CONTENT_ENDPOINT}~" constants.js
+          sed -i -e "s~parseInt('<@maxQueryLength@>', 10)~${MAX_QUERY_LENGTH}~" constants.js
 
       - name: Publish pre-release to NPM
         if: ${{ github.event.release.prerelease }}

@@ -24,7 +24,7 @@ export class SocketChannel<I extends Input, O extends Output> implements DuplexC
 
     private readonly options: Options;
 
-    private readonly listeners: ChannelListener<I>[] = [];
+    private readonly listeners: Array<ChannelListener<I>> = [];
 
     private connection?: Promise<WebSocket>;
 
@@ -81,20 +81,22 @@ export class SocketChannel<I extends Input, O extends Output> implements DuplexC
         }
 
         if (this.connection !== undefined) {
-            return this.connection.then(connection => {
-                const state = connection.readyState;
+            return this.connection
+                .then(connection => {
+                    const state = connection.readyState;
 
-                if (state === WebSocket.OPEN) {
-                    return connection;
-                }
+                    if (state === WebSocket.OPEN) {
+                        return connection;
+                    }
 
-                throw new Error('Connection lost.');
-            }).catch(() => {
-                // Reconnect
-                delete this.connection;
+                    throw new Error('Connection lost.');
+                })
+                .catch(() => {
+                    // Reconnect
+                    delete this.connection;
 
-                return this.connect();
-            });
+                    return this.connect();
+                });
         }
 
         this.connection = new Promise((resolve, reject): void => {
@@ -102,7 +104,7 @@ export class SocketChannel<I extends Input, O extends Output> implements DuplexC
 
             const connection = new window.WebSocket(this.url, this.options.protocols);
 
-            if (this.options.binaryType) {
+            if (this.options.binaryType !== undefined) {
                 connection.binaryType = this.options.binaryType;
             }
 
@@ -143,7 +145,7 @@ export class SocketChannel<I extends Input, O extends Output> implements DuplexC
             const closeListener = (event: CloseEvent): void => {
                 window.clearTimeout(abortTimer);
 
-                const reason = `${formatCause(event.reason || 'unknown')} (code ${event.code})`;
+                const reason = `${formatCause(event.reason ?? 'unknown')} (code ${event.code})`;
                 const message = `Connection has been closed, reason: ${reason}`;
 
                 if (!this.closed) {

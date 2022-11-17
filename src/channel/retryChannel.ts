@@ -28,7 +28,9 @@ export class RetryChannel<T> implements OutputChannel<T> {
             return Promise.reject(new Error('The channel is closed.'));
         }
 
-        return this.channel.publish(message).catch(error => this.retry(message, error));
+        return this.channel
+            .publish(message)
+            .catch(error => this.retry(message, error));
     }
 
     public async retry(message: T, error: unknown): Promise<void> {

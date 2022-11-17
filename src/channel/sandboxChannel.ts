@@ -1,7 +1,7 @@
 import {ChannelListener, DuplexChannel} from './channel';
 
 export class SandboxChannel<I, O> implements DuplexChannel<I, O> {
-    private readonly listeners: ChannelListener<I>[] = [];
+    private readonly listeners: Array<ChannelListener<I>> = [];
 
     public readonly messages: O[] = [];
 

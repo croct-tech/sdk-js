@@ -1,6 +1,6 @@
 import {ObjectType, NumberType, JsonObjectType} from '../validation';
 
-export const optionsSchema = new ObjectType({
+export const evaluationOptionsSchema = new ObjectType({
     properties: {
         timeout: new NumberType({
             integer: true,

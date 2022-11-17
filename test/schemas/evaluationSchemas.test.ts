@@ -1,7 +1,7 @@
-import {optionsSchema} from '../../src/schema';
+import {evaluationOptionsSchema} from '../../src/schema';
 
 describe('The evaluation option schema', () => {
-    test.each([
+    it.each([
         [{}],
         [{
             timeout: 1,
@@ -15,13 +15,13 @@ describe('The evaluation option schema', () => {
         }],
     ])('should allow %s', (value: Record<string, unknown>) => {
         function validate(): void {
-            optionsSchema.validate(value);
+            evaluationOptionsSchema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {timeout: -1},
             'Expected a value greater than or equal to 0 at path \'/timeout\', actual -1.',
@@ -36,10 +36,9 @@ describe('The evaluation option schema', () => {
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
-            optionsSchema.validate(value);
+            evaluationOptionsSchema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

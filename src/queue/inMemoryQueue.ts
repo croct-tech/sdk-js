@@ -24,13 +24,13 @@ export class InMemoryQueue<T> implements Queue<T> {
     }
 
     public peek(): T | null {
-        return this.queue[0] || null;
+        return this.queue[0] ?? null;
     }
 
     public shift(): T {
         const value = this.queue.shift();
 
-        if (!value) {
+        if (value === undefined) {
             throw new Error('The queue is empty.');
         }
 

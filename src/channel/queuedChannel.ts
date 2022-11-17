@@ -46,7 +46,11 @@ export class QueuedChannel<T> implements OutputChannel<T> {
 
         this.enqueue(message);
 
-        this.pending = this.pending.then(() => this.channel.publish(message).then(this.dequeue.bind(this)));
+        this.pending = this.pending.then(
+            () => this.channel
+                .publish(message)
+                .then(this.dequeue.bind(this)),
+        );
 
         return this.pending;
     }
@@ -82,7 +86,11 @@ export class QueuedChannel<T> implements OutputChannel<T> {
         this.logger.debug(`Queue length: ${length}`);
 
         for (const message of this.queue.all()) {
-            this.pending = this.pending.then(() => this.channel.publish(message).then(this.dequeue.bind(this)));
+            this.pending = this.pending.then(
+                () => this.channel
+                    .publish(message)
+                    .then(this.dequeue.bind(this)),
+            );
         }
 
         return this.pending;

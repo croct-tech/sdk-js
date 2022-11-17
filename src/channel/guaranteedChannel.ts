@@ -117,7 +117,9 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
 
             this.logger.debug(`Sending message #${id}...`);
 
-            this.channel.publish({id, message}).then(wait, abort);
+            this.channel
+                .publish({id: id, message: message})
+                .then(wait, abort);
         });
     }
 

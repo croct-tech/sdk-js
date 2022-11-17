@@ -20,7 +20,7 @@ class TestRecord extends ActiveRecord<any> {
 }
 
 describe('An active record', () => {
-    test('should build a patch', () => {
+    it('should build a patch', () => {
         const record = new TestRecord()
             .set('a', 1)
             .set({a: 1})
@@ -96,7 +96,7 @@ describe('An active record', () => {
         expect(record).toEqual(operations);
     });
 
-    test('should determine whether the record has pending changes', () => {
+    it('should determine whether the record has pending changes', () => {
         const record = new TestRecord();
 
         expect(record.isDirty()).toBeFalsy();
@@ -106,7 +106,7 @@ describe('An active record', () => {
         expect(record.isDirty()).toBeTruthy();
     });
 
-    test('should allow discarding pending changes', () => {
+    it('should allow discarding pending changes', () => {
         const record = new TestRecord();
 
         record.set('a', '1');

@@ -2,7 +2,7 @@ import {EvaluatorFacade, TabContextFactory} from './evaluatorFacade';
 import {TrackerFacade} from './trackerFacade';
 import {Context, TokenScope} from '../context';
 import {UserFacade} from './userFacade';
-import {Token} from '../token';
+import {Token, TokenStore} from '../token';
 import {formatCause} from '../error';
 import {sdkFacadeConfigurationSchema} from '../schema';
 import {Sdk} from '../sdk';
@@ -13,6 +13,7 @@ import {EventManager} from '../eventManager';
 import {CidAssigner} from '../cid';
 import {PartialTrackingEvent} from '../trackingEvents';
 import {UrlSanitizer} from '../tab';
+import {ContentFetcherFacade} from './contentFetcherFacade';
 
 export type Configuration = {
     appId: string,
@@ -22,19 +23,17 @@ export type Configuration = {
     track?: boolean,
     token?: string | null,
     userId?: string,
+    clientId?: string,
     eventMetadata?: {[key: string]: string},
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
     trackerEndpointUrl?: string,
     evaluationEndpointUrl?: string,
-    bootstrapEndpointUrl?: string,
+    contentEndpointUrl?: string,
+    cidAssignerEndpointUrl?: string,
 };
 
 function validateConfiguration(configuration: unknown): asserts configuration is Configuration {
-    if (typeof configuration !== 'object' || configuration === null) {
-        throw new Error('The configuration must be a key-value map.');
-    }
-
     try {
         sdkFacadeConfigurationSchema.validate(configuration);
     } catch (violation) {
@@ -52,6 +51,8 @@ export class SdkFacade {
     private sessionFacade?: SessionFacade;
 
     private evaluatorFacade?: EvaluatorFacade;
+
+    private contentFetcherFacade?: ContentFetcherFacade;
 
     private constructor(sdk: Sdk) {
         this.sdk = sdk;
@@ -100,6 +101,14 @@ export class SdkFacade {
         return this.sdk.cidAssigner;
     }
 
+    public get previewTokenStore(): TokenStore {
+        return this.sdk.previewTokenStore;
+    }
+
+    public get userTokenStore(): TokenStore {
+        return this.sdk.userTokenStore;
+    }
+
     public get tracker(): TrackerFacade {
         if (this.trackerFacade === undefined) {
             this.trackerFacade = new TrackerFacade(this.sdk.tracker);
@@ -126,13 +135,33 @@ export class SdkFacade {
 
     public get evaluator(): EvaluatorFacade {
         if (this.evaluatorFacade === undefined) {
-            this.evaluatorFacade = new EvaluatorFacade(
-                this.sdk.evaluator,
-                new TabContextFactory(this.sdk.context.getTab()),
-            );
+            this.evaluatorFacade = new EvaluatorFacade({
+                evaluator: this.sdk.evaluator,
+                contextFactory: new TabContextFactory(this.sdk
+                    .context
+                    .getTab()),
+                cidAssigner: this.sdk.cidAssigner,
+                userTokenProvider: this.sdk.userTokenStore,
+            });
         }
 
         return this.evaluatorFacade;
+    }
+
+    public get contentFetcher(): ContentFetcherFacade {
+        if (this.contentFetcherFacade === undefined) {
+            this.contentFetcherFacade = new ContentFetcherFacade({
+                contentFetcher: this.sdk.contentFetcher,
+                contextFactory: new TabContextFactory(this.sdk
+                    .context
+                    .getTab()),
+                cidAssigner: this.sdk.cidAssigner,
+                previewTokenProvider: this.sdk.previewTokenStore,
+                userTokenProvider: this.sdk.userTokenStore,
+            });
+        }
+
+        return this.contentFetcherFacade;
     }
 
     public get eventManager(): EventManager<Record<string, Record<string, unknown>>, SdkEventMap> {
@@ -236,9 +265,12 @@ export class SdkFacade {
     }
 
     private trackInternalEvent(event: PartialTrackingEvent): void {
-        this.sdk.tracker.track(event).catch(() => {
-            // suppress error as it is already logged by the tracker
-        });
+        this.sdk
+            .tracker
+            .track(event)
+            .catch(() => {
+                // suppress error as it is already logged by the tracker
+            });
     }
 
     public getLogger(...namespace: string[]): Logger {

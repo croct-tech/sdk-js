@@ -1,11 +1,11 @@
 import {NumberType, StringType, UnionType} from '../../src/validation';
 
 describe('An union type', () => {
-    test('should provide the allowed types', () => {
+    it('should provide the allowed types', () => {
         expect(new UnionType(new StringType(), new NumberType()).getTypes()).toEqual(['string', 'number']);
     });
 
-    test.each([
+    it.each([
         [null, false],
         ['foo', true],
         [true, false],
@@ -18,7 +18,7 @@ describe('An union type', () => {
         expect(new UnionType(new StringType(), new NumberType()).isValidType(value)).toBe(expected);
     });
 
-    test.each([
+    it.each([
         [1],
         [1.23],
         ['foo'],
@@ -27,10 +27,10 @@ describe('An union type', () => {
             new UnionType(new StringType(), new NumberType()).validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [null, "Expected value of type string or number at path '/', actual null."],
         [true, "Expected value of type string or number at path '/', actual boolean."],
         [[], "Expected value of type string or number at path '/', actual array."],
@@ -40,7 +40,6 @@ describe('An union type', () => {
             new UnionType(new StringType(), new NumberType()).validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

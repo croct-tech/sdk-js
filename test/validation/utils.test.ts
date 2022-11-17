@@ -3,11 +3,11 @@ import {describe as describeValue, formatPath} from '../../src/validation/violat
 class SomeClass {}
 
 describe('Validation utilities', () => {
-    test('should provide a function for formatting paths', () => {
+    it('should provide a function for formatting paths', () => {
         expect(formatPath(['foo', 'bar', 'baz'])).toEqual('/foo/bar/baz');
     });
 
-    test.each([
+    it.each([
         [null, 'null'],
         ['foo', 'string'],
         [true, 'boolean'],

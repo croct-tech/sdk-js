@@ -1,11 +1,11 @@
 import {uuid4} from '../src/uuid';
 
-afterEach(() => {
-    jest.restoreAllMocks();
-});
-
 describe('A UUID v4 function', () => {
-    test('should generate a random UUID', () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    it('should generate a random UUID', () => {
         const generated = [];
 
         for (let iteration = 0; iteration < 100; iteration++) {
@@ -18,8 +18,9 @@ describe('A UUID v4 function', () => {
         }
     });
 
-    test('should generate a random and lexicographically sortable UUID', async () => {
+    it('should generate a random and lexicographically sortable UUID', () => {
         let timestamp: number = Date.now();
+
         jest.spyOn(Date, 'now').mockImplementation(() => {
             timestamp += 1;
 
@@ -27,6 +28,7 @@ describe('A UUID v4 function', () => {
         });
 
         const generated = [];
+
         for (let iteration = 0; iteration < 100; iteration++) {
             const uuid = uuid4(true);
 

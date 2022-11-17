@@ -1,7 +1,7 @@
 import {attributeNameSchema} from '../../src/schema/attributeSchema';
 
 describe('The attribute name schema', () => {
-    test.each([
+    it.each([
         ['looooooooooooooooooooooooooooooooongKeyWith50Chars'],
         ['_someKey'],
     ])('should allow %s', (value: string) => {
@@ -9,10 +9,10 @@ describe('The attribute name schema', () => {
             attributeNameSchema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             'looooooooooooooooooooooooooooooooooooooooooooongKey',
             'Expected at most 50 characters at path \'/\', actual 51.',
@@ -26,7 +26,6 @@ describe('The attribute name schema', () => {
             attributeNameSchema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

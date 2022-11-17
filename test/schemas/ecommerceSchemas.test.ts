@@ -32,7 +32,7 @@ const minimalOrder: Order = {
 };
 
 describe('The product details schema', () => {
-    test.each([
+    it.each([
         [minimalProductDetails],
         [{
             productId: '12345',
@@ -51,10 +51,10 @@ describe('The product details schema', () => {
             productDetails.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {name: 'Smartphone 9', displayPrice: 599.00},
             'Missing property \'/productId\'.',
@@ -73,7 +73,7 @@ describe('The product details schema', () => {
         ],
         [
             {productId: 'x'.repeat(51), name: 'Smartphone 9', displayPrice: 599.00},
-            'Expected at most 50 characters at path \'/productId\', actual 51',
+            'Expected at most 50 characters at path \'/productId\', actual 51.',
         ],
         [
             {productId: '12345', name: 'Smartphone 9', displayPrice: 599.00, sku: ''},
@@ -81,7 +81,7 @@ describe('The product details schema', () => {
         ],
         [
             {productId: '12345', name: 'Smartphone 9', displayPrice: 599.00, sku: 'x'.repeat(51)},
-            'Expected at most 50 characters at path \'/sku\', actual 51',
+            'Expected at most 50 characters at path \'/sku\', actual 51.',
         ],
         [
             {productId: '12345', name: '', displayPrice: 599.00},
@@ -136,13 +136,12 @@ describe('The product details schema', () => {
             productDetails.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('The cart item schema', () => {
-    test.each([
+    it.each([
         [minimalCartItem],
         [{
             index: 0,
@@ -157,10 +156,10 @@ describe('The cart item schema', () => {
             cartItem.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {
                 product: minimalProductDetails,
@@ -248,20 +247,19 @@ describe('The cart item schema', () => {
                 product: minimalProductDetails,
                 coupon: 'x'.repeat(51),
             },
-            'Expected at most 50 characters at path \'/coupon\', actual 51',
+            'Expected at most 50 characters at path \'/coupon\', actual 51.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             cartItem.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('The cart schema', () => {
-    test.each([
+    it.each([
         [minimalCart],
         [{
             currency: 'brl',
@@ -303,10 +301,10 @@ describe('The cart schema', () => {
             cart.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {
                 total: 776.49,
@@ -465,13 +463,12 @@ describe('The cart schema', () => {
             cart.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('The order item schema', () => {
-    test.each([
+    it.each([
         [minimalOrderItem],
         [{
             index: 0,
@@ -486,10 +483,10 @@ describe('The order item schema', () => {
             orderItem.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {
                 product: minimalProductDetails,
@@ -577,20 +574,19 @@ describe('The order item schema', () => {
                 product: minimalProductDetails,
                 coupon: 'x'.repeat(51),
             },
-            'Expected at most 50 characters at path \'/coupon\', actual 51',
+            'Expected at most 50 characters at path \'/coupon\', actual 51.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             orderItem.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('The order schema', () => {
-    test.each([
+    it.each([
         [minimalOrder],
         [{
             orderId: 'b76c0ef6-9520-4107-9de3-11110829588e',
@@ -657,10 +653,10 @@ describe('The order schema', () => {
             order.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {
                 currency: 'brl',
@@ -709,7 +705,7 @@ describe('The order schema', () => {
                 total: 776.49,
                 items: [minimalOrderItem],
             },
-            'Expected at most 50 characters at path \'/orderId\', actual 51',
+            'Expected at most 50 characters at path \'/orderId\', actual 51.',
         ],
         [
             {
@@ -911,7 +907,6 @@ describe('The order schema', () => {
             order.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

@@ -44,45 +44,43 @@ const minimalOrder: Order = {
 };
 
 describe('The "cartModified" payload schema', () => {
-    test('should allow %s', () => {
+    it('should allow %s', () => {
         function validate(): void {
             cartModified.validate({cart: minimalCart});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test('should not allow %s', () => {
+    it('should not allow %s', () => {
         function validate(): void {
-            expect((): void => cartModified.validate({})).not.toThrow(Error);
+            cartModified.validate({});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Missing property \'/cart\'.');
+        expect(validate).toThrowWithMessage(Error, 'Missing property \'/cart\'.');
     });
 });
 
 describe('The "cartViewed" payload schema', () => {
-    test('should allow %s', () => {
+    it('should allow %s', () => {
         function validate(): void {
             cartViewed.validate({cart: minimalCart});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test('should not allow %s', () => {
+    it('should not allow %s', () => {
         function validate(): void {
             cartViewed.validate({});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Missing property \'/cart\'.');
+        expect(validate).toThrowWithMessage(Error, 'Missing property \'/cart\'.');
     });
 });
 
 describe('The "checkoutStarted" payload schema', () => {
-    test.each([
+    it.each([
         [{cart: minimalCart}],
         [{cart: minimalCart, orderId: 'b76c0ef6-9520-4107-9de3-11110829588e'}],
     ])('should allow %s', (value: Record<string, unknown>) => {
@@ -90,10 +88,10 @@ describe('The "checkoutStarted" payload schema', () => {
             checkoutStarted.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {orderId: 'b76c0ef6-9520-4107-9de3-11110829588e'},
             'Missing property \'/cart\'.',
@@ -111,51 +109,48 @@ describe('The "checkoutStarted" payload schema', () => {
             checkoutStarted.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('The "orderPlaced" payload schema', () => {
-    test('should allow %s', () => {
+    it('should allow %s', () => {
         function validate(): void {
             orderPlaced.validate({order: minimalOrder});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test('should not allow %s', () => {
+    it('should not allow %s', () => {
         function validate(): void {
             orderPlaced.validate({});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Missing property \'/order\'.');
+        expect(validate).toThrowWithMessage(Error, 'Missing property \'/order\'.');
     });
 });
 
 describe('The "productViewed" payload schema', () => {
-    test('should allow %s', () => {
+    it('should allow %s', () => {
         function validate(): void {
             productViewed.validate({product: minimalProductDetails});
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test('should not allow %s', () => {
+    it('should not allow %s', () => {
         function validate(): void {
             productViewed.validate({});
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow('Missing property \'/product\'.');
+        expect(validate).toThrowWithMessage(Error, 'Missing property \'/product\'.');
     });
 });
 
 describe('The "userSignedUp" payload schema', () => {
-    test.each([
+    it.each([
         [{
             userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
         }],
@@ -168,10 +163,10 @@ describe('The "userSignedUp" payload schema', () => {
             userSignedUp.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {},
             'Missing property \'/userId\'.',
@@ -193,13 +188,12 @@ describe('The "userSignedUp" payload schema', () => {
             userSignedUp.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('The "eventOccurred" payload schema', () => {
-    test.each([
+    it.each([
         [{
             name: 'foo',
         }],
@@ -221,10 +215,10 @@ describe('The "eventOccurred" payload schema', () => {
             eventOccurred.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {},
             'Missing property \'/name\'.',
@@ -337,13 +331,12 @@ describe('The "eventOccurred" payload schema', () => {
             eventOccurred.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('The "goalCompleted" payload schema', () => {
-    test.each([
+    it.each([
         [{
             goalId: 'foo:bar-baz_123',
         }],
@@ -369,10 +362,10 @@ describe('The "goalCompleted" payload schema', () => {
             goalCompleted.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {},
             'Missing property \'/goalId\'.',
@@ -446,13 +439,12 @@ describe('The "goalCompleted" payload schema', () => {
             goalCompleted.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('The "interestShown" payload schema', () => {
-    test.each([
+    it.each([
         [{
             interests: ['foo'],
         }],
@@ -464,10 +456,10 @@ describe('The "interestShown" payload schema', () => {
             interestShown.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {},
             'Missing property \'/interests\'.',
@@ -493,13 +485,12 @@ describe('The "interestShown" payload schema', () => {
             interestShown.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('The "postViewed" payload schema', () => {
-    test.each([
+    it.each([
         [{
             post: {
                 postId: 'post-id',
@@ -512,10 +503,10 @@ describe('The "postViewed" payload schema', () => {
             postViewed.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {},
             'Missing property \'/post\'.',
@@ -529,13 +520,12 @@ describe('The "postViewed" payload schema', () => {
             postViewed.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('The "linkOpened" payload schema', () => {
-    test.each([
+    it.each([
         [{
             link: 'http://www.foo.com.br',
         }],
@@ -547,10 +537,10 @@ describe('The "linkOpened" payload schema', () => {
             linkOpened.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {},
             'Missing property \'/link\'.',
@@ -564,7 +554,6 @@ describe('The "linkOpened" payload schema', () => {
             linkOpened.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

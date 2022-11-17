@@ -20,7 +20,7 @@ export class DumbStorage implements Storage {
             return '';
         }
 
-        if (!Object.prototype.hasOwnProperty.call(this.store, key)) {
+        if (!Object.keys(this.store).includes(key)) {
             return null;
         }
 

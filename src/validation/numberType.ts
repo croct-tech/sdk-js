@@ -34,7 +34,7 @@ export class NumberType implements TypeSchema {
             throw new Violation(
                 `Expected value of type ${type} at path '${formatPath(path)}', actual ${describe(value)}.`,
                 path,
-                {type},
+                {type: type},
             );
         }
 

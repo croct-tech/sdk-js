@@ -42,7 +42,7 @@ export class BeaconSocketChannel implements DuplexChannel<string, Envelope<strin
 
     private readonly trackerEndpointUrl: string;
 
-    private readonly listeners: ChannelListener<string>[] = [];
+    private readonly listeners: Array<ChannelListener<string>> = [];
 
     private socketChannel?: DuplexChannel<string, string>;
 
@@ -90,6 +90,7 @@ export class BeaconSocketChannel implements DuplexChannel<string, Envelope<strin
 
     private async createSocketChannel(token?: string): Promise<DuplexChannel<string, string>> {
         const endpoint = new URL(this.trackerEndpointUrl);
+
         endpoint.searchParams.append(this.cidParameter, await this.cidAssigner.assignCid());
 
         if (token !== undefined) {

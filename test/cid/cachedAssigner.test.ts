@@ -7,7 +7,7 @@ describe('A cached CID assigner', () => {
         localStorage.clear();
     });
 
-    test('should try to retrieve the CID from cache', async () => {
+    it('should try to retrieve the CID from cache', async () => {
         const cache: Cache = new InMemoryCache();
         const underlyingAssigner: CidAssigner = {assignCid: jest.fn()};
         const cachedAssigner = new CachedAssigner(underlyingAssigner, cache);
@@ -19,7 +19,7 @@ describe('A cached CID assigner', () => {
         expect(underlyingAssigner.assignCid).not.toHaveBeenCalled();
     });
 
-    test('should assign and cache new CIDs', async () => {
+    it('should assign and cache new CIDs', async () => {
         const underlyingAssigner: CidAssigner = {assignCid: jest.fn().mockResolvedValue('123')};
         const cache: Cache = new InMemoryCache();
         const cachedAssigner = new CachedAssigner(underlyingAssigner, cache, new NullLogger());

@@ -6,29 +6,30 @@ import {
     EvaluationContext,
     EvaluationError,
     EvaluationErrorType,
-    ExpressionError,
-    ExpressionErrorResponse,
+    QueryError,
+    QueryErrorResponse,
+    EvaluationOptions,
 } from '../src/evaluator';
-import {Token, FixedTokenProvider} from '../src/token';
-import {CidAssigner, FixedAssigner} from '../src/cid';
+import {Token} from '../src/token';
+import {EVALUATION_ENDPOINT_URL} from '../src/constants';
 
-jest.mock('../src/constants', () => ({
-    MAX_EXPRESSION_LENGTH: 30,
-}));
+jest.mock(
+    '../src/constants',
+    () => ({
+        ...jest.requireActual('../src/constants'),
+        MAX_QUERY_LENGTH: 30,
+        EVALUATION_ENDPOINT_URL: 'https://evaluation.example.com',
+    }),
+);
 
 describe('An evaluator', () => {
-    const endpoint = 'https://croct.io/evaluate';
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
-    const expression = 'user\'s name';
+    const apiKey = '00000000-0000-0000-0000-000000000000';
+    const query = 'user\'s name';
     const requestMatcher: MockOptions = {
-        matcher: endpoint,
-        method: 'GET',
-        query: {
-            expression: expression,
-        },
-        headers: {
-            'X-App-Id': appId,
-            'X-Client-Id': '123',
+        method: 'POST',
+        body: {
+            query: query,
         },
     };
 
@@ -37,12 +38,57 @@ describe('An evaluator', () => {
         jest.clearAllMocks();
     });
 
-    test('should evaluate expressions without token when not provided', async () => {
+    it('should require either an application ID or API key', async () => {
+        await expect(() => new Evaluator({}))
+            .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
+    });
+
+    it('should require either an application ID or API key, but not both', async () => {
+        await expect(() => new Evaluator({apiKey: apiKey, appId: appId}))
+            .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
+    });
+
+    it('should use the specified base endpoint', async () => {
+        const customEndpoint = 'https://custom.example.com';
+
         const evaluator = new Evaluator({
             appId: appId,
-            endpointUrl: endpoint,
-            tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: new FixedAssigner('123'),
+            endpointUrl: customEndpoint,
+        });
+
+        const result = 'Anonymous';
+
+        fetchMock.mock({
+            ...requestMatcher,
+            matcher: `${customEndpoint}/client/web/evaluate`,
+            response: JSON.stringify(result),
+        });
+
+        await expect(evaluator.evaluate(query)).resolves.toBe(result);
+    });
+
+    it('should use the external endpoint when specifying an API key', async () => {
+        const evaluator = new Evaluator({
+            apiKey: apiKey,
+        });
+
+        const result = 'Anonymous';
+
+        fetchMock.mock({
+            ...requestMatcher,
+            matcher: `${EVALUATION_ENDPOINT_URL}/external/web/evaluate`,
+            headers: {
+                'X-Api-Key': apiKey,
+            },
+            response: JSON.stringify(result),
+        });
+
+        await expect(evaluator.evaluate(query)).resolves.toBe(result);
+    });
+
+    it('should evaluate queries without token when not provided', async () => {
+        const evaluator = new Evaluator({
+            appId: appId,
         });
 
         const result = 'Anonymous';
@@ -52,17 +98,14 @@ describe('An evaluator', () => {
             response: JSON.stringify(result),
         });
 
-        await expect(evaluator.evaluate(expression)).resolves.toBe(result);
+        await expect(evaluator.evaluate(query)).resolves.toBe(result);
     });
 
-    test('should evaluate expressions with token when provided', async () => {
+    it('should evaluate queries using the provided token', async () => {
         const token = Token.issue(appId, 'foo', Date.now());
 
         const evaluator = new Evaluator({
             appId: appId,
-            endpointUrl: endpoint,
-            tokenProvider: new FixedTokenProvider(token),
-            cidAssigner: new FixedAssigner('123'),
         });
 
         const result = 'Carol';
@@ -76,17 +119,127 @@ describe('An evaluator', () => {
             response: JSON.stringify(result),
         });
 
-        const promise = evaluator.evaluate(expression);
+        const options: EvaluationOptions = {
+            userToken: token,
+        };
 
-        await expect(promise).resolves.toBe(result);
+        await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
     });
 
-    test('should abort the evaluation if the timeout is reached', async () => {
+    it('should evaluate queries using the provided client ID', async () => {
         const evaluator = new Evaluator({
             appId: appId,
-            endpointUrl: endpoint,
-            tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: new FixedAssigner('123'),
+        });
+
+        const clientId = 'c3b5b9f0-5f9a-4b3c-8c9c-8b5c8b5c8b5c';
+
+        const result = 'Carol';
+
+        fetchMock.mock({
+            ...requestMatcher,
+            headers: {
+                ...requestMatcher.headers,
+                'X-Client-Id': clientId,
+            },
+            response: JSON.stringify(result),
+        });
+
+        const options: EvaluationOptions = {
+            clientId: clientId,
+        };
+
+        await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
+    });
+
+    it('should evaluate queries using the provided client IP', async () => {
+        const evaluator = new Evaluator({
+            appId: appId,
+        });
+
+        const clientIp = '192.168.0.1';
+
+        const result = 'Carol';
+
+        fetchMock.mock({
+            ...requestMatcher,
+            headers: {
+                ...requestMatcher.headers,
+                'X-Client-IP': clientIp,
+            },
+            response: JSON.stringify(result),
+        });
+
+        const options: EvaluationOptions = {
+            clientIp: clientIp,
+        };
+
+        await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
+    });
+
+    it('should evaluate queries using the provided user agent', async () => {
+        const evaluator = new Evaluator({
+            appId: appId,
+        });
+
+        const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
+
+        const result = 'Carol';
+
+        fetchMock.mock({
+            ...requestMatcher,
+            headers: {
+                ...requestMatcher.headers,
+                'User-Agent': userAgent,
+            },
+            response: JSON.stringify(result),
+        });
+
+        const options: EvaluationOptions = {
+            userAgent: userAgent,
+        };
+
+        await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
+    });
+
+    it('should fetch using the extra options', async () => {
+        const evaluator = new Evaluator({
+            appId: appId,
+        });
+
+        const result = 'Carol';
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: JSON.stringify(result),
+        });
+
+        const overridableOptions: RequestInit = {
+            credentials: 'omit',
+        };
+
+        const nonOverridableOptions: RequestInit = {
+            method: 'GET',
+            headers: {
+                invalid: 'header',
+            },
+            signal: undefined,
+            body: 'invalid body',
+        };
+
+        const extraOptions: RequestInit = {
+            ...overridableOptions,
+            ...nonOverridableOptions,
+        };
+
+        await evaluator.evaluate(query, {extra: extraOptions as EvaluationOptions['extra']});
+
+        expect(fetchMock.lastOptions()).toEqual(expect.objectContaining(overridableOptions));
+        expect(fetchMock.lastOptions()).not.toEqual(expect.objectContaining(nonOverridableOptions));
+    });
+
+    it('should abort the evaluation if the timeout is reached', async () => {
+        const evaluator = new Evaluator({
+            appId: appId,
         });
 
         fetchMock.mock({
@@ -97,30 +250,34 @@ describe('An evaluator', () => {
             },
         });
 
-        const promise = evaluator.evaluate(expression, {
+        const promise = evaluator.evaluate(query, {
             timeout: 10,
         });
 
-        await expect(promise).rejects.toThrow(
-            new EvaluationError({
+        const fetchOptions = fetchMock.lastOptions() as MockOptions & {signal: AbortSignal} | undefined;
+
+        expect(fetchOptions?.signal).toBeDefined();
+
+        await expect(promise).rejects.toThrow(EvaluationError);
+        await expect(promise).rejects.toThrow(expect.objectContaining({
+            response: {
                 title: 'Maximum evaluation timeout reached before evaluation could complete.',
                 type: EvaluationErrorType.TIMEOUT,
                 detail: 'The evaluation took more than 10ms to complete.',
                 status: 408,
-            }),
-        );
+            },
+        }));
+
+        expect(fetchOptions?.signal.aborted).toBe(true);
     });
 
-    test('should evaluate expressions using the provided context', async () => {
+    it('should evaluate queries using the provided context', async () => {
         const evaluator = new Evaluator({
             appId: appId,
-            endpointUrl: endpoint,
-            tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: new FixedAssigner('123'),
         });
 
         const context: Required<EvaluationContext> = {
-            timezone: 'America/Sao_Paulo',
+            timeZone: 'America/Sao_Paulo',
             page: {
                 referrer: 'http://referrer.com',
                 url: 'http://site.com.br',
@@ -142,24 +299,21 @@ describe('An evaluator', () => {
 
         fetchMock.mock({
             ...requestMatcher,
-            query: {
-                ...requestMatcher.query,
-                context: JSON.stringify(context),
+            body: {
+                ...requestMatcher.body,
+                context: context,
             },
             response: JSON.stringify(result),
         });
 
-        const promise = evaluator.evaluate(expression, {context: context});
+        const promise = evaluator.evaluate(query, {context: context});
 
         await expect(promise).resolves.toBe(result);
     });
 
-    test('should report errors if the evaluation fails', async () => {
+    it('should report errors if the evaluation fails', async () => {
         const evaluator = new Evaluator({
             appId: appId,
-            endpointUrl: endpoint,
-            tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: new FixedAssigner('123'),
         });
 
         const response: ErrorResponse = {
@@ -176,27 +330,24 @@ describe('An evaluator', () => {
             },
         });
 
-        const promise = evaluator.evaluate(expression);
+        const promise = evaluator.evaluate(query);
 
         await expect(promise).rejects.toThrow(EvaluationError);
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
-    test.each([
+    it.each([
         [EvaluationErrorType.EVALUATION_FAILED],
-        [EvaluationErrorType.INVALID_EXPRESSION],
-        [EvaluationErrorType.TOO_COMPLEX_EXPRESSION],
+        [EvaluationErrorType.INVALID_QUERY],
+        [EvaluationErrorType.TOO_COMPLEX_QUERY],
     ])(
-        'should report an expression error if the error that can be traced back to the offending input (%s)',
+        'should report an query error if the error that can be traced back to the offending input (%s)',
         async (errorType: EvaluationErrorType) => {
             const evaluator = new Evaluator({
                 appId: appId,
-                endpointUrl: endpoint,
-                tokenProvider: new FixedTokenProvider(null),
-                cidAssigner: new FixedAssigner('123'),
             });
 
-            const response: ExpressionErrorResponse = {
+            const response: QueryErrorResponse = {
                 type: errorType,
                 title: 'Error title',
                 status: 422,
@@ -225,30 +376,27 @@ describe('An evaluator', () => {
                 },
             });
 
-            const promise = evaluator.evaluate(expression);
+            const promise = evaluator.evaluate(query);
 
-            await expect(promise).rejects.toThrow(ExpressionError);
+            await expect(promise).rejects.toThrow(QueryError);
             await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
         },
     );
 
-    test('should report an expression error if the expression exceeds the maximum allowed length', async () => {
+    it('should report an query error if the query exceeds the maximum allowed length', async () => {
         const evaluator = new Evaluator({
             appId: appId,
-            endpointUrl: endpoint,
-            tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: new FixedAssigner('123'),
         });
 
-        const length = Evaluator.MAX_EXPRESSION_LENGTH + 1;
-        const response: ExpressionErrorResponse = {
-            title: 'The expression is too complex.',
+        const length = Evaluator.MAX_QUERY_LENGTH + 1;
+        const response: QueryErrorResponse = {
+            title: 'The query is too complex.',
             status: 422,
-            type: EvaluationErrorType.TOO_COMPLEX_EXPRESSION,
-            detail: `The expression must be at most ${Evaluator.MAX_EXPRESSION_LENGTH} `
+            type: EvaluationErrorType.TOO_COMPLEX_QUERY,
+            detail: `The query must be at most ${Evaluator.MAX_QUERY_LENGTH} `
                 + `characters long, but it is ${length} characters long.`,
             errors: [{
-                cause: 'The expression is longer than expected.',
+                cause: 'The query is longer than expected.',
                 location: {
                     start: {
                         index: 0,
@@ -266,16 +414,38 @@ describe('An evaluator', () => {
 
         const promise = evaluator.evaluate('_'.repeat(length));
 
-        await expect(promise).rejects.toThrow(ExpressionError);
+        await expect(promise).rejects.toThrow(QueryError);
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
-    test('should report unexpected errors when the cause of the evaluation failure is unknown', async () => {
+    it('should catch deserialization errors', async () => {
         const evaluator = new Evaluator({
             appId: appId,
-            endpointUrl: endpoint,
-            tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: new FixedAssigner('123'),
+        });
+
+        const response: ErrorResponse = {
+            title: expect.stringMatching('Invalid json response body'),
+            type: EvaluationErrorType.UNEXPECTED_ERROR,
+            detail: 'Please try again or contact Croct support if the error persists.',
+            status: 500,
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                body: 'non-json',
+            },
+        });
+
+        const promise = evaluator.evaluate(query);
+
+        await expect(promise).rejects.toThrow(EvaluationError);
+        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+    });
+
+    it('should report unexpected errors when the cause of the evaluation failure is unknown', async () => {
+        const evaluator = new Evaluator({
+            appId: appId,
         });
 
         const response: ErrorResponse = {
@@ -292,40 +462,20 @@ describe('An evaluator', () => {
             },
         });
 
-        const promise = evaluator.evaluate(expression);
+        const promise = evaluator.evaluate(query);
 
         await expect(promise).rejects.toThrow(EvaluationError);
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
-    test('should report an unexpected error occurring while assigning a CID', async () => {
-        const cidAssigner: CidAssigner = {
-            assignCid: jest.fn().mockRejectedValue(new Error('Unexpected CID error.')),
-        };
-
-        const evaluator = new Evaluator({
-            appId: appId,
-            endpointUrl: endpoint,
-            tokenProvider: new FixedTokenProvider(null),
-            cidAssigner: cidAssigner,
-        });
-
-        const response: ErrorResponse = {
-            title: 'Unexpected CID error.',
-            type: EvaluationErrorType.UNEXPECTED_ERROR,
-            detail: 'Please try again or contact Croct support if the error persists.',
-            status: 500,
-        };
-
-        const promise = evaluator.evaluate(expression);
-
-        await expect(promise).rejects.toThrow(EvaluationError);
-        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+    it('should not be serializable', () => {
+        expect(() => new Evaluator({appId: appId}).toJSON())
+            .toThrowWithMessage(Error, 'Unserializable value.');
     });
 });
 
 describe('An evaluation error', () => {
-    test('should have a response', () => {
+    it('should have a response', () => {
         const response: ErrorResponse = {
             type: EvaluationErrorType.UNALLOWED_RESULT,
             title: 'Error title',
@@ -338,9 +488,9 @@ describe('An evaluation error', () => {
     });
 });
 
-describe('An expression error', () => {
-    test('should have a response', () => {
-        const response: ExpressionErrorResponse = {
+describe('An query error', () => {
+    it('should have a response', () => {
+        const response: QueryErrorResponse = {
             type: EvaluationErrorType.TIMEOUT,
             title: 'Error title',
             status: 422,
@@ -361,7 +511,7 @@ describe('An expression error', () => {
             }],
         };
 
-        const error = new ExpressionError(response);
+        const error = new QueryError(response);
 
         expect(error.response).toEqual(response);
     });

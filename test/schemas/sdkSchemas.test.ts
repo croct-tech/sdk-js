@@ -1,7 +1,7 @@
 import {sdkConfigurationSchema, eventMetadataSchema} from '../../src/schema';
 
 describe('The event metadata schema', () => {
-    test.each([
+    it.each([
         [{}],
         [{
             foo: 'bar',
@@ -15,10 +15,10 @@ describe('The event metadata schema', () => {
             eventMetadataSchema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {
                 '@foo': 'foo',
@@ -59,13 +59,12 @@ describe('The event metadata schema', () => {
             eventMetadataSchema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
 describe('The SDK configuration schema', () => {
-    test.each([
+    it.each([
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
         }],
@@ -75,11 +74,12 @@ describe('The SDK configuration schema', () => {
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            cid: '9f62d6343c8742028df3e9e3ec596526',
+            clientId: '9f62d6343c8742028df3e9e3ec596526',
             tokenScope: 'isolated',
-            trackerEndpointUrl: 'http://www.foo.com',
-            evaluationEndpointUrl: 'http://www.bar.com',
-            bootstrapEndpointUrl: 'http://www.baz.com',
+            trackerEndpointUrl: 'https://api.croct.io/tracker',
+            evaluationEndpointUrl: 'https://api.croct.io/evaluation',
+            contentEndpointUrl: 'https://api.croct.io/content',
+            cidAssignerEndpointUrl: 'https://api.croct.io/cid',
             beaconQueueSize: 1,
             debug: true,
             test: true,
@@ -96,21 +96,21 @@ describe('The SDK configuration schema', () => {
             sdkConfigurationSchema.validate(value);
         }
 
-        expect(validate).not.toThrow(Error);
+        expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {},
             "Missing property '/appId'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', cid: '7e9d59a9'},
-            "Invalid format at path '/cid'",
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', clientId: '7e9d59a9'},
+            "Invalid format at path '/clientId'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', tokenScope: 'x'},
-            "Unexpected value at path '/tokenScope'",
+            "Unexpected value at path '/tokenScope', expecting 'global', 'contextual' or 'isolated', found 'x'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', debug: 'foo'},
@@ -129,8 +129,12 @@ describe('The SDK configuration schema', () => {
             "Invalid url format at path '/evaluationEndpointUrl'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', bootstrapEndpointUrl: 'foo'},
-            "Invalid url format at path '/bootstrapEndpointUrl'.",
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', contentEndpointUrl: 'foo'},
+            "Invalid url format at path '/contentEndpointUrl'.",
+        ],
+        [
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', cidAssignerEndpointUrl: 'foo'},
+            "Invalid url format at path '/cidAssignerEndpointUrl'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', beaconQueueSize: -1},
@@ -153,7 +157,6 @@ describe('The SDK configuration schema', () => {
             sdkConfigurationSchema.validate(value);
         }
 
-        expect(validate).toThrow(Error);
-        expect(validate).toThrow(message);
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

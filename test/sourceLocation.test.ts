@@ -1,7 +1,7 @@
 import {getLength, getLocation, getPosition} from '../src/sourceLocation';
 
 describe('The string length function', () => {
-    test.each([
+    it.each([
         ['What if\nwe could\ndo this?', 25],
         ['What if\r\nwe could\r\ndo this?', 27],
         ['foo', 3],
@@ -14,7 +14,7 @@ describe('The string length function', () => {
 });
 
 describe('The string position function', () => {
-    test.each([
+    it.each([
         [0, 'What if\nwe could\ndo this?', {line: 1, column: 0, index: 0}],
         [7, 'What if\nwe could\ndo this?', {line: 1, column: 7, index: 7}],
         [8, 'What if\nwe could\ndo this?', {line: 2, column: 0, index: 8}],
@@ -37,7 +37,7 @@ describe('The string position function', () => {
 });
 
 describe('The string location function', () => {
-    test.each([
+    it.each([
         [
             0,
             10,
@@ -77,21 +77,21 @@ describe('The string location function', () => {
         expect(getLocation(input, start, end)).toEqual(location);
     });
 
-    test('should fail if the start index is negative', () => {
+    it('should fail if the start index is negative', () => {
         function location(): void {
             getLocation('foo', -1, 0);
         }
 
-        expect(location).toThrow(Error);
+        expect(location).toThrow();
         expect(location).toThrow('The start index cannot be negative.');
     });
 
-    test('should fail if the start index is greater than end index', () => {
+    it('should fail if the start index is greater than end index', () => {
         function location(): void {
             getLocation('foo', 1, 0);
         }
 
-        expect(location).toThrow(Error);
+        expect(location).toThrow();
         expect(location).toThrow('The end index must greater than or equal to the start index.');
     });
 });

@@ -1,16 +1,8 @@
 import {JsonObject, JsonValue} from '@croct/json';
-import {TokenProvider} from './token';
-import {EVALUATION_ENDPOINT_URL, MAX_EXPRESSION_LENGTH} from './constants';
+import {Token} from './token';
+import {EVALUATION_ENDPOINT_URL, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
-import {CidAssigner} from './cid';
-
-export type Configuration = {
-    appId: string,
-    endpointUrl?: string,
-    tokenProvider: TokenProvider,
-    cidAssigner: CidAssigner,
-};
 
 export type Campaign = {
     name?: string,
@@ -21,28 +13,39 @@ export type Campaign = {
 };
 
 export type Page = {
-    title: string,
     url: string,
+    title?: string,
     referrer?: string,
 };
 
 export type EvaluationContext = {
-    timezone?: string,
+    timeZone?: string,
     campaign?: Campaign,
     page?: Page,
     attributes?: JsonObject,
 };
 
+type AllowedFetchOptions = Exclude<keyof RequestInit, 'method' | 'body' | 'headers' | 'signal'>;
+
+type ExtraFetchOptions<T extends keyof RequestInit = AllowedFetchOptions> = Pick<RequestInit, T>
+    & {[key in Exclude<keyof RequestInit, T>]?: never}
+    & Record<string, any>;
+
 export type EvaluationOptions = {
+    clientId?: string,
+    clientIp?: string,
+    userAgent?: string,
+    userToken?: Token|string,
     timeout?: number,
     context?: EvaluationContext,
+    extra?: ExtraFetchOptions,
 };
 
 export enum EvaluationErrorType {
     TIMEOUT = 'https://croct.help/api/evaluation#timeout',
     UNEXPECTED_ERROR = 'https://croct.help/api/evaluation#unexpected-error',
-    INVALID_EXPRESSION = 'https://croct.help/api/evaluation#invalid-expression',
-    TOO_COMPLEX_EXPRESSION = 'https://croct.help/api/evaluation#too-complex-expression',
+    INVALID_QUERY = 'https://croct.help/api/evaluation#invalid-query',
+    TOO_COMPLEX_QUERY = 'https://croct.help/api/evaluation#too-complex-query',
     EVALUATION_FAILED = 'https://croct.help/api/evaluation#evaluation-failed',
     UNALLOWED_RESULT = 'https://croct.help/api/evaluation#unallowed-result',
     UNSERIALIZABLE_RESULT = 'https://croct.help/api/evaluation#unserializable-result',
@@ -67,64 +70,83 @@ export class EvaluationError<T extends ErrorResponse = ErrorResponse> extends Er
     }
 }
 
-type ExpressionErrorDetail = {
+type QueryErrorDetail = {
     cause: string,
     location: Location,
 };
 
-export type ExpressionErrorResponse = ErrorResponse & {
-    errors: ExpressionErrorDetail[],
+export type QueryErrorResponse = ErrorResponse & {
+    errors: QueryErrorDetail[],
 };
 
-export class ExpressionError extends EvaluationError<ExpressionErrorResponse> {
-    public constructor(response: ExpressionErrorResponse) {
+export class QueryError extends EvaluationError<QueryErrorResponse> {
+    public constructor(response: QueryErrorResponse) {
         super(response);
 
-        Object.setPrototypeOf(this, ExpressionError.prototype);
+        Object.setPrototypeOf(this, QueryError.prototype);
     }
 }
 
-export class Evaluator {
-    public static readonly MAX_EXPRESSION_LENGTH = MAX_EXPRESSION_LENGTH;
+export type Configuration = {
+    appId?: string,
+    apiKey?: string,
+    endpointUrl?: string,
+};
 
-    private readonly configuration: Required<Configuration>;
+export class Evaluator {
+    public static readonly MAX_QUERY_LENGTH = MAX_QUERY_LENGTH;
+
+    private readonly configuration: Configuration;
+
+    private readonly endpoint: string;
 
     public constructor(configuration: Configuration) {
-        this.configuration = {
-            ...configuration,
-            endpointUrl: configuration.endpointUrl ?? EVALUATION_ENDPOINT_URL,
-        };
+        if ((configuration.appId === undefined) === (configuration.apiKey === undefined)) {
+            throw new Error('Either the application ID or the API key must be provided.');
+        }
+
+        const {endpointUrl, apiKey} = configuration;
+
+        // eslint-disable-next-line prefer-template -- Better readability
+        this.endpoint = (endpointUrl ?? EVALUATION_ENDPOINT_URL).replace(/\/+$/, '')
+            + (apiKey === undefined ? '/client' : '/external')
+            + '/web/evaluate';
+
+        this.configuration = configuration;
     }
 
-    public async evaluate(expression: string, options: EvaluationOptions = {}): Promise<JsonValue> {
-        const length = getLength(expression);
+    public evaluate(query: string, options: EvaluationOptions = {}): Promise<JsonValue> {
+        const length = getLength(query);
 
-        if (length > Evaluator.MAX_EXPRESSION_LENGTH) {
-            const response: ExpressionErrorResponse = {
-                title: 'The expression is too complex.',
+        if (length > Evaluator.MAX_QUERY_LENGTH) {
+            const response: QueryErrorResponse = {
+                title: 'The query is too complex.',
                 status: 422, // Unprocessable Entity
-                type: EvaluationErrorType.TOO_COMPLEX_EXPRESSION,
-                detail: `The expression must be at most ${Evaluator.MAX_EXPRESSION_LENGTH} characters long, `
+                type: EvaluationErrorType.TOO_COMPLEX_QUERY,
+                detail: `The query must be at most ${Evaluator.MAX_QUERY_LENGTH} characters long, `
                     + `but it is ${length} characters long.`,
                 errors: [{
-                    cause: 'The expression is longer than expected.',
-                    location: getLocation(expression, 0, Math.max(length - 1, 0)),
+                    cause: 'The query is longer than expected.',
+                    location: getLocation(query, 0, Math.max(length - 1, 0)),
                 }],
             };
 
-            return Promise.reject(new ExpressionError(response));
+            return Promise.reject(new QueryError(response));
         }
 
-        const endpoint = new URL(this.configuration.endpointUrl);
-        endpoint.searchParams.append('expression', expression);
+        const body: JsonObject = {
+            query: query,
+        };
 
         if (options.context !== undefined) {
-            endpoint.searchParams.append('context', JSON.stringify(options.context));
+            body.context = options.context;
         }
 
         return new Promise((resolve, reject) => {
+            const abortController = new AbortController();
+
             if (options.timeout !== undefined) {
-                window.setTimeout(
+                setTimeout(
                     () => {
                         const response: ErrorResponse = {
                             title: 'Maximum evaluation timeout reached before evaluation could complete.',
@@ -133,67 +155,97 @@ export class Evaluator {
                             status: 408, // Request Timeout
                         };
 
+                        abortController.abort();
+
                         reject(new EvaluationError(response));
                     },
                     options.timeout,
                 );
             }
 
-            const promise = this.fetch(endpoint.toString());
+            const promise = this.fetch(body, abortController.signal, options);
 
             promise.then(
-                response => {
-                    if (response.ok) {
-                        response.json().then(resolve);
+                response => response.json()
+                    .then(data => {
+                        if (response.ok) {
+                            return resolve(data);
+                        }
 
-                        return;
-                    }
-
-                    response.json().then(result => {
-                        const errorResponse: ErrorResponse = result;
+                        const errorResponse: ErrorResponse = data;
 
                         switch (errorResponse.type) {
-                            case EvaluationErrorType.INVALID_EXPRESSION:
+                            case EvaluationErrorType.INVALID_QUERY:
                             case EvaluationErrorType.EVALUATION_FAILED:
-                            case EvaluationErrorType.TOO_COMPLEX_EXPRESSION:
-                                reject(new ExpressionError(errorResponse as ExpressionErrorResponse));
+                            case EvaluationErrorType.TOO_COMPLEX_QUERY:
+                                reject(new QueryError(errorResponse as QueryErrorResponse));
+
                                 break;
 
                             default:
                                 reject(new EvaluationError(errorResponse));
+
                                 break;
                         }
-                    });
-                },
-                error => {
-                    const errorResponse: ErrorResponse = {
-                        title: formatMessage(error),
-                        type: EvaluationErrorType.UNEXPECTED_ERROR,
-                        detail: 'Please try again or contact Croct support if the error persists.',
-                        status: 500, // Internal Server Error
-                    };
-
-                    reject(new EvaluationError(errorResponse));
-                },
-            );
+                    }),
+            )
+                .catch(
+                    error => {
+                        if (!abortController.signal.aborted) {
+                            reject(
+                                new EvaluationError({
+                                    title: formatMessage(error),
+                                    type: EvaluationErrorType.UNEXPECTED_ERROR,
+                                    detail: 'Please try again or contact Croct support if the error persists.',
+                                    status: 500, // Internal Server Error
+                                }),
+                            );
+                        }
+                    },
+                );
         });
     }
 
-    private async fetch(endpoint: string): Promise<Response> {
-        const {tokenProvider, cidAssigner, appId} = this.configuration;
-        const token = tokenProvider.getToken();
-        const cid = await cidAssigner.assignCid();
+    private fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
+        const {appId, apiKey} = this.configuration;
+        const {clientId, clientIp, userAgent, userToken} = options;
 
-        const headers = {
-            'X-App-Id': appId,
-            'X-Client-Id': cid as string,
-            ...(token !== null && {'X-Token': token.toString()}),
-        };
+        const headers = new Headers();
 
-        return window.fetch(endpoint.toString(), {
-            method: 'GET',
+        if (apiKey !== undefined) {
+            headers.set('X-Api-Key', apiKey);
+        } else if (appId !== undefined) {
+            headers.set('X-App-Id', appId);
+        }
+
+        if (clientId !== undefined) {
+            headers.set('X-Client-Id', clientId);
+        }
+
+        if (clientIp !== undefined) {
+            headers.set('X-Client-Ip', clientIp);
+        }
+
+        if (userToken !== undefined) {
+            headers.set('X-Token', userToken.toString());
+        }
+
+        if (userAgent !== undefined) {
+            headers.set('User-Agent', userAgent);
+        }
+
+        return fetch(this.endpoint, {
+            credentials: 'omit',
+            ...options.extra,
+            method: 'POST',
             headers: headers,
-            credentials: 'include',
+            signal: signal,
+            body: JSON.stringify(body),
         });
+    }
+
+    public toJSON(): never {
+        // Prevent sensitive configuration from being serialized
+        throw new Error('Unserializable value.');
     }
 }

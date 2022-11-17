@@ -5,7 +5,7 @@ describe('A null logger', () => {
         jest.clearAllMocks();
     });
 
-    test('should not log info messages', () => {
+    it('should not log info messages', () => {
         const info = jest.spyOn(window.console, 'info');
 
         const logger = new NullLogger();
@@ -15,7 +15,7 @@ describe('A null logger', () => {
         expect(info).toHaveBeenCalledTimes(0);
     });
 
-    test('should not log warn messages', () => {
+    it('should not log warn messages', () => {
         const warn = jest.spyOn(window.console, 'warn');
 
         const logger = new NullLogger();
@@ -25,7 +25,7 @@ describe('A null logger', () => {
         expect(warn).toHaveBeenCalledTimes(0);
     });
 
-    test('should not log debug messages', () => {
+    it('should not log debug messages', () => {
         const debug = jest.spyOn(window.console, 'debug');
 
         const logger = new NullLogger();
@@ -35,7 +35,7 @@ describe('A null logger', () => {
         expect(debug).toHaveBeenCalledTimes(0);
     });
 
-    test('should not log error messages', () => {
+    it('should not log error messages', () => {
         const error = jest.spyOn(window.console, 'error');
 
         const logger = new NullLogger();

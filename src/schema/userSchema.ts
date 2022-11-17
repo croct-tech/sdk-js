@@ -1,4 +1,12 @@
-import {StringType, ObjectType, UnionType, BooleanType, NullType, NumberType, ArrayType} from '../validation';
+import {
+    StringType,
+    ObjectType,
+    UnionType,
+    BooleanType,
+    NullType,
+    NumberType,
+    ArrayType,
+} from '../validation';
 import {attributeNameSchema} from './attributeSchema';
 
 export const userProfileSchema = new ObjectType({

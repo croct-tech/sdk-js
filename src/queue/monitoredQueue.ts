@@ -12,7 +12,7 @@ export class MonitoredQueue<T> implements Queue<T> {
 
     private readonly logger: Logger;
 
-    private readonly callbacks: Partial<{[key in QueueStatus]: QueueCallback<T>[]}> = {};
+    private readonly callbacks: Partial<{[key in QueueStatus]: Array<QueueCallback<T>>}> = {};
 
     private status: QueueStatus;
 
@@ -32,7 +32,7 @@ export class MonitoredQueue<T> implements Queue<T> {
     }
 
     public addCallback(status: QueueStatus, callback: QueueCallback<T>): void {
-        const callbacks = this.callbacks[status] || [];
+        const callbacks = this.callbacks[status] ?? [];
 
         if (!callbacks.includes(callback)) {
             callbacks.push(callback);
@@ -43,6 +43,7 @@ export class MonitoredQueue<T> implements Queue<T> {
         switch (this.status) {
             case status:
                 callback(this);
+
                 break;
 
             case 'empty':
@@ -50,6 +51,7 @@ export class MonitoredQueue<T> implements Queue<T> {
                 if (status === 'halfEmpty') {
                     callback(this);
                 }
+
                 break;
 
             case 'full':
@@ -57,6 +59,7 @@ export class MonitoredQueue<T> implements Queue<T> {
                 if (status === 'halfFull') {
                     callback(this);
                 }
+
                 break;
         }
     }
@@ -64,7 +67,7 @@ export class MonitoredQueue<T> implements Queue<T> {
     public removeCallback(type: QueueStatus, callback: QueueCallback<T>): void {
         const callbacks = this.callbacks[type];
 
-        if (!callbacks) {
+        if (callbacks == null) {
             return;
         }
 
@@ -98,11 +101,13 @@ export class MonitoredQueue<T> implements Queue<T> {
             case 'empty':
             case 'almostEmpty':
                 this.report('halfEmpty');
+
                 break;
 
             case 'full':
             case 'almostFull':
                 this.report('halfFull');
+
                 break;
 
             default:

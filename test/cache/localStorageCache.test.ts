@@ -5,7 +5,7 @@ describe('A storage cache', () => {
         localStorage.clear();
     });
 
-    test('should cache data into the provided storage', async () => {
+    it('should cache data into the provided storage', () => {
         const cache = new LocalStorageCache(localStorage, 'key');
 
         expect(localStorage.getItem('key')).toBeNull();
@@ -22,7 +22,7 @@ describe('A storage cache', () => {
         expect(cache.get()).toBeNull();
     });
 
-    test('should allow ot subscribe and unsubscribe listeners to get notified about changes to the cache', async () => {
+    it('should allow ot subscribe and unsubscribe listeners to get notified about changes to the cache', () => {
         const cache = new LocalStorageCache(localStorage, 'key');
         const listener = jest.fn();
 
@@ -42,7 +42,7 @@ describe('A storage cache', () => {
         expect(listener).toHaveBeenNthCalledWith(2, null);
     });
 
-    test('should ensure consistency against external changes', async () => {
+    it('should ensure consistency against external changes', () => {
         const cache = new LocalStorageCache(localStorage, 'key');
 
         cache.put('foo');
@@ -58,12 +58,13 @@ describe('A storage cache', () => {
         expect(cache.get()).toBe('bar');
     });
 
-    test('should provide a mechanism to sync the cache with external changes', async () => {
+    it('should provide a mechanism to sync the cache with external changes', () => {
         const cache = new LocalStorageCache(localStorage, 'key');
 
         const disable = LocalStorageCache.autoSync(cache);
 
         const listener = jest.fn();
+
         cache.addListener(listener);
 
         cache.put('bar');
