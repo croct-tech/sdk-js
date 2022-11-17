@@ -1,7 +1,7 @@
 module.exports = {
     testEnvironment: 'jsdom',
-    transform: {
-        '^.+\\.ts$': 'ts-jest',
-    },
-    setupFilesAfterEnv: ['jest-extended/all'],
+    testMatch: ['<rootDir>/test/**/*.test.ts'],
+    transformIgnorePatterns: [
+        'node_modules/(?!@croct/.*)',
+    ],
 };

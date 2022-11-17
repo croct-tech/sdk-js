@@ -5,11 +5,15 @@ import {Context} from '../../src/context';
 
 describe('A user facade', () => {
     function createContextMock(): Context {
-        return jest.createMockFromModule<{Context: Context}>('../../src/context').Context;
+        const mock = jest.createMockFromModule<{Context: new() => Context}>('../../src/context');
+
+        return new mock.Context();
     }
 
     function createTrackerMock(): Tracker {
-        return jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
+        const mock = jest.createMockFromModule<{Tracker: new() => Tracker}>('../../src/tracker');
+
+        return new mock.Tracker();
     }
 
     afterEach(() => {
