@@ -18,7 +18,9 @@ describe('An evaluator facade', () => {
     });
 
     beforeEach(() => {
-        evaluator = jest.createMockFromModule<{Evaluator: Evaluator}>('../../src/evaluator').Evaluator;
+        const mock = jest.createMockFromModule<{Evaluator: new() => Evaluator}>('../../src/evaluator');
+
+        evaluator = new mock.Evaluator();
 
         jest.spyOn(evaluator, 'evaluate').mockImplementation();
     });

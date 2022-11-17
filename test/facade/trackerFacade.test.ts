@@ -12,7 +12,9 @@ describe('A tracker facade', () => {
     });
 
     function createTrackerMock(): Tracker {
-        return jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
+        const mock = jest.createMockFromModule<{Tracker: new() => Tracker}>('../../src/tracker');
+
+        return new mock.Tracker();
     }
 
     it('can enable the tracker', () => {

@@ -7,7 +7,10 @@ describe('A session facade', () => {
     let sessionFacade: SessionFacade;
 
     beforeEach(() => {
-        tracker = jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
+        const mock = jest.createMockFromModule<{Tracker: new() => Tracker}>('../../src/tracker');
+
+        tracker = new mock.Tracker();
+
         jest.spyOn(tracker, 'track').mockImplementation(event => Promise.resolve(event));
 
         sessionFacade = new SessionFacade(tracker);

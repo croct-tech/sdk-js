@@ -18,8 +18,9 @@ describe('A content fetcher facade', () => {
     });
 
     beforeEach(() => {
-        fetcher = jest.createMockFromModule<{ContentFetcher: ContentFetcher}>('../../src/contentFetcher')
-            .ContentFetcher;
+        const mock = jest.createMockFromModule<{ContentFetcher: new() => ContentFetcher}>('../../src/contentFetcher');
+
+        fetcher = new mock.ContentFetcher();
 
         jest.spyOn(fetcher, 'fetch').mockImplementation();
     });

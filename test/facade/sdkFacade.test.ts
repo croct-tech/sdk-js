@@ -19,17 +19,21 @@ describe('A SDK facade', () => {
     const clientId = '8e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
 
     function createTrackerMock(): Tracker {
-        return jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
+        const mock = jest.createMockFromModule<{Tracker: new() => Tracker}>('../../src/tracker');
+
+        return new mock.Tracker();
     }
 
     function createContextMock(): Context {
-        const context = jest.createMockFromModule<{Context: Context}>('../../src/context').Context;
+        const mock = jest.createMockFromModule<{Context: new() => Context}>('../../src/context');
+        const context = new mock.Context();
 
         let token: Token|null = null;
 
         jest.spyOn(context, 'getToken')
             .mockImplementation()
             .mockImplementation(() => token);
+
         jest.spyOn(context, 'setToken')
             .mockImplementation()
             .mockImplementation(newToken => {
@@ -316,7 +320,8 @@ describe('A SDK facade', () => {
         const tab = new Tab('1', true);
         const result = '2';
 
-        const evaluator = jest.createMockFromModule<{Evaluator: Evaluator}>('../../src/evaluator').Evaluator;
+        const mock = jest.createMockFromModule<{Evaluator: new() => Evaluator}>('../../src/evaluator');
+        const evaluator = new mock.Evaluator();
 
         jest.spyOn(evaluator, 'evaluate').mockImplementation(() => Promise.resolve(result));
 
@@ -354,8 +359,8 @@ describe('A SDK facade', () => {
             },
         };
 
-        const fetcher = jest.createMockFromModule<{ContentFetcher: ContentFetcher}>('../../src/contentFetcher')
-            .ContentFetcher;
+        const mock = jest.createMockFromModule<{ContentFetcher: new() => ContentFetcher}>('../../src/contentFetcher');
+        const fetcher = new mock.ContentFetcher();
 
         fetcher.fetch = jest.fn(() => Promise.resolve(result)) as typeof fetcher.fetch;
 

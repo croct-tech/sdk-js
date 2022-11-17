@@ -7,7 +7,10 @@ describe('A session patch', () => {
     let patch: SessionPatch;
 
     beforeEach(() => {
-        tracker = jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
+        const mock = jest.createMockFromModule<{Tracker: new() => Tracker}>('../../src/tracker');
+
+        tracker = new mock.Tracker();
+
         jest.spyOn(tracker, 'track').mockImplementation(event => Promise.resolve(event));
 
         patch = new SessionPatch(tracker);
