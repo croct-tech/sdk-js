@@ -44,7 +44,9 @@ export class ObjectType implements TypeSchema {
             return value instanceof this.definition.type;
         }
 
-        return Object.prototype.toString.call(value) === '[object Object]';
+        return Object.prototype
+            .toString
+            .call(value) === '[object Object]';
     }
 
     public validate(value: unknown, path: string[] = []): void {
@@ -96,7 +98,9 @@ export class ObjectType implements TypeSchema {
         for (const [entryName, entryValue] of entries) {
             const propertyPath = path.concat([entryName]);
 
-            this.definition.propertyNames.validate(entryName, propertyPath);
+            this.definition
+                .propertyNames
+                .validate(entryName, propertyPath);
 
             const propertyRule = this.definition.properties[entryName];
 
@@ -115,7 +119,9 @@ export class ObjectType implements TypeSchema {
             }
 
             if (this.definition.additionalProperties !== true) {
-                this.definition.additionalProperties.validate(entryValue, propertyPath);
+                this.definition
+                    .additionalProperties
+                    .validate(entryValue, propertyPath);
             }
         }
 

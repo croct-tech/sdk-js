@@ -1,7 +1,7 @@
 import {evaluationOptionsSchema} from '../../src/schema';
 
 describe('The evaluation option schema', () => {
-    test.each([
+    it.each([
         [{}],
         [{
             timeout: 1,
@@ -21,7 +21,7 @@ describe('The evaluation option schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {timeout: -1},
             'Expected a value greater than or equal to 0 at path \'/timeout\', actual -1.',

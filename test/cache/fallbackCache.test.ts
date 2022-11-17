@@ -1,7 +1,7 @@
 import {Cache, FallbackCache} from '../../src/cache';
 
 describe('An fallback cache', () => {
-    test('should retrieve data from one of the underlying caches', async () => {
+    it('should retrieve data from one of the underlying caches', () => {
         const firstCache: Cache = {
             get: jest.fn()
                 .mockReturnValueOnce(null)
@@ -29,7 +29,7 @@ describe('An fallback cache', () => {
         expect(secondCache.get).toHaveBeenCalledTimes(1);
     });
 
-    test('should store data into all underlying caches', async () => {
+    it('should store data into all underlying caches', () => {
         const firstCache: Cache = {
             get: jest.fn(),
             put: jest.fn(),
@@ -52,7 +52,7 @@ describe('An fallback cache', () => {
         expect(secondCache.put).toHaveBeenCalledWith('bar');
     });
 
-    test('should clear all underlying caches', async () => {
+    it('should clear all underlying caches', () => {
         const firstCache: Cache = {
             get: jest.fn(),
             put: jest.fn(),

@@ -5,7 +5,7 @@ describe('A console logger', () => {
         jest.clearAllMocks();
     });
 
-    test('should log debug messages to the console', () => {
+    it('should log debug messages to the console', () => {
         const consoleDebug = jest.spyOn(window.console, 'debug').mockImplementation();
 
         const logger = new ConsoleLogger();
@@ -15,7 +15,7 @@ describe('A console logger', () => {
         expect(consoleDebug).toHaveBeenCalledWith('Debug message.');
     });
 
-    test('should log debug messages prefixed with a namespace to the console', () => {
+    it('should log debug messages prefixed with a namespace to the console', () => {
         const consoleDebug = jest.spyOn(window.console, 'debug').mockImplementation();
 
         const logger = new ConsoleLogger('foo');
@@ -25,7 +25,7 @@ describe('A console logger', () => {
         expect(consoleDebug).toHaveBeenCalledWith('[foo]', 'Debug message.');
     });
 
-    test('should log info messages to the console', () => {
+    it('should log info messages to the console', () => {
         const consoleInfo = jest.spyOn(window.console, 'info').mockImplementation();
 
         const logger = new ConsoleLogger();
@@ -35,7 +35,7 @@ describe('A console logger', () => {
         expect(consoleInfo).toHaveBeenCalledWith('Info message.');
     });
 
-    test('should log info messages prefixed with a namespace to the console', () => {
+    it('should log info messages prefixed with a namespace to the console', () => {
         const consoleInfo = jest.spyOn(window.console, 'info').mockImplementation();
 
         const logger = new ConsoleLogger('foo');
@@ -45,7 +45,7 @@ describe('A console logger', () => {
         expect(consoleInfo).toHaveBeenCalledWith('[foo]', 'Info message.');
     });
 
-    test('should log warn messages to the console', () => {
+    it('should log warn messages to the console', () => {
         const consoleWarn = jest.spyOn(window.console, 'warn').mockImplementation();
 
         const logger = new ConsoleLogger();
@@ -55,7 +55,7 @@ describe('A console logger', () => {
         expect(consoleWarn).toHaveBeenCalledWith('Warn message.');
     });
 
-    test('should log warn messages prefixed with a namespace to the console', () => {
+    it('should log warn messages prefixed with a namespace to the console', () => {
         const consoleWarn = jest.spyOn(window.console, 'warn').mockImplementation();
 
         const logger = new ConsoleLogger('foo');
@@ -65,7 +65,7 @@ describe('A console logger', () => {
         expect(consoleWarn).toHaveBeenCalledWith('[foo]', 'Warn message.');
     });
 
-    test('should log error messages to the console', () => {
+    it('should log error messages to the console', () => {
         const consoleError = jest.spyOn(window.console, 'error').mockImplementation();
 
         const logger = new ConsoleLogger();
@@ -75,7 +75,7 @@ describe('A console logger', () => {
         expect(consoleError).toHaveBeenCalledWith('Error message.');
     });
 
-    test('should log error messages prefixed with a namespace to the console', () => {
+    it('should log error messages prefixed with a namespace to the console', () => {
         const consoleError = jest.spyOn(window.console, 'error').mockImplementation();
 
         const logger = new ConsoleLogger('foo');

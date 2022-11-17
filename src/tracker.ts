@@ -65,7 +65,7 @@ export class Tracker {
 
     private readonly listeners: EventListener[] = [];
 
-    private readonly pending: Promise<void>[] = [];
+    private readonly pending: Array<Promise<void>> = [];
 
     private readonly state: State = {
         enabled: false,
@@ -77,7 +77,9 @@ export class Tracker {
         since: 0,
     };
 
-    public constructor({tab, tokenProvider, channel, logger, inactivityRetryPolicy, ...options}: Configuration) {
+    public constructor(config: Configuration) {
+        const {tab, tokenProvider, channel, logger, inactivityRetryPolicy, ...options} = config;
+
         this.tab = tab;
         this.tokenProvider = tokenProvider;
         this.inactivityRetryPolicy = inactivityRetryPolicy;
@@ -354,22 +356,24 @@ export class Tracker {
         this.notifyEvent(eventInfo);
 
         return new Promise<T>((resolve, reject) => {
-            const promise = this.channel.publish(this.createBeacon(event, timestamp, context)).then(
-                () => {
-                    this.logger.debug(`Successfully published event "${event.type}"`);
+            const promise = this.channel
+                .publish(this.createBeacon(event, timestamp, context))
+                .then(
+                    () => {
+                        this.logger.debug(`Successfully published event "${event.type}"`);
 
-                    this.notifyEvent({...eventInfo, status: 'confirmed'});
+                        this.notifyEvent({...eventInfo, status: 'confirmed'});
 
-                    resolve(event);
-                },
-                cause => {
-                    this.logger.error(`Failed to publish event "${event.type}", reason: ${formatCause(cause)}`);
+                        resolve(event);
+                    },
+                    cause => {
+                        this.logger.error(`Failed to publish event "${event.type}", reason: ${formatCause(cause)}`);
 
-                    this.notifyEvent({...eventInfo, status: 'failed'});
+                        this.notifyEvent({...eventInfo, status: 'failed'});
 
-                    reject(cause);
-                },
-            );
+                        reject(cause);
+                    },
+                );
 
             this.pending.push(promise);
 

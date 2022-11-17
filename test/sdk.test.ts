@@ -8,9 +8,12 @@ import {TabEventEmulator} from './utils/tabEventEmulator';
 import {BeaconPayload, NothingChanged} from '../src/trackingEvents';
 import {FetchResponse} from '../src/contentFetcher';
 
-jest.mock('../src/constants', () => ({
-    VERSION: '0.0.1-test',
-}));
+jest.mock(
+    '../src/constants',
+    () => ({
+        VERSION: '0.0.1-test',
+    }),
+);
 
 describe('A SDK', () => {
     const tabEventEmulator = new TabEventEmulator();
@@ -38,6 +41,7 @@ describe('A SDK', () => {
         window.WebSocket = class WebSocket extends window.WebSocket {
             public constructor(originalUrl: string) {
                 const url = new URL(originalUrl);
+
                 url.search = '';
 
                 super(url.toString());
@@ -60,21 +64,20 @@ describe('A SDK', () => {
         sessionStorage.clear();
     });
 
-    test('should validate the specified configuration', () => {
+    it('should validate the specified configuration', () => {
         expect(() => Sdk.init('' as unknown as Configuration))
             .toThrow('The configuration must be a key-value map.');
 
-        expect(() => Sdk.init({} as Configuration))
-            .toThrow('Invalid configuration');
+        expect(() => Sdk.init({} as Configuration)).toThrow('Invalid configuration');
     });
 
-    test('should be initialized with the specified app ID', () => {
+    it('should be initialized with the specified app ID', () => {
         const sdk = Sdk.init(configuration);
 
         expect(sdk.appId).toEqual(configuration.appId);
     });
 
-    test('should be initialized with the specified logger', async () => {
+    it('should be initialized with the specified logger', () => {
         const logger: Logger = {
             debug: jest.fn(),
             info: jest.fn(),
@@ -100,7 +103,7 @@ describe('A SDK', () => {
         expect(logger.error).toHaveBeenLastCalledWith('[Croct:Foo:Bar] Error bar');
     });
 
-    test('should configure the context with the specified URL sanitizer', () => {
+    it('should configure the context with the specified URL sanitizer', () => {
         const sanitizedUrl = 'example://sanitized';
         const sanitizer = jest.fn().mockReturnValue(new URL(sanitizedUrl));
 
@@ -114,7 +117,7 @@ describe('A SDK', () => {
         expect(tab.url).toBe(sanitizedUrl);
     });
 
-    test('should configure the token storage with global scope', async () => {
+    it('should configure the token storage with global scope', () => {
         const token = Token.issue(configuration.appId, 'carol');
         const key = `croct[${configuration.appId}].token`;
 
@@ -167,7 +170,7 @@ describe('A SDK', () => {
         expect(sdkTabB.context.getToken()).toEqual(null);
     });
 
-    test('should configure the token storage with isolated scope', async () => {
+    it('should configure the token storage with isolated scope', () => {
         const carolToken = Token.issue(configuration.appId, 'carol');
         const erickToken = Token.issue(configuration.appId, 'erick');
 
@@ -194,7 +197,7 @@ describe('A SDK', () => {
         expect(sdkTabB.context.getToken()).toEqual(erickToken);
     });
 
-    test('should configure the token storage with contextual scope', async () => {
+    it('should configure the token storage with contextual scope', () => {
         const carolToken = Token.issue(configuration.appId, 'carol');
         const erickToken = Token.issue(configuration.appId, 'erick');
 
@@ -247,7 +250,7 @@ describe('A SDK', () => {
         expect(sdkTabD.context.getToken()).toEqual(erickToken);
     });
 
-    test('should configure the tracker', async () => {
+    it('should configure the tracker', async () => {
         fetchMock.mock({
             method: 'GET',
             matcher: configuration.cidAssignerEndpointUrl,
@@ -299,7 +302,7 @@ describe('A SDK', () => {
         }));
     });
 
-    test('should ensure that events are delivered one at a time and in order', async () => {
+    it('should ensure that events are delivered one at a time and in order', async () => {
         fetchMock.mock({
             method: 'GET',
             matcher: configuration.cidAssignerEndpointUrl,
@@ -367,7 +370,7 @@ describe('A SDK', () => {
         await expect(secondPromise).resolves.toBe(secondEvent);
     });
 
-    test('should configure the evaluator', async () => {
+    it('should configure the evaluator', async () => {
         const query = '1 + 2';
         const result = 3;
 
@@ -392,7 +395,7 @@ describe('A SDK', () => {
         await expect(promise).resolves.toBe(result);
     });
 
-    test('should configure the content fetcher', async () => {
+    it('should configure the content fetcher', async () => {
         const slotId = 'home-banner';
         const result: FetchResponse = {
             content: {
@@ -418,13 +421,13 @@ describe('A SDK', () => {
         await expect(promise).resolves.toEqual(result);
     });
 
-    test('should provide a CID assigner', async () => {
+    it('should provide a CID assigner', async () => {
         const sdk = Sdk.init(configuration);
 
         await expect(sdk.cidAssigner.assignCid()).resolves.toEqual(configuration.clientId);
     });
 
-    test('should provide a user token store', async () => {
+    it('should provide a user token store', () => {
         const sdk = Sdk.init(configuration);
 
         expect(Object.keys(localStorage)).toHaveLength(0);
@@ -434,7 +437,7 @@ describe('A SDK', () => {
         expect(Object.keys(localStorage)).toHaveLength(1);
     });
 
-    test('should provide a preview token store', async () => {
+    it('should provide a preview token store', () => {
         const sdk = Sdk.init(configuration);
 
         expect(Object.keys(localStorage)).toHaveLength(0);
@@ -444,19 +447,21 @@ describe('A SDK', () => {
         expect(Object.keys(localStorage)).toHaveLength(1);
     });
 
-    test('should provide an event manager to allow inter-service communication', () => {
+    it('should provide an event manager to allow inter-service communication', () => {
         const sdk = Sdk.init(configuration);
 
         const listener = jest.fn();
+
         sdk.eventManager.addListener('somethingHappened', listener);
 
         const event = {};
+
         sdk.eventManager.dispatch('somethingHappened', {});
 
         expect(listener).toHaveBeenCalledWith(event);
     });
 
-    test('should provide an isolated session storage', () => {
+    it('should provide an isolated session storage', () => {
         jest.spyOn(Storage.prototype, 'setItem');
 
         const sdk = Sdk.init(configuration);
@@ -465,10 +470,11 @@ describe('A SDK', () => {
         storage.setItem('key', 'value');
 
         const namespacedKey = `croct[${configuration.appId}].external.foo.bar.key`;
+
         expect(window.sessionStorage.setItem).toHaveBeenCalledWith(namespacedKey, 'value');
     });
 
-    test('should provide an isolated browser storage', () => {
+    it('should provide an isolated browser storage', () => {
         jest.spyOn(Storage.prototype, 'setItem');
 
         const sdk = Sdk.init(configuration);
@@ -477,10 +483,11 @@ describe('A SDK', () => {
         storage.setItem('key', 'value');
 
         const namespacedKey = `croct[${configuration.appId}].external.foo.bar.key`;
+
         expect(window.localStorage.setItem).toHaveBeenCalledWith(namespacedKey, 'value');
     });
 
-    test('should clean up resources on close', async () => {
+    it('should clean up resources on close', async () => {
         fetchMock.mock({
             method: 'GET',
             matcher: configuration.cidAssignerEndpointUrl,
@@ -503,11 +510,10 @@ describe('A SDK', () => {
 
         const {tracker} = sdk;
 
-        tracker
-            .track({
-                type: 'nothingChanged',
-                sinceTime: Date.now(),
-            })
+        tracker.track({
+            type: 'nothingChanged',
+            sinceTime: Date.now(),
+        })
             .catch(() => {
                 // suppress error;
             });
@@ -522,7 +528,7 @@ describe('A SDK', () => {
         expect(log).toHaveBeenLastCalledWith('[Croct] SDK closed.');
     });
 
-    test('should not fail if closed more than once', async () => {
+    it('should not fail if closed more than once', async () => {
         const sdk = Sdk.init(configuration);
 
         await expect(sdk.close()).resolves.toBeUndefined();

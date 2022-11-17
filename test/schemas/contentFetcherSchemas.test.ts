@@ -1,7 +1,7 @@
 import {fetchOptionsSchema} from '../../src/schema';
 
 describe('The content fetcher option schema', () => {
-    test.each([
+    it.each([
         [{}],
         [{
             timeout: 1,
@@ -45,7 +45,7 @@ describe('The content fetcher option schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {timeout: -1},
             'Expected a value greater than or equal to 0 at path \'/timeout\', actual -1.',

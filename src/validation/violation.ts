@@ -12,7 +12,6 @@ export function describe(value: unknown): string {
     }
 
     if (typeof value === 'object') {
-        // eslint-disable-next-line @typescript-eslint/ban-types
         return (value as object).constructor.name;
     }
 

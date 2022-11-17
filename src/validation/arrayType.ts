@@ -22,7 +22,7 @@ export class ArrayType implements TypeSchema {
         return ['array'];
     }
 
-    public isValidType(value: unknown): value is Array<unknown> {
+    public isValidType(value: unknown): value is unknown[] {
         return Array.isArray(value);
     }
 
@@ -63,7 +63,9 @@ export class ArrayType implements TypeSchema {
         }
 
         for (let index = 0; index < length; index++) {
-            this.definition.items.validate(value[index], path.concat([index.toString()]));
+            this.definition
+                .items
+                .validate(value[index], path.concat([index.toString()]));
         }
     }
 }

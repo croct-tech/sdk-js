@@ -32,7 +32,7 @@ const minimalOrder: Order = {
 };
 
 describe('The product details schema', () => {
-    test.each([
+    it.each([
         [minimalProductDetails],
         [{
             productId: '12345',
@@ -54,7 +54,7 @@ describe('The product details schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {name: 'Smartphone 9', displayPrice: 599.00},
             'Missing property \'/productId\'.',
@@ -141,7 +141,7 @@ describe('The product details schema', () => {
 });
 
 describe('The cart item schema', () => {
-    test.each([
+    it.each([
         [minimalCartItem],
         [{
             index: 0,
@@ -159,7 +159,7 @@ describe('The cart item schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {
                 product: minimalProductDetails,
@@ -259,7 +259,7 @@ describe('The cart item schema', () => {
 });
 
 describe('The cart schema', () => {
-    test.each([
+    it.each([
         [minimalCart],
         [{
             currency: 'brl',
@@ -304,7 +304,7 @@ describe('The cart schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {
                 total: 776.49,
@@ -468,7 +468,7 @@ describe('The cart schema', () => {
 });
 
 describe('The order item schema', () => {
-    test.each([
+    it.each([
         [minimalOrderItem],
         [{
             index: 0,
@@ -486,7 +486,7 @@ describe('The order item schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {
                 product: minimalProductDetails,
@@ -586,7 +586,7 @@ describe('The order item schema', () => {
 });
 
 describe('The order schema', () => {
-    test.each([
+    it.each([
         [minimalOrder],
         [{
             orderId: 'b76c0ef6-9520-4107-9de3-11110829588e',
@@ -656,7 +656,7 @@ describe('The order schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {
                 currency: 'brl',

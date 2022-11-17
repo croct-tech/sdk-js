@@ -1,7 +1,7 @@
 import {InMemoryCache} from '../../src/cache';
 
 describe('An in-memory cache', () => {
-    test('should cache data in memory', async () => {
+    it('should cache data in memory', () => {
         const cache = new InMemoryCache();
 
         expect(cache.get()).toBeNull();

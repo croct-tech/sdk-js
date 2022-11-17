@@ -132,7 +132,7 @@ export class Container {
             inactivityRetryPolicy: new ArbitraryPolicy([30_000, 30_000, 120_000, 120_000, 300_000, 300_000, 900_000]),
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
-            eventMetadata: this.configuration.eventMetadata || {},
+            eventMetadata: this.configuration.eventMetadata,
         });
 
         const queue = this.getBeaconQueue();
@@ -146,6 +146,7 @@ export class Container {
     public getUserTokenStore(): TokenStore {
         if (this.userTokenProvider === undefined) {
             const context = this.getContext();
+
             this.userTokenProvider = {
                 getToken: context.getToken.bind(context),
                 setToken: context.setToken.bind(context),
@@ -208,7 +209,9 @@ export class Container {
                         tokenParameter: 'token',
                         loggerFactory: this.getLogger.bind(this),
                         logger: channelLogger,
-                        channelFactory: (url, logger): SocketChannel<any, any> => new SocketChannel({url, logger}),
+                        channelFactory: (url, logger): SocketChannel<any, any> => (
+                            new SocketChannel({url: url, logger: logger})
+                        ),
                         cidAssigner: this.getCidAssigner(),
                         cidParameter: 'clientId',
                     }),
@@ -322,7 +325,9 @@ export class Container {
     }
 
     private resolveStorageNamespace(namespace: string, ...subnamespace: string[]): string {
-        return `croct[${this.configuration.appId.toLowerCase()}].${[namespace].concat(subnamespace).join('.')}`;
+        return `croct[${this.configuration
+            .appId
+            .toLowerCase()}].${[namespace].concat(subnamespace).join('.')}`;
     }
 
     private getLocalStorage(): Storage {
@@ -340,20 +345,20 @@ export class Container {
     public async dispose(): Promise<void> {
         const logger = this.getLogger();
 
-        if (this.beaconChannel) {
+        if (this.beaconChannel != null) {
             logger.debug('Closing beacon channel...');
 
             await this.beaconChannel.close();
         }
 
-        if (this.removeTokenSyncListener) {
+        if (this.removeTokenSyncListener != null) {
             logger.debug('Removing token sync listener...');
 
             this.removeTokenSyncListener();
         }
 
-        if (this.tracker) {
-            if (this.beaconQueue) {
+        if (this.tracker != null) {
+            if (this.beaconQueue != null) {
                 logger.debug('Removing queue listeners...');
 
                 this.beaconQueue.removeCallback('halfEmpty', this.tracker.unsuspend);

@@ -1,11 +1,11 @@
 import {ArrayType, NumberType} from '../../src/validation';
 
 describe('An array type', () => {
-    test('should provide the allowed type', () => {
+    it('should provide the allowed type', () => {
         expect(new ArrayType().getTypes()).toEqual(['array']);
     });
 
-    test.each([
+    it.each([
         [null, false],
         ['foo', false],
         [true, false],
@@ -18,7 +18,7 @@ describe('An array type', () => {
         expect(new ArrayType().isValidType(value)).toBe(expected);
     });
 
-    test.each([
+    it.each([
         [[1], new ArrayType({minItems: 1})],
         [[1], new ArrayType({maxItems: 1})],
         [[1], new ArrayType({items: new NumberType({})})],
@@ -30,7 +30,7 @@ describe('An array type', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [null, new ArrayType({}), 'Expected value of type array at path \'/\', actual null.'],
         ['a', new ArrayType({}), 'Expected value of type array at path \'/\', actual string.'],
         [1, new ArrayType({}), 'Expected value of type array at path \'/\', actual integer.'],

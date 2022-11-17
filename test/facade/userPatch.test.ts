@@ -8,7 +8,7 @@ describe('A user patch', () => {
 
     beforeEach(() => {
         tracker = jest.createMockFromModule<{Tracker: Tracker}>('../../src/tracker').Tracker;
-        tracker.track = jest.fn(event => Promise.resolve(event));
+        jest.spyOn(tracker, 'track').mockImplementation(event => Promise.resolve(event));
 
         patch = new UserPatch(tracker);
     });
@@ -17,7 +17,7 @@ describe('A user patch', () => {
         jest.restoreAllMocks();
     });
 
-    test('should not track a "userProfileChanged" event if the patch is empty', async () => {
+    it('should not track a "userProfileChanged" event if the patch is empty', async () => {
         const promise = patch.save();
 
         const expectedEvent: UserProfileChanged = {
@@ -31,9 +31,8 @@ describe('A user patch', () => {
         expect(tracker.track).not.toHaveBeenCalled();
     });
 
-    test('should track a "userProfileChanged" event and reset itself', async () => {
-        const promise = patch
-            .add('foo', 'bar')
+    it('should track a "userProfileChanged" event and reset itself', async () => {
+        const promise = patch.add('foo', 'bar')
             .save();
 
         const nonEmptyEvent: UserProfileChanged = {

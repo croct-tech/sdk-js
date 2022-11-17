@@ -115,7 +115,7 @@ export class Evaluator {
         };
     }
 
-    public async evaluate(query: string, options: EvaluationOptions = {}): Promise<JsonValue> {
+    public evaluate(query: string, options: EvaluationOptions = {}): Promise<JsonValue> {
         const length = getLength(query);
 
         if (length > Evaluator.MAX_QUERY_LENGTH) {
@@ -165,26 +165,30 @@ export class Evaluator {
 
             const promise = this.fetch(body, abortController.signal, options);
 
-            promise.then(response => response.json()
-                .then(body => {
-                    if (response.ok) {
-                        return resolve(body);
-                    }
+            promise.then(
+                response => response.json()
+                    .then(data => {
+                        if (response.ok) {
+                            return resolve(data);
+                        }
 
-                    const errorResponse: ErrorResponse = body;
+                        const errorResponse: ErrorResponse = data;
 
-                    switch (errorResponse.type) {
-                        case EvaluationErrorType.INVALID_QUERY:
-                        case EvaluationErrorType.EVALUATION_FAILED:
-                        case EvaluationErrorType.TOO_COMPLEX_QUERY:
-                            reject(new QueryError(errorResponse as QueryErrorResponse));
-                            break;
+                        switch (errorResponse.type) {
+                            case EvaluationErrorType.INVALID_QUERY:
+                            case EvaluationErrorType.EVALUATION_FAILED:
+                            case EvaluationErrorType.TOO_COMPLEX_QUERY:
+                                reject(new QueryError(errorResponse as QueryErrorResponse));
 
-                        default:
-                            reject(new EvaluationError(errorResponse));
-                            break;
-                    }
-                }))
+                                break;
+
+                            default:
+                                reject(new EvaluationError(errorResponse));
+
+                                break;
+                        }
+                    }),
+            )
                 .catch(
                     error => {
                         if (!abortController.signal.aborted) {
@@ -202,11 +206,13 @@ export class Evaluator {
         });
     }
 
-    private async fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
+    private fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
         const {appId, apiKey} = this.configuration;
 
         // eslint-disable-next-line prefer-template -- Better readability
-        const endpoint = this.configuration.endpointUrl.replace(/\/+$/, '')
+        const endpoint = this.configuration
+            .endpointUrl
+            .replace(/\/+$/, '')
             + (apiKey === undefined ? '/client' : '/external')
             + '/web/evaluate';
 

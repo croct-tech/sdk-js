@@ -31,7 +31,7 @@ const complexMap = {
 };
 
 describe('An add operation schema', () => {
-    test.each([
+    it.each([
         [1],
         [1.2],
         [null],
@@ -48,7 +48,7 @@ describe('An add operation schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             [['foo']],
             'Expected a JSON primitive at path \'/value/0\', actual array.',
@@ -81,7 +81,7 @@ describe('An add operation schema', () => {
         expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -94,7 +94,7 @@ describe('An add operation schema', () => {
 });
 
 describe('A set operation schema', () => {
-    test.each([
+    it.each([
         [1],
         [1.2],
         [null],
@@ -111,7 +111,7 @@ describe('A set operation schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             [['foo']],
             'Expected a JSON primitive at path \'/value/0\', actual array.',
@@ -144,7 +144,7 @@ describe('A set operation schema', () => {
         expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -157,7 +157,7 @@ describe('A set operation schema', () => {
 });
 
 describe('A combine operation schema', () => {
-    test.each([
+    it.each([
         [1],
         [1.2],
         [null],
@@ -174,7 +174,7 @@ describe('A combine operation schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             [['foo']],
             'Expected a JSON primitive at path \'/value/0\', actual array.',
@@ -207,7 +207,7 @@ describe('A combine operation schema', () => {
         expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -220,7 +220,7 @@ describe('A combine operation schema', () => {
 });
 
 describe('A merge operation schema', () => {
-    test.each([
+    it.each([
         [simpleArray],
         [simpleMap],
         [complexMap],
@@ -232,7 +232,7 @@ describe('A merge operation schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [1, 'Expected value of type array or object at path \'/value\', actual integer.'],
         [1.2, 'Expected value of type array or object at path \'/value\', actual number.'],
         [null, 'Expected value of type array or object at path \'/value\', actual null.'],
@@ -267,7 +267,7 @@ describe('A merge operation schema', () => {
         expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -280,7 +280,7 @@ describe('A merge operation schema', () => {
 });
 
 describe('An increment operation schema', () => {
-    test.each([
+    it.each([
         [1],
         [1.2],
     ])('should allow value %s', (value: any) => {
@@ -291,7 +291,7 @@ describe('An increment operation schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [null, 'Expected value of type number at path \'/value\', actual null.'],
         ['foo', 'Expected value of type number at path \'/value\', actual string.'],
         [true, 'Expected value of type number at path \'/value\', actual boolean.'],
@@ -307,7 +307,7 @@ describe('An increment operation schema', () => {
         expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -320,7 +320,7 @@ describe('An increment operation schema', () => {
 });
 
 describe('A decrement operation schema', () => {
-    test.each([
+    it.each([
         [1],
         [1.2],
     ])('should allow value %s', (value: any) => {
@@ -331,7 +331,7 @@ describe('A decrement operation schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [null, 'Expected value of type number at path \'/value\', actual null.'],
         ['foo', 'Expected value of type number at path \'/value\', actual string.'],
         [true, 'Expected value of type number at path \'/value\', actual boolean.'],
@@ -347,7 +347,7 @@ describe('A decrement operation schema', () => {
         expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -360,7 +360,7 @@ describe('A decrement operation schema', () => {
 });
 
 describe('A remove operation schema', () => {
-    test.each([
+    it.each([
         [1],
         [1.5],
         ['foo'],
@@ -376,7 +376,7 @@ describe('A remove operation schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             [['foo']],
             'Expected a JSON primitive at path \'/value/0\', actual array.',
@@ -413,7 +413,7 @@ describe('A remove operation schema', () => {
         expect(validate).toThrowWithMessage(Error, message);
     });
 
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -426,7 +426,7 @@ describe('A remove operation schema', () => {
 });
 
 describe('A clear operation schema', () => {
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {
@@ -439,7 +439,7 @@ describe('A clear operation schema', () => {
 });
 
 describe('An unset operation schema', () => {
-    test.each([
+    it.each([
         ['foo.'],
         [''],
     ])('should fail if path is invalid', (path: string) => {

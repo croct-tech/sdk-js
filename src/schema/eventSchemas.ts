@@ -1,4 +1,12 @@
-import {ObjectType, StringType, NumberType, UnionType, NullType, BooleanType, ArrayType} from '../validation';
+import {
+    ObjectType,
+    StringType,
+    NumberType,
+    UnionType,
+    NullType,
+    BooleanType,
+    ArrayType,
+} from '../validation';
 import {cart, order, productDetails} from './ecommerceSchemas';
 import {userProfileSchema} from './userSchema';
 import {postDetails} from './contentSchemas';

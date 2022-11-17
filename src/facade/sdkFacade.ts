@@ -137,7 +137,9 @@ export class SdkFacade {
         if (this.evaluatorFacade === undefined) {
             this.evaluatorFacade = new EvaluatorFacade({
                 evaluator: this.sdk.evaluator,
-                contextFactory: new TabContextFactory(this.sdk.context.getTab()),
+                contextFactory: new TabContextFactory(this.sdk
+                    .context
+                    .getTab()),
                 cidAssigner: this.sdk.cidAssigner,
                 userTokenProvider: this.sdk.userTokenStore,
             });
@@ -150,7 +152,9 @@ export class SdkFacade {
         if (this.contentFetcherFacade === undefined) {
             this.contentFetcherFacade = new ContentFetcherFacade({
                 contentFetcher: this.sdk.contentFetcher,
-                contextFactory: new TabContextFactory(this.sdk.context.getTab()),
+                contextFactory: new TabContextFactory(this.sdk
+                    .context
+                    .getTab()),
                 cidAssigner: this.sdk.cidAssigner,
                 previewTokenProvider: this.sdk.previewTokenStore,
                 userTokenProvider: this.sdk.userTokenStore,
@@ -261,9 +265,12 @@ export class SdkFacade {
     }
 
     private trackInternalEvent(event: PartialTrackingEvent): void {
-        this.sdk.tracker.track(event).catch(() => {
+        this.sdk
+            .tracker
+            .track(event)
+            .catch(() => {
             // suppress error as it is already logged by the tracker
-        });
+            });
     }
 
     public getLogger(...namespace: string[]): Logger {

@@ -20,7 +20,7 @@ const FORMAT: {[key: string]: Format} = {
     },
     url: function url(value: string): boolean {
         try {
-            // eslint-disable-next-line no-new
+            // eslint-disable-next-line no-new -- Easier way to validate a URL
             new URL(value);
         } catch {
             return false;
@@ -101,18 +101,18 @@ export class StringType implements TypeSchema {
                 }', `
                 + `found '${value}'.`,
                 path,
-                {enumeration},
+                {enumeration: enumeration},
             );
         }
 
         const {format, pattern} = this.definition;
 
         if (format !== undefined && !FORMAT[format](value)) {
-            throw new Violation(`Invalid ${format} format at path '${formatPath(path)}'.`, path, {format});
+            throw new Violation(`Invalid ${format} format at path '${formatPath(path)}'.`, path, {format: format});
         }
 
         if (pattern !== undefined && !pattern.test(value)) {
-            throw new Violation(`Invalid format at path '${formatPath(path)}'.`, path, {pattern});
+            throw new Violation(`Invalid format at path '${formatPath(path)}'.`, path, {pattern: pattern});
         }
     }
 }

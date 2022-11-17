@@ -21,7 +21,7 @@ describe('A context', () => {
         tabEventEmulator.reset();
     });
 
-    test('should have a tab', () => {
+    it('should have a tab', () => {
         const tabStorage = new DumbStorage();
 
         const context = Context.load({
@@ -42,7 +42,7 @@ describe('A context', () => {
         expect(tab.isNew).toEqual(true);
     });
 
-    test('should share token across all tabs if the token scope is global', () => {
+    it('should share token across all tabs if the token scope is global', () => {
         const browserCache = new LocalStorageCache(localStorage, 'token');
 
         const aTabStorage = new DumbStorage();
@@ -84,7 +84,7 @@ describe('A context', () => {
         expect(contextB.getToken()).toEqual(erickToken);
     });
 
-    test('should share token across related tabs if the token scope is contextual', () => {
+    it('should share token across related tabs if the token scope is contextual', () => {
         const browserCache = new LocalStorageCache(localStorage, 'token');
 
         // Open the tab A
@@ -183,7 +183,7 @@ describe('A context', () => {
         expect(contextD.getToken()).toEqual(carolToken);
     });
 
-    test('should not share token across tabs if the token scope is isolated', () => {
+    it('should not share token across tabs if the token scope is isolated', () => {
         const browserCache = new LocalStorageCache(localStorage, 'token');
 
         const aTabStorage = new DumbStorage();
@@ -225,7 +225,7 @@ describe('A context', () => {
         expect(contextB.getToken()).toEqual(erickToken);
     });
 
-    test('should allow setting a user token', () => {
+    it('should allow setting a user token', () => {
         const tabStorage = new DumbStorage();
 
         const context = Context.load({
@@ -247,7 +247,7 @@ describe('A context', () => {
         expect(context.getToken()).toEqual(carolToken);
     });
 
-    test('should provide the token subject', () => {
+    it('should provide the token subject', () => {
         const tabStorage = new DumbStorage();
 
         const context = Context.load({
@@ -269,7 +269,7 @@ describe('A context', () => {
         expect(context.getUser()).toEqual('c4r0l');
     });
 
-    test('should determine whether token is from anonymous user', () => {
+    it('should determine whether token is from anonymous user', () => {
         const identifiedStorage = new DumbStorage();
 
         const identifiedContext = Context.load({
@@ -307,7 +307,7 @@ describe('A context', () => {
         expect(anonymousContext.isAnonymous()).toBeTruthy();
     });
 
-    test.each<[TokenScope]>([
+    it.each<[TokenScope]>([
         ['isolated'],
         ['contextual'],
         ['global'],
@@ -345,7 +345,7 @@ describe('A context', () => {
         });
     });
 
-    test('should report external token changes', () => {
+    it('should report external token changes', () => {
         const browserCache = new LocalStorageCache(localStorage, 'token');
         const tabStorage = new DumbStorage();
         const eventDispatcher: EventDispatcher<SdkEventMap> = {dispatch: jest.fn()};

@@ -96,7 +96,7 @@ export class ContentFetcher {
     }
 
     public fetch<P extends JsonObject>(slotId: string, options: FetchOptions = {}): Promise<FetchResponse<P>> {
-        if (options.static && this.configuration.apiKey === undefined) {
+        if (options.static === true && this.configuration.apiKey === undefined) {
             throw new Error('The API key must be provided to fetch static content.');
         }
 
@@ -122,14 +122,16 @@ export class ContentFetcher {
             }
 
             this.load(slotId, abortController.signal, options)
-                .then(response => response.json()
-                    .then(body => {
-                        if (response.ok) {
-                            resolve(body);
-                        } else {
-                            reject(new ContentError(body));
-                        }
-                    }))
+                .then(
+                    response => response.json()
+                        .then(body => {
+                            if (response.ok) {
+                                resolve(body);
+                            } else {
+                                reject(new ContentError(body));
+                            }
+                        }),
+                )
                 .catch(error => {
                     if (!abortController.signal.aborted) {
                         reject(
@@ -145,12 +147,14 @@ export class ContentFetcher {
         });
     }
 
-    private async load(slotId: string, signal: AbortSignal, options: FetchOptions): Promise<Response> {
+    private load(slotId: string, signal: AbortSignal, options: FetchOptions): Promise<Response> {
         const dynamic = ContentFetcher.isDynamicContent(options);
         const {apiKey, appId} = this.configuration;
 
         // eslint-disable-next-line prefer-template -- Better readability
-        const endpoint = this.configuration.endpointUrl.replace(/\/+$/, '')
+        const endpoint = this.configuration
+            .endpointUrl
+            .replace(/\/+$/, '')
             + (apiKey === undefined ? '/client' : '/external')
             + '/web'
             + (dynamic ? '/content' : '/static-content');

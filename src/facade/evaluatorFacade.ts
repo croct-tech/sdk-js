@@ -96,7 +96,7 @@ export class TabContextFactory implements ContextFactory {
 
         context.page = page;
 
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? null;
 
         if (timeZone !== null) {
             context.timeZone = timeZone;
@@ -122,22 +122,27 @@ export class TabContextFactory implements ContextFactory {
             switch (parameter.toLowerCase()) {
                 case 'utm_campaign':
                     campaign.name = value;
+
                     break;
 
                 case 'utm_source':
                     campaign.source = value;
+
                     break;
 
                 case 'utm_term':
                     campaign.term = value;
+
                     break;
 
                 case 'utm_medium':
                     campaign.medium = value;
+
                     break;
 
                 case 'utm_content':
                     campaign.content = value;
+
                     break;
             }
         }

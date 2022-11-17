@@ -1,12 +1,12 @@
 import {FunctionType} from '../../src/validation';
 
 describe('A function type', () => {
-    test('should provide the allowed type', () => {
+    it('should provide the allowed type', () => {
         expect(new FunctionType().getTypes()).toEqual(['function']);
     });
 
-    test.each([
-        [(): void => {}, true],
+    it.each([
+        [(): void => { /* empty */ }, true],
         [jest.fn(), true],
         [1, false],
         [null, false],
@@ -17,14 +17,14 @@ describe('A function type', () => {
         expect(new FunctionType().isValidType(value)).toBe(expected);
     });
 
-    test('should allow functions', () => {
+    it('should allow functions', () => {
         const type = new FunctionType();
 
-        expect((): void => type.validate(() => {})).not.toThrow();
+        expect((): void => type.validate(() => { /* empty */ })).not.toThrow();
         expect((): void => type.validate(jest.fn())).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [null, "Expected value of type function at path '/', actual null."],
         ['foo', "Expected value of type function at path '/', actual string."],
         [1, "Expected value of type function at path '/', actual integer."],

@@ -1,7 +1,7 @@
 import {sdkConfigurationSchema, eventMetadataSchema} from '../../src/schema';
 
 describe('The event metadata schema', () => {
-    test.each([
+    it.each([
         [{}],
         [{
             foo: 'bar',
@@ -18,7 +18,7 @@ describe('The event metadata schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {
                 '@foo': 'foo',
@@ -64,7 +64,7 @@ describe('The event metadata schema', () => {
 });
 
 describe('The SDK configuration schema', () => {
-    test.each([
+    it.each([
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
         }],
@@ -99,7 +99,7 @@ describe('The SDK configuration schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {},
             "Missing property '/appId'.",

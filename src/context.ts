@@ -62,6 +62,7 @@ export class Context {
 
             case 'global': {
                 const context = new Context(tab, new CachedTokenStore(cache.browserToken), eventDispatcher);
+
                 cache.browserToken.addListener(context.syncToken);
 
                 return context;

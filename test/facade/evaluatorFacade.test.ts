@@ -5,22 +5,22 @@ import {Tab} from '../../src/tab';
 import {FixedAssigner} from '../../src/cid';
 import {InMemoryTokenStore, FixedTokenProvider, Token} from '../../src/token';
 
-const {timeZone} = Intl.DateTimeFormat().resolvedOptions();
-
-beforeEach(() => {
-    Object.defineProperty(window.document, 'referrer', {
-        value: '',
-        configurable: true,
-    });
-});
-
 describe('An evaluator facade', () => {
     let evaluator: Evaluator;
+
+    const {timeZone} = Intl.DateTimeFormat().resolvedOptions();
+
+    beforeEach(() => {
+        Object.defineProperty(window.document, 'referrer', {
+            value: '',
+            configurable: true,
+        });
+    });
 
     beforeEach(() => {
         evaluator = jest.createMockFromModule<{Evaluator: Evaluator}>('../../src/evaluator').Evaluator;
 
-        evaluator.evaluate = jest.fn();
+        jest.spyOn(evaluator, 'evaluate').mockImplementation();
     });
 
     afterEach(() => {
@@ -29,7 +29,7 @@ describe('An evaluator facade', () => {
 
     const clientId = '11111111-1111-1111-1111-111111111111';
 
-    test('should fail if the query is empty', async () => {
+    it('should fail if the query is empty', async () => {
         const evaluationFacade = new EvaluatorFacade({
             evaluator: evaluator,
             cidAssigner: new FixedAssigner(clientId),
@@ -37,12 +37,11 @@ describe('An evaluator facade', () => {
             contextFactory: new MinimalContextFactory(),
         });
 
-        await expect(evaluationFacade.evaluate(''))
-            .rejects
+        await expect(evaluationFacade.evaluate('')).rejects
             .toThrowWithMessage(Error, 'The query must be a non-empty string.');
     });
 
-    test('should fail if the options are invalid', async () => {
+    it('should fail if the options are invalid', async () => {
         const evaluationFacade = new EvaluatorFacade({
             evaluator: evaluator,
             cidAssigner: new FixedAssigner(clientId),
@@ -50,12 +49,15 @@ describe('An evaluator facade', () => {
             contextFactory: new MinimalContextFactory(),
         });
 
-        await expect(evaluationFacade.evaluate('1 + 1', {timeout: 1.2}))
-            .rejects
-            .toThrowWithMessage(Error, 'Invalid options: expected value of type integer at path \'/timeout\', actual number.');
+        await expect(evaluationFacade.evaluate('1 + 1', {timeout: 1.2})).rejects
+            .toThrowWithMessage(
+                Error,
+                'Invalid options: expected value of type integer '
+                + 'at path \'/timeout\', actual number.',
+            );
     });
 
-    test('should fail if the options are not a key-value map', async () => {
+    it('should fail if the options are not a key-value map', async () => {
         const evaluationFacade = new EvaluatorFacade({
             evaluator: evaluator,
             cidAssigner: new FixedAssigner(clientId),
@@ -68,8 +70,9 @@ describe('An evaluator facade', () => {
             .toThrowWithMessage(Error, 'Invalid options: expected value of type object at path \'/\', actual null.');
     });
 
-    test('should delegate the evaluation to the evaluator', async () => {
+    it('should delegate the evaluation to the evaluator', async () => {
         const url = new URL('http://localhost');
+
         url.searchParams.append('utm_campaign', 'campaign');
         url.searchParams.append('utm_source', 'source');
         url.searchParams.append('utm_medium', 'medium');
@@ -132,7 +135,7 @@ describe('An evaluator facade', () => {
 });
 
 describe('A minimal context factory', () => {
-    test('should load a context containing attributes only', () => {
+    it('should load a context containing attributes only', () => {
         const factory = new MinimalContextFactory();
         const attributes: JsonObject = {
             foo: 1,
@@ -146,7 +149,7 @@ describe('A minimal context factory', () => {
         expect(context.timeZone).toBeUndefined();
     });
 
-    test('can load an empty context', () => {
+    it('can load an empty context', () => {
         const factory = new MinimalContextFactory();
 
         expect(factory.createContext()).toEqual({});
@@ -154,8 +157,9 @@ describe('A minimal context factory', () => {
 });
 
 describe('A tab context factory', () => {
-    test('should load a context containing tab information and attributes', () => {
+    it('should load a context containing tab information and attributes', () => {
         const url = new URL('http://localhost');
+
         url.searchParams.append('UTM_campaign', 'campaign');
         url.searchParams.append('utm_SOURCE', 'source');
         url.searchParams.append('utm_mediuM', 'medium');

@@ -1,11 +1,11 @@
 import {StringType} from '../../src/validation';
 
 describe('A string type', () => {
-    test('should provide the allowed type', () => {
+    it('should provide the allowed type', () => {
         expect(new StringType().getTypes()).toEqual(['string']);
     });
 
-    test.each([
+    it.each([
         [null, false],
         ['foo', true],
         [true, false],
@@ -18,7 +18,7 @@ describe('A string type', () => {
         expect(new StringType().isValidType(value)).toBe(expected);
     });
 
-    test.each([
+    it.each([
         ['bd70aced-f238-4a06-b49d-0c96fe10c4f8', 'uuid'],
         ['2015-08-31', 'date'],
         ['foo://example.com:3000/path?here=there#fragment', 'url'],
@@ -50,7 +50,7 @@ describe('A string type', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         ['bd70acedf2384a06b49d0c96fe10c4f8', 'uuid'],
         ['bd70aced-zzzz-4a06-b49d-0c96fe10c4f8', 'uuid'],
         ['20150831', 'date'],
@@ -90,7 +90,7 @@ describe('A string type', () => {
         expect(validate).toThrowWithMessage(Error, `Invalid ${format} format at path '/'.`);
     });
 
-    test.each([
+    it.each([
         ['foo', new StringType({minLength: 2})],
         ['foo', new StringType({maxLength: 4})],
         ['foo', new StringType({enumeration: ['foo']})],
@@ -107,7 +107,7 @@ describe('A string type', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [null, new StringType({}), 'Expected value of type string at path \'/\', actual null.'],
         [1, new StringType({}), 'Expected value of type string at path \'/\', actual integer.'],
         [[], new StringType({}), 'Expected value of type string at path \'/\', actual array.'],

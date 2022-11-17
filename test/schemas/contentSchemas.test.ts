@@ -1,7 +1,7 @@
 import {postDetails} from '../../src/schema/contentSchemas';
 
 describe('The product details schema', () => {
-    test.each([
+    it.each([
         [{
             postId: 'post-id',
             title: 'post-title',
@@ -25,7 +25,7 @@ describe('The product details schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {title: 'post-title', publishTime: 0},
             'Missing property \'/postId\'.',

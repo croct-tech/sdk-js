@@ -15,7 +15,7 @@ describe('A remote CID assigner', () => {
         fetchMock.reset();
     });
 
-    test('should call a HTTP endpoint to assign a CID', async () => {
+    it('should call a HTTP endpoint to assign a CID', async () => {
         const cachedAssigner = new RemoteAssigner(ENDPOINT);
 
         fetchMock.mock(requestMatcher);
@@ -23,7 +23,7 @@ describe('A remote CID assigner', () => {
         await expect(cachedAssigner.assignCid()).resolves.toEqual('123');
     });
 
-    test('should fail if a HTTP error occurs', async () => {
+    it('should fail if a HTTP error occurs', async () => {
         const cachedAssigner = new RemoteAssigner(ENDPOINT);
 
         fetchMock.mock({
@@ -34,7 +34,7 @@ describe('A remote CID assigner', () => {
         await expect(cachedAssigner.assignCid()).rejects.toThrow('Failed to assign CID: service Unavailable');
     });
 
-    test('should not assign CIDs concurrently', async () => {
+    it('should not assign CIDs concurrently', async () => {
         const cachedAssigner = new RemoteAssigner(ENDPOINT);
 
         let resolve: {(value: string): void} = jest.fn();
@@ -64,4 +64,3 @@ describe('A remote CID assigner', () => {
         expect(done).toHaveBeenCalled();
     });
 });
-

@@ -1,11 +1,11 @@
 import {NullType} from '../../src/validation';
 
 describe('A null type', () => {
-    test('should provide the allowed type', () => {
+    it('should provide the allowed type', () => {
         expect(new NullType().getTypes()).toEqual(['null']);
     });
 
-    test.each([
+    it.each([
         [null, true],
         ['foo', false],
         [true, false],
@@ -18,13 +18,13 @@ describe('A null type', () => {
         expect(new NullType().isValidType(value)).toBe(expected);
     });
 
-    test('should allow a null value', () => {
+    it('should allow a null value', () => {
         const type = new NullType();
 
         expect((): void => type.validate(null)).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [true, 'Expected value of type null at path \'/\', actual boolean.'],
         ['foo', 'Expected value of type null at path \'/\', actual string.'],
         [1, 'Expected value of type null at path \'/\', actual integer.'],

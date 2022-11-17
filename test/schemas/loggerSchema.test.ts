@@ -1,7 +1,7 @@
 import {loggerSchema} from '../../src/schema';
 
 describe('The logger schema', () => {
-    test('should allow valid loggers', () => {
+    it('should allow valid loggers', () => {
         const logger = {
             debug: jest.fn(),
             info: jest.fn(),
@@ -13,7 +13,7 @@ describe('The logger schema', () => {
         expect(() => loggerSchema.validate(logger)).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {
                 info: jest.fn(),

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define -- Mutual dependency */
 import {JsonArray, JsonObject, JsonPrimitive, JsonValue} from '@croct/json';
 import {Schema, TypeSchema, Violation} from './schema';
 import {describe, formatPath} from './violation';
@@ -6,21 +7,22 @@ function isJsonPrimitive(value: unknown): value is JsonPrimitive {
     return value === null || typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number';
 }
 
-function isJsonArray(value: unknown): value is JsonArray {
-    return Array.isArray(value) && value.every(isJsonValue);
+function isPlainObject(value: unknown): value is object {
+    return Object.prototype
+        .toString
+        .call(value) === '[object Object]';
 }
 
-function isJsonValue(value: unknown): value is JsonValue {
-    return isJsonPrimitive(value) || isJsonArray(value) || isJsonObject(value);
+function isJsonArray(value: unknown): value is JsonArray {
+    return Array.isArray(value) && value.every(isJsonValue);
 }
 
 function isJsonObject(value: unknown): value is JsonObject {
     return isPlainObject(value) && Object.values(value).every(isJsonValue);
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-function isPlainObject(value: unknown): value is object {
-    return Object.prototype.toString.call(value) === '[object Object]';
+function isJsonValue(value: unknown): value is JsonValue {
+    return isJsonPrimitive(value) || isJsonArray(value) || isJsonObject(value);
 }
 
 type JsonObjectDefinition = {
@@ -60,11 +62,15 @@ export class JsonObjectType implements TypeSchema {
             const propertyPath = path.concat([entryName]);
 
             if (this.definition.propertyNames !== undefined) {
-                this.definition.propertyNames.validate(entryName, propertyPath);
+                this.definition
+                    .propertyNames
+                    .validate(entryName, propertyPath);
             }
 
             if (this.definition.properties !== undefined) {
-                this.definition.properties.validate(entryValue, path.concat([entryName]));
+                this.definition
+                    .properties
+                    .validate(entryValue, path.concat([entryName]));
             }
         }
     }
@@ -103,7 +109,9 @@ export class JsonArrayType implements TypeSchema {
         }
 
         for (let index = 0; index < value.length; index++) {
-            this.definition.items.validate(value[index], path.concat([index.toString()]));
+            this.definition
+                .items
+                .validate(value[index], path.concat([index.toString()]));
         }
     }
 }

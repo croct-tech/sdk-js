@@ -13,10 +13,6 @@ export function getLength(input: string): number {
     return [...input].length;
 }
 
-export function getPosition(input: string, index: number): Position {
-    return getLocation(input, index, index).start;
-}
-
 export function getLocation(input: string, startIndex: number, endIndex: number): Location {
     if (startIndex < 0) {
         throw Error('The start index cannot be negative.');
@@ -82,4 +78,8 @@ export function getLocation(input: string, startIndex: number, endIndex: number)
         start: start,
         end: end,
     };
+}
+
+export function getPosition(input: string, index: number): Position {
+    return getLocation(input, index, index).start;
 }

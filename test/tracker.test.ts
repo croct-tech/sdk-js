@@ -18,6 +18,7 @@ describe('A tracker', () => {
 
     beforeEach(() => {
         const date = jest.spyOn(Date, 'now');
+
         date.mockReturnValue(now);
 
         sessionStorage.clear();
@@ -37,7 +38,7 @@ describe('A tracker', () => {
         tabEventEmulator.reset();
     });
 
-    test('should determine whether it is enabled or disabled', () => {
+    it('should determine whether it is enabled or disabled', () => {
         const tracker = new Tracker({
             inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
@@ -56,7 +57,7 @@ describe('A tracker', () => {
         expect(tracker.isEnabled()).toBeFalsy();
     });
 
-    test('should not fail if enabled more than once', () => {
+    it('should not fail if enabled more than once', () => {
         const tracker = new Tracker({
             inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
@@ -73,7 +74,7 @@ describe('A tracker', () => {
         expect(tracker.isEnabled()).toBeTruthy();
     });
 
-    test('should not fail if disabled more than once', () => {
+    it('should not fail if disabled more than once', () => {
         const tracker = new Tracker({
             inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
@@ -88,7 +89,7 @@ describe('A tracker', () => {
         expect(tracker.isEnabled()).toBeFalsy();
     });
 
-    test('should allow to add and remove event listeners', async () => {
+    it('should allow to add and remove event listeners', async () => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),
             publish: jest.fn()
@@ -172,7 +173,7 @@ describe('A tracker', () => {
         expect(listener).toHaveBeenCalledTimes(5);
     });
 
-    test('should allow to be enabled even if it is suspended', () => {
+    it('should allow to be enabled even if it is suspended', () => {
         const tracker = new Tracker({
             inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
@@ -191,7 +192,7 @@ describe('A tracker', () => {
         expect(tracker.isSuspended()).toBeTruthy();
     });
 
-    test('should allow to be disabled even if it is suspended', () => {
+    it('should allow to be disabled even if it is suspended', () => {
         const tracker = new Tracker({
             inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
@@ -211,7 +212,7 @@ describe('A tracker', () => {
         expect(tracker.isSuspended()).toBeTruthy();
     });
 
-    test('should determine whether it is suspended or not', () => {
+    it('should determine whether it is suspended or not', () => {
         const tracker = new Tracker({
             inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
@@ -230,7 +231,7 @@ describe('A tracker', () => {
         expect(tracker.isSuspended()).toBeFalsy();
     });
 
-    test('should not fail if suspended more than once', () => {
+    it('should not fail if suspended more than once', () => {
         const tracker = new Tracker({
             inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
@@ -247,7 +248,7 @@ describe('A tracker', () => {
         expect(tracker.isSuspended()).toBeTruthy();
     });
 
-    test('should not fail if unsuspended more than once', () => {
+    it('should not fail if unsuspended more than once', () => {
         const tracker = new Tracker({
             inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: new InMemoryTokenStore(),
@@ -262,7 +263,7 @@ describe('A tracker', () => {
         expect(tracker.isSuspended()).toBeFalsy();
     });
 
-    test('should not automatically track events if it is disabled', async () => {
+    it('should not automatically track events if it is disabled', () => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),
             publish: jest.fn().mockResolvedValue(undefined),
@@ -290,7 +291,7 @@ describe('A tracker', () => {
         expect(channel.publish).not.toHaveBeenCalled();
     });
 
-    test('should track events if it is suspended', async () => {
+    it('should track events if it is suspended', async () => {
         const publish = jest.fn(event => Promise.resolve(event));
 
         const channel: OutputChannel<Beacon> = {
@@ -338,7 +339,7 @@ describe('A tracker', () => {
         expect(publish).toHaveBeenCalledTimes(1);
     });
 
-    test('should report errors publishing the event', async () => {
+    it('should report errors publishing the event', async () => {
         const publish = jest.fn().mockRejectedValue('Error.');
 
         const channel: OutputChannel<Beacon> = {
@@ -365,7 +366,7 @@ describe('A tracker', () => {
         await expect(tracker.track(event)).rejects.toEqual('Error.');
     });
 
-    test('should include the metadata in the beacons', async () => {
+    it('should include the metadata in the beacons', async () => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),
             publish: jest.fn().mockResolvedValue(undefined),
@@ -398,7 +399,7 @@ describe('A tracker', () => {
         );
     });
 
-    test('should include the token in the beacons', async () => {
+    it('should include the token in the beacons', async () => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),
             publish: jest.fn().mockResolvedValue(undefined),
@@ -407,6 +408,7 @@ describe('A tracker', () => {
         const token = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'c4r0l');
 
         const store = new InMemoryTokenStore();
+
         store.setToken(token);
 
         const tracker = new Tracker({
@@ -428,7 +430,7 @@ describe('A tracker', () => {
         );
     });
 
-    test('should track "tabOpened" event when enabled on a tab for the first time', () => {
+    it('should track "tabOpened" event when enabled on a tab for the first time', () => {
         const publish = jest.fn(event => Promise.resolve(event));
 
         const channel: OutputChannel<Beacon> = {
@@ -477,7 +479,7 @@ describe('A tracker', () => {
         expect(publish).not.toHaveBeenCalled();
     });
 
-    test('should track "pageOpened" event when enabled on a page for the first time', () => {
+    it('should track "pageOpened" event when enabled on a page for the first time', () => {
         const publish = jest.fn(event => Promise.resolve(event));
 
         const channel: OutputChannel<Beacon> = {
@@ -526,7 +528,7 @@ describe('A tracker', () => {
         expect(publish).not.toHaveBeenCalled();
     });
 
-    test('should track "pageLoaded" event when the page loads', () => {
+    it('should track "pageLoaded" event when the page loads', () => {
         const publish = jest.fn(event => Promise.resolve(event));
 
         const channel: OutputChannel<Beacon> = {
@@ -566,7 +568,7 @@ describe('A tracker', () => {
         expect(publish).toHaveBeenCalledTimes(1);
     });
 
-    test('should track "tabUrlChanged" event when the tab\'s URL changes', () => {
+    it('should track "tabUrlChanged" event when the tab\'s URL changes', () => {
         const publish = jest.fn(event => Promise.resolve(event));
 
         const channel: OutputChannel<Beacon> = {
@@ -605,7 +607,7 @@ describe('A tracker', () => {
         expect(publish).toHaveBeenCalledTimes(1);
     });
 
-    test('should track "tabUrlChanged" event every time the tab\'s URL changes', () => {
+    it('should track "tabUrlChanged" event every time the tab\'s URL changes', () => {
         const publish = jest.fn(event => Promise.resolve(event));
 
         const channel: OutputChannel<Beacon> = {
@@ -659,7 +661,7 @@ describe('A tracker', () => {
         expect(publish).toHaveBeenCalledTimes(2);
     });
 
-    test('should track "pageVisibilityChanged" event when the page\'s visibility changes', () => {
+    it('should track "pageVisibilityChanged" event when the page\'s visibility changes', () => {
         const publish = jest.fn(event => Promise.resolve(event));
 
         const channel: OutputChannel<Beacon> = {
@@ -715,7 +717,7 @@ describe('A tracker', () => {
         expect(publish).toHaveBeenCalledTimes(2);
     });
 
-    test('should track "nothingChanged" event after an inactive period if it is not suspended', async () => {
+    it('should track "nothingChanged" event after an inactive period if it is not suspended', async () => {
         const publish = jest.fn(event => Promise.resolve(event));
 
         const channel: OutputChannel<Beacon> = {
@@ -795,7 +797,7 @@ describe('A tracker', () => {
         expect(publish).toHaveBeenCalledTimes(3);
     });
 
-    test.each<[PartialTrackingEvent, BeaconPayload | undefined]>([
+    it.each<[PartialTrackingEvent, BeaconPayload | undefined]>([
         [
             {
                 type: 'productViewed',
@@ -1220,7 +1222,7 @@ describe('A tracker', () => {
         expect(channel.publish).toHaveBeenCalledTimes(1);
     });
 
-    test('should provide a callback that is called when the current pending events are flushed', async () => {
+    it('should provide a callback that is called when the current pending events are flushed', async () => {
         const publish = jest.fn(event => new Promise<any>(resolve => { setTimeout(() => resolve(event), 10); }));
 
         const channel: OutputChannel<Beacon> = {

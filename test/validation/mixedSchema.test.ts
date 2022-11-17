@@ -1,7 +1,7 @@
 import {MixedSchema} from '../../src/validation';
 
 describe('A mixed schema', () => {
-    test('should allow anything', () => {
+    it('should allow anything', () => {
         const type = new MixedSchema();
 
         function validate(): void {

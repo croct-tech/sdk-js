@@ -47,7 +47,7 @@ export class PersistentQueue<T> implements Queue<T> {
     public shift(): T {
         const value = this.queue.shift();
 
-        if (!value) {
+        if (value === undefined) {
             throw new Error('The queue is empty.');
         }
 
@@ -57,7 +57,7 @@ export class PersistentQueue<T> implements Queue<T> {
     }
 
     private get queue(): T[] {
-        if (!this.cache) {
+        if (this.cache === undefined) {
             this.cache = this.load();
         }
 
@@ -65,7 +65,7 @@ export class PersistentQueue<T> implements Queue<T> {
     }
 
     private flush(): void {
-        this.storage.setItem(this.key, JSON.stringify(this.cache || []));
+        this.storage.setItem(this.key, JSON.stringify(this.cache ?? []));
     }
 
     private load(): T[] {

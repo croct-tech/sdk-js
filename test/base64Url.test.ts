@@ -18,13 +18,13 @@ describe('A base64 URL encoder/decoder function', () => {
         ['foobar', 'Zm9vYmFy'],
     ];
 
-    test.each(encodeTests)('should encode "%s" as "%s"', (decoded: string, encoded: string) => {
+    it.each(encodeTests)('should encode "%s" as "%s"', (decoded: string, encoded: string) => {
         expect(base64UrlEncode(decoded)).toBe(encoded);
     });
 
     const decodeTests = encodeTests.map(([encoded, decoded]) => [decoded, encoded]);
 
-    test.each(decodeTests)('should decode "%s" as "%s"', (encoded: string, decoded: string) => {
+    it.each(decodeTests)('should decode "%s" as "%s"', (encoded: string, decoded: string) => {
         expect(base64UrlDecode(encoded)).toBe(decoded);
     });
 });

@@ -20,34 +20,18 @@ import {
 } from '../schema';
 
 const eventSchemas = {
-    cartViewed,
-    cartModified,
-    checkoutStarted,
-    orderPlaced,
-    productViewed,
-    userSignedUp,
-    eventOccurred,
-    interestShown,
-    postViewed,
-    goalCompleted,
-    linkOpened,
+    cartViewed: cartViewed,
+    cartModified: cartModified,
+    checkoutStarted: checkoutStarted,
+    orderPlaced: orderPlaced,
+    productViewed: productViewed,
+    userSignedUp: userSignedUp,
+    eventOccurred: eventOccurred,
+    interestShown: interestShown,
+    postViewed: postViewed,
+    goalCompleted: goalCompleted,
+    linkOpened: linkOpened,
 };
-
-function createEvent<T extends ExternalEventType>(type: T, payload: unknown): ExternalEvent<T> {
-    if (typeof type !== 'string') {
-        throw new Error('The event type must of type string.');
-    }
-
-    if (typeof payload !== 'object' || payload == null) {
-        throw new Error('The event payload must of type object.');
-    }
-
-    const event: UnknownEvent<T> = {type: type, ...payload};
-
-    validateEvent(event);
-
-    return event;
-}
 
 type UnknownEvent<T extends ExternalEventType> = Pick<ExternalEvent<T>, 'type'>;
 
@@ -63,6 +47,22 @@ function validateEvent<T extends ExternalEventType>(event: UnknownEvent<T>): ass
     } catch (violation) {
         throw new Error(`Invalid event payload: ${formatCause(violation)}`);
     }
+}
+
+function createEvent<T extends ExternalEventType>(type: T, payload: unknown): ExternalEvent<T> {
+    if (typeof type !== 'string') {
+        throw new Error('The event type must of type string.');
+    }
+
+    if (typeof payload !== 'object' || payload == null) {
+        throw new Error('The event payload must of type object.');
+    }
+
+    const event: UnknownEvent<T> = {type: type, ...payload};
+
+    validateEvent(event);
+
+    return event;
 }
 
 export class TrackerFacade {

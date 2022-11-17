@@ -2,7 +2,11 @@ export function uuid4(sortable = false): string {
     let uuid = '';
 
     if (sortable) {
-        const prefix = Date.now().toString(16).padStart(12, '0').substring(0, 12);
+        const prefix = Date.now()
+            .toString(16)
+            .padStart(12, '0')
+            .substring(0, 12);
+
         uuid = `${prefix.substring(0, 8)}-${prefix.substring(8, 12)}`;
     }
 
@@ -13,11 +17,13 @@ export function uuid4(sortable = false): string {
             case 18:
             case 23:
                 uuid += '-';
+
                 break;
 
             case 14:
                 // bits 12-15 of the time_hi_and_version field to 0010
                 uuid += '4';
+
                 break;
 
             default: {

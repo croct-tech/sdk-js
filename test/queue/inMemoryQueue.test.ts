@@ -7,18 +7,18 @@ describe('An in-memory queue', () => {
         queue = new InMemoryQueue();
     });
 
-    test('should provide all items', () => {
+    it('should provide all items', () => {
         queue.push('foo');
         queue.push('bar');
 
         expect(queue.all()).toEqual(['foo', 'bar']);
     });
 
-    test('should have infinity capacity', () => {
+    it('should have infinity capacity', () => {
         expect(queue.getCapacity()).toEqual(Infinity);
     });
 
-    test('should determine whether the queue is empty', () => {
+    it('should determine whether the queue is empty', () => {
         expect(queue.isEmpty()).toBeTruthy();
 
         queue.push('foo');
@@ -26,7 +26,7 @@ describe('An in-memory queue', () => {
         expect(queue.isEmpty()).toBeFalsy();
     });
 
-    test('should allow to enqueue new items', () => {
+    it('should allow to enqueue new items', () => {
         expect(queue.isEmpty()).toBeTruthy();
 
         queue.push('foo');
@@ -34,14 +34,14 @@ describe('An in-memory queue', () => {
         expect(queue.isEmpty()).toBeFalsy();
     });
 
-    test('should allow retrieving the item at the beginning of the queue without removing it', () => {
+    it('should allow retrieving the item at the beginning of the queue without removing it', () => {
         queue.push('foo');
 
         expect(queue.peek()).toBe('foo');
         expect(queue.length()).toBe(1);
     });
 
-    test('should allow removing the item at the beginning of the queue', () => {
+    it('should allow removing the item at the beginning of the queue', () => {
         queue.push('1');
         queue.push('2');
         queue.push('3');
@@ -51,7 +51,7 @@ describe('An in-memory queue', () => {
         expect(queue.shift()).toBe('3');
     });
 
-    test('should fail to remove an item if it is empty', () => {
+    it('should fail to remove an item if it is empty', () => {
         function shift(): void {
             queue.shift();
         }
@@ -60,7 +60,7 @@ describe('An in-memory queue', () => {
         expect(shift).toThrow('The queue is empty.');
     });
 
-    test('should provide its length', () => {
+    it('should provide its length', () => {
         queue.push('foo');
         queue.push('bar');
 

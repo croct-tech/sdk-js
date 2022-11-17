@@ -1,7 +1,7 @@
 import {tokenSchema} from '../../src/schema';
 
 describe('The token schema', () => {
-    test.each([
+    it.each([
         [{
             headers: {
                 typ: 'JWT',
@@ -63,7 +63,7 @@ describe('The token schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {
                 headers: {

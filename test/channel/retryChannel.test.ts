@@ -6,7 +6,7 @@ describe('A retry channel', () => {
         jest.restoreAllMocks();
     });
 
-    test('should not retry if a message is successfully published', async () => {
+    it('should not retry if a message is successfully published', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn().mockResolvedValue(undefined),
@@ -22,7 +22,7 @@ describe('A retry channel', () => {
         expect(outputChannel.publish).toHaveBeenCalledTimes(1);
     });
 
-    test('should retry if an error occurs while publishing a message', async () => {
+    it('should retry if an error occurs while publishing a message', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn()
@@ -43,7 +43,7 @@ describe('A retry channel', () => {
         expect(outputChannel.publish).toHaveBeenCalledTimes(3);
     });
 
-    test('should fail to publish messages if the channel is closed', async () => {
+    it('should fail to publish messages if the channel is closed', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn().mockResolvedValue(undefined),
@@ -58,7 +58,7 @@ describe('A retry channel', () => {
         await expect(channel.publish('foo')).rejects.toEqual(new Error('The channel is closed.'));
     });
 
-    test('should fail to publish a message if the channel is closed before retrying', async () => {
+    it('should fail to publish a message if the channel is closed before retrying', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn().mockRejectedValue(new Error('Rejected')),
@@ -75,7 +75,7 @@ describe('A retry channel', () => {
         await expect(promise).rejects.toEqual(new Error('Connection deliberately closed.'));
     });
 
-    test('should fail to publish a message if the channel is closed while retrying', async () => {
+    it('should fail to publish a message if the channel is closed while retrying', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn().mockRejectedValue(new Error('Rejected')),
@@ -94,7 +94,7 @@ describe('A retry channel', () => {
         await expect(promise).rejects.toEqual(new Error('Connection deliberately closed.'));
     });
 
-    test('should fail to publish a message if maximum retry attempts is reached', async () => {
+    it('should fail to publish a message if maximum retry attempts is reached', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn()
@@ -112,7 +112,7 @@ describe('A retry channel', () => {
         expect(outputChannel.publish).toHaveBeenCalledTimes(2);
     });
 
-    test('should close the output channel on close', async () => {
+    it('should close the output channel on close', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn(),
             publish: jest.fn(),

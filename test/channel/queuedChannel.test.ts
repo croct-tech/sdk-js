@@ -6,7 +6,7 @@ describe('A queued channel', () => {
         jest.restoreAllMocks();
     });
 
-    test('should resume flushing from the last failed message', async () => {
+    it('should resume flushing from the last failed message', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn()
@@ -31,7 +31,7 @@ describe('A queued channel', () => {
         expect(outputChannel.publish).toHaveBeenCalledTimes(3);
     });
 
-    test('should do nothing when flushing an empty queue', async () => {
+    it('should do nothing when flushing an empty queue', async () => {
         const queue = new InMemoryQueue('foo');
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
@@ -46,8 +46,8 @@ describe('A queued channel', () => {
         expect(outputChannel.publish).not.toHaveBeenCalled();
     });
 
-    test('should publish messages in order', async () => {
-        const pending: {(): void}[] = [];
+    it('should publish messages in order', async () => {
+        const pending: Array<{(): void}> = [];
 
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
@@ -80,7 +80,7 @@ describe('A queued channel', () => {
         await expect(secondPromise).resolves.toBeUndefined();
     });
 
-    test('should fail to flush messages if the channel is closed', async () => {
+    it('should fail to flush messages if the channel is closed', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn().mockResolvedValue(undefined),
@@ -92,7 +92,7 @@ describe('A queued channel', () => {
         await expect(channel.flush()).rejects.toEqual(new Error('Channel is closed.'));
     });
 
-    test('should fail to publish messages if the queue is full', async () => {
+    it('should fail to publish messages if the queue is full', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn().mockResolvedValue(undefined),
@@ -102,7 +102,7 @@ describe('A queued channel', () => {
         await expect(channel.publish('bar')).rejects.toThrow('The queue is full.');
     });
 
-    test('should fail to publish messages if the channel is closed', async () => {
+    it('should fail to publish messages if the channel is closed', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn().mockResolvedValue(undefined),
@@ -114,7 +114,7 @@ describe('A queued channel', () => {
         await expect(channel.publish('foo')).rejects.toEqual(new Error('Channel is closed.'));
     });
 
-    test('should fail to publish messages if queue has pending messages', async () => {
+    it('should fail to publish messages if queue has pending messages', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn().mockResolvedValue(undefined),
@@ -134,7 +134,7 @@ describe('A queued channel', () => {
         expect(outputChannel.publish).toHaveBeenCalledTimes(3);
     });
 
-    test('should publish messages if queue has no pending messages', async () => {
+    it('should publish messages if queue has no pending messages', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn().mockResolvedValue(undefined),
@@ -154,7 +154,7 @@ describe('A queued channel', () => {
         expect(outputChannel.publish).toHaveBeenCalledTimes(2);
     });
 
-    test('should close the output channel and wait for pending messages', async () => {
+    it('should close the output channel and wait for pending messages', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn().mockResolvedValue(undefined),

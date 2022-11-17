@@ -5,10 +5,13 @@ import {Token} from '../src/token';
 import {ContentFetcher, ContentError, ContentErrorType, ErrorResponse, FetchOptions} from '../src/contentFetcher';
 import {CONTENT_ENDPOINT_URL} from '../src/constants';
 
-jest.mock('../src/constants', () => ({
-    ...jest.requireActual('../src/constants'),
-    CONTENT_ENDPOINT_URL: 'https://croct.io',
-}));
+jest.mock(
+    '../src/constants',
+    () => ({
+        ...jest.requireActual('../src/constants'),
+        CONTENT_ENDPOINT_URL: 'https://croct.io',
+    }),
+);
 
 describe('A content fetcher', () => {
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
@@ -33,17 +36,17 @@ describe('A content fetcher', () => {
         jest.clearAllMocks();
     });
 
-    test('should require either an application ID or API key', async () => {
+    it('should require either an application ID or API key', async () => {
         await expect(() => new ContentFetcher({}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
-    test('should require either an application ID or API key, but not both', async () => {
+    it('should require either an application ID or API key, but not both', async () => {
         await expect(() => new ContentFetcher({apiKey: apiKey, appId: appId}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
-    test('should use the specified base endpoint', async () => {
+    it('should use the specified base endpoint', async () => {
         const customEndpoint = 'https://custom.endpoint.com';
 
         const fetcher = new ContentFetcher({
@@ -60,7 +63,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId)).resolves.toEqual(content);
     });
 
-    test('should use the external endpoint for static content', async () => {
+    it('should use the external endpoint for static content', async () => {
         const fetcher = new ContentFetcher({
             apiKey: apiKey,
         });
@@ -81,7 +84,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    test('should requite an API key to fetch static content', async () => {
+    it('should requite an API key to fetch static content', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -90,7 +93,7 @@ describe('A content fetcher', () => {
             .toThrowWithMessage(Error, 'The API key must be provided to fetch static content.');
     });
 
-    test('should use the external endpoint when specifying an API key', async () => {
+    it('should use the external endpoint when specifying an API key', async () => {
         const fetcher = new ContentFetcher({
             apiKey: apiKey,
         });
@@ -107,7 +110,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId)).resolves.toEqual(content);
     });
 
-    test('should fetch content using the provided client ID', async () => {
+    it('should fetch content using the provided client ID', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -130,7 +133,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    test('should fetch content passing the provided client IP', async () => {
+    it('should fetch content passing the provided client IP', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -153,7 +156,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    test('should fetch content passing the provided user agent', async () => {
+    it('should fetch content passing the provided user agent', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -176,7 +179,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    test('should fetch content using the provided user token', async () => {
+    it('should fetch content using the provided user token', async () => {
         const token = Token.issue(appId, 'foo', Date.now());
 
         const fetcher = new ContentFetcher({
@@ -199,7 +202,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    test('should fetch content using the provided preview token', async () => {
+    it('should fetch content using the provided preview token', async () => {
         const token = Token.issue(appId, 'foo', Date.now());
 
         const fetcher = new ContentFetcher({
@@ -222,7 +225,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    test('should fetch using the extra options', async () => {
+    it('should fetch using the extra options', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -258,7 +261,7 @@ describe('A content fetcher', () => {
         expect(fetchMock.lastOptions()).not.toEqual(expect.objectContaining(nonOverridableOptions));
     });
 
-    test('should abort after reaching the timeout', async () => {
+    it('should abort after reaching the timeout', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -293,7 +296,7 @@ describe('A content fetcher', () => {
         expect(fetchOptions?.signal.aborted).toBe(true);
     });
 
-    test('should fetch content using the provided context', async () => {
+    it('should fetch content using the provided context', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -331,7 +334,7 @@ describe('A content fetcher', () => {
         await expect(promise).resolves.toEqual(content);
     });
 
-    test('should fetch content for the specified slot version', async () => {
+    it('should fetch content for the specified slot version', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -352,7 +355,7 @@ describe('A content fetcher', () => {
         await expect(promise).resolves.toEqual(content);
     });
 
-    test('should fetch content for the specified preferred locale', async () => {
+    it('should fetch content for the specified preferred locale', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -373,7 +376,7 @@ describe('A content fetcher', () => {
         await expect(promise).resolves.toEqual(content);
     });
 
-    test('should report errors if the fetch fails', async () => {
+    it('should report errors if the fetch fails', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -398,7 +401,7 @@ describe('A content fetcher', () => {
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
-    test('should catch deserialization errors', async () => {
+    it('should catch deserialization errors', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -423,7 +426,7 @@ describe('A content fetcher', () => {
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
-    test('should report unexpected errors when the cause of the fetch failure is unknown', async () => {
+    it('should report unexpected errors when the cause of the fetch failure is unknown', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -448,14 +451,14 @@ describe('A content fetcher', () => {
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
-    test('should not be serializable', async () => {
+    it('should not be serializable', () => {
         expect(() => new ContentFetcher({appId: appId}).toJSON())
             .toThrowWithMessage(Error, 'Unserializable value.');
     });
 });
 
 describe('A content error', () => {
-    test('should have a response', () => {
+    it('should have a response', () => {
         const response: ErrorResponse = {
             type: ContentErrorType.UNEXPECTED_ERROR,
             title: 'Error title',

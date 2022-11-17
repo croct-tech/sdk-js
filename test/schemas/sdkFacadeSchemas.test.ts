@@ -1,7 +1,7 @@
 import {sdkFacadeConfigurationSchema} from '../../src/schema';
 
 describe('The SDK facade configuration schema', () => {
-    test.each([
+    it.each([
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
         }],
@@ -44,7 +44,7 @@ describe('The SDK facade configuration schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test.each([
+    it.each([
         [
             {},
             "Missing property '/appId'.",

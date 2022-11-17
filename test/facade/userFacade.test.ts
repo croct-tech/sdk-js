@@ -16,33 +16,36 @@ describe('A user facade', () => {
         jest.restoreAllMocks();
     });
 
-    test('should determine whether the user is anonymous or identified', () => {
+    it('should determine whether the user is anonymous or identified', () => {
         const tracker = createTrackerMock();
         const context = createContextMock();
         const userFacade = new UserFacade(context, tracker);
 
         // mock tracker.isUserAnonymous() call
-        context.isAnonymous = jest.fn(() => true);
+        jest.spyOn(context, 'isAnonymous').mockImplementation(() => true);
 
         expect(userFacade.isAnonymous()).toBeTruthy();
         expect(userFacade.isIdentified()).toBeFalsy();
 
         // mock tracker.isUserAnonymous() call
-        context.isAnonymous = jest.fn(() => false);
+        jest.spyOn(context, 'isAnonymous').mockImplementation(() => false);
 
         expect(userFacade.isAnonymous()).toBeFalsy();
         expect(userFacade.isIdentified()).toBeTruthy();
     });
 
-    test('should always start a new patch', async () => {
+    it('should always start a new patch', () => {
         const userFacade = new UserFacade(createContextMock(), createTrackerMock());
 
         expect(userFacade.edit()).not.toBe(userFacade.edit());
     });
 
-    test('should initialize the patch with the tracker', async () => {
+    it('should initialize the patch with the tracker', async () => {
         const tracker = createTrackerMock();
-        tracker.track = jest.fn().mockImplementation(event => Promise.resolve(event));
+
+        jest.spyOn(tracker, 'track')
+            .mockImplementation()
+            .mockImplementation(event => Promise.resolve(event));
 
         const userFacade = new UserFacade(createContextMock(), tracker);
 

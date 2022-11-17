@@ -1,7 +1,7 @@
 import {tokenScopeSchema} from '../../src/schema';
 
 describe('The token schema', () => {
-    test.each([
+    it.each([
         ['global'],
         ['contextual'],
         ['isolated'],
@@ -13,7 +13,7 @@ describe('The token schema', () => {
         expect(validate).not.toThrow();
     });
 
-    test('should not allow values other than the defined', () => {
+    it('should not allow values other than the defined', () => {
         function validate(): void {
             tokenScopeSchema.validate('foo');
         }

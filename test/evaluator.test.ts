@@ -13,11 +13,14 @@ import {
 import {Token} from '../src/token';
 import {EVALUATION_ENDPOINT_URL} from '../src/constants';
 
-jest.mock('../src/constants', () => ({
-    ...jest.requireActual('../src/constants'),
-    MAX_QUERY_LENGTH: 30,
-    EVALUATION_ENDPOINT_URL: 'https://evaluation.example.com',
-}));
+jest.mock(
+    '../src/constants',
+    () => ({
+        ...jest.requireActual('../src/constants'),
+        MAX_QUERY_LENGTH: 30,
+        EVALUATION_ENDPOINT_URL: 'https://evaluation.example.com',
+    }),
+);
 
 describe('An evaluator', () => {
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
@@ -35,17 +38,17 @@ describe('An evaluator', () => {
         jest.clearAllMocks();
     });
 
-    test('should require either an application ID or API key', async () => {
+    it('should require either an application ID or API key', async () => {
         await expect(() => new Evaluator({}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
-    test('should require either an application ID or API key, but not both', async () => {
+    it('should require either an application ID or API key, but not both', async () => {
         await expect(() => new Evaluator({apiKey: apiKey, appId: appId}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
-    test('should use the specified base endpoint', async () => {
+    it('should use the specified base endpoint', async () => {
         const customEndpoint = 'https://custom.example.com';
 
         const evaluator = new Evaluator({
@@ -64,7 +67,7 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query)).resolves.toBe(result);
     });
 
-    test('should use the external endpoint when specifying an API key', async () => {
+    it('should use the external endpoint when specifying an API key', async () => {
         const evaluator = new Evaluator({
             apiKey: apiKey,
         });
@@ -83,7 +86,7 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query)).resolves.toBe(result);
     });
 
-    test('should evaluate queries without token when not provided', async () => {
+    it('should evaluate queries without token when not provided', async () => {
         const evaluator = new Evaluator({
             appId: appId,
         });
@@ -98,7 +101,7 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query)).resolves.toBe(result);
     });
 
-    test('should evaluate queries using the provided token', async () => {
+    it('should evaluate queries using the provided token', async () => {
         const token = Token.issue(appId, 'foo', Date.now());
 
         const evaluator = new Evaluator({
@@ -123,7 +126,7 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
     });
 
-    test('should evaluate queries using the provided client ID', async () => {
+    it('should evaluate queries using the provided client ID', async () => {
         const evaluator = new Evaluator({
             appId: appId,
         });
@@ -148,7 +151,7 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
     });
 
-    test('should evaluate queries using the provided client IP', async () => {
+    it('should evaluate queries using the provided client IP', async () => {
         const evaluator = new Evaluator({
             appId: appId,
         });
@@ -173,7 +176,7 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
     });
 
-    test('should evaluate queries using the provided user agent', async () => {
+    it('should evaluate queries using the provided user agent', async () => {
         const evaluator = new Evaluator({
             appId: appId,
         });
@@ -198,7 +201,7 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
     });
 
-    test('should fetch using the extra options', async () => {
+    it('should fetch using the extra options', async () => {
         const evaluator = new Evaluator({
             appId: appId,
         });
@@ -234,7 +237,7 @@ describe('An evaluator', () => {
         expect(fetchMock.lastOptions()).not.toEqual(expect.objectContaining(nonOverridableOptions));
     });
 
-    test('should abort the evaluation if the timeout is reached', async () => {
+    it('should abort the evaluation if the timeout is reached', async () => {
         const evaluator = new Evaluator({
             appId: appId,
         });
@@ -268,7 +271,7 @@ describe('An evaluator', () => {
         expect(fetchOptions?.signal.aborted).toBe(true);
     });
 
-    test('should evaluate queries using the provided context', async () => {
+    it('should evaluate queries using the provided context', async () => {
         const evaluator = new Evaluator({
             appId: appId,
         });
@@ -308,7 +311,7 @@ describe('An evaluator', () => {
         await expect(promise).resolves.toBe(result);
     });
 
-    test('should report errors if the evaluation fails', async () => {
+    it('should report errors if the evaluation fails', async () => {
         const evaluator = new Evaluator({
             appId: appId,
         });
@@ -333,7 +336,7 @@ describe('An evaluator', () => {
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
-    test.each([
+    it.each([
         [EvaluationErrorType.EVALUATION_FAILED],
         [EvaluationErrorType.INVALID_QUERY],
         [EvaluationErrorType.TOO_COMPLEX_QUERY],
@@ -380,7 +383,7 @@ describe('An evaluator', () => {
         },
     );
 
-    test('should report an query error if the query exceeds the maximum allowed length', async () => {
+    it('should report an query error if the query exceeds the maximum allowed length', async () => {
         const evaluator = new Evaluator({
             appId: appId,
         });
@@ -415,7 +418,7 @@ describe('An evaluator', () => {
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
-    test('should catch deserialization errors', async () => {
+    it('should catch deserialization errors', async () => {
         const evaluator = new Evaluator({
             appId: appId,
         });
@@ -440,7 +443,7 @@ describe('An evaluator', () => {
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
-    test('should report unexpected errors when the cause of the evaluation failure is unknown', async () => {
+    it('should report unexpected errors when the cause of the evaluation failure is unknown', async () => {
         const evaluator = new Evaluator({
             appId: appId,
         });
@@ -465,14 +468,14 @@ describe('An evaluator', () => {
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
-    test('should not be serializable', async () => {
+    it('should not be serializable', () => {
         expect(() => new Evaluator({appId: appId}).toJSON())
             .toThrowWithMessage(Error, 'Unserializable value.');
     });
 });
 
 describe('An evaluation error', () => {
-    test('should have a response', () => {
+    it('should have a response', () => {
         const response: ErrorResponse = {
             type: EvaluationErrorType.UNALLOWED_RESULT,
             title: 'Error title',
@@ -486,7 +489,7 @@ describe('An evaluation error', () => {
 });
 
 describe('An query error', () => {
-    test('should have a response', () => {
+    it('should have a response', () => {
         const response: QueryErrorResponse = {
             type: EvaluationErrorType.TIMEOUT,
             title: 'Error title',

@@ -20,7 +20,7 @@ describe('A guaranteed channel', () => {
         jest.restoreAllMocks();
     });
 
-    test('should acknowledge messages confirmed before the specified timeout is reached', async () => {
+    it('should acknowledge messages confirmed before the specified timeout is reached', async () => {
         expect(sandboxChannel.messages).toHaveLength(0);
 
         const promise = channel.publish('ping');
@@ -38,7 +38,7 @@ describe('A guaranteed channel', () => {
         await expect(promise).resolves.toBeUndefined();
     });
 
-    test('should fail if no confirmation is received before the specified timeout is reached', async () => {
+    it('should fail if no confirmation is received before the specified timeout is reached', async () => {
         expect(sandboxChannel.messages).toHaveLength(0);
 
         const promise = channel.publish('ping');
@@ -57,7 +57,7 @@ describe('A guaranteed channel', () => {
         await expect(promise).rejects.toThrow('Maximum confirmation time reached.');
     });
 
-    test('should stop waiting for confirmation if the channel is closed in the meanwhile', async () => {
+    it('should stop waiting for confirmation if the channel is closed in the meanwhile', async () => {
         const promise = channel.publish('foo');
 
         await new Promise(resolve => { window.setTimeout(resolve, 1); });
@@ -67,13 +67,13 @@ describe('A guaranteed channel', () => {
         await expect(promise).rejects.toEqual(new Error('Connection deliberately closed.'));
     });
 
-    test('should close the output channel on close', async () => {
+    it('should close the output channel on close', async () => {
         await channel.close();
 
         expect(sandboxChannel.isClosed()).toBeTruthy();
     });
 
-    test('should fail to publish messages if the channel is closed', async () => {
+    it('should fail to publish messages if the channel is closed', async () => {
         await channel.close();
 
         await expect(channel.publish('foo')).rejects.toEqual(new Error('Channel is closed.'));
@@ -81,11 +81,12 @@ describe('A guaranteed channel', () => {
 });
 
 describe('A time stamper', () => {
-    test('should stamp messages with the current time', () => {
+    it('should stamp messages with the current time', () => {
         const timeStamper = new TimeStamper();
 
         const date = jest.spyOn(Date, 'now');
         const now = Date.now();
+
         date.mockReturnValue(now);
 
         expect(timeStamper.generate()).toBe(now.toString());
