@@ -157,6 +157,8 @@ describe('A minimal context factory', () => {
 });
 
 describe('A tab context factory', () => {
+    const {timeZone} = Intl.DateTimeFormat().resolvedOptions();
+
     it('should load a context containing tab information and attributes', () => {
         const url = new URL('http://localhost');
 
