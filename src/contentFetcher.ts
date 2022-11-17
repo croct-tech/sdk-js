@@ -149,14 +149,9 @@ export class ContentFetcher {
         const dynamic = ContentFetcher.isDynamicContent(options);
         const {apiKey, appId} = this.configuration;
 
-        const headers: Record<string, string> = {
-            ...(appId && {'X-App-Id': appId}),
-            ...(apiKey && {'X-Api-Key': apiKey}),
-        };
-
         // eslint-disable-next-line prefer-template -- Better readability
         const endpoint = this.configuration.endpointUrl.replace(/\/+$/, '')
-            + (apiKey !== undefined ? '/external' : '/client')
+            + (apiKey === undefined ? '/client' : '/external')
             + '/web'
             + (dynamic ? '/content' : '/static-content');
 
@@ -164,21 +159,31 @@ export class ContentFetcher {
             slotId: slotId,
         };
 
+        const headers = new Headers();
+
+        if (appId !== undefined) {
+            headers.set('X-App-Id', appId);
+        }
+
+        if (apiKey !== undefined) {
+            headers.set('X-Api-Key', apiKey);
+        }
+
         if (dynamic) {
             if (options.clientId !== undefined) {
-                headers['X-Client-Id'] = options.clientId;
-            }
-
-            if (options.userToken !== undefined) {
-                headers['X-Token'] = `${options.userToken}`;
+                headers.set('X-Client-Id', options.clientId);
             }
 
             if (options.clientIp !== undefined) {
-                headers['X-Client-Ip'] = options.clientIp;
+                headers.set('X-Client-Ip', options.clientIp);
+            }
+
+            if (options.userToken !== undefined) {
+                headers.set('X-Token', options.userToken.toString());
             }
 
             if (options.userAgent !== undefined) {
-                headers['User-Agent'] = options.userAgent;
+                headers.set('User-Agent', options.userAgent);
             }
 
             if (options.version !== undefined) {
@@ -199,7 +204,7 @@ export class ContentFetcher {
         }
 
         return fetch(endpoint, {
-            credentials: 'include',
+            credentials: 'omit',
             ...options.extra,
             method: 'POST',
             headers: headers,

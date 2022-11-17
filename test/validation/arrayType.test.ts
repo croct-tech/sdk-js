@@ -52,6 +52,6 @@ describe('An array type', () => {
             type.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

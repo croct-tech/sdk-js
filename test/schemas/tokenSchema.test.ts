@@ -392,6 +392,6 @@ describe('The token schema', () => {
             tokenSchema.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

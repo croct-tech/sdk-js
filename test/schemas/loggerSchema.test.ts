@@ -87,6 +87,6 @@ describe('The logger schema', () => {
             loggerSchema.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

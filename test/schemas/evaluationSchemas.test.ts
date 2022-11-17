@@ -39,6 +39,6 @@ describe('The evaluation option schema', () => {
             evaluationOptionsSchema.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

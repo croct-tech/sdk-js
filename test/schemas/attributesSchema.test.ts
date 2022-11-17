@@ -26,6 +26,6 @@ describe('The attribute name schema', () => {
             attributeNameSchema.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

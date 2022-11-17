@@ -59,7 +59,7 @@ describe('The event metadata schema', () => {
             eventMetadataSchema.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -157,6 +157,6 @@ describe('The SDK configuration schema', () => {
             sdkConfigurationSchema.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

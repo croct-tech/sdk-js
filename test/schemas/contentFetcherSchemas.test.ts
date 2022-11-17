@@ -83,6 +83,6 @@ describe('The content fetcher option schema', () => {
             fetchOptionsSchema.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

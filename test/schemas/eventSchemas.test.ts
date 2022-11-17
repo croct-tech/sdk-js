@@ -57,7 +57,7 @@ describe('The "cartModified" payload schema', () => {
             cartModified.validate({});
         }
 
-        expect(validate).toThrow(new Error('Missing property \'/cart\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Missing property \'/cart\'.');
     });
 });
 
@@ -75,7 +75,7 @@ describe('The "cartViewed" payload schema', () => {
             cartViewed.validate({});
         }
 
-        expect(validate).toThrow(new Error('Missing property \'/cart\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Missing property \'/cart\'.');
     });
 });
 
@@ -109,7 +109,7 @@ describe('The "checkoutStarted" payload schema', () => {
             checkoutStarted.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -127,7 +127,7 @@ describe('The "orderPlaced" payload schema', () => {
             orderPlaced.validate({});
         }
 
-        expect(validate).toThrow(new Error('Missing property \'/order\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Missing property \'/order\'.');
     });
 });
 
@@ -145,7 +145,7 @@ describe('The "productViewed" payload schema', () => {
             productViewed.validate({});
         }
 
-        expect(validate).toThrow(new Error('Missing property \'/product\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Missing property \'/product\'.');
     });
 });
 
@@ -188,7 +188,7 @@ describe('The "userSignedUp" payload schema', () => {
             userSignedUp.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -331,7 +331,7 @@ describe('The "eventOccurred" payload schema', () => {
             eventOccurred.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -439,7 +439,7 @@ describe('The "goalCompleted" payload schema', () => {
             goalCompleted.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -485,7 +485,7 @@ describe('The "interestShown" payload schema', () => {
             interestShown.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -520,7 +520,7 @@ describe('The "postViewed" payload schema', () => {
             postViewed.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -554,6 +554,6 @@ describe('The "linkOpened" payload schema', () => {
             linkOpened.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

@@ -35,12 +35,12 @@ describe('A content fetcher', () => {
 
     test('should require either an application ID or API key', async () => {
         await expect(() => new ContentFetcher({}))
-            .toThrow(new Error('Either the application ID or the API key must be provided.'));
+            .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
     test('should require either an application ID or API key, but not both', async () => {
         await expect(() => new ContentFetcher({apiKey: apiKey, appId: appId}))
-            .toThrow(new Error('Either the application ID or the API key must be provided.'));
+            .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
     test('should use the specified base endpoint', async () => {
@@ -87,7 +87,7 @@ describe('A content fetcher', () => {
         });
 
         await expect(() => fetcher.fetch(contentId, {static: true}))
-            .toThrow(new Error('The API key must be provided to fetch static content.'));
+            .toThrowWithMessage(Error, 'The API key must be provided to fetch static content.');
     });
 
     test('should use the external endpoint when specifying an API key', async () => {
@@ -450,7 +450,7 @@ describe('A content fetcher', () => {
 
     test('should not be serializable', async () => {
         expect(() => new ContentFetcher({appId: appId}).toJSON())
-            .toThrow(new Error('Unserializable value.'));
+            .toThrowWithMessage(Error, 'Unserializable value.');
     });
 });
 

@@ -87,7 +87,7 @@ describe('A string type', () => {
             new StringType({format: format}).validate(value);
         }
 
-        expect(validate).toThrow(new Error(`Invalid ${format} format at path '/'.`));
+        expect(validate).toThrowWithMessage(Error, `Invalid ${format} format at path '/'.`);
     });
 
     test.each([
@@ -130,6 +130,6 @@ describe('A string type', () => {
             type.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

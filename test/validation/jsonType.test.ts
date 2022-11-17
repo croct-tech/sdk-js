@@ -49,7 +49,7 @@ describe('A JSON array type', () => {
             schema.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -121,7 +121,7 @@ describe('A JSON object type', () => {
             schema.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -168,7 +168,7 @@ describe('A JSON primitive type', () => {
             new JsonPrimitiveType().validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -215,6 +215,6 @@ describe('A JSON value type', () => {
             new JsonType().validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

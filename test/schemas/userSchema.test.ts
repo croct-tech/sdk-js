@@ -282,6 +282,6 @@ describe('The user profile schema', () => {
             userProfileSchema.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

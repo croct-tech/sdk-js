@@ -39,7 +39,7 @@ describe('An evaluator facade', () => {
 
         await expect(evaluationFacade.evaluate(''))
             .rejects
-            .toThrow(new Error('The query must be a non-empty string.'));
+            .toThrowWithMessage(Error, 'The query must be a non-empty string.');
     });
 
     test('should fail if the options are invalid', async () => {
@@ -52,7 +52,7 @@ describe('An evaluator facade', () => {
 
         await expect(evaluationFacade.evaluate('1 + 1', {timeout: 1.2}))
             .rejects
-            .toThrow(new Error('Invalid options: expected value of type integer at path \'/timeout\', actual number.'));
+            .toThrowWithMessage(Error, 'Invalid options: expected value of type integer at path \'/timeout\', actual number.');
     });
 
     test('should fail if the options are not a key-value map', async () => {
@@ -65,7 +65,7 @@ describe('An evaluator facade', () => {
 
         await expect(evaluationFacade.evaluate('1 + 1', null as unknown as EvaluationOptions))
             .rejects
-            .toThrow(new Error('Invalid options: expected value of type object at path \'/\', actual null.'));
+            .toThrowWithMessage(Error, 'Invalid options: expected value of type object at path \'/\', actual null.');
     });
 
     test('should delegate the evaluation to the evaluator', async () => {

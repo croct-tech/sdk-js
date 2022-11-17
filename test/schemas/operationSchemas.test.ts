@@ -78,7 +78,7 @@ describe('An add operation schema', () => {
             addOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
     test.each([
@@ -89,7 +89,7 @@ describe('An add operation schema', () => {
             addOperation.validate({path: path, value: 'bar'});
         }
 
-        expect(validate).toThrow(new Error('Invalid pointer format at path \'/path\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
@@ -141,7 +141,7 @@ describe('A set operation schema', () => {
             setOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
     test.each([
@@ -152,7 +152,7 @@ describe('A set operation schema', () => {
             setOperation.validate({path: path, value: 'bar'});
         }
 
-        expect(validate).toThrow(new Error('Invalid pointer format at path \'/path\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
@@ -204,7 +204,7 @@ describe('A combine operation schema', () => {
             combineOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
     test.each([
@@ -215,7 +215,7 @@ describe('A combine operation schema', () => {
             combineOperation.validate({path: path, value: 'bar'});
         }
 
-        expect(validate).toThrow(new Error('Invalid pointer format at path \'/path\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
@@ -264,7 +264,7 @@ describe('A merge operation schema', () => {
             mergeOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
     test.each([
@@ -275,7 +275,7 @@ describe('A merge operation schema', () => {
             mergeOperation.validate({path: path, value: 'bar'});
         }
 
-        expect(validate).toThrow(new Error('Invalid pointer format at path \'/path\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
@@ -304,7 +304,7 @@ describe('An increment operation schema', () => {
             incrementOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
     test.each([
@@ -315,7 +315,7 @@ describe('An increment operation schema', () => {
             incrementOperation.validate({path: path, value: 1});
         }
 
-        expect(validate).toThrow(new Error('Invalid pointer format at path \'/path\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
@@ -344,7 +344,7 @@ describe('A decrement operation schema', () => {
             decrementOperation.validate({path: 'foo', value: value});
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
     test.each([
@@ -355,7 +355,7 @@ describe('A decrement operation schema', () => {
             decrementOperation.validate({path: path, value: 1});
         }
 
-        expect(validate).toThrow(new Error('Invalid pointer format at path \'/path\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
@@ -410,7 +410,7 @@ describe('A remove operation schema', () => {
         function validate(): void {
             removeOperation.validate({path: 'foo', value: value});
         }
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 
     test.each([
@@ -421,7 +421,7 @@ describe('A remove operation schema', () => {
             removeOperation.validate({path: path, value: 'bar'});
         }
 
-        expect(validate).toThrow(new Error('Invalid pointer format at path \'/path\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
@@ -434,7 +434,7 @@ describe('A clear operation schema', () => {
             clearOperation.validate({path: path});
         }
 
-        expect(validate).toThrow(new Error('Invalid pointer format at path \'/path\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });
 
@@ -447,6 +447,6 @@ describe('An unset operation schema', () => {
             unsetOperation.validate({path: path});
         }
 
-        expect(validate).toThrow(new Error('Invalid pointer format at path \'/path\'.'));
+        expect(validate).toThrowWithMessage(Error, 'Invalid pointer format at path \'/path\'.');
     });
 });

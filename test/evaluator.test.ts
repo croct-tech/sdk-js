@@ -37,12 +37,12 @@ describe('An evaluator', () => {
 
     test('should require either an application ID or API key', async () => {
         await expect(() => new Evaluator({}))
-            .toThrow(new Error('Either the application ID or the API key must be provided.'));
+            .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
     test('should require either an application ID or API key, but not both', async () => {
         await expect(() => new Evaluator({apiKey: apiKey, appId: appId}))
-            .toThrow(new Error('Either the application ID or the API key must be provided.'));
+            .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
     test('should use the specified base endpoint', async () => {
@@ -467,7 +467,7 @@ describe('An evaluator', () => {
 
     test('should not be serializable', async () => {
         expect(() => new Evaluator({appId: appId}).toJSON())
-            .toThrow(new Error('Unserializable value.'));
+            .toThrowWithMessage(Error, 'Unserializable value.');
     });
 });
 

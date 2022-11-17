@@ -43,7 +43,7 @@ describe('A content fetcher facade', () => {
 
         await expect(fetcherFacade.fetch(''))
             .rejects
-            .toThrow(new Error('The slot ID must be a non-empty string.'));
+            .toThrowWithMessage(Error, 'The slot ID must be a non-empty string.');
     });
 
     test('should fail if the options are invalid', async () => {
@@ -71,7 +71,7 @@ describe('A content fetcher facade', () => {
 
         await expect(() => fetcherFacade.fetch('home-banner', null as unknown as FetchFacadeOptions))
             .rejects
-            .toThrow(new Error('Invalid options: expected value of type object at path \'/\', actual null.'));
+            .toThrowWithMessage(Error, 'Invalid options: expected value of type object at path \'/\', actual null.');
     });
 
     test('should delegate the fetching to the content fetcher', async () => {

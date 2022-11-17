@@ -143,6 +143,6 @@ describe('The product details schema', () => {
             postDetails.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

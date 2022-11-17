@@ -40,6 +40,6 @@ describe('An union type', () => {
             new UnionType(new StringType(), new NumberType()).validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

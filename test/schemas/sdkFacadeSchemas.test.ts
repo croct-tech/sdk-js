@@ -110,6 +110,6 @@ describe('The SDK facade configuration schema', () => {
             sdkFacadeConfigurationSchema.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });

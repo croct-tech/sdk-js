@@ -204,24 +204,40 @@ export class Evaluator {
 
     private async fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
         const {appId, apiKey} = this.configuration;
-        const {clientId, clientIp, userAgent, userToken} = options;
-
-        const headers = {
-            ...(apiKey === undefined && {'X-App-Id': appId}),
-            ...(apiKey !== undefined && {'X-Api-Key': apiKey}),
-            ...(clientId !== undefined && {'X-Client-Id': clientId}),
-            ...(clientIp !== undefined && {'X-Client-Ip': clientIp}),
-            ...(userToken !== undefined && {'X-Token': `${userToken}`}),
-            ...(userAgent !== undefined && {'User-Agent': userAgent}),
-        };
 
         // eslint-disable-next-line prefer-template -- Better readability
         const endpoint = this.configuration.endpointUrl.replace(/\/+$/, '')
-            + (apiKey !== undefined ? '/external' : '/client')
+            + (apiKey === undefined ? '/client' : '/external')
             + '/web/evaluate';
 
+        const {clientId, clientIp, userAgent, userToken} = options;
+
+        const headers = new Headers();
+
+        if (apiKey !== undefined) {
+            headers.set('X-Api-Key', apiKey);
+        } else if (appId !== undefined) {
+            headers.set('X-App-Id', appId);
+        }
+
+        if (clientId !== undefined) {
+            headers.set('X-Client-Id', clientId);
+        }
+
+        if (clientIp !== undefined) {
+            headers.set('X-Client-Ip', clientIp);
+        }
+
+        if (userToken !== undefined) {
+            headers.set('X-Token', userToken.toString());
+        }
+
+        if (userAgent !== undefined) {
+            headers.set('User-Agent', userAgent);
+        }
+
         return fetch(endpoint, {
-            credentials: 'include',
+            credentials: 'omit',
             ...options.extra,
             method: 'POST',
             headers: headers,

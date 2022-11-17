@@ -136,7 +136,7 @@ describe('The product details schema', () => {
             productDetails.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -254,7 +254,7 @@ describe('The cart item schema', () => {
             cartItem.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -463,7 +463,7 @@ describe('The cart schema', () => {
             cart.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -581,7 +581,7 @@ describe('The order item schema', () => {
             orderItem.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
 
@@ -907,6 +907,6 @@ describe('The order schema', () => {
             order.validate(value);
         }
 
-        expect(validate).toThrow(new Error(message));
+        expect(validate).toThrowWithMessage(Error, message);
     });
 });
