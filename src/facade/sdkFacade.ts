@@ -269,7 +269,7 @@ export class SdkFacade {
             .tracker
             .track(event)
             .catch(() => {
-            // suppress error as it is already logged by the tracker
+                // suppress error as it is already logged by the tracker
             });
     }
 

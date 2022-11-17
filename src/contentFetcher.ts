@@ -149,12 +149,10 @@ export class ContentFetcher {
 
     private load(slotId: string, signal: AbortSignal, options: FetchOptions): Promise<Response> {
         const dynamic = ContentFetcher.isDynamicContent(options);
-        const {apiKey, appId} = this.configuration;
+        const {apiKey, appId, endpointUrl} = this.configuration;
 
         // eslint-disable-next-line prefer-template -- Better readability
-        const endpoint = this.configuration
-            .endpointUrl
-            .replace(/\/+$/, '')
+        const endpoint = endpointUrl.replace(/\/+$/, '')
             + (apiKey === undefined ? '/client' : '/external')
             + '/web'
             + (dynamic ? '/content' : '/static-content');

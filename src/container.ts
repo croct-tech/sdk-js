@@ -345,20 +345,20 @@ export class Container {
     public async dispose(): Promise<void> {
         const logger = this.getLogger();
 
-        if (this.beaconChannel != null) {
+        if (this.beaconChannel !== undefined) {
             logger.debug('Closing beacon channel...');
 
             await this.beaconChannel.close();
         }
 
-        if (this.removeTokenSyncListener != null) {
+        if (this.removeTokenSyncListener !== undefined) {
             logger.debug('Removing token sync listener...');
 
             this.removeTokenSyncListener();
         }
 
-        if (this.tracker != null) {
-            if (this.beaconQueue != null) {
+        if (this.tracker !== undefined) {
+            if (this.beaconQueue !== undefined) {
                 logger.debug('Removing queue listeners...');
 
                 this.beaconQueue.removeCallback('halfEmpty', this.tracker.unsuspend);

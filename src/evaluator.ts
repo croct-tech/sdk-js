@@ -207,12 +207,10 @@ export class Evaluator {
     }
 
     private fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
-        const {appId, apiKey} = this.configuration;
+        const {appId, apiKey, endpointUrl} = this.configuration;
 
         // eslint-disable-next-line prefer-template -- Better readability
-        const endpoint = this.configuration
-            .endpointUrl
-            .replace(/\/+$/, '')
+        const endpoint = endpointUrl.replace(/\/+$/, '')
             + (apiKey === undefined ? '/client' : '/external')
             + '/web/evaluate';
 
