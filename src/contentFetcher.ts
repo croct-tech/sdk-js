@@ -37,7 +37,7 @@ export class ContentError<T extends ErrorResponse = ErrorResponse> extends Error
 }
 
 type BasicOptions = {
-    version?: `${number}`|number,
+    version?: `${number}` | number,
     preferredLocale?: string,
     timeout?: number,
     extra?: ExtraFetchOptions,
