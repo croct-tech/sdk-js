@@ -93,26 +93,26 @@ export type Configuration = {
     endpointUrl?: string,
 };
 
-type NormalizedConfiguration = {
-    appId?: string,
-    apiKey?: string,
-    endpointUrl: string,
-};
-
 export class Evaluator {
     public static readonly MAX_QUERY_LENGTH = MAX_QUERY_LENGTH;
 
-    private readonly configuration: NormalizedConfiguration;
+    private readonly configuration: Configuration;
+
+    private readonly endpoint: string;
 
     public constructor(configuration: Configuration) {
         if ((configuration.appId === undefined) === (configuration.apiKey === undefined)) {
             throw new Error('Either the application ID or the API key must be provided.');
         }
 
-        this.configuration = {
-            ...configuration,
-            endpointUrl: configuration.endpointUrl ?? EVALUATION_ENDPOINT_URL,
-        };
+        const {endpointUrl, apiKey} = configuration;
+
+        // eslint-disable-next-line prefer-template -- Better readability
+        this.endpoint = (endpointUrl ?? EVALUATION_ENDPOINT_URL).replace(/\/+$/, '')
+            + (apiKey === undefined ? '/client' : '/external')
+            + '/web/evaluate';
+
+        this.configuration = configuration;
     }
 
     public evaluate(query: string, options: EvaluationOptions = {}): Promise<JsonValue> {
@@ -207,13 +207,7 @@ export class Evaluator {
     }
 
     private fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
-        const {appId, apiKey, endpointUrl} = this.configuration;
-
-        // eslint-disable-next-line prefer-template -- Better readability
-        const endpoint = endpointUrl.replace(/\/+$/, '')
-            + (apiKey === undefined ? '/client' : '/external')
-            + '/web/evaluate';
-
+        const {appId, apiKey} = this.configuration;
         const {clientId, clientIp, userAgent, userToken} = options;
 
         const headers = new Headers();
@@ -240,7 +234,7 @@ export class Evaluator {
             headers.set('User-Agent', userAgent);
         }
 
-        return fetch(endpoint, {
+        return fetch(this.endpoint, {
             credentials: 'omit',
             ...options.extra,
             method: 'POST',

@@ -92,7 +92,7 @@ export class SocketChannel<I extends Input, O extends Output> implements DuplexC
                     throw new Error('Connection lost.');
                 })
                 .catch(() => {
-                // Reconnect
+                    // Reconnect
                     delete this.connection;
 
                     return this.connect();

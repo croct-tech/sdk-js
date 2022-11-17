@@ -75,24 +75,29 @@ export type Configuration = {
     endpointUrl?: string,
 };
 
-type NormalizedConfiguration = {
-    appId?: string,
-    apiKey?: string,
-    endpointUrl: string,
-};
-
 export class ContentFetcher {
-    private readonly configuration: NormalizedConfiguration;
+    private readonly configuration: Configuration;
+
+    private readonly dynamicEndpoint: string;
+
+    private readonly staticEndpoint: string;
 
     public constructor(configuration: Configuration) {
         if ((configuration.appId === undefined) === (configuration.apiKey === undefined)) {
             throw new Error('Either the application ID or the API key must be provided.');
         }
 
-        this.configuration = {
-            ...configuration,
-            endpointUrl: configuration.endpointUrl ?? CONTENT_ENDPOINT_URL,
-        };
+        this.configuration = configuration;
+
+        const {apiKey, endpointUrl} = this.configuration;
+
+        // eslint-disable-next-line prefer-template -- Better readability
+        const baseEndpoint = (endpointUrl ?? CONTENT_ENDPOINT_URL).replace(/\/+$/, '')
+            + (apiKey === undefined ? '/client' : '/external')
+            + '/web';
+
+        this.dynamicEndpoint = `${baseEndpoint}/content`;
+        this.staticEndpoint = `${baseEndpoint}/static-content`;
     }
 
     public fetch<P extends JsonObject>(slotId: string, options: FetchOptions = {}): Promise<FetchResponse<P>> {
@@ -148,18 +153,11 @@ export class ContentFetcher {
     }
 
     private load(slotId: string, signal: AbortSignal, options: FetchOptions): Promise<Response> {
-        const dynamic = ContentFetcher.isDynamicContent(options);
-        const {apiKey, appId, endpointUrl} = this.configuration;
-
-        // eslint-disable-next-line prefer-template -- Better readability
-        const endpoint = endpointUrl.replace(/\/+$/, '')
-            + (apiKey === undefined ? '/client' : '/external')
-            + '/web'
-            + (dynamic ? '/content' : '/static-content');
-
         const payload: FetchPayload = {
             slotId: slotId,
         };
+
+        const {apiKey, appId} = this.configuration;
 
         const headers = new Headers();
 
@@ -170,6 +168,8 @@ export class ContentFetcher {
         if (apiKey !== undefined) {
             headers.set('X-Api-Key', apiKey);
         }
+
+        const dynamic = ContentFetcher.isDynamicContent(options);
 
         if (dynamic) {
             if (options.clientId !== undefined) {
@@ -205,7 +205,7 @@ export class ContentFetcher {
             }
         }
 
-        return fetch(endpoint, {
+        return fetch(dynamic ? this.dynamicEndpoint : this.staticEndpoint, {
             credentials: 'omit',
             ...options.extra,
             method: 'POST',
