@@ -47,7 +47,8 @@
   },
   "files": [
     "**/*.js",
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.map"
   ],
   "browserslist": [
     "last 1 version"
