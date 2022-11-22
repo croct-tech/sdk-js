@@ -1,12 +1,24 @@
 import * as fetchMock from 'fetch-mock';
 import {MockOptions} from 'fetch-mock';
 import {RemoteAssigner} from '../../src/cid';
+import {CLIENT_LIBRARY} from '../../src/constants';
+
+jest.mock(
+    '../../src/constants',
+    () => ({
+        ...jest.requireActual('../../src/constants'),
+        'X-Client-Library': 'Plug v1.0.0',
+    }),
+);
 
 describe('A remote CID assigner', () => {
     const ENDPOINT = 'https://localhost:8080/endpoint';
 
     const requestMatcher: MockOptions = {
         method: 'GET',
+        headers: {
+            'X-Client-Library': CLIENT_LIBRARY,
+        },
         matcher: ENDPOINT,
         response: '123',
     };
