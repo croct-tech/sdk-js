@@ -3,13 +3,14 @@ import {MockOptions} from 'fetch-mock';
 import {EvaluationContext} from '../src/evaluator';
 import {Token} from '../src/token';
 import {ContentFetcher, ContentError, ContentErrorType, ErrorResponse, FetchOptions} from '../src/contentFetcher';
-import {CONTENT_ENDPOINT_URL} from '../src/constants';
+import {CLIENT_LIBRARY, CONTENT_ENDPOINT_URL} from '../src/constants';
 
 jest.mock(
     '../src/constants',
     () => ({
         ...jest.requireActual('../src/constants'),
         CONTENT_ENDPOINT_URL: 'https://croct.io',
+        'X-Client-Library': 'Plug v1.0.0',
     }),
 );
 
@@ -26,6 +27,9 @@ describe('A content fetcher', () => {
 
     const requestMatcher: MockOptions = {
         method: 'POST',
+        headers: {
+            'X-Client-Library': CLIENT_LIBRARY,
+        },
         body: {
             slotId: contentId,
         },
@@ -76,6 +80,7 @@ describe('A content fetcher', () => {
             ...requestMatcher,
             matcher: `${CONTENT_ENDPOINT_URL}/external/web/static-content`,
             headers: {
+                ...requestMatcher.headers,
                 'X-Api-Key': apiKey,
             },
             response: content,
@@ -102,6 +107,7 @@ describe('A content fetcher', () => {
             ...requestMatcher,
             matcher: `${CONTENT_ENDPOINT_URL}/external/web/content`,
             headers: {
+                ...requestMatcher.headers,
                 'X-Api-Key': apiKey,
             },
             response: content,

@@ -1,7 +1,7 @@
 import {JsonObject} from '@croct/json';
 import {EvaluationContext} from './evaluator';
 import {Token} from './token';
-import {CONTENT_ENDPOINT_URL} from './constants';
+import {CLIENT_LIBRARY, CONTENT_ENDPOINT_URL} from './constants';
 import {formatMessage} from './error';
 
 export type ErrorResponse = {
@@ -160,6 +160,8 @@ export class ContentFetcher {
         const {apiKey, appId} = this.configuration;
 
         const headers = new Headers();
+
+        headers.set('X-Client-Library', CLIENT_LIBRARY);
 
         if (appId !== undefined) {
             headers.set('X-App-Id', appId);

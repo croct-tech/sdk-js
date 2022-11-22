@@ -1,6 +1,7 @@
 import {Logger, NullLogger} from '../logging';
 import {formatCause} from '../error';
 import {CidAssigner} from './assigner';
+import {CLIENT_LIBRARY} from '../constants';
 
 export class RemoteAssigner implements CidAssigner {
     private readonly logger: Logger;
@@ -28,6 +29,9 @@ export class RemoteAssigner implements CidAssigner {
         const options: RequestInit = {
             method: 'GET',
             credentials: 'include',
+            headers: {
+                'X-Client-Library': CLIENT_LIBRARY,
+            },
         };
 
         const response = await window.fetch(this.endpoint, options);

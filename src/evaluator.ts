@@ -1,6 +1,6 @@
 import {JsonObject, JsonValue} from '@croct/json';
 import {Token} from './token';
-import {EVALUATION_ENDPOINT_URL, MAX_QUERY_LENGTH} from './constants';
+import {CLIENT_LIBRARY, EVALUATION_ENDPOINT_URL, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
 
@@ -211,6 +211,8 @@ export class Evaluator {
         const {clientId, clientIp, userAgent, userToken} = options;
 
         const headers = new Headers();
+
+        headers.set('X-Client-Library', CLIENT_LIBRARY);
 
         if (apiKey !== undefined) {
             headers.set('X-Api-Key', apiKey);

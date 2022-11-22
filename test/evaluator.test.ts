@@ -11,7 +11,7 @@ import {
     EvaluationOptions,
 } from '../src/evaluator';
 import {Token} from '../src/token';
-import {EVALUATION_ENDPOINT_URL} from '../src/constants';
+import {EVALUATION_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
 
 jest.mock(
     '../src/constants',
@@ -19,6 +19,7 @@ jest.mock(
         ...jest.requireActual('../src/constants'),
         MAX_QUERY_LENGTH: 30,
         EVALUATION_ENDPOINT_URL: 'https://evaluation.example.com',
+        ClIENT_LIBRARY: 'Plug v1.0.0',
     }),
 );
 
@@ -28,6 +29,9 @@ describe('An evaluator', () => {
     const query = 'user\'s name';
     const requestMatcher: MockOptions = {
         method: 'POST',
+        headers: {
+            'X-Client-Library': CLIENT_LIBRARY,
+        },
         body: {
             query: query,
         },
@@ -78,6 +82,7 @@ describe('An evaluator', () => {
             ...requestMatcher,
             matcher: `${EVALUATION_ENDPOINT_URL}/external/web/evaluate`,
             headers: {
+                ...requestMatcher.headers,
                 'X-Api-Key': apiKey,
             },
             response: JSON.stringify(result),
