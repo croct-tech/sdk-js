@@ -1097,10 +1097,9 @@ describe('A tracker', () => {
             {
                 type: 'eventOccurred',
                 name: 'event-name',
-                personalizationId: 'foo',
-                audience: 'bar',
-                testId: 'baz',
-                groupId: 'barbaz',
+                label: 'foo',
+                action: 'bar',
+                description: 'baz',
                 details: {
                     foo: 'bar',
                 },
