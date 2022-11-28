@@ -327,7 +327,7 @@ export interface EventOccurred extends BaseEvent {
     name: string;
     label?: string;
     action?: string;
-    description?: string;
+    category?: string;
     details?: {[key: string]: string|number|boolean|null};
 }
 

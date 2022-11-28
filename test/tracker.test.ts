@@ -1099,7 +1099,7 @@ describe('A tracker', () => {
                 name: 'event-name',
                 label: 'foo',
                 action: 'bar',
-                description: 'baz',
+                category: 'baz',
                 details: {
                     foo: 'bar',
                 },

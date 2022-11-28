@@ -122,7 +122,7 @@ export const eventOccurred = new ObjectType({
             minLength: 1,
             maxLength: 50,
         }),
-        description: new StringType({
+        category: new StringType({
             minLength: 1,
             maxLength: 50,
         }),
