@@ -4,4 +4,4 @@ export const EVALUATION_ENDPOINT_URL = '<@evaluationEndpointUrl@>';
 export const CONTENT_ENDPOINT_URL = '<@contentEndpointUrl@>';
 export const MAX_QUERY_LENGTH = parseInt('<@maxQueryLength@>', 10);
 export const VERSION = '<@version@>';
-export const CLIENT_LIBRARY = `Plug v${VERSION}`;
+export const CLIENT_LIBRARY = `Croct SDK JS v${VERSION}`;
