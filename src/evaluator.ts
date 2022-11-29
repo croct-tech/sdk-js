@@ -210,30 +210,32 @@ export class Evaluator {
         const {appId, apiKey} = this.configuration;
         const {clientId, clientIp, userAgent, userToken} = options;
 
-        const headers = new Headers();
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
 
-        headers.set('X-Client-Library', CLIENT_LIBRARY);
+        headers['X-Client-Library'] = CLIENT_LIBRARY;
 
         if (apiKey !== undefined) {
-            headers.set('X-Api-Key', apiKey);
+            headers['X-Api-Key'] = apiKey;
         } else if (appId !== undefined) {
-            headers.set('X-App-Id', appId);
+            headers['X-App-Id'] = appId;
         }
 
         if (clientId !== undefined) {
-            headers.set('X-Client-Id', clientId);
+            headers['X-Client-Id'] = clientId;
         }
 
         if (clientIp !== undefined) {
-            headers.set('X-Client-Ip', clientIp);
+            headers['X-Client-Ip'] = clientIp;
         }
 
         if (userToken !== undefined) {
-            headers.set('X-Token', userToken.toString());
+            headers['X-Token'] = userToken.toString();
         }
 
         if (userAgent !== undefined) {
-            headers.set('User-Agent', userAgent);
+            headers['User-Agent'] = userAgent;
         }
 
         return fetch(this.endpoint, {
