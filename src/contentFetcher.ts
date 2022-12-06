@@ -159,35 +159,37 @@ export class ContentFetcher {
 
         const {apiKey, appId} = this.configuration;
 
-        const headers = new Headers();
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
 
-        headers.set('X-Client-Library', CLIENT_LIBRARY);
+        headers['X-Client-Library'] = CLIENT_LIBRARY;
 
         if (appId !== undefined) {
-            headers.set('X-App-Id', appId);
+            headers['X-App-Id'] = appId;
         }
 
         if (apiKey !== undefined) {
-            headers.set('X-Api-Key', apiKey);
+            headers['X-Api-Key'] = apiKey;
         }
 
         const dynamic = ContentFetcher.isDynamicContent(options);
 
         if (dynamic) {
             if (options.clientId !== undefined) {
-                headers.set('X-Client-Id', options.clientId);
+                headers['X-Client-Id'] = options.clientId;
             }
 
             if (options.clientIp !== undefined) {
-                headers.set('X-Client-Ip', options.clientIp);
+                headers['X-Client-Ip'] = options.clientIp;
             }
 
             if (options.userToken !== undefined) {
-                headers.set('X-Token', options.userToken.toString());
+                headers['X-Token'] = options.userToken.toString();
             }
 
             if (options.userAgent !== undefined) {
-                headers.set('User-Agent', options.userAgent);
+                headers['User-Agent'] = options.userAgent;
             }
 
             if (options.version !== undefined) {

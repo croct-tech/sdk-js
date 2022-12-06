@@ -30,6 +30,7 @@ describe('An evaluator', () => {
     const requestMatcher: MockOptions = {
         method: 'POST',
         headers: {
+            'Content-Type': 'application/json',
             'X-Client-Library': CLIENT_LIBRARY,
         },
         body: {
