@@ -6,6 +6,8 @@ describe('A token', () => {
     const anonymousSerializedToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIiwiYXBwSWQiOiI3ZTlkNTlhOS1lNG'
         + 'IzLTQ1ZDQtYjFjNy00ODI4N2YxZTVlOGEifQ.eyJpc3MiOiJjcm9jdC5pbyIsImF1ZCI6ImNyb2N0LmlvIiwiaWF0Ij'
         + 'oxNDQwOTgyOTIzfQ.';
+    const binarySignature = 'VIBocta06jN0I6YXPiqtfAm_QJn64aLaM_'
+        + 'slfBo6MhRApV0znNagbMM5102L5OwtFLDMC8BFHFeKnHxrFKSK0Q';
 
     it('may contain headers', () => {
         const token = Token.issue(appId, 'c4r0l', 1440982923);
@@ -29,9 +31,6 @@ describe('A token', () => {
     });
 
     it('may contain a signature', () => {
-        const binarySignature = 'uLvpiRxDrYpU1BO4Y6rLyFv3uj3PuPD3KFg1RA_Wu5S4'
-            + 'svht8KsdS1WR8Sr-L55e-7_y9Do8LCTo3ZWp92JZDQ';
-
         const token = Token.parse(`${anonymousSerializedToken}${binarySignature}`);
 
         // The result is a binary string
@@ -116,6 +115,49 @@ describe('A token', () => {
             aud: ['croct.io'],
             iat: 1440982923,
         });
+    });
+
+    it('should parse and serialize a token with UTF-8 characters and binary signature', () => {
+        const data = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsImtpZCI6IkV4cGV'
+            + 'yacOqbmNpYSBwYXJhIFPDo28gUGF1bG8ifQ.eyJleHAiOjE2NzEyMDQ4MD'
+            + 'csImlhdCI6MTY3MTIwMTIwNywibmJmIjoxNjcxMjAxMjA3LCJpc3MiOiJj'
+            + 'cm9jdC5jb20iLCJhdWQiOiJjcm9jdC5jb206YWRtaW4iLCJzY29wZSI6Wy'
+            + 'JQUkVWSUVXIl0sInN1YiI6ImE0MTliMGRjLWJjZGItNDJmMi1iMzczLTQ5'
+            + 'NjM4NzA3MmYxYyIsIm1ldGFkYXRhIjp7InByZXZpZXdNb2RlIjoicHVibG'
+            + 'lzaGVkQ29udGVudCIsImV4cGVyaWVuY2VJZCI6ImUzN2M5MGY4LTJiZDgt'
+            + 'NDdlNi04NWRlLTAyYTUyNThiNDlkMiIsImV4cGVyaWVuY2VOYW1lIjoiRX'
+            + 'hwZXJpw6puY2lhIHBhcmEgU8OjbyBQYXVsbyIsImF1ZGllbmNlSWQiOiI5'
+            + 'ZmZjMmE1Ny0zZGYzLTQ2YzgtYmIyYS05NjcwNmVhYzJlYjUiLCJhdWRpZW'
+            + `5jZU5hbWUiOiJ0ZXN0In19.${binarySignature}`;
+
+        const token = Token.parse(data);
+
+        expect(token.getHeaders()).toEqual({
+            typ: 'JWT',
+            alg: 'ES256',
+            kid: 'Experiência para São Paulo',
+        });
+
+        expect(token.getPayload()).toEqual({
+            aud: 'croct.com:admin',
+            sub: 'a419b0dc-bcdb-42f2-b373-496387072f1c',
+            exp: 1671204807,
+            iat: 1671201207,
+            nbf: 1671201207,
+            scope: ['PREVIEW'],
+            iss: 'croct.com',
+            metadata: {
+                experienceId: 'e37c90f8-2bd8-47e6-85de-02a5258b49d2',
+                experienceName: 'Experiência para São Paulo',
+                audienceId: '9ffc2a57-3df3-46c8-bb2a-96706eac2eb5',
+                audienceName: 'test',
+                previewMode: 'publishedContent',
+            },
+        });
+
+        expect(token.getSignature()).toEqual(base64UrlDecode(binarySignature, false));
+
+        expect(token.toString()).toEqual(data);
     });
 
     it('should fail to parse an empty token', () => {
