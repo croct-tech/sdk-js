@@ -135,9 +135,9 @@ export class Token {
     }
 
     public toString(): string {
-        const headers = base64UrlEncode(JSON.stringify(this.headers));
-        const payload = base64UrlEncode(JSON.stringify(this.payload));
-        const signature = base64UrlEncode(this.signature);
+        const headers = base64UrlEncode(JSON.stringify(this.headers), true);
+        const payload = base64UrlEncode(JSON.stringify(this.payload), true);
+        const signature = base64UrlEncode(this.signature, false);
 
         return `${headers}.${payload}.${signature}`;
     }
