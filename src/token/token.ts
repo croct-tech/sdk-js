@@ -79,11 +79,11 @@ export class Token {
         let signature;
 
         try {
-            headers = JSON.parse(base64UrlDecode(parts[0]));
-            payload = JSON.parse(base64UrlDecode(parts[1]));
+            headers = JSON.parse(base64UrlDecode(parts[0], true));
+            payload = JSON.parse(base64UrlDecode(parts[1], true));
 
             if (parts.length === 3) {
-                signature = base64UrlDecode(parts[2]);
+                signature = base64UrlDecode(parts[2], false);
             }
         } catch {
             throw new Error('The token is corrupted.');
