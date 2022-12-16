@@ -1,5 +1,5 @@
 import {Token, FixedTokenProvider} from '../../src/token';
-import {base64UrlEncode} from '../../src/base64Url';
+import {base64UrlEncode, base64UrlDecode} from '../../src/base64Url';
 
 describe('A token', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
@@ -29,9 +29,13 @@ describe('A token', () => {
     });
 
     it('may contain a signature', () => {
-        const token = Token.parse(`${anonymousSerializedToken}${base64UrlEncode('some-signature')}`);
+        const binarySignature = 'uLvpiRxDrYpU1BO4Y6rLyFv3uj3PuPD3KFg1RA_Wu5S4'
+            + 'svht8KsdS1WR8Sr-L55e-7_y9Do8LCTo3ZWp92JZDQ';
 
-        expect(token.getSignature()).toBe('some-signature');
+        const token = Token.parse(`${anonymousSerializedToken}${binarySignature}`);
+
+        // The result is a binary string
+        expect(token.getSignature()).toBe(base64UrlDecode(binarySignature, false));
     });
 
     it('should have an issue time', () => {
