@@ -3,12 +3,6 @@ import {base64UrlDecode, base64UrlEncode} from '../src/base64Url';
 describe('A base64 URL encoder/decoder function', () => {
     const encodeTests = [
         ['000000', 'MDAwMDAw'],
-        ['\0\0\0\0', 'AAAAAA'],
-        ['\xff', '_w'],
-        ['\xff\xff', '__8'],
-        ['\xff\xff\xff', '____'],
-        ['\xff\xff\xff\xff', '_____w'],
-        ['\xfb', '-w'],
         ['', ''],
         ['f', 'Zg'],
         ['fo', 'Zm8'],
@@ -16,6 +10,7 @@ describe('A base64 URL encoder/decoder function', () => {
         ['foob', 'Zm9vYg'],
         ['fooba', 'Zm9vYmE'],
         ['foobar', 'Zm9vYmFy'],
+        ['Jacaré', 'SmFjYXLDqQ'],
     ];
 
     it.each(encodeTests)('should encode "%s" as "%s"', (decoded: string, encoded: string) => {
