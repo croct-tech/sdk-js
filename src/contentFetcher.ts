@@ -1,7 +1,7 @@
 import {JsonObject} from '@croct/json';
 import {EvaluationContext} from './evaluator';
 import {Token} from './token';
-import {CLIENT_LIBRARY, CONTENT_ENDPOINT_URL} from './constants';
+import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from './constants';
 import {formatMessage} from './error';
 
 export type ErrorResponse = {
@@ -72,7 +72,7 @@ export type FetchResponse<P extends JsonObject = JsonObject> = {
 export type Configuration = {
     appId?: string,
     apiKey?: string,
-    endpointUrl?: string,
+    baseEndpointUrl?: string,
 };
 
 export class ContentFetcher {
@@ -89,10 +89,10 @@ export class ContentFetcher {
 
         this.configuration = configuration;
 
-        const {apiKey, endpointUrl} = this.configuration;
+        const {apiKey, baseEndpointUrl} = this.configuration;
 
         // eslint-disable-next-line prefer-template -- Better readability
-        const baseEndpoint = (endpointUrl ?? CONTENT_ENDPOINT_URL).replace(/\/+$/, '')
+        const baseEndpoint = (baseEndpointUrl ?? BASE_ENDPOINT_URL).replace(/\/+$/, '')
             + (apiKey === undefined ? '/client' : '/external')
             + '/web';
 

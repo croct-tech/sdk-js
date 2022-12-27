@@ -6,10 +6,7 @@ on:
       - published
 
 env:
-  CID_ASSIGNER_ENDPOINT: https://api.croct.io/client/web/bootstrap
-  TRACKER_ENDPOINT: wss://api.croct.io/client/web/connect
-  EVALUATION_ENDPOINT: https://api.croct.io
-  CONTENT_ENDPOINT: https://api.croct.io
+  BASE_ENDPOINT: https://api.croct.io
   MAX_QUERY_LENGTH: 500
 
 jobs:
@@ -46,10 +43,7 @@ jobs:
           find . -type f -path '*/*\.js.map' -exec sed -i -e "s~../src~src~" {} +          
           sed -i -e "s~\"version\": \"0.0.0-dev\"~\"version\": \"${GITHUB_REF##*/}\"~" package.json
           sed -i -e "s~<@version@>~${GITHUB_REF##*/}~" constants.*
-          sed -i -e "s~<@cidAssignerEndpointUrl@>~${CID_ASSIGNER_ENDPOINT}~" constants.*
-          sed -i -e "s~<@trackerEndpointUrl@>~${TRACKER_ENDPOINT}~" constants.*
-          sed -i -e "s~<@evaluationEndpointUrl@>~${EVALUATION_ENDPOINT}~" constants.*
-          sed -i -e "s~<@contentEndpointUrl@>~${CONTENT_ENDPOINT}~" constants.*
+          sed -i -e "s~<@baseEndpointUrl@>~${BASE_ENDPOINT}~" constants.*
           sed -i -e "s~parseInt('<@maxQueryLength@>', 10)~${MAX_QUERY_LENGTH}~" constants.*
           cp -r ../src src
 

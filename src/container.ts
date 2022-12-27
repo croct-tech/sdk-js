@@ -32,10 +32,10 @@ export type Configuration = {
     clientId?: string,
     debug: boolean,
     test: boolean,
-    trackerEndpointUrl: string,
-    evaluationEndpointUrl: string,
-    contentEndpointUrl: string,
     cidAssignerEndpointUrl: string,
+    trackerEndpointUrl: string,
+    evaluationBaseEndpointUrl: string,
+    contentBaseEndpointUrl: string,
     beaconQueueSize: number,
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
@@ -86,7 +86,7 @@ export class Container {
     private createEvaluator(): Evaluator {
         return new Evaluator({
             appId: this.configuration.appId,
-            endpointUrl: this.configuration.evaluationEndpointUrl,
+            baseEndpointUrl: this.configuration.evaluationBaseEndpointUrl,
         });
     }
 
@@ -101,7 +101,7 @@ export class Container {
     private createContentFetcher(): ContentFetcher {
         return new ContentFetcher({
             appId: this.configuration.appId,
-            endpointUrl: this.configuration.contentEndpointUrl,
+            baseEndpointUrl: this.configuration.contentBaseEndpointUrl,
         });
     }
 

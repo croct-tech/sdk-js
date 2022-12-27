@@ -1,7 +1,4 @@
-export const CID_ASSIGNER_ENDPOINT_URL = '<@cidAssignerEndpointUrl@>';
-export const TRACKER_ENDPOINT_URL = '<@trackerEndpointUrl@>';
-export const EVALUATION_ENDPOINT_URL = '<@evaluationEndpointUrl@>';
-export const CONTENT_ENDPOINT_URL = '<@contentEndpointUrl@>';
+export const BASE_ENDPOINT_URL = '<@baseEndpointUrl@>';
 export const MAX_QUERY_LENGTH = parseInt('<@maxQueryLength@>', 10);
 export const VERSION = '<@version@>';
 export const CLIENT_LIBRARY = `Croct SDK JS v${VERSION}`;

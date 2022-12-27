@@ -27,9 +27,7 @@ export type Configuration = {
     eventMetadata?: {[key: string]: string},
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
-    trackerEndpointUrl?: string,
-    evaluationEndpointUrl?: string,
-    contentEndpointUrl?: string,
+    baseEndpointUrl?: string,
     cidAssignerEndpointUrl?: string,
 };
 

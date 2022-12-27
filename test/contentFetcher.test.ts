@@ -3,13 +3,13 @@ import {MockOptions} from 'fetch-mock';
 import {EvaluationContext} from '../src/evaluator';
 import {Token} from '../src/token';
 import {ContentFetcher, ContentError, ContentErrorType, ErrorResponse, FetchOptions} from '../src/contentFetcher';
-import {CLIENT_LIBRARY, CONTENT_ENDPOINT_URL} from '../src/constants';
+import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
 
 jest.mock(
     '../src/constants',
     () => ({
         ...jest.requireActual('../src/constants'),
-        CONTENT_ENDPOINT_URL: 'https://croct.io',
+        BASE_ENDPOINT_URL: 'https://croct.io',
         'X-Client-Library': 'Plug v1.0.0',
     }),
 );
@@ -56,7 +56,7 @@ describe('A content fetcher', () => {
 
         const fetcher = new ContentFetcher({
             appId: appId,
-            endpointUrl: customEndpoint,
+            baseEndpointUrl: customEndpoint,
         });
 
         fetchMock.mock({
@@ -79,7 +79,7 @@ describe('A content fetcher', () => {
 
         fetchMock.mock({
             ...requestMatcher,
-            matcher: `${CONTENT_ENDPOINT_URL}/external/web/static-content`,
+            matcher: `${BASE_ENDPOINT_URL}/external/web/static-content`,
             headers: {
                 ...requestMatcher.headers,
                 'X-Api-Key': apiKey,
@@ -106,7 +106,7 @@ describe('A content fetcher', () => {
 
         fetchMock.mock({
             ...requestMatcher,
-            matcher: `${CONTENT_ENDPOINT_URL}/external/web/content`,
+            matcher: `${BASE_ENDPOINT_URL}/external/web/content`,
             headers: {
                 ...requestMatcher.headers,
                 'X-Api-Key': apiKey,

@@ -7,11 +7,13 @@ import {TabEventEmulator} from './utils/tabEventEmulator';
 
 import {BeaconPayload, NothingChanged} from '../src/trackingEvents';
 import {FetchResponse} from '../src/contentFetcher';
+import {BASE_ENDPOINT_URL} from '../src/constants';
 
 jest.mock(
     '../src/constants',
     () => ({
         VERSION: '0.0.1-test',
+        BASE_ENDPOINT_URL: 'https://api.croct.io',
     }),
 );
 
@@ -27,11 +29,11 @@ describe('A SDK', () => {
         logger: new NullLogger(),
         urlSanitizer: jest.fn().mockImplementation((url: string) => new URL(url)),
         eventMetadata: {},
-        cidAssignerEndpointUrl: 'https://localtest/boostrap',
-        contentEndpointUrl: 'https://localtest/content',
-        evaluationEndpointUrl: 'https://localtest/evaluate',
-        trackerEndpointUrl: 'wss://localtest/connect',
+        baseEndpointUrl: 'https://localtest',
+        cidAssignerEndpointUrl: 'https://localtest/cid',
     };
+
+    const websocketEndpoint = `${configuration.baseEndpointUrl.replace(/^http/i, 'ws')}/client/web/connect`;
 
     // Mock Socket does not support query strings:
     // https://github.com/thoov/mock-socket/pull/231
@@ -250,57 +252,47 @@ describe('A SDK', () => {
         expect(sdkTabD.context.getToken()).toEqual(erickToken);
     });
 
-    it('should configure the tracker', async () => {
+    it('should configure the CID assigner with the specified endpoint', async () => {
         fetchMock.mock({
             method: 'GET',
             matcher: configuration.cidAssignerEndpointUrl,
             response: '123',
         });
 
-        const server = creatWebSocketMock(`${configuration.trackerEndpointUrl}/${configuration.appId}`);
-
-        server.on('connection', socket => {
-            socket.on('message', message => {
-                const {receiptId} = JSON.parse(message as unknown as string);
-
-                server.send({
-                    receiptId: receiptId,
-                    violations: [],
-                });
-            });
-        });
-
-        const metaName = 'foo';
-        const metaValue = 'bar';
-
         const sdk = Sdk.init({
-            ...configuration,
-            eventMetadata: {
-                [metaName]: metaValue,
-            },
+            appId: configuration.appId,
+            cidAssignerEndpointUrl: configuration.cidAssignerEndpointUrl,
+            tokenScope: configuration.tokenScope,
+            debug: false,
+            test: false,
         });
 
-        const event: NothingChanged = {
-            type: 'nothingChanged',
-            sinceTime: Date.now(),
-        };
-
-        const promise = sdk.tracker.track(event);
-
-        await expect(promise).resolves.toEqual(event);
-
-        await expect(server).toReceiveMessage(expect.objectContaining({
-            receiptId: expect.stringMatching(/^\d+$/),
-            originalTime: expect.any(Number),
-            departureTime: expect.any(Number),
-            context: expect.objectContaining({
-                metadata: {
-                    sdkVersion: VERSION,
-                    [`custom_${metaName}`]: metaValue,
-                },
-            }),
-        }));
+        await expect(sdk.cidAssigner.assignCid()).resolves.toEqual('123');
     });
+
+    it.each([
+        [undefined, `${BASE_ENDPOINT_URL}/client/web/cid`],
+        [configuration.baseEndpointUrl, `${configuration.baseEndpointUrl}/client/web/cid`],
+    ])(
+        'should configure the CID assigner with the base endpoint',
+        async (baseEndpoint: string|undefined, expectedEndpoint: string) => {
+            fetchMock.mock({
+                method: 'GET',
+                matcher: expectedEndpoint,
+                response: '123',
+            });
+
+            const sdk = Sdk.init({
+                appId: configuration.appId,
+                tokenScope: configuration.tokenScope,
+                ...(baseEndpoint !== undefined ? {baseEndpointUrl: baseEndpoint} : {}),
+                debug: false,
+                test: false,
+            });
+
+            await expect(sdk.cidAssigner.assignCid()).resolves.toEqual('123');
+        },
+    );
 
     it('should ensure that events are delivered one at a time and in order', async () => {
         fetchMock.mock({
@@ -309,7 +301,7 @@ describe('A SDK', () => {
             response: '123',
         });
 
-        const server = creatWebSocketMock(`${configuration.trackerEndpointUrl}/${configuration.appId}`);
+        const server = creatWebSocketMock(`${websocketEndpoint}/${configuration.appId}`);
         const receiptIds: string[] = [];
 
         server.on('connection', socket => {
@@ -370,56 +362,143 @@ describe('A SDK', () => {
         await expect(secondPromise).resolves.toBe(secondEvent);
     });
 
-    it('should configure the evaluator', async () => {
-        const query = '1 + 2';
-        const result = 3;
+    it.each([
+        [undefined, `${BASE_ENDPOINT_URL.replace(/^http/i, 'ws')}/client/web/connect`],
+        [configuration.baseEndpointUrl, websocketEndpoint],
+    ])(
+        'should configure the tracker with the specified base endpoint',
+        async (baseEndpoint: string|undefined, expectedEndpoint: string) => {
+            fetchMock.mock({
+                method: 'GET',
+                matcher: configuration.cidAssignerEndpointUrl,
+                response: '123',
+            });
 
-        fetchMock.mock({
-            method: 'GET',
-            matcher: configuration.cidAssignerEndpointUrl,
-            response: '123',
-        });
+            const server = creatWebSocketMock(
+                `${expectedEndpoint}/${configuration.appId}`,
+            );
 
-        fetchMock.mock({
-            method: 'POST',
-            matcher: `begin:${configuration.evaluationEndpointUrl}`,
-            body: {
-                query: query,
-            },
-            response: JSON.stringify(result),
-        });
+            server.on('connection', socket => {
+                socket.on('message', message => {
+                    const {receiptId} = JSON.parse(message as unknown as string);
 
-        const sdk = Sdk.init(configuration);
-        const promise = sdk.evaluator.evaluate(query);
+                    server.send({
+                        receiptId: receiptId,
+                        violations: [],
+                    });
+                });
+            });
 
-        await expect(promise).resolves.toBe(result);
-    });
+            const metaName = 'foo';
+            const metaValue = 'bar';
 
-    it('should configure the content fetcher', async () => {
-        const slotId = 'home-banner';
-        const result: FetchResponse = {
-            content: {
-                title: 'Hello world',
-            },
-        };
+            const {baseEndpointUrl: _, ...baseConfiguration} = configuration;
 
-        fetchMock.mock({
-            method: 'GET',
-            matcher: configuration.cidAssignerEndpointUrl,
-            response: '123',
-        });
+            const sdk = Sdk.init({
+                ...baseConfiguration,
+                ...(baseEndpoint !== undefined ? {baseEndpointUrl: baseEndpoint} : {}),
+                eventMetadata: {
+                    [metaName]: metaValue,
+                },
+            });
 
-        fetchMock.mock({
-            method: 'POST',
-            matcher: `begin:${configuration.contentEndpointUrl}`,
-            response: result,
-        });
+            const event: NothingChanged = {
+                type: 'nothingChanged',
+                sinceTime: Date.now(),
+            };
 
-        const sdk = Sdk.init(configuration);
-        const promise = sdk.contentFetcher.fetch(slotId);
+            const promise = sdk.tracker.track(event);
 
-        await expect(promise).resolves.toEqual(result);
-    });
+            await expect(promise).resolves.toEqual(event);
+
+            await expect(server).toReceiveMessage(expect.objectContaining({
+                receiptId: expect.stringMatching(/^\d+$/),
+                originalTime: expect.any(Number),
+                departureTime: expect.any(Number),
+                context: expect.objectContaining({
+                    metadata: {
+                        sdkVersion: VERSION,
+                        [`custom_${metaName}`]: metaValue,
+                    },
+                }),
+            }));
+        },
+    );
+
+    it.each([
+        [undefined, BASE_ENDPOINT_URL],
+        [configuration.baseEndpointUrl, configuration.baseEndpointUrl],
+    ])(
+        'should configure the evaluator',
+        async (baseEndpoint: string|undefined, expectedEndpoint: string) => {
+            const query = '1 + 2';
+            const result = 3;
+
+            fetchMock.mock({
+                method: 'GET',
+                matcher: configuration.cidAssignerEndpointUrl,
+                response: '123',
+            });
+
+            fetchMock.mock({
+                method: 'POST',
+                matcher: `begin:${expectedEndpoint}`,
+                body: {
+                    query: query,
+                },
+                response: JSON.stringify(result),
+            });
+
+            const {baseEndpointUrl: _, ...baseConfiguration} = configuration;
+
+            const sdk = Sdk.init({
+                ...baseConfiguration,
+                ...(baseEndpoint !== undefined ? {baseEndpointUrl: baseEndpoint} : {}),
+            });
+
+            const promise = sdk.evaluator.evaluate(query);
+
+            await expect(promise).resolves.toBe(result);
+        },
+    );
+
+    it.each([
+        [undefined, BASE_ENDPOINT_URL],
+        [configuration.baseEndpointUrl, configuration.baseEndpointUrl],
+    ])(
+        'should configure the content fetcher',
+        async (baseEndpoint: string|undefined, expectedEndpoint: string) => {
+            const slotId = 'home-banner';
+            const result: FetchResponse = {
+                content: {
+                    title: 'Hello world',
+                },
+            };
+
+            fetchMock.mock({
+                method: 'GET',
+                matcher: configuration.cidAssignerEndpointUrl,
+                response: '123',
+            });
+
+            fetchMock.mock({
+                method: 'POST',
+                matcher: `begin:${expectedEndpoint}`,
+                response: result,
+            });
+
+            const {baseEndpointUrl: _, ...baseConfiguration} = configuration;
+
+            const sdk = Sdk.init({
+                ...baseConfiguration,
+                ...(baseEndpoint !== undefined ? {baseEndpointUrl: baseEndpoint} : {}),
+            });
+
+            const promise = sdk.contentFetcher.fetch(slotId);
+
+            await expect(promise).resolves.toEqual(result);
+        },
+    );
 
     it('should provide a CID assigner', async () => {
         const sdk = Sdk.init(configuration);
@@ -494,7 +573,7 @@ describe('A SDK', () => {
             response: '123',
         });
 
-        const server = creatWebSocketMock(`${configuration.trackerEndpointUrl}/${configuration.appId}`);
+        const server = creatWebSocketMock(`${websocketEndpoint}/${configuration.appId}`);
 
         const log = jest.fn();
 

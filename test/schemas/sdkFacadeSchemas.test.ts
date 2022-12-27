@@ -19,9 +19,7 @@ describe('The SDK facade configuration schema', () => {
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            trackerEndpointUrl: 'https://api.croct.io/tracker',
-            evaluationEndpointUrl: 'https://api.croct.io/evaluation',
-            contentEndpointUrl: 'https://api.croct.io/content',
+            baseEndpointUrl: 'https://api.croct.io/',
             cidAssignerEndpointUrl: 'https://api.croct.io/cid',
             tokenScope: 'isolated',
             userId: 'c4r0l',
@@ -58,16 +56,8 @@ describe('The SDK facade configuration schema', () => {
             "Invalid url format at path '/cidAssignerEndpointUrl'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', evaluationEndpointUrl: 'x'},
-            "Invalid url format at path '/evaluationEndpointUrl'.",
-        ],
-        [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', contentEndpointUrl: 'x'},
-            "Invalid url format at path '/contentEndpointUrl'.",
-        ],
-        [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', trackerEndpointUrl: 'x'},
-            "Invalid url format at path '/trackerEndpointUrl'.",
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', baseEndpointUrl: 'x'},
+            "Invalid url format at path '/baseEndpointUrl'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', tokenScope: 'x'},
