@@ -1,6 +1,6 @@
 import {JsonObject, JsonValue} from '@croct/json';
 import {Token} from './token';
-import {CLIENT_LIBRARY, EVALUATION_ENDPOINT_URL, MAX_QUERY_LENGTH} from './constants';
+import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
 
@@ -90,7 +90,7 @@ export class QueryError extends EvaluationError<QueryErrorResponse> {
 export type Configuration = {
     appId?: string,
     apiKey?: string,
-    endpointUrl?: string,
+    baseEndpointUrl?: string,
 };
 
 export class Evaluator {
@@ -105,10 +105,10 @@ export class Evaluator {
             throw new Error('Either the application ID or the API key must be provided.');
         }
 
-        const {endpointUrl, apiKey} = configuration;
+        const {baseEndpointUrl, apiKey} = configuration;
 
         // eslint-disable-next-line prefer-template -- Better readability
-        this.endpoint = (endpointUrl ?? EVALUATION_ENDPOINT_URL).replace(/\/+$/, '')
+        this.endpoint = (baseEndpointUrl ?? BASE_ENDPOINT_URL).replace(/\/+$/, '')
             + (apiKey === undefined ? '/client' : '/external')
             + '/web/evaluate';
 

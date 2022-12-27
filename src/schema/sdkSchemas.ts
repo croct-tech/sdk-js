@@ -24,13 +24,7 @@ export const sdkConfigurationSchema = new ObjectType({
             pattern: /^[0-9a-f]{32}$/i,
         }),
         tokenScope: tokenScopeSchema,
-        trackerEndpointUrl: new StringType({
-            format: 'url',
-        }),
-        evaluationEndpointUrl: new StringType({
-            format: 'url',
-        }),
-        contentEndpointUrl: new StringType({
+        baseEndpointUrl: new StringType({
             format: 'url',
         }),
         cidAssignerEndpointUrl: new StringType({

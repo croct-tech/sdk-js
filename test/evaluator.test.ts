@@ -11,14 +11,14 @@ import {
     EvaluationOptions,
 } from '../src/evaluator';
 import {Token} from '../src/token';
-import {EVALUATION_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
+import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
 
 jest.mock(
     '../src/constants',
     () => ({
         ...jest.requireActual('../src/constants'),
         MAX_QUERY_LENGTH: 30,
-        EVALUATION_ENDPOINT_URL: 'https://evaluation.example.com',
+        BASE_ENDPOINT_URL: 'https://evaluation.example.com',
         ClIENT_LIBRARY: 'Plug v1.0.0',
     }),
 );
@@ -58,7 +58,7 @@ describe('An evaluator', () => {
 
         const evaluator = new Evaluator({
             appId: appId,
-            endpointUrl: customEndpoint,
+            baseEndpointUrl: customEndpoint,
         });
 
         const result = 'Anonymous';
@@ -81,7 +81,7 @@ describe('An evaluator', () => {
 
         fetchMock.mock({
             ...requestMatcher,
-            matcher: `${EVALUATION_ENDPOINT_URL}/external/web/evaluate`,
+            matcher: `${BASE_ENDPOINT_URL}/external/web/evaluate`,
             headers: {
                 ...requestMatcher.headers,
                 'X-Api-Key': apiKey,

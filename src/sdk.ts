@@ -1,13 +1,7 @@
 import {Container} from './container';
 import {Context, TokenScope} from './context';
 import {Logger} from './logging';
-import {
-    CID_ASSIGNER_ENDPOINT_URL,
-    CONTENT_ENDPOINT_URL,
-    EVALUATION_ENDPOINT_URL,
-    TRACKER_ENDPOINT_URL,
-    VERSION,
-} from './constants';
+import {BASE_ENDPOINT_URL, VERSION} from './constants';
 import {sdkConfigurationSchema} from './schema';
 import {formatCause} from './error';
 import {Tracker} from './tracker';
@@ -25,9 +19,7 @@ export type Configuration = {
     debug: boolean,
     test: boolean,
     clientId?: string,
-    trackerEndpointUrl?: string,
-    evaluationEndpointUrl?: string,
-    contentEndpointUrl?: string,
+    baseEndpointUrl?: string,
     cidAssignerEndpointUrl?: string,
     beaconQueueSize?: number,
     urlSanitizer?: UrlSanitizer,
@@ -59,7 +51,12 @@ export class Sdk {
     public static init(configuration: Configuration): Sdk {
         validateConfiguration(configuration);
 
-        const {eventMetadata: customMetadata = {}, ...containerConfiguration} = configuration;
+        const {
+            eventMetadata: customMetadata = {},
+            baseEndpointUrl = BASE_ENDPOINT_URL,
+            cidAssignerEndpointUrl,
+            ...containerConfiguration
+        } = configuration;
 
         const eventMetadata: {[key: string]: string} = {
             sdkVersion: VERSION,
@@ -69,12 +66,15 @@ export class Sdk {
             eventMetadata[`custom_${metadata}`] = customMetadata[metadata];
         }
 
+        const baseHttpEndpoint = baseEndpointUrl.replace(/\/+$/, '');
+        const baseWsEndpoint = baseHttpEndpoint.replace(/^http/i, 'ws');
+
         const container = new Container({
             ...containerConfiguration,
-            evaluationEndpointUrl: containerConfiguration.evaluationEndpointUrl ?? EVALUATION_ENDPOINT_URL,
-            contentEndpointUrl: containerConfiguration.contentEndpointUrl ?? CONTENT_ENDPOINT_URL,
-            trackerEndpointUrl: containerConfiguration.trackerEndpointUrl ?? TRACKER_ENDPOINT_URL,
-            cidAssignerEndpointUrl: containerConfiguration.cidAssignerEndpointUrl ?? CID_ASSIGNER_ENDPOINT_URL,
+            evaluationBaseEndpointUrl: baseHttpEndpoint,
+            contentBaseEndpointUrl: baseHttpEndpoint,
+            trackerEndpointUrl: `${baseWsEndpoint}/client/web/connect`,
+            cidAssignerEndpointUrl: cidAssignerEndpointUrl ?? `${baseHttpEndpoint}/client/web/cid`,
             beaconQueueSize: containerConfiguration.beaconQueueSize ?? 100,
             eventMetadata: eventMetadata,
         });

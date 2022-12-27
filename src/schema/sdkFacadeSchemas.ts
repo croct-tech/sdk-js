@@ -28,13 +28,7 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
             }),
             new NullType(),
         ),
-        trackerEndpointUrl: new StringType({
-            format: 'url',
-        }),
-        evaluationEndpointUrl: new StringType({
-            format: 'url',
-        }),
-        contentEndpointUrl: new StringType({
+        baseEndpointUrl: new StringType({
             format: 'url',
         }),
         cidAssignerEndpointUrl: new StringType({

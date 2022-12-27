@@ -76,9 +76,7 @@ describe('The SDK configuration schema', () => {
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             clientId: '9f62d6343c8742028df3e9e3ec596526',
             tokenScope: 'isolated',
-            trackerEndpointUrl: 'https://api.croct.io/tracker',
-            evaluationEndpointUrl: 'https://api.croct.io/evaluation',
-            contentEndpointUrl: 'https://api.croct.io/content',
+            baseEndpointUrl: 'https://api.croct.io',
             cidAssignerEndpointUrl: 'https://api.croct.io/cid',
             beaconQueueSize: 1,
             debug: true,
@@ -121,16 +119,8 @@ describe('The SDK configuration schema', () => {
             "Expected value of type boolean at path '/test', actual string.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', trackerEndpointUrl: 'foo'},
-            "Invalid url format at path '/trackerEndpointUrl'.",
-        ],
-        [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', evaluationEndpointUrl: 'foo'},
-            "Invalid url format at path '/evaluationEndpointUrl'.",
-        ],
-        [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', contentEndpointUrl: 'foo'},
-            "Invalid url format at path '/contentEndpointUrl'.",
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', baseEndpointUrl: 'foo'},
+            "Invalid url format at path '/baseEndpointUrl'.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', cidAssignerEndpointUrl: 'foo'},

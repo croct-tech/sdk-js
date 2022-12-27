@@ -25,9 +25,9 @@ describe('A container', () => {
         beaconQueueSize: 3,
         debug: false,
         test: false,
-        cidAssignerEndpointUrl: 'https://localtest/boostrap',
-        contentEndpointUrl: 'https://localtest/content',
-        evaluationEndpointUrl: 'https://localtest/evaluate',
+        cidAssignerEndpointUrl: 'https://localtest/cid',
+        contentBaseEndpointUrl: 'https://localtest/content',
+        evaluationBaseEndpointUrl: 'https://localtest/evaluate',
         trackerEndpointUrl: 'wss://localtest/connect',
     };
 
