@@ -43,8 +43,8 @@ describe('The product details schema', () => {
             'Expected at least 1 character at path \'/postId\', actual 0.',
         ],
         [
-            {postId: 'x'.repeat(101), title: 'post-title', publishTime: 0},
-            'Expected at most 100 characters at path \'/postId\', actual 101.',
+            {postId: 'x'.repeat(201), title: 'post-title', publishTime: 0},
+            'Expected at most 200 characters at path \'/postId\', actual 201.',
         ],
         [
             {postId: null, title: 'post-title', publishTime: 0},
@@ -55,8 +55,8 @@ describe('The product details schema', () => {
             'Expected at least 1 character at path \'/title\', actual 0.',
         ],
         [
-            {postId: 'post-id', title: 'x'.repeat(101), publishTime: 0},
-            'Expected at most 100 characters at path \'/title\', actual 101.',
+            {postId: 'post-id', title: 'x'.repeat(201), publishTime: 0},
+            'Expected at most 200 characters at path \'/title\', actual 201.',
         ],
         [
             {postId: 'post-id', title: null, publishTime: 0},

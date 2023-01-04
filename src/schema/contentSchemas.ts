@@ -5,14 +5,14 @@ export const postDetails = new ObjectType({
     properties: {
         postId: new StringType({
             minLength: 1,
-            maxLength: 100,
+            maxLength: 200,
         }),
         url: new StringType({
             format: 'url',
         }),
         title: new StringType({
             minLength: 1,
-            maxLength: 100,
+            maxLength: 200,
         }),
         tags: new ArrayType({
             items: new StringType({
