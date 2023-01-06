@@ -187,6 +187,13 @@ export class Evaluator {
 
                                 break;
                         }
+                    })
+                    .catch(error => {
+                        if (!response.ok) {
+                            throw new Error(`Error ${response.status} - ${response.statusText}`);
+                        }
+
+                        throw error;
                     }),
             )
                 .catch(

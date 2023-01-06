@@ -430,7 +430,7 @@ describe('An evaluator', () => {
         });
 
         const response: ErrorResponse = {
-            title: expect.stringMatching('Invalid json response body'),
+            title: 'Error 500 - Internal Server Error',
             type: EvaluationErrorType.UNEXPECTED_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,
@@ -439,7 +439,8 @@ describe('An evaluator', () => {
         fetchMock.mock({
             ...requestMatcher,
             response: {
-                body: 'non-json',
+                status: 500,
+                body: 'Invalid JSON payload',
             },
         });
 

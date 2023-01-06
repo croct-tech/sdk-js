@@ -90,7 +90,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    it('should requite an API key to fetch static content', async () => {
+    it('should require an API key to fetch static content', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -117,7 +117,61 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId)).resolves.toEqual(content);
     });
 
-    it('should fetch content using the provided client ID', async () => {
+    it('should fetch static content for the specified slot version', async () => {
+        const fetcher = new ContentFetcher({
+            apiKey: apiKey,
+        });
+
+        const options: FetchOptions = {
+            static: true,
+            version: 2,
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            matcher: `${BASE_ENDPOINT_URL}/external/web/static-content`,
+            headers: {
+                ...requestMatcher.headers,
+                'X-Api-Key': apiKey,
+            },
+            body: {
+                ...requestMatcher.body,
+                version: `${options.version}`,
+            },
+            response: content,
+        });
+
+        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+    });
+
+    it('should fetch static content for the specified preferred locale', async () => {
+        const fetcher = new ContentFetcher({
+            apiKey: apiKey,
+        });
+
+        const options: FetchOptions = {
+            static: true,
+            preferredLocale: 'en-US',
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            matcher: `${BASE_ENDPOINT_URL}/external/web/static-content`,
+            headers: {
+                ...requestMatcher.headers,
+                'X-Api-Key': apiKey,
+            },
+            body: {
+                ...requestMatcher.body,
+                preferredLocale: options.preferredLocale,
+            },
+            response: content,
+        });
+
+        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+    });
+
+    it('should fetch dynamic content using the provided client ID', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -140,7 +194,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    it('should fetch content passing the provided client IP', async () => {
+    it('should fetch dynamic content passing the provided client IP', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -163,7 +217,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    it('should fetch content passing the provided user agent', async () => {
+    it('should fetch dynamic content passing the provided user agent', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -186,7 +240,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    it('should fetch content using the provided user token', async () => {
+    it('should fetch dynamic content using the provided user token', async () => {
         const token = Token.issue(appId, 'foo', Date.now());
 
         const fetcher = new ContentFetcher({
@@ -209,7 +263,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    it('should fetch content using the provided preview token', async () => {
+    it('should fetch dynamic content using the provided preview token', async () => {
         const token = Token.issue(appId, 'foo', Date.now());
 
         const fetcher = new ContentFetcher({
@@ -303,7 +357,7 @@ describe('A content fetcher', () => {
         expect(fetchOptions?.signal.aborted).toBe(true);
     });
 
-    it('should fetch content using the provided context', async () => {
+    it('should fetch dynamic content using the provided context', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -341,7 +395,7 @@ describe('A content fetcher', () => {
         await expect(promise).resolves.toEqual(content);
     });
 
-    it('should fetch content for the specified slot version', async () => {
+    it('should fetch dynamic content for the specified slot version', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -362,7 +416,7 @@ describe('A content fetcher', () => {
         await expect(promise).resolves.toEqual(content);
     });
 
-    it('should fetch content for the specified preferred locale', async () => {
+    it('should fetch dynamic content for the specified preferred locale', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -414,7 +468,7 @@ describe('A content fetcher', () => {
         });
 
         const response: ErrorResponse = {
-            title: expect.stringMatching('Invalid json response body'),
+            title: 'Error 500 - Internal Server Error',
             type: ContentErrorType.UNEXPECTED_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,
@@ -423,7 +477,8 @@ describe('A content fetcher', () => {
         fetchMock.mock({
             ...requestMatcher,
             response: {
-                body: 'non-json',
+                status: 500,
+                body: 'Invalid JSON payload',
             },
         });
 
