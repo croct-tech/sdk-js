@@ -135,6 +135,13 @@ export class ContentFetcher {
                             } else {
                                 reject(new ContentError(body));
                             }
+                        })
+                        .catch(error => {
+                            if (!response.ok) {
+                                throw new Error(`Error ${response.status} - ${response.statusText}`);
+                            }
+
+                            throw error;
                         }),
                 )
                 .catch(error => {
@@ -153,10 +160,6 @@ export class ContentFetcher {
     }
 
     private load(slotId: string, signal: AbortSignal, options: FetchOptions): Promise<Response> {
-        const payload: FetchPayload = {
-            slotId: slotId,
-        };
-
         const {apiKey, appId} = this.configuration;
 
         const headers: Record<string, string> = {
@@ -171,6 +174,18 @@ export class ContentFetcher {
 
         if (apiKey !== undefined) {
             headers['X-Api-Key'] = apiKey;
+        }
+
+        const payload: FetchPayload = {
+            slotId: slotId,
+        };
+
+        if (options.version !== undefined) {
+            payload.version = `${options.version}`;
+        }
+
+        if (options.preferredLocale !== undefined) {
+            payload.preferredLocale = options.preferredLocale;
         }
 
         const dynamic = ContentFetcher.isDynamicContent(options);
@@ -190,14 +205,6 @@ export class ContentFetcher {
 
             if (options.userAgent !== undefined) {
                 headers['User-Agent'] = options.userAgent;
-            }
-
-            if (options.version !== undefined) {
-                payload.version = `${options.version}`;
-            }
-
-            if (options.preferredLocale !== undefined) {
-                payload.preferredLocale = options.preferredLocale;
             }
 
             if (options.context !== undefined) {
