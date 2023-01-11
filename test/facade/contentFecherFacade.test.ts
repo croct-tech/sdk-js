@@ -120,13 +120,6 @@ describe('A content fetcher facade', () => {
                     referrer: referrer,
                 },
                 timeZone: timeZone,
-                campaign: {
-                    name: 'campaign',
-                    source: 'source',
-                    medium: 'medium',
-                    content: 'content',
-                    term: 'term',
-                },
             },
         };
 

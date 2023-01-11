@@ -1,5 +1,5 @@
 import {JsonObject, JsonValue} from '@croct/json';
-import {Evaluator, Campaign, EvaluationContext, Page} from '../evaluator';
+import {Evaluator, EvaluationContext, Page} from '../evaluator';
 import {Tab} from '../tab';
 import {evaluationOptionsSchema as optionsSchema} from '../schema';
 import {formatCause} from '../error';
@@ -102,51 +102,10 @@ export class TabContextFactory implements ContextFactory {
             context.timeZone = timeZone;
         }
 
-        const campaign = TabContextFactory.createCampaign(url);
-
-        if (Object.keys(campaign).length > 0) {
-            context.campaign = campaign;
-        }
-
         if (attributes !== undefined && Object.keys(attributes).length > 0) {
             context.attributes = attributes;
         }
 
         return context;
-    }
-
-    private static createCampaign(url: URL): Campaign {
-        const campaign: Campaign = {};
-
-        for (const [parameter, value] of url.searchParams.entries()) {
-            switch (parameter.toLowerCase()) {
-                case 'utm_campaign':
-                    campaign.name = value;
-
-                    break;
-
-                case 'utm_source':
-                    campaign.source = value;
-
-                    break;
-
-                case 'utm_term':
-                    campaign.term = value;
-
-                    break;
-
-                case 'utm_medium':
-                    campaign.medium = value;
-
-                    break;
-
-                case 'utm_content':
-                    campaign.content = value;
-
-                    break;
-            }
-        }
-
-        return campaign;
     }
 }

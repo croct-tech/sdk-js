@@ -1,6 +1,6 @@
 import {JsonObject} from '@croct/json';
 import {EvaluatorFacade, MinimalContextFactory, TabContextFactory} from '../../src/facade';
-import {Evaluator, Campaign, EvaluationOptions, Page} from '../../src/evaluator';
+import {Evaluator, EvaluationOptions, Page} from '../../src/evaluator';
 import {Tab} from '../../src/tab';
 import {FixedAssigner} from '../../src/cid';
 import {InMemoryTokenStore, FixedTokenProvider, Token} from '../../src/token';
@@ -114,13 +114,6 @@ describe('An evaluator facade', () => {
                     referrer: referrer,
                 },
                 timeZone: timeZone,
-                campaign: {
-                    name: 'campaign',
-                    source: 'source',
-                    medium: 'medium',
-                    content: 'content',
-                    term: 'term',
-                },
             },
             timeout: 5,
         };
@@ -163,13 +156,6 @@ describe('A tab context factory', () => {
 
     it('should load a context containing tab information and attributes', () => {
         const url = new URL('http://localhost');
-
-        url.searchParams.append('UTM_campaign', 'campaign');
-        url.searchParams.append('utm_SOURCE', 'source');
-        url.searchParams.append('utm_mediuM', 'medium');
-        url.searchParams.append('utm_Content', 'content');
-        url.searchParams.append('UTM_TERM', 'term');
-
         const title = 'Welcome to Foo Inc.';
         const referrer = 'http://referrer.com?foo=%22bar%22&foo="bar"';
 
@@ -195,16 +181,9 @@ describe('A tab context factory', () => {
             url: window.encodeURI(window.decodeURI(url.toString())),
             referrer: window.encodeURI(window.decodeURI(referrer)),
         };
-        const campaign: Campaign = {
-            name: 'campaign',
-            source: 'source',
-            medium: 'medium',
-            content: 'content',
-            term: 'term',
-        };
 
         expect(context.attributes).toEqual(attributes);
-        expect(context.campaign).toEqual(campaign);
+        expect(context.campaign).toBeUndefined();
         expect(context.page).toEqual(page);
         expect(context.timeZone).toBe(timeZone);
     });
