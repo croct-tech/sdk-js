@@ -28,7 +28,7 @@
     "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@croct/json": "^1.0",
+    "@croct/json": "^2.0.1",
     "tslib": "^2.4.1"
   },
   "devDependencies": {
