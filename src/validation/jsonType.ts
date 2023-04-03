@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define -- Mutual dependency */
 import {JsonArray, JsonObject, JsonPrimitive, JsonValue} from '@croct/json';
 import {Schema, TypeSchema, Violation} from './schema';
 import {describe, formatPath} from './violation';
