@@ -1,5 +1,5 @@
 import {tokenScopeSchema} from '../../src/schema';
-import {TokenScope} from '../../build/context';
+import {TokenScope} from '../../src/context';
 
 describe('The token schema', () => {
     it.each<TokenScope[]>([
