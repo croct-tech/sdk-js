@@ -465,6 +465,35 @@ describe('A SDK facade', () => {
         expect(context.setToken).not.toHaveBeenCalled();
     });
 
+    it('should allow unidentifying a user', () => {
+        const context = createContextMock();
+
+        jest.spyOn(context, 'getToken')
+            .mockImplementation(() => Token.issue(appId, 'c4r0l'));
+
+        jest.spyOn(context, 'setToken')
+            .mockImplementation();
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'appId', 'get').mockReturnValue(appId);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+
+                return sdk;
+            });
+
+        SdkFacade.init({
+            appId: appId,
+            track: false,
+            userId: null,
+        });
+
+        expect(context.setToken).toHaveBeenCalledWith(null);
+        expect(context.setToken).toHaveBeenCalledTimes(1);
+    });
+
     it('should allow anonymizing a user', () => {
         const context = createContextMock();
 

@@ -19,9 +19,12 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
         logger: loggerSchema,
         urlSanitizer: new FunctionType(),
         eventMetadata: eventMetadataSchema,
-        userId: new StringType({
-            minLength: 1,
-        }),
+        userId: new UnionType(
+            new StringType({
+                minLength: 1,
+            }),
+            new NullType(),
+        ),
         token: new UnionType(
             new StringType({
                 pattern: /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/,

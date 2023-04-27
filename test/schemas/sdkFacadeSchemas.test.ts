@@ -19,6 +19,10 @@ describe('The SDK facade configuration schema', () => {
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            userId: null,
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             baseEndpointUrl: 'https://api.croct.io/',
             cidAssignerEndpointUrl: 'https://api.croct.io/cid',
             tokenScope: 'isolated',
@@ -69,7 +73,7 @@ describe('The SDK facade configuration schema', () => {
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', userId: 1},
-            "Expected value of type string at path '/userId', actual integer.",
+            "Expected value of type string or null at path '/userId', actual integer.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', token: 'foo'},

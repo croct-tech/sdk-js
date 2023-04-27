@@ -22,7 +22,7 @@ export type Configuration = {
     test?: boolean,
     track?: boolean,
     token?: string | null,
-    userId?: string,
+    userId?: string | null,
     clientId?: string,
     eventMetadata?: {[key: string]: string},
     logger?: Logger,
@@ -75,10 +75,14 @@ export class SdkFacade {
         );
 
         if (userId !== undefined) {
-            const currentToken = sdk.context.getToken();
+            if (userId === null) {
+                sdk.unsetToken();
+            } else {
+                const currentToken = sdk.context.getToken();
 
-            if (currentToken?.getSubject() !== userId) {
-                sdk.identify(userId);
+                if (currentToken?.getSubject() !== userId) {
+                    sdk.identify(userId);
+                }
             }
         } else if (token !== undefined) {
             if (token === null) {
