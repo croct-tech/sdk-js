@@ -49,7 +49,6 @@ describe('A SDK facade', () => {
 
     afterEach(() => {
         jest.restoreAllMocks();
-        jest.useRealTimers();
     });
 
     it('should fail if the configuration is not a key-value map', () => {
