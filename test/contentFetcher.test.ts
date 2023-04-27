@@ -488,6 +488,32 @@ describe('A content fetcher', () => {
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
+    it('should catch unexpected error responses', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+        });
+
+        const response: ErrorResponse = {
+            title: `Invalid json response body at ${BASE_ENDPOINT_URL}/client/web/content `
+                + 'reason: Unexpected token I in JSON at position 0',
+            type: ContentErrorType.UNEXPECTED_ERROR,
+            detail: 'Please try again or contact Croct support if the error persists.',
+            status: 500,
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                body: 'Invalid JSON payload',
+            },
+        });
+
+        const promise = fetcher.fetch(contentId);
+
+        await expect(promise).rejects.toThrow(ContentError);
+        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+    });
+
     it('should report unexpected errors when the cause of the fetch failure is unknown', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,

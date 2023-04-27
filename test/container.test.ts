@@ -25,6 +25,7 @@ describe('A container', () => {
         beaconQueueSize: 3,
         debug: false,
         test: false,
+        refreshCid: false,
         cidAssignerEndpointUrl: 'https://localtest/cid',
         contentBaseEndpointUrl: 'https://localtest/content',
         evaluationBaseEndpointUrl: 'https://localtest/evaluate',
@@ -207,6 +208,53 @@ describe('A container', () => {
 
         await expect(assigner.assignCid()).resolves.toBe(cid);
         await expect(assigner.assignCid()).resolves.toBe(cid);
+    });
+
+    it('should refresh the CID when the refresh flag is enabled', async () => {
+        const cid = 'e6a133ffd3d2410681403d5e1bd95505';
+        const endpoint = `${configuration.cidAssignerEndpointUrl}?cid=${cid}`;
+
+        fetchMock.mock({
+            method: 'GET',
+            matcher: endpoint,
+            response: '123',
+        });
+
+        localStorage.setItem('croct.cid', cid);
+
+        const container = new Container({
+            ...configuration,
+            refreshCid: true,
+        });
+
+        const assigner = container.getCidAssigner();
+
+        await expect(assigner.assignCid()).resolves.toBe(cid);
+
+        expect(fetchMock.lastUrl()).toBe(endpoint);
+    });
+
+    it('should not refresh the CID when the refresh flag is disabled', async () => {
+        const cid = 'e6a133ffd3d2410681403d5e1bd95505';
+
+        fetchMock.mock({
+            method: 'GET',
+            matcher: configuration.cidAssignerEndpointUrl,
+            response: '123',
+        });
+
+        localStorage.setItem('croct.cid', cid);
+
+        const container = new Container({
+            ...configuration,
+            refreshCid: false,
+        });
+
+        const assigner = container.getCidAssigner();
+
+        await expect(assigner.assignCid()).resolves.toBe(cid);
+
+        expect(fetchMock.lastUrl()).toBeUndefined();
     });
 
     it('should configure a fixed CID assigner in test mode', async () => {

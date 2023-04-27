@@ -1,7 +1,8 @@
 import {evaluationOptionsSchema} from '../../src/schema';
+import {EvaluationOptions} from '../../src/facade/evaluatorFacade';
 
 describe('The evaluation option schema', () => {
-    it.each([
+    it.each<EvaluationOptions[]>([
         [{}],
         [{
             timeout: 1,
@@ -13,7 +14,7 @@ describe('The evaluation option schema', () => {
             timeout: 1,
             attributes: {foo: 'bar'},
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             evaluationOptionsSchema.validate(value);
         }

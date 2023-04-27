@@ -1,7 +1,8 @@
 import {sdkFacadeConfigurationSchema} from '../../src/schema';
+import {Configuration} from '../../src/facade/sdkFacade';
 
 describe('The SDK facade configuration schema', () => {
-    it.each([
+    it.each<Configuration[]>([
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
         }],
@@ -28,6 +29,7 @@ describe('The SDK facade configuration schema', () => {
             tokenScope: 'isolated',
             userId: 'c4r0l',
             token: 'a.b.c',
+            refreshCid: true,
             debug: true,
             test: true,
             track: true,
@@ -38,7 +40,7 @@ describe('The SDK facade configuration schema', () => {
                 error: jest.fn(),
             },
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             sdkFacadeConfigurationSchema.validate(value);
         }
@@ -94,6 +96,10 @@ describe('The SDK facade configuration schema', () => {
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', track: 'foo'},
             "Expected value of type boolean at path '/track', actual string.",
+        ],
+        [
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', refreshCid: 'foo'},
+            "Expected value of type boolean at path '/refreshCid', actual string.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', logger: null},

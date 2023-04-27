@@ -1,4 +1,5 @@
 import {sdkConfigurationSchema, eventMetadataSchema} from '../../src/schema';
+import {Configuration} from '../../src';
 
 describe('The event metadata schema', () => {
     it.each([
@@ -64,13 +65,13 @@ describe('The event metadata schema', () => {
 });
 
 describe('The SDK configuration schema', () => {
-    it.each([
-        [{
-            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-        }],
+    it.each<Configuration[]>([
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
+            refreshCid: true,
+            debug: true,
+            test: true,
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
@@ -79,6 +80,7 @@ describe('The SDK configuration schema', () => {
             baseEndpointUrl: 'https://api.croct.io',
             cidAssignerEndpointUrl: 'https://api.croct.io/cid',
             beaconQueueSize: 1,
+            refreshCid: true,
             debug: true,
             test: true,
             logger: {
@@ -89,7 +91,7 @@ describe('The SDK configuration schema', () => {
             },
             eventMetadata: {},
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             sdkConfigurationSchema.validate(value);
         }
@@ -99,47 +101,146 @@ describe('The SDK configuration schema', () => {
 
     it.each([
         [
-            {},
+            {
+                tokenScope: 'global',
+                refreshCid: true,
+                debug: true,
+                test: true,
+            },
             "Missing property '/appId'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', clientId: '7e9d59a9'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                refreshCid: true,
+                debug: true,
+                test: true,
+            },
+            "Missing property '/tokenScope'.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                debug: true,
+                test: true,
+            },
+            "Missing property '/refreshCid'.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                refreshCid: true,
+                test: true,
+            },
+            "Missing property '/debug'.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                refreshCid: true,
+                debug: true,
+                test: true,
+                clientId: '7e9d59a9',
+            },
             "Invalid format at path '/clientId'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', tokenScope: 'x'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                refreshCid: true,
+                debug: true,
+                test: true,
+                tokenScope: 'x',
+            },
             "Unexpected value at path '/tokenScope', expecting 'global', 'contextual' or 'isolated', found 'x'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', debug: 'foo'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                refreshCid: true,
+                test: true,
+                debug: 'foo',
+            },
             "Expected value of type boolean at path '/debug', actual string.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', test: 'foo'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                refreshCid: true,
+                debug: true,
+                test: 'foo',
+            },
             "Expected value of type boolean at path '/test', actual string.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', baseEndpointUrl: 'foo'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                refreshCid: true,
+                debug: true,
+                test: true,
+                baseEndpointUrl: 'foo',
+            },
             "Invalid url format at path '/baseEndpointUrl'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', cidAssignerEndpointUrl: 'foo'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                refreshCid: true,
+                debug: true,
+                test: true,
+                cidAssignerEndpointUrl: 'foo',
+            },
             "Invalid url format at path '/cidAssignerEndpointUrl'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', beaconQueueSize: -1},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                refreshCid: true,
+                debug: true,
+                test: true,
+                beaconQueueSize: -1,
+            },
             "Expected a value greater than or equal to 0 at path '/beaconQueueSize', actual -1.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', beaconQueueSize: 1.2},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                refreshCid: true,
+                debug: true,
+                test: true,
+                beaconQueueSize: 1.2,
+            },
             "Expected value of type integer at path '/beaconQueueSize', actual number.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', eventMetadata: {foo: 1}},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                refreshCid: true,
+                debug: true,
+                test: true,
+                eventMetadata: {foo: 1},
+            },
             "Expected value of type string at path '/eventMetadata/foo', actual integer.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', logger: null},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                refreshCid: true,
+                debug: true,
+                test: true,
+                logger: null,
+            },
             "Expected value of type object at path '/logger', actual null.",
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {

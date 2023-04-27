@@ -28,6 +28,7 @@ export type Configuration = {
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
     baseEndpointUrl?: string,
+    refreshCid?: boolean,
     cidAssignerEndpointUrl?: string,
 };
 
@@ -71,6 +72,7 @@ export class SdkFacade {
                 tokenScope: containerConfiguration.tokenScope ?? 'global',
                 debug: containerConfiguration.debug ?? false,
                 test: containerConfiguration.test ?? false,
+                refreshCid: containerConfiguration.refreshCid ?? false,
             }),
         );
 

@@ -20,6 +20,7 @@ export type Configuration = {
     test: boolean,
     clientId?: string,
     baseEndpointUrl?: string,
+    refreshCid: boolean,
     cidAssignerEndpointUrl?: string,
     beaconQueueSize?: number,
     urlSanitizer?: UrlSanitizer,
@@ -52,6 +53,7 @@ export class Sdk {
         validateConfiguration(configuration);
 
         const {
+            refreshCid,
             eventMetadata: customMetadata = {},
             baseEndpointUrl = BASE_ENDPOINT_URL,
             cidAssignerEndpointUrl,
@@ -71,6 +73,7 @@ export class Sdk {
 
         const container = new Container({
             ...containerConfiguration,
+            refreshCid: refreshCid,
             evaluationBaseEndpointUrl: baseHttpEndpoint,
             contentBaseEndpointUrl: baseHttpEndpoint,
             trackerEndpointUrl: `${baseWsEndpoint}/client/web/connect`,

@@ -32,6 +32,7 @@ export type Configuration = {
     clientId?: string,
     debug: boolean,
     test: boolean,
+    refreshCid: boolean,
     cidAssignerEndpointUrl: string,
     trackerEndpointUrl: string,
     evaluationBaseEndpointUrl: string,
@@ -255,15 +256,28 @@ export class Container {
             return new FixedAssigner('00000000-0000-0000-0000-000000000000');
         }
 
+        const cidKey = 'croct.cid';
+        const cache = this.getLocalStorage();
         const logger = this.getLogger('CidAssigner');
+        let endpoint = this.configuration.cidAssignerEndpointUrl;
+
+        if (this.configuration.refreshCid) {
+            const cachedCid = cache.getItem(cidKey);
+            const baseEndpoint = new URL(endpoint);
+
+            if (cachedCid !== null) {
+                baseEndpoint.searchParams.set('cid', cachedCid);
+                endpoint = baseEndpoint.toString();
+            }
+        }
 
         return new CachedAssigner(
-            new RemoteAssigner(
-                this.configuration.cidAssignerEndpointUrl,
-                logger,
-            ),
-            new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),
-            logger,
+            new RemoteAssigner(endpoint.toString(), logger),
+            new LocalStorageCache(cache, cidKey),
+            {
+                logger: logger,
+                refresh: this.configuration.refreshCid,
+            },
         );
     }
 

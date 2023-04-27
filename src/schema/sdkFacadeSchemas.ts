@@ -13,6 +13,7 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
             pattern: /^[0-9a-f]{32}$/i,
         }),
         tokenScope: tokenScopeSchema,
+        refreshCid: new BooleanType(),
         debug: new BooleanType(),
         test: new BooleanType(),
         track: new BooleanType(),
