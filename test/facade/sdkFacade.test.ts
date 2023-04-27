@@ -49,6 +49,7 @@ describe('A SDK facade', () => {
 
     afterEach(() => {
         jest.restoreAllMocks();
+        jest.useRealTimers();
     });
 
     it('should fail if the configuration is not a key-value map', () => {
@@ -436,6 +437,32 @@ describe('A SDK facade', () => {
 
         expect(context.setToken).toHaveBeenCalledWith(Token.issue(appId, 'c4r0l'));
         expect(context.setToken).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not re-identify a user', () => {
+        const context = createContextMock();
+
+        jest.spyOn(context, 'getToken')
+            .mockImplementation()
+            .mockImplementationOnce(() => Token.issue(appId, 'c4r0l', Math.floor(Date.now() / 1000) - 3600));
+
+        jest.spyOn(Sdk, 'init')
+            .mockImplementationOnce(config => {
+                const sdk = Sdk.init(config);
+
+                jest.spyOn(sdk, 'appId', 'get').mockReturnValue(appId);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+
+                return sdk;
+            });
+
+        SdkFacade.init({
+            appId: appId,
+            track: false,
+            userId: 'c4r0l',
+        });
+
+        expect(context.setToken).not.toHaveBeenCalled();
     });
 
     it('should allow anonymizing a user', () => {

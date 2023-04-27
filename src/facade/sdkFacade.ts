@@ -75,7 +75,11 @@ export class SdkFacade {
         );
 
         if (userId !== undefined) {
-            sdk.identify(userId);
+            const currentToken = sdk.context.getToken();
+
+            if (currentToken?.getSubject() !== userId) {
+                sdk.identify(userId);
+            }
         } else if (token !== undefined) {
             if (token === null) {
                 sdk.unsetToken();
