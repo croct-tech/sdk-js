@@ -1,7 +1,8 @@
 import {userProfileSchema} from '../../src/schema';
+import {UserProfile} from '../../src/trackingEvents';
 
 describe('The user profile schema', () => {
-    it.each([
+    it.each<UserProfile[]>([
         [{firstName: 'x'}],
         [{firstName: 'x'.repeat(50)}],
         [{lastName: 'x'}],
@@ -101,7 +102,7 @@ describe('The user profile schema', () => {
         [{custom: {nestedArrayInMap: {foo: [1, 2, 3]}}}],
         [{custom: {nestedMapInArray: [{foo: 'bar'}]}}],
         [{custom: {nestedMapInMap: {foo: {bar: 'baz'}}}}],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             userProfileSchema.validate(value);
         }

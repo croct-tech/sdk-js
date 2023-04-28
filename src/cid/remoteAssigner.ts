@@ -15,9 +15,9 @@ export class RemoteAssigner implements CidAssigner {
         this.logger = logger ?? new NullLogger();
     }
 
-    public assignCid(): Promise<string> {
+    public assignCid(currentCid?: string): Promise<string> {
         if (this.pending === undefined) {
-            this.pending = this.fetchCid().finally(() => {
+            this.pending = this.fetchCid(currentCid).finally(() => {
                 this.pending = undefined;
             });
         }
@@ -25,7 +25,7 @@ export class RemoteAssigner implements CidAssigner {
         return this.pending;
     }
 
-    private async fetchCid(): Promise<string> {
+    private async fetchCid(currentCid?: string): Promise<string> {
         const options: RequestInit = {
             method: 'GET',
             credentials: 'include',
@@ -34,7 +34,13 @@ export class RemoteAssigner implements CidAssigner {
             },
         };
 
-        const response = await window.fetch(this.endpoint, options);
+        const endpoint = new URL(this.endpoint);
+
+        if (currentCid !== undefined) {
+            endpoint.searchParams.set('cid', currentCid);
+        }
+
+        const response = await fetch(endpoint, options);
 
         if (!response.ok) {
             const error = new Error(`Failed to assign CID: ${formatCause(response.statusText)}`);

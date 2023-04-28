@@ -2,34 +2,67 @@ import {Logger, NullLogger} from '../logging';
 import {Cache} from '../cache';
 import {CidAssigner} from './assigner';
 
+type CachedAssignerOptions = {
+    logger?: Logger,
+    refresh?: boolean,
+};
+
 export class CachedAssigner implements CidAssigner {
     private readonly assigner: CidAssigner;
 
     private readonly cache: Cache;
 
-    private readonly logger: Logger;
+    private readonly options: Required<CachedAssignerOptions>;
 
-    public constructor(assigner: CidAssigner, cache: Cache, logger?: Logger) {
+    public constructor(assigner: CidAssigner, cache: Cache, options: CachedAssignerOptions = {}) {
         this.assigner = assigner;
         this.cache = cache;
-        this.logger = logger ?? new NullLogger();
+        this.options = {
+            logger: options.logger ?? new NullLogger(),
+            refresh: options.refresh ?? false,
+        };
     }
 
-    public async assignCid(): Promise<string> {
-        const cid = this.cache.get();
+    public async assignCid(currentCid?: string): Promise<string> {
+        const cachedCid = this.cache.get();
+        const previousCid = currentCid ?? cachedCid ?? null;
+        const {logger, refresh} = this.options;
 
-        if (cid !== null) {
-            this.logger.debug('Previous CID loaded from cache');
+        if (previousCid === null) {
+            const newCid = await this.assigner.assignCid();
 
-            return cid;
+            this.cache.put(newCid);
+
+            logger.debug('New CID stored into cache');
+
+            return newCid;
         }
 
-        const newCid = await this.assigner.assignCid();
+        logger.debug('Using existing CID');
 
-        this.cache.put(newCid);
+        if (cachedCid !== previousCid) {
+            logger.debug('The cached CID is stale, updating cache...');
 
-        this.logger.debug('New CID stored into cache');
+            this.cache.put(previousCid);
+        }
 
-        return newCid;
+        if (refresh) {
+            logger.debug('Refreshing CID');
+
+            this.assigner
+                .assignCid(previousCid)
+                .then(newCid => {
+                    if (newCid !== previousCid) {
+                        logger.warn('The CID has changed, updating cache...');
+
+                        this.cache.put(newCid);
+                    }
+                })
+                .catch(() => {
+                    logger.error('Failed to refresh CID');
+                });
+        }
+
+        return previousCid;
     }
 }

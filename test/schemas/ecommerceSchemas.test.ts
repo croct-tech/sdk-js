@@ -7,23 +7,27 @@ const minimalProductDetails: ProductDetails = {
     name: 'Smartphone 9',
     displayPrice: 599.00,
 };
+
 const minimalCartItem: CartItem = {
     index: 0,
     total: 699.00,
     quantity: 1,
     product: minimalProductDetails,
 };
+
 const minimalCart: Optional<Cart, 'lastUpdateTime'> = {
     currency: 'brl',
     total: 776.49,
     items: [minimalCartItem],
 };
+
 const minimalOrderItem: OrderItem = {
     index: 0,
     total: 699.00,
     quantity: 1,
     product: minimalProductDetails,
 };
+
 const minimalOrder: Order = {
     orderId: 'b76c0ef6-9520-4107-9de3-11110829588e',
     currency: 'brl',
@@ -32,7 +36,7 @@ const minimalOrder: Order = {
 };
 
 describe('The product details schema', () => {
-    it.each([
+    it.each<ProductDetails[]>([
         [minimalProductDetails],
         [{
             productId: '12345',
@@ -46,7 +50,7 @@ describe('The product details schema', () => {
             url: 'https://www.acme.com/product/smartphone9',
             imageUrl: 'https://www.acme.com/images/smartphone9-64gb-green',
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             productDetails.validate(value);
         }
@@ -141,7 +145,7 @@ describe('The product details schema', () => {
 });
 
 describe('The cart item schema', () => {
-    it.each([
+    it.each<CartItem[]>([
         [minimalCartItem],
         [{
             index: 0,
@@ -151,7 +155,7 @@ describe('The cart item schema', () => {
             coupon: 'PROMO',
             product: minimalProductDetails,
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', (value: CartItem) => {
         function validate(): void {
             cartItem.validate(value);
         }
@@ -259,7 +263,7 @@ describe('The cart item schema', () => {
 });
 
 describe('The cart schema', () => {
-    it.each([
+    it.each<Array<Optional<Cart, 'lastUpdateTime'>>>([
         [minimalCart],
         [{
             currency: 'brl',
@@ -296,7 +300,7 @@ describe('The cart schema', () => {
             coupon: 'FREE-SHIPPING',
             lastUpdateTime: 123456789,
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             cart.validate(value);
         }
@@ -468,7 +472,7 @@ describe('The cart schema', () => {
 });
 
 describe('The order item schema', () => {
-    it.each([
+    it.each<OrderItem[]>([
         [minimalOrderItem],
         [{
             index: 0,
@@ -478,7 +482,7 @@ describe('The order item schema', () => {
             coupon: 'PROMO',
             product: minimalProductDetails,
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             orderItem.validate(value);
         }
@@ -586,7 +590,7 @@ describe('The order item schema', () => {
 });
 
 describe('The order schema', () => {
-    it.each([
+    it.each<Order[]>([
         [minimalOrder],
         [{
             orderId: 'b76c0ef6-9520-4107-9de3-11110829588e',
@@ -648,7 +652,7 @@ describe('The order schema', () => {
             installments: 1,
             status: 'paid',
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             order.validate(value);
         }

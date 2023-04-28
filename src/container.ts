@@ -32,6 +32,7 @@ export type Configuration = {
     clientId?: string,
     debug: boolean,
     test: boolean,
+    refreshCid: boolean,
     cidAssignerEndpointUrl: string,
     trackerEndpointUrl: string,
     evaluationBaseEndpointUrl: string,
@@ -258,12 +259,12 @@ export class Container {
         const logger = this.getLogger('CidAssigner');
 
         return new CachedAssigner(
-            new RemoteAssigner(
-                this.configuration.cidAssignerEndpointUrl,
-                logger,
-            ),
+            new RemoteAssigner(this.configuration.cidAssignerEndpointUrl, logger),
             new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),
-            logger,
+            {
+                logger: logger,
+                refresh: this.configuration.refreshCid,
+            },
         );
     }
 

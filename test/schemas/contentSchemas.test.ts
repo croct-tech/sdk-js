@@ -1,7 +1,8 @@
 import {postDetails} from '../../src/schema/contentSchemas';
+import {PostDetails} from '../../src/trackingEvents';
 
 describe('The product details schema', () => {
-    it.each([
+    it.each<PostDetails[]>([
         [{
             postId: 'post-id',
             title: 'post-title',
@@ -17,7 +18,7 @@ describe('The product details schema', () => {
             publishTime: 0,
             updateTime: 1,
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             postDetails.validate(value);
         }

@@ -1,7 +1,8 @@
 import {fetchOptionsSchema} from '../../src/schema';
+import {FetchOptions} from '../../src/facade/contentFetcherFacade';
 
 describe('The content fetcher option schema', () => {
-    it.each([
+    it.each<FetchOptions[]>([
         [{}],
         [{
             timeout: 1,
@@ -37,7 +38,7 @@ describe('The content fetcher option schema', () => {
             timeout: 1,
             attributes: {foo: 'bar'},
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             fetchOptionsSchema.validate(value);
         }

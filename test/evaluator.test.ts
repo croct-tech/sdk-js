@@ -450,6 +450,32 @@ describe('An evaluator', () => {
         await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
     });
 
+    it('should catch unexpected error responses', async () => {
+        const evaluator = new Evaluator({
+            appId: appId,
+        });
+
+        const response: ErrorResponse = {
+            title: `Invalid json response body at ${BASE_ENDPOINT_URL}/client/web/evaluate `
+                + 'reason: Unexpected token I in JSON at position 0',
+            type: EvaluationErrorType.UNEXPECTED_ERROR,
+            detail: 'Please try again or contact Croct support if the error persists.',
+            status: 500,
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                body: 'Invalid JSON payload',
+            },
+        });
+
+        const promise = evaluator.evaluate(query);
+
+        await expect(promise).rejects.toThrow(EvaluationError);
+        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+    });
+
     it('should report unexpected errors when the cause of the evaluation failure is unknown', async () => {
         const evaluator = new Evaluator({
             appId: appId,

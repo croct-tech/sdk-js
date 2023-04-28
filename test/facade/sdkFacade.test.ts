@@ -88,12 +88,15 @@ describe('A SDK facade', () => {
 
         SdkFacade.init({appId: appId});
 
-        expect(initialize).toHaveBeenCalledWith({
-            appId: appId,
-            tokenScope: 'global',
-            debug: false,
-            test: false,
-        });
+        expect(initialize).toHaveBeenCalledWith(
+            {
+                appId: appId,
+                tokenScope: 'global',
+                refreshCid: false,
+                debug: false,
+                test: false,
+            } satisfies Configuration,
+        );
     });
 
     it('should load the SDK using the specified configuration', () => {
@@ -115,16 +118,19 @@ describe('A SDK facade', () => {
             urlSanitizer: urlSanitizer,
         });
 
-        expect(initialize).toHaveBeenCalledWith({
-            appId: appId,
-            baseEndpointUrl: 'https://api.croct.io',
-            cidAssignerEndpointUrl: 'https://api.croct.io/cid',
-            debug: false,
-            test: false,
-            tokenScope: 'isolated',
-            logger: logger,
-            urlSanitizer: urlSanitizer,
-        });
+        expect(initialize).toHaveBeenCalledWith(
+            {
+                appId: appId,
+                baseEndpointUrl: 'https://api.croct.io',
+                cidAssignerEndpointUrl: 'https://api.croct.io/cid',
+                refreshCid: false,
+                debug: false,
+                test: false,
+                tokenScope: 'isolated',
+                logger: logger,
+                urlSanitizer: urlSanitizer,
+            } satisfies Configuration,
+        );
     });
 
     it('should load the SDK and set the provided token', () => {

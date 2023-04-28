@@ -1,4 +1,16 @@
-import {Cart, CartItem, Order, OrderItem, ProductDetails} from '../../src/trackingEvents';
+import {
+    Cart,
+    CartItem,
+    ExternalTrackingEvent,
+    GoalCompleted,
+    InterestShown,
+    LinkOpened,
+    Order,
+    OrderItem,
+    PostViewed,
+    ProductDetails,
+    EventOccurred,
+} from '../../src/trackingEvents';
 import {
     cartViewed,
     cartModified,
@@ -19,23 +31,27 @@ const minimalProductDetails: ProductDetails = {
     name: 'Smartphone 9',
     displayPrice: 599.00,
 };
+
 const minimalCartItem: CartItem = {
     index: 0,
     total: 699.00,
     quantity: 1,
     product: minimalProductDetails,
 };
+
 const minimalCart: Optional<Cart, 'lastUpdateTime'> = {
     currency: 'brl',
     total: 776.49,
     items: [minimalCartItem],
 };
+
 const minimalOrderItem: OrderItem = {
     index: 0,
     total: 699.00,
     quantity: 1,
     product: minimalProductDetails,
 };
+
 const minimalOrder: Order = {
     orderId: 'b76c0ef6-9520-4107-9de3-11110829588e',
     currency: 'brl',
@@ -80,10 +96,10 @@ describe('The "cartViewed" payload schema', () => {
 });
 
 describe('The "checkoutStarted" payload schema', () => {
-    it.each([
+    it.each<Array<Omit<ExternalTrackingEvent<'checkoutStarted'>, 'type'>>>([
         [{cart: minimalCart}],
         [{cart: minimalCart, orderId: 'b76c0ef6-9520-4107-9de3-11110829588e'}],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             checkoutStarted.validate(value);
         }
@@ -150,7 +166,7 @@ describe('The "productViewed" payload schema', () => {
 });
 
 describe('The "userSignedUp" payload schema', () => {
-    it.each([
+    it.each<Array<Omit<ExternalTrackingEvent<'userSignedUp'>, 'type'>>>([
         [{
             userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
         }],
@@ -158,7 +174,7 @@ describe('The "userSignedUp" payload schema', () => {
             userId: '1ed2fd65-a027-4f3a-a35f-c6dd97537392',
             profile: {firstName: 'John'},
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             userSignedUp.validate(value);
         }
@@ -193,7 +209,7 @@ describe('The "userSignedUp" payload schema', () => {
 });
 
 describe('The "eventOccurred" payload schema', () => {
-    it.each([
+    it.each<Array<Omit<EventOccurred, 'type'>>>([
         [{
             name: 'foo',
         }],
@@ -210,7 +226,7 @@ describe('The "eventOccurred" payload schema', () => {
                 boolean: true,
             },
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             eventOccurred.validate(value);
         }
@@ -336,7 +352,7 @@ describe('The "eventOccurred" payload schema', () => {
 });
 
 describe('The "goalCompleted" payload schema', () => {
-    it.each([
+    it.each<Array<Omit<GoalCompleted, 'type'>>>([
         [{
             goalId: 'foo:bar-baz_123',
         }],
@@ -357,7 +373,7 @@ describe('The "goalCompleted" payload schema', () => {
             value: 1,
             currency: 'brl',
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             goalCompleted.validate(value);
         }
@@ -444,14 +460,14 @@ describe('The "goalCompleted" payload schema', () => {
 });
 
 describe('The "interestShown" payload schema', () => {
-    it.each([
+    it.each<Array<Omit<InterestShown, 'type'>>>([
         [{
             interests: ['foo'],
         }],
         [{
             interests: new Array(10).fill('x'),
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             interestShown.validate(value);
         }
@@ -490,7 +506,7 @@ describe('The "interestShown" payload schema', () => {
 });
 
 describe('The "postViewed" payload schema', () => {
-    it.each([
+    it.each<Array<Omit<PostViewed, 'type'>>>([
         [{
             post: {
                 postId: 'post-id',
@@ -498,7 +514,7 @@ describe('The "postViewed" payload schema', () => {
                 publishTime: 0,
             },
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             postViewed.validate(value);
         }
@@ -525,7 +541,7 @@ describe('The "postViewed" payload schema', () => {
 });
 
 describe('The "linkOpened" payload schema', () => {
-    it.each([
+    it.each<Array<Omit<LinkOpened, 'type'>>>([
         [{
             link: 'http://www.foo.com.br',
         }],

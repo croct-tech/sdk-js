@@ -29,10 +29,10 @@
   },
   "dependencies": {
     "@croct/json": "^2.0.1",
-    "tslib": "^2.4.1"
+    "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@croct/eslint-plugin": "^0.6.3",
+    "@croct/eslint-plugin": "^0.6.6",
     "@types/jest": "^29.2.3",
     "eslint": "^8.27.0",
     "fetch-mock": "^9.11.0",

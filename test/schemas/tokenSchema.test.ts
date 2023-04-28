@@ -1,7 +1,14 @@
 import {tokenSchema} from '../../src/schema';
+import {TokenPayload, Headers} from '../../src/token';
+
+type ParsedToken = {
+    headers: Headers,
+    payload: TokenPayload,
+    signature?: string,
+};
 
 describe('The token schema', () => {
-    it.each([
+    it.each<ParsedToken[]>([
         [{
             headers: {
                 typ: 'JWT',
@@ -55,7 +62,7 @@ describe('The token schema', () => {
                 },
             },
         }],
-    ])('should allow %s', (value: Record<string, unknown>) => {
+    ])('should allow %s', value => {
         function validate(): void {
             tokenSchema.validate(value);
         }

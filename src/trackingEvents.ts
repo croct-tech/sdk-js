@@ -7,7 +7,7 @@ import {DistributiveOmit, Optional} from './utilityTypes';
 
 export type ProductDetails = {
     productId: string,
-    productSku?: string,
+    sku?: string,
     name: string,
     category?: string,
     brand?: string,
@@ -144,7 +144,7 @@ type TwoLevelMap = {[member: string]: Primitive | PrimitiveMap | PrimitiveArray}
 type TwoLevelArray = PrimitiveArray | PrimitiveMap[] | PrimitiveArray[];
 type CustomAttribute = Primitive | TwoLevelMap | TwoLevelArray;
 
-type UserProfile = {
+export type UserProfile = {
     firstName?: string,
     lastName?: string,
     birthDate?: string,

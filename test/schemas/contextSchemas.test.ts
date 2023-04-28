@@ -1,11 +1,12 @@
 import {tokenScopeSchema} from '../../src/schema';
+import {TokenScope} from '../../src/context';
 
 describe('The token schema', () => {
-    it.each([
+    it.each<TokenScope[]>([
         ['global'],
         ['contextual'],
         ['isolated'],
-    ])('should allow the value "%s"', (value: string) => {
+    ])('should allow the value "%s"', value => {
         function validate(): void {
             tokenScopeSchema.validate(value);
         }
