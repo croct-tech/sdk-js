@@ -210,7 +210,7 @@ describe('A container', () => {
         await expect(assigner.assignCid()).resolves.toBe(cid);
     });
 
-    it('should refresh the CID when the refresh flag is enabled', async () => {
+    it('should refresh the CID passing the current CID as a query parameter', async () => {
         const cid = 'e6a133ffd3d2410681403d5e1bd95505';
         const endpoint = `${configuration.cidAssignerEndpointUrl}?cid=${cid}`;
 
@@ -255,6 +255,23 @@ describe('A container', () => {
         await expect(assigner.assignCid()).resolves.toBe(cid);
 
         expect(fetchMock.lastUrl()).toBeUndefined();
+    });
+
+    it('should not refresh the CID when there is no cached CID', async () => {
+        fetchMock.mock({
+            method: 'GET',
+            matcher: configuration.cidAssignerEndpointUrl,
+            response: '123',
+        });
+
+        const container = new Container({
+            ...configuration,
+            refreshCid: true,
+        });
+
+        const assigner = container.getCidAssigner();
+
+        await expect(assigner.assignCid()).resolves.toBe('123');
     });
 
     it('should configure a fixed CID assigner in test mode', async () => {

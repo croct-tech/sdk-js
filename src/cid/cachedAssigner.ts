@@ -23,39 +23,46 @@ export class CachedAssigner implements CidAssigner {
         };
     }
 
-    public async assignCid(): Promise<string> {
-        const cid = this.cache.get();
+    public async assignCid(currentCid?: string): Promise<string> {
+        const cachedCid = this.cache.get();
+        const previousCid = currentCid ?? cachedCid ?? null;
         const {logger, refresh} = this.options;
 
-        if (cid !== null) {
-            logger.debug('Previous CID loaded from cache');
+        if (previousCid === null) {
+            const newCid = await this.assigner.assignCid();
 
-            if (refresh) {
-                logger.debug('Refreshing CID');
+            this.cache.put(newCid);
 
-                this.assigner
-                    .assignCid()
-                    .then(newCid => {
-                        if (newCid !== cid) {
-                            logger.warn('The CID has changed, updating cache');
+            logger.debug('New CID stored into cache');
 
-                            this.cache.put(newCid);
-                        }
-                    })
-                    .catch(() => {
-                        logger.error('Failed to refresh CID');
-                    });
-            }
-
-            return cid;
+            return newCid;
         }
 
-        const newCid = await this.assigner.assignCid();
+        logger.debug('Using existing CID');
 
-        this.cache.put(newCid);
+        if (cachedCid !== previousCid) {
+            logger.debug('Cached CID is stale, updating cache...');
 
-        logger.debug('New CID stored into cache');
+            this.cache.put(previousCid);
+        }
 
-        return newCid;
+        if (refresh) {
+            logger.debug('Refreshing CID');
+
+            this.assigner
+                .assignCid(previousCid)
+                .then(newCid => {
+                    if (newCid !== previousCid) {
+                        logger.warn('The CID has changed, updating cache...');
+
+                        this.cache.put(newCid);
+                    }
+                })
+                .catch(() => {
+                    logger.error('Failed to refresh CID');
+                });
+        }
+
+        return previousCid;
     }
 }

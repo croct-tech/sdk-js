@@ -1,3 +1,3 @@
 export interface CidAssigner {
-    assignCid(): Promise<string>;
+    assignCid(currentCid?: string): Promise<string>;
 }

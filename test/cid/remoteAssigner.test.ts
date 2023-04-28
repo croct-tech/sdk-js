@@ -75,4 +75,15 @@ describe('A remote CID assigner', () => {
 
         expect(done).toHaveBeenCalled();
     });
+
+    it('should pass the current CID to the endpoint', async () => {
+        const cachedAssigner = new RemoteAssigner(ENDPOINT);
+
+        fetchMock.mock({
+            ...requestMatcher,
+            matcher: `${ENDPOINT}?cid=321`,
+        });
+
+        await expect(cachedAssigner.assignCid('321')).resolves.toEqual('123');
+    });
 });
