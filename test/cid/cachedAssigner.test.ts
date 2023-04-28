@@ -73,6 +73,8 @@ describe('A cached CID assigner', () => {
 
         await expect(cachedAssigner.assignCid()).resolves.toEqual('321');
 
+        expect(logger.debug).toHaveBeenCalledWith('The cached CID is stale, updating cache...');
+
         expect(underlyingAssigner.assignCid).not.toHaveBeenCalled();
     });
 

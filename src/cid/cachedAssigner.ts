@@ -41,7 +41,7 @@ export class CachedAssigner implements CidAssigner {
         logger.debug('Using existing CID');
 
         if (cachedCid !== previousCid) {
-            logger.debug('Cached CID is stale, updating cache...');
+            logger.debug('The cached CID is stale, updating cache...');
 
             this.cache.put(previousCid);
         }
