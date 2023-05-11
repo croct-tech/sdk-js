@@ -24,7 +24,7 @@ describe('A SDK', () => {
         clientId: 'e6a133ffd3d2410681403d5e1bd95505',
         tokenScope: 'global',
         beaconQueueSize: 3,
-        refreshCid: false,
+        disableCidMirroring: false,
         debug: true,
         test: false,
         logger: new NullLogger(),
@@ -264,7 +264,7 @@ describe('A SDK', () => {
             appId: configuration.appId,
             cidAssignerEndpointUrl: configuration.cidAssignerEndpointUrl,
             tokenScope: configuration.tokenScope,
-            refreshCid: false,
+            disableCidMirroring: false,
             debug: false,
             test: false,
         });
@@ -288,7 +288,7 @@ describe('A SDK', () => {
                 appId: configuration.appId,
                 tokenScope: configuration.tokenScope,
                 ...(baseEndpoint !== undefined ? {baseEndpointUrl: baseEndpoint} : {}),
-                refreshCid: false,
+                disableCidMirroring: false,
                 debug: false,
                 test: false,
             });

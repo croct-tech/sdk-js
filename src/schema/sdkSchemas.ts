@@ -15,7 +15,7 @@ export const eventMetadataSchema = new ObjectType({
 });
 
 export const sdkConfigurationSchema = new ObjectType({
-    required: ['appId', 'tokenScope', 'refreshCid', 'debug', 'test'],
+    required: ['appId', 'tokenScope', 'disableCidMirroring', 'debug', 'test'],
     properties: {
         appId: new StringType({
             format: 'uuid',
@@ -34,7 +34,7 @@ export const sdkConfigurationSchema = new ObjectType({
             minimum: 0,
             integer: true,
         }),
-        refreshCid: new BooleanType(),
+        disableCidMirroring: new BooleanType(),
         debug: new BooleanType(),
         test: new BooleanType(),
         logger: loggerSchema,

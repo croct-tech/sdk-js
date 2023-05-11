@@ -29,7 +29,7 @@ describe('The SDK facade configuration schema', () => {
             tokenScope: 'isolated',
             userId: 'c4r0l',
             token: 'a.b.c',
-            refreshCid: true,
+            disableCidMirroring: true,
             debug: true,
             test: true,
             track: true,
@@ -98,8 +98,8 @@ describe('The SDK facade configuration schema', () => {
             "Expected value of type boolean at path '/track', actual string.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', refreshCid: 'foo'},
-            "Expected value of type boolean at path '/refreshCid', actual string.",
+            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', disableCidMirroring: 'foo'},
+            "Expected value of type boolean at path '/disableCidMirroring', actual string.",
         ],
         [
             {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', logger: null},

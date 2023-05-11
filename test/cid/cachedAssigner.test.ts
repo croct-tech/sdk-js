@@ -117,7 +117,7 @@ describe('A cached CID assigner', () => {
 
         const cachedAssigner = new CachedAssigner(underlyingAssigner, cache, {
             logger: logger,
-            refresh: true,
+            mirror: true,
         });
 
         cache.put('123');
@@ -128,7 +128,7 @@ describe('A cached CID assigner', () => {
 
         expect(logger.debug).toHaveBeenCalledWith('Using existing CID');
 
-        expect(logger.debug).toHaveBeenCalledWith('Refreshing CID');
+        expect(logger.debug).toHaveBeenCalledWith('Mirroring CID');
 
         await expect(cachedAssigner.assignCid()).resolves.toEqual('321');
 
@@ -152,7 +152,7 @@ describe('A cached CID assigner', () => {
 
         const cachedAssigner = new CachedAssigner(underlyingAssigner, cache, {
             logger: logger,
-            refresh: true,
+            mirror: true,
         });
 
         // Make sure it will use the current CID and not the cached one
@@ -179,7 +179,7 @@ describe('A cached CID assigner', () => {
 
         const cachedAssigner = new CachedAssigner(underlyingAssigner, cache, {
             logger: logger,
-            refresh: true,
+            mirror: true,
         });
 
         cache.put('123');
@@ -202,7 +202,7 @@ describe('A cached CID assigner', () => {
 
         const cachedAssigner = new CachedAssigner(underlyingAssigner, cache, {
             logger: logger,
-            refresh: true,
+            mirror: true,
         });
 
         cache.put('123');
@@ -211,6 +211,6 @@ describe('A cached CID assigner', () => {
 
         expect(underlyingAssigner.assignCid).toHaveBeenCalledTimes(1);
 
-        expect(logger.error).toHaveBeenCalledWith('Failed to refresh CID');
+        expect(logger.error).toHaveBeenCalledWith('Failed to mirror CID');
     });
 });
