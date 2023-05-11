@@ -1001,7 +1001,7 @@ describe('A tracker', () => {
                 patch: {
                     operations: [
                         {
-                            type: 'set',
+                            type: 'merge',
                             path: '.',
                             value: {
                                 firstName: 'John',
