@@ -428,7 +428,7 @@ export class Tracker {
                 patch: {
                     operations: [
                         {
-                            type: 'set',
+                            type: 'merge',
                             path: '.',
                             value: profile,
                         },
