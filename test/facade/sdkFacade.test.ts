@@ -92,7 +92,7 @@ describe('A SDK facade', () => {
             {
                 appId: appId,
                 tokenScope: 'global',
-                refreshCid: false,
+                disableCidMirroring: false,
                 debug: false,
                 test: false,
             } satisfies Configuration,
@@ -123,7 +123,7 @@ describe('A SDK facade', () => {
                 appId: appId,
                 baseEndpointUrl: 'https://api.croct.io',
                 cidAssignerEndpointUrl: 'https://api.croct.io/cid',
-                refreshCid: false,
+                disableCidMirroring: false,
                 debug: false,
                 test: false,
                 tokenScope: 'isolated',

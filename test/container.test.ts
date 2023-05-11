@@ -25,7 +25,7 @@ describe('A container', () => {
         beaconQueueSize: 3,
         debug: false,
         test: false,
-        refreshCid: false,
+        disableCidMirroring: false,
         cidAssignerEndpointUrl: 'https://localtest/cid',
         contentBaseEndpointUrl: 'https://localtest/content',
         evaluationBaseEndpointUrl: 'https://localtest/evaluate',
@@ -224,7 +224,7 @@ describe('A container', () => {
 
         const container = new Container({
             ...configuration,
-            refreshCid: true,
+            disableCidMirroring: false,
         });
 
         const assigner = container.getCidAssigner();
@@ -247,7 +247,7 @@ describe('A container', () => {
 
         const container = new Container({
             ...configuration,
-            refreshCid: false,
+            disableCidMirroring: false,
         });
 
         const assigner = container.getCidAssigner();
@@ -266,7 +266,7 @@ describe('A container', () => {
 
         const container = new Container({
             ...configuration,
-            refreshCid: true,
+            disableCidMirroring: false,
         });
 
         const assigner = container.getCidAssigner();

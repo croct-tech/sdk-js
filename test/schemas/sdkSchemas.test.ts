@@ -69,7 +69,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            refreshCid: true,
+            disableCidMirroring: true,
             debug: true,
             test: true,
         }],
@@ -80,7 +80,7 @@ describe('The SDK configuration schema', () => {
             baseEndpointUrl: 'https://api.croct.io',
             cidAssignerEndpointUrl: 'https://api.croct.io/cid',
             beaconQueueSize: 1,
-            refreshCid: true,
+            disableCidMirroring: true,
             debug: true,
             test: true,
             logger: {
@@ -103,7 +103,7 @@ describe('The SDK configuration schema', () => {
         [
             {
                 tokenScope: 'global',
-                refreshCid: true,
+                disableCidMirroring: true,
                 debug: true,
                 test: true,
             },
@@ -112,7 +112,7 @@ describe('The SDK configuration schema', () => {
         [
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-                refreshCid: true,
+                disableCidMirroring: true,
                 debug: true,
                 test: true,
             },
@@ -125,13 +125,13 @@ describe('The SDK configuration schema', () => {
                 debug: true,
                 test: true,
             },
-            "Missing property '/refreshCid'.",
+            "Missing property '/disableCidMirroring'.",
         ],
         [
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 tokenScope: 'global',
-                refreshCid: true,
+                disableCidMirroring: true,
                 test: true,
             },
             "Missing property '/debug'.",
@@ -140,7 +140,7 @@ describe('The SDK configuration schema', () => {
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 tokenScope: 'global',
-                refreshCid: true,
+                disableCidMirroring: true,
                 debug: true,
                 test: true,
                 clientId: '7e9d59a9',
@@ -150,7 +150,7 @@ describe('The SDK configuration schema', () => {
         [
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-                refreshCid: true,
+                disableCidMirroring: true,
                 debug: true,
                 test: true,
                 tokenScope: 'x',
@@ -161,7 +161,7 @@ describe('The SDK configuration schema', () => {
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 tokenScope: 'global',
-                refreshCid: true,
+                disableCidMirroring: true,
                 test: true,
                 debug: 'foo',
             },
@@ -171,7 +171,7 @@ describe('The SDK configuration schema', () => {
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 tokenScope: 'global',
-                refreshCid: true,
+                disableCidMirroring: true,
                 debug: true,
                 test: 'foo',
             },
@@ -181,7 +181,7 @@ describe('The SDK configuration schema', () => {
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 tokenScope: 'global',
-                refreshCid: true,
+                disableCidMirroring: true,
                 debug: true,
                 test: true,
                 baseEndpointUrl: 'foo',
@@ -192,7 +192,7 @@ describe('The SDK configuration schema', () => {
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 tokenScope: 'global',
-                refreshCid: true,
+                disableCidMirroring: true,
                 debug: true,
                 test: true,
                 cidAssignerEndpointUrl: 'foo',
@@ -203,7 +203,7 @@ describe('The SDK configuration schema', () => {
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 tokenScope: 'global',
-                refreshCid: true,
+                disableCidMirroring: true,
                 debug: true,
                 test: true,
                 beaconQueueSize: -1,
@@ -214,7 +214,7 @@ describe('The SDK configuration schema', () => {
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 tokenScope: 'global',
-                refreshCid: true,
+                disableCidMirroring: true,
                 debug: true,
                 test: true,
                 beaconQueueSize: 1.2,
@@ -225,7 +225,7 @@ describe('The SDK configuration schema', () => {
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 tokenScope: 'global',
-                refreshCid: true,
+                disableCidMirroring: true,
                 debug: true,
                 test: true,
                 eventMetadata: {foo: 1},
@@ -236,7 +236,7 @@ describe('The SDK configuration schema', () => {
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 tokenScope: 'global',
-                refreshCid: true,
+                disableCidMirroring: true,
                 debug: true,
                 test: true,
                 logger: null,

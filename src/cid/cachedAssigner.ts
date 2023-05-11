@@ -4,7 +4,7 @@ import {CidAssigner} from './assigner';
 
 type CachedAssignerOptions = {
     logger?: Logger,
-    refresh?: boolean,
+    mirror?: boolean,
 };
 
 export class CachedAssigner implements CidAssigner {
@@ -19,14 +19,14 @@ export class CachedAssigner implements CidAssigner {
         this.cache = cache;
         this.options = {
             logger: options.logger ?? new NullLogger(),
-            refresh: options.refresh ?? false,
+            mirror: options.mirror ?? false,
         };
     }
 
     public async assignCid(currentCid?: string): Promise<string> {
         const cachedCid = this.cache.get();
         const previousCid = currentCid ?? cachedCid ?? null;
-        const {logger, refresh} = this.options;
+        const {logger, mirror} = this.options;
 
         if (previousCid === null) {
             const newCid = await this.assigner.assignCid();
@@ -46,8 +46,8 @@ export class CachedAssigner implements CidAssigner {
             this.cache.put(previousCid);
         }
 
-        if (refresh) {
-            logger.debug('Refreshing CID');
+        if (mirror) {
+            logger.debug('Mirroring CID');
 
             this.assigner
                 .assignCid(previousCid)
@@ -59,7 +59,7 @@ export class CachedAssigner implements CidAssigner {
                     }
                 })
                 .catch(() => {
-                    logger.error('Failed to refresh CID');
+                    logger.error('Failed to mirror CID');
                 });
         }
 

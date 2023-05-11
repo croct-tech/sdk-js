@@ -32,7 +32,7 @@ export type Configuration = {
     clientId?: string,
     debug: boolean,
     test: boolean,
-    refreshCid: boolean,
+    disableCidMirroring: boolean,
     cidAssignerEndpointUrl: string,
     trackerEndpointUrl: string,
     evaluationBaseEndpointUrl: string,
@@ -263,7 +263,7 @@ export class Container {
             new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),
             {
                 logger: logger,
-                refresh: this.configuration.refreshCid,
+                mirror: !this.configuration.disableCidMirroring,
             },
         );
     }
