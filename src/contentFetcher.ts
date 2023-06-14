@@ -51,7 +51,7 @@ export type DynamicContentOptions = BasicOptions & {
     static?: false,
     clientId?: string,
     clientIp?: string,
-    userAgent?: string,
+    clientAgent?: string,
     userToken?: Token|string,
     previewToken?: Token|string,
     context?: EvaluationContext,
@@ -203,8 +203,8 @@ export class ContentFetcher {
                 headers['X-Token'] = options.userToken.toString();
             }
 
-            if (options.userAgent !== undefined) {
-                headers['User-Agent'] = options.userAgent;
+            if (options.clientAgent !== undefined) {
+                headers['X-Client-Agent'] = options.clientAgent;
             }
 
             if (options.context !== undefined) {

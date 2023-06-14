@@ -34,7 +34,7 @@ type ExtraFetchOptions<T extends keyof RequestInit = AllowedFetchOptions> = Pick
 export type EvaluationOptions = {
     clientId?: string,
     clientIp?: string,
-    userAgent?: string,
+    clientAgent?: string,
     userToken?: Token|string,
     timeout?: number,
     context?: EvaluationContext,
@@ -215,7 +215,7 @@ export class Evaluator {
 
     private fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
         const {appId, apiKey} = this.configuration;
-        const {clientId, clientIp, userAgent, userToken} = options;
+        const {clientId, clientIp, clientAgent, userToken} = options;
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
@@ -241,8 +241,8 @@ export class Evaluator {
             headers['X-Token'] = userToken.toString();
         }
 
-        if (userAgent !== undefined) {
-            headers['User-Agent'] = userAgent;
+        if (clientAgent !== undefined) {
+            headers['X-Client-Agent'] = clientAgent;
         }
 
         return fetch(this.endpoint, {

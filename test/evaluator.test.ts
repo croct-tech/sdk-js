@@ -195,13 +195,13 @@ describe('An evaluator', () => {
             ...requestMatcher,
             headers: {
                 ...requestMatcher.headers,
-                'User-Agent': userAgent,
+                'X-Client-Agent': userAgent,
             },
             response: JSON.stringify(result),
         });
 
         const options: EvaluationOptions = {
-            userAgent: userAgent,
+            clientAgent: userAgent,
         };
 
         await expect(evaluator.evaluate(query, options)).resolves.toBe(result);

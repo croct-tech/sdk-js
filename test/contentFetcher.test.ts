@@ -225,14 +225,14 @@ describe('A content fetcher', () => {
         const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
 
         const options: FetchOptions = {
-            userAgent: userAgent,
+            clientAgent: userAgent,
         };
 
         fetchMock.mock({
             ...requestMatcher,
             headers: {
                 ...requestMatcher.headers,
-                'User-Agent': userAgent,
+                'X-Client-Agent': userAgent,
             },
             response: content,
         });
