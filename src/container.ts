@@ -88,6 +88,7 @@ export class Container {
         return new Evaluator({
             appId: this.configuration.appId,
             baseEndpointUrl: this.configuration.evaluationBaseEndpointUrl,
+            logger: this.getLogger('Evaluator'),
         });
     }
 
@@ -103,6 +104,7 @@ export class Container {
         return new ContentFetcher({
             appId: this.configuration.appId,
             baseEndpointUrl: this.configuration.contentBaseEndpointUrl,
+            logger: this.getLogger('ContentFetcher'),
         });
     }
 

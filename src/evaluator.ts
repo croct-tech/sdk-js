@@ -3,6 +3,7 @@ import {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
+import {Logger, NullLogger} from './logging';
 
 export type Campaign = {
     name?: string,
@@ -35,6 +36,10 @@ export type EvaluationOptions = {
     clientId?: string,
     clientIp?: string,
     clientAgent?: string,
+    /**
+     * @deprecated Use `clientAgent` instead. This option will be removed in future releases.
+     */
+    userAgent?: string,
     userToken?: Token|string,
     timeout?: number,
     context?: EvaluationContext,
@@ -91,14 +96,17 @@ export type Configuration = {
     appId?: string,
     apiKey?: string,
     baseEndpointUrl?: string,
+    logger?: Logger,
 };
 
 export class Evaluator {
     public static readonly MAX_QUERY_LENGTH = MAX_QUERY_LENGTH;
 
-    private readonly configuration: Configuration;
+    private readonly configuration: Pick<Configuration, 'appId' | 'apiKey'>;
 
     private readonly endpoint: string;
+
+    private readonly logger: Logger;
 
     public constructor(configuration: Configuration) {
         if ((configuration.appId === undefined) === (configuration.apiKey === undefined)) {
@@ -113,6 +121,7 @@ export class Evaluator {
             + '/web/evaluate';
 
         this.configuration = configuration;
+        this.logger = configuration.logger ?? new NullLogger();
     }
 
     public evaluate(query: string, options: EvaluationOptions = {}): Promise<JsonValue> {
@@ -215,7 +224,17 @@ export class Evaluator {
 
     private fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
         const {appId, apiKey} = this.configuration;
-        const {clientId, clientIp, clientAgent, userToken} = options;
+        const {clientId, clientIp, userToken} = options;
+        const clientAgent = options.clientAgent ?? options.userAgent;
+
+        if (options.userAgent !== undefined) {
+            this.logger.warn(
+                'The `userAgent` option is deprecated and '
+                + 'will be removed in future releases. '
+                + 'Please update the part of your code calling the `evaluate` method '
+                + 'to use the `clientAgent` option instead.',
+            );
+        }
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',

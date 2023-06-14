@@ -12,6 +12,7 @@ import {
 } from '../src/evaluator';
 import {Token} from '../src/token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
+import {Logger} from '../src/logging';
 
 jest.mock(
     '../src/constants',
@@ -205,6 +206,43 @@ describe('An evaluator', () => {
         };
 
         await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
+    });
+
+    it('should warn when passing a userAgent option', async () => {
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
+        const evaluator = new Evaluator({
+            appId: appId,
+            logger: logger,
+        });
+
+        const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
+
+        const result = 'Carol';
+
+        fetchMock.mock({
+            ...requestMatcher,
+            headers: {
+                ...requestMatcher.headers,
+                'X-Client-Agent': userAgent,
+            },
+            response: JSON.stringify(result),
+        });
+
+        const options: EvaluationOptions = {
+            userAgent: userAgent,
+        };
+
+        await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
+
+        expect(logger.warn).toHaveBeenCalledWith(
+            expect.stringContaining('The `userAgent` option is deprecated '),
+        );
     });
 
     it('should fetch using the extra options', async () => {

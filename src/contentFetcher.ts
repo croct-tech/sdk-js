@@ -3,6 +3,7 @@ import {EvaluationContext} from './evaluator';
 import {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from './constants';
 import {formatMessage} from './error';
+import {Logger, NullLogger} from './logging';
 
 export type ErrorResponse = {
     type: string,
@@ -52,6 +53,10 @@ export type DynamicContentOptions = BasicOptions & {
     clientId?: string,
     clientIp?: string,
     clientAgent?: string,
+    /**
+     * @deprecated Use `clientAgent` instead. This option will be removed in future releases.
+     */
+    userAgent?: string,
     userToken?: Token|string,
     previewToken?: Token|string,
     context?: EvaluationContext,
@@ -73,14 +78,17 @@ export type Configuration = {
     appId?: string,
     apiKey?: string,
     baseEndpointUrl?: string,
+    logger?: Logger,
 };
 
 export class ContentFetcher {
-    private readonly configuration: Configuration;
+    private readonly configuration: Pick<Configuration, 'appId' | 'apiKey'>;
 
     private readonly dynamicEndpoint: string;
 
     private readonly staticEndpoint: string;
+
+    private readonly logger: Logger;
 
     public constructor(configuration: Configuration) {
         if ((configuration.appId === undefined) === (configuration.apiKey === undefined)) {
@@ -89,7 +97,7 @@ export class ContentFetcher {
 
         this.configuration = configuration;
 
-        const {apiKey, baseEndpointUrl} = this.configuration;
+        const {apiKey, baseEndpointUrl} = configuration;
 
         // eslint-disable-next-line prefer-template -- Better readability
         const baseEndpoint = (baseEndpointUrl ?? BASE_ENDPOINT_URL).replace(/\/+$/, '')
@@ -98,6 +106,7 @@ export class ContentFetcher {
 
         this.dynamicEndpoint = `${baseEndpoint}/content`;
         this.staticEndpoint = `${baseEndpoint}/static-content`;
+        this.logger = configuration.logger ?? new NullLogger();
     }
 
     public fetch<P extends JsonObject>(slotId: string, options: FetchOptions = {}): Promise<FetchResponse<P>> {
@@ -191,6 +200,15 @@ export class ContentFetcher {
         const dynamic = ContentFetcher.isDynamicContent(options);
 
         if (dynamic) {
+            if (options.userAgent !== undefined) {
+                this.logger.warn(
+                    'The `userAgent` option is deprecated and '
+                    + 'will be removed in future releases. '
+                    + 'Please update the part of your code calling the `fetch` method '
+                    + 'to use the `clientAgent` option instead.',
+                );
+            }
+
             if (options.clientId !== undefined) {
                 headers['X-Client-Id'] = options.clientId;
             }
@@ -203,8 +221,10 @@ export class ContentFetcher {
                 headers['X-Token'] = options.userToken.toString();
             }
 
-            if (options.clientAgent !== undefined) {
-                headers['X-Client-Agent'] = options.clientAgent;
+            const clientAgent = options.clientAgent ?? options.userAgent;
+
+            if (clientAgent !== undefined) {
+                headers['X-Client-Agent'] = clientAgent;
             }
 
             if (options.context !== undefined) {
