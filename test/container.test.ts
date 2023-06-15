@@ -234,12 +234,12 @@ describe('A container', () => {
         expect(fetchMock.lastUrl()).toBe(endpoint);
     });
 
-    it('should not refresh the CID when the refresh flag is disabled', async () => {
+    it('should not refresh the CID when mirroring is disabled', async () => {
         const cid = 'e6a133ffd3d2410681403d5e1bd95505';
 
         fetchMock.mock({
             method: 'GET',
-            matcher: configuration.cidAssignerEndpointUrl,
+            matcher: `begin:${configuration.cidAssignerEndpointUrl}`,
             response: '123',
         });
 
@@ -247,7 +247,7 @@ describe('A container', () => {
 
         const container = new Container({
             ...configuration,
-            disableCidMirroring: false,
+            disableCidMirroring: true,
         });
 
         const assigner = container.getCidAssigner();

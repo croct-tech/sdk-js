@@ -4,6 +4,7 @@ import {EvaluationContext} from '../src/evaluator';
 import {Token} from '../src/token';
 import {ContentFetcher, ContentError, ContentErrorType, ErrorResponse, FetchOptions} from '../src/contentFetcher';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
+import {Logger} from '../src/logging';
 
 jest.mock(
     '../src/constants',
@@ -217,9 +218,40 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    it('should fetch dynamic content passing the provided user agent', async () => {
+    it('should fetch dynamic content passing the provided client agent', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+        });
+
+        const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
+
+        const options: FetchOptions = {
+            clientAgent: userAgent,
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            headers: {
+                ...requestMatcher.headers,
+                'X-Client-Agent': userAgent,
+            },
+            response: content,
+        });
+
+        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+    });
+
+    it('should warn when passing a userAgent option', async () => {
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
+        const fetcher = new ContentFetcher({
+            appId: appId,
+            logger: logger,
         });
 
         const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
@@ -232,12 +264,16 @@ describe('A content fetcher', () => {
             ...requestMatcher,
             headers: {
                 ...requestMatcher.headers,
-                'User-Agent': userAgent,
+                'X-Client-Agent': userAgent,
             },
             response: content,
         });
 
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+
+        expect(logger.warn).toHaveBeenCalledWith(
+            expect.stringContaining('The `userAgent` option is deprecated'),
+        );
     });
 
     it('should fetch dynamic content using the provided user token', async () => {
