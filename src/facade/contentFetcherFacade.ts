@@ -52,7 +52,6 @@ export class ContentFetcherFacade {
         this.userTokenProvider = configuration.userTokenProvider;
         this.cidAssigner = configuration.cidAssigner;
         this.contextFactory = configuration.contextFactory;
-
         this.options = {
             preferredLocale: configuration.preferredLocale,
         };
