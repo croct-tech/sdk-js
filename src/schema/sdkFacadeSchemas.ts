@@ -38,5 +38,6 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
         cidAssignerEndpointUrl: new StringType({
             format: 'url',
         }),
+        preferredLocale: new StringType(),
     },
 });

@@ -21,7 +21,11 @@ function validate(options: unknown): asserts options is FetchOptions {
     }
 }
 
-export type Configuration = {
+type Options = {
+    preferredLocale?: string,
+};
+
+export type Configuration = Options & {
     contentFetcher: ContentFetcher,
     contextFactory: ContextFactory,
     previewTokenProvider: TokenProvider,
@@ -40,12 +44,18 @@ export class ContentFetcherFacade {
 
     private readonly cidAssigner: CidAssigner;
 
+    private readonly options: Options;
+
     public constructor(configuration: Configuration) {
         this.fetcher = configuration.contentFetcher;
         this.previewTokenProvider = configuration.previewTokenProvider;
         this.userTokenProvider = configuration.userTokenProvider;
         this.cidAssigner = configuration.cidAssigner;
         this.contextFactory = configuration.contextFactory;
+
+        this.options = {
+            preferredLocale: configuration.preferredLocale,
+        };
     }
 
     public async fetch<P extends JsonObject>(slotId: string, options: FetchOptions = {}): Promise<FetchResponse<P>> {
@@ -54,6 +64,8 @@ export class ContentFetcherFacade {
         }
 
         validate(options);
+
+        const preferredLocale = options.preferredLocale ?? this.options.preferredLocale;
 
         return this.fetcher.fetch(slotId, {
             static: false,
@@ -64,6 +76,7 @@ export class ContentFetcherFacade {
             preferredLocale: options.preferredLocale,
             context: this.contextFactory.createContext(options.attributes),
             timeout: options.timeout,
+            ...(preferredLocale !== undefined ? {preferredLocale: preferredLocale} : {}),
         });
     }
 }

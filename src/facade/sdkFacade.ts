@@ -15,7 +15,11 @@ import {PartialTrackingEvent} from '../trackingEvents';
 import {UrlSanitizer} from '../tab';
 import {ContentFetcherFacade} from './contentFetcherFacade';
 
-export type Configuration = {
+type Options = {
+    preferredLocale?: string,
+};
+
+export type Configuration = Options & {
     appId: string,
     tokenScope?: TokenScope,
     debug?: boolean,
@@ -53,8 +57,11 @@ export class SdkFacade {
 
     private contentFetcherFacade?: ContentFetcherFacade;
 
-    private constructor(sdk: Sdk) {
+    private readonly options: Options;
+
+    private constructor(sdk: Sdk, options: Options = {}) {
         this.sdk = sdk;
+        this.options = options;
     }
 
     public static init(configuration: Configuration): SdkFacade {
@@ -166,6 +173,7 @@ export class SdkFacade {
                 cidAssigner: this.sdk.cidAssigner,
                 previewTokenProvider: this.sdk.previewTokenStore,
                 userTokenProvider: this.sdk.userTokenStore,
+                preferredLocale: this.options.preferredLocale,
             });
         }
 
