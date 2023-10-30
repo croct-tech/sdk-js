@@ -67,7 +67,7 @@ export class SdkFacade {
     public static init(configuration: Configuration): SdkFacade {
         validateConfiguration(configuration);
 
-        const {track = true, userId, token, ...containerConfiguration} = configuration;
+        const {track = true, userId, token, preferredLocale, ...containerConfiguration} = configuration;
 
         if (userId !== undefined && token !== undefined) {
             throw new Error('Either the user ID or token can be specified, but not both.');
@@ -81,6 +81,9 @@ export class SdkFacade {
                 test: containerConfiguration.test ?? false,
                 disableCidMirroring: containerConfiguration.disableCidMirroring ?? false,
             }),
+            {
+                preferredLocale: preferredLocale,
+            },
         );
 
         if (userId !== undefined) {

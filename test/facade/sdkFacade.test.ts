@@ -381,17 +381,27 @@ describe('A SDK facade', () => {
                 return sdk;
             });
 
+        const slotId = 'home-banner';
+        const preferredLocale = 'en-us';
+
         const sdkFacade = SdkFacade.init({
             appId: appId,
             track: false,
+            preferredLocale: preferredLocale,
         });
 
-        const slotId = 'home-banner';
-        const options: FetchOptions = {timeout: 5};
+        const options: FetchOptions = {
+            timeout: 5,
+        };
+
+        const expectedOptions: FetchOptions = {
+            ...options,
+            preferredLocale: preferredLocale,
+        };
 
         await expect(sdkFacade.contentFetcher.fetch(slotId, options)).resolves.toBe(result);
 
-        expect(fetcher.fetch).toHaveBeenCalledWith(slotId, expect.objectContaining(options));
+        expect(fetcher.fetch).toHaveBeenCalledWith(slotId, expect.objectContaining(expectedOptions));
         expect(fetcher.fetch).toHaveBeenCalledTimes(1);
     });
 
