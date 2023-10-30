@@ -38,6 +38,8 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
         cidAssignerEndpointUrl: new StringType({
             format: 'url',
         }),
-        preferredLocale: new StringType(),
+        preferredLocale: new StringType({
+            pattern: /^[a-z]{2,3}([-_][a-z]{2,3})?$/i,
+        }),
     },
 });
