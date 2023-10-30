@@ -64,18 +64,15 @@ export class ContentFetcherFacade {
 
         validate(options);
 
-        const preferredLocale = options.preferredLocale ?? this.options.preferredLocale;
-
         return this.fetcher.fetch(slotId, {
             static: false,
             clientId: await this.cidAssigner.assignCid(),
             userToken: this.userTokenProvider.getToken() ?? undefined,
             previewToken: this.previewTokenProvider.getToken() ?? undefined,
             version: options.version,
-            preferredLocale: options.preferredLocale,
             context: this.contextFactory.createContext(options.attributes),
             timeout: options.timeout,
-            ...(preferredLocale !== undefined ? {preferredLocale: preferredLocale} : {}),
+            preferredLocale: options.preferredLocale ?? this.options.preferredLocale,
         });
     }
 }
