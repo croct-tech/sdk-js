@@ -24,6 +24,30 @@ describe('The SDK facade configuration schema', () => {
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            preferredLocale: 'pt',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            preferredLocale: 'pt_br',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            preferredLocale: 'pt_BR',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            preferredLocale: 'pt-br',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            preferredLocale: 'pt-BR',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            preferredLocale: 'abc_cde',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             baseEndpointUrl: 'https://api.croct.io/',
             cidAssignerEndpointUrl: 'https://api.croct.io/cid',
             tokenScope: 'isolated',
@@ -54,56 +78,123 @@ describe('The SDK facade configuration schema', () => {
             "Missing property '/appId'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', clientId: '7e9d59a9'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                clientId: '7e9d59a9',
+            },
             "Invalid format at path '/clientId'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', cidAssignerEndpointUrl: 'x'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                cidAssignerEndpointUrl: 'x',
+            },
             "Invalid url format at path '/cidAssignerEndpointUrl'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', baseEndpointUrl: 'x'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                baseEndpointUrl: 'x',
+            },
             "Invalid url format at path '/baseEndpointUrl'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', tokenScope: 'x'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'x',
+            },
             "Unexpected value at path '/tokenScope', expecting 'global', 'contextual' or 'isolated', found 'x'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', userId: ''},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                userId: '',
+            },
             "Expected at least 1 character at path '/userId', actual 0.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', userId: 1},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                userId: 1,
+            },
             "Expected value of type string or null at path '/userId', actual integer.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', token: 'foo'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                token: 'foo',
+            },
             "Invalid format at path '/token'.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', token: 1},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                token: 1,
+            },
             "Expected value of type string or null at path '/token', actual integer.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', debug: 'foo'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                debug: 'foo',
+            },
             "Expected value of type boolean at path '/debug', actual string.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', test: 'foo'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                test: 'foo',
+            },
             "Expected value of type boolean at path '/test', actual string.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', track: 'foo'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                track: 'foo',
+            },
             "Expected value of type boolean at path '/track', actual string.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', disableCidMirroring: 'foo'},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                disableCidMirroring: 'foo',
+            },
             "Expected value of type boolean at path '/disableCidMirroring', actual string.",
         ],
         [
-            {appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', logger: null},
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                logger: null,
+            },
             "Expected value of type object at path '/logger', actual null.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                preferredLocale: '',
+            },
+            "Invalid format at path '/preferredLocale'.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                preferredLocale: 'fooo',
+            },
+            'Invalid format at path \'/preferredLocale\'.',
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                preferredLocale: 'foo-baar',
+            },
+            'Invalid format at path \'/preferredLocale\'.',
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                preferredLocale: 'foo_baar',
+            },
+            'Invalid format at path \'/preferredLocale\'.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {

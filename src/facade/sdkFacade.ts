@@ -15,7 +15,11 @@ import {PartialTrackingEvent} from '../trackingEvents';
 import {UrlSanitizer} from '../tab';
 import {ContentFetcherFacade} from './contentFetcherFacade';
 
-export type Configuration = {
+type Options = {
+    preferredLocale?: string,
+};
+
+export type Configuration = Options & {
     appId: string,
     tokenScope?: TokenScope,
     debug?: boolean,
@@ -53,14 +57,17 @@ export class SdkFacade {
 
     private contentFetcherFacade?: ContentFetcherFacade;
 
-    private constructor(sdk: Sdk) {
+    private readonly options: Options;
+
+    private constructor(sdk: Sdk, options: Options = {}) {
         this.sdk = sdk;
+        this.options = options;
     }
 
     public static init(configuration: Configuration): SdkFacade {
         validateConfiguration(configuration);
 
-        const {track = true, userId, token, ...containerConfiguration} = configuration;
+        const {track = true, userId, token, preferredLocale, ...containerConfiguration} = configuration;
 
         if (userId !== undefined && token !== undefined) {
             throw new Error('Either the user ID or token can be specified, but not both.');
@@ -74,6 +81,9 @@ export class SdkFacade {
                 test: containerConfiguration.test ?? false,
                 disableCidMirroring: containerConfiguration.disableCidMirroring ?? false,
             }),
+            {
+                preferredLocale: preferredLocale,
+            },
         );
 
         if (userId !== undefined) {
@@ -166,6 +176,7 @@ export class SdkFacade {
                 cidAssigner: this.sdk.cidAssigner,
                 previewTokenProvider: this.sdk.previewTokenStore,
                 userTokenProvider: this.sdk.userTokenStore,
+                preferredLocale: this.options.preferredLocale,
             });
         }
 

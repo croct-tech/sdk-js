@@ -94,12 +94,13 @@ describe('A content fetcher facade', () => {
         const userToken = Token.issue('00000000-0000-0000-0000-000000000000', 'foo', Date.now());
         const previewToken = Token.issue('11111111-1111-1111-1111-111111111111', 'bar', Date.now());
 
-        const evaluationFacade = new ContentFetcherFacade({
+        const fetcherFacade = new ContentFetcherFacade({
             contentFetcher: fetcher,
             cidAssigner: new FixedAssigner(clientId),
             userTokenProvider: new FixedTokenProvider(userToken),
             previewTokenProvider: new FixedTokenProvider(previewToken),
             contextFactory: new TabContextFactory(tab),
+            preferredLocale: 'pt-br',
         });
 
         const options: FetchOptions = {
@@ -109,7 +110,6 @@ describe('A content fetcher facade', () => {
             previewToken: previewToken,
             timeout: 5,
             version: 1,
-            preferredLocale: 'en-US',
             context: {
                 attributes: {
                     foo: 'bar',
@@ -125,13 +125,27 @@ describe('A content fetcher facade', () => {
 
         const slotId = 'home-banner';
 
-        await evaluationFacade.fetch(slotId, {
+        await fetcherFacade.fetch(slotId, {
             timeout: options.timeout,
             version: options.version,
-            preferredLocale: options.preferredLocale,
             attributes: options?.context?.attributes,
         });
 
-        expect(fetcher.fetch).toHaveBeenNthCalledWith(1, slotId, options);
+        expect(fetcher.fetch).toHaveBeenNthCalledWith(1, slotId, {
+            ...options,
+            preferredLocale: 'pt-br',
+        });
+
+        await fetcherFacade.fetch(slotId, {
+            timeout: options.timeout,
+            version: options.version,
+            attributes: options?.context?.attributes,
+            preferredLocale: 'en-us',
+        });
+
+        expect(fetcher.fetch).toHaveBeenNthCalledWith(2, slotId, {
+            ...options,
+            preferredLocale: 'en-us',
+        });
     });
 });
