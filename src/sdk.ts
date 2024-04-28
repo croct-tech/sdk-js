@@ -12,6 +12,7 @@ import {CidAssigner} from './cid';
 import {UrlSanitizer} from './tab';
 import {ContentFetcher} from './contentFetcher';
 import {TokenStore} from './token';
+import {CookieCacheConfiguration} from './cache/cookieCache';
 
 export type Configuration = {
     appId: string,
@@ -26,6 +27,7 @@ export type Configuration = {
     urlSanitizer?: UrlSanitizer,
     logger?: Logger,
     eventMetadata?: {[key: string]: string},
+    cidCookie?: CookieCacheConfiguration,
 };
 
 function validateConfiguration(configuration: unknown): asserts configuration is Configuration {

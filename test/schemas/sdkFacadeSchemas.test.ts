@@ -63,6 +63,13 @@ describe('The SDK facade configuration schema', () => {
                 warn: jest.fn(),
                 error: jest.fn(),
             },
+            cidCookie: {
+                name: 'cid',
+                domain: 'croct.com',
+                path: '/',
+                secure: true,
+                sameSite: 'strict',
+            },
         }],
     ])('should allow %s', value => {
         function validate(): void {
@@ -195,6 +202,15 @@ describe('The SDK facade configuration schema', () => {
                 preferredLocale: 'foo_baar',
             },
             'Invalid format at path \'/preferredLocale\'.',
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                cidCookie: {
+                    name: 1,
+                },
+            },
+            "Expected value of type string at path '/cidCookie/name', actual integer.",
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {

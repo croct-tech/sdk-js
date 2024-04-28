@@ -285,7 +285,7 @@ describe('A container', () => {
         await expect(assigner.assignCid()).resolves.toBe('00000000-0000-0000-0000-000000000000');
     });
 
-    it('should configure the CID assigner if a CID is not specified', async () => {
+    it('should configure the CID assigner using local storage by default', async () => {
         fetchMock.mock({
             method: 'GET',
             matcher: configuration.cidAssignerEndpointUrl,
@@ -298,6 +298,50 @@ describe('A container', () => {
         await expect(assigner.assignCid()).resolves.toBe('123');
 
         expect(localStorage.getItem('croct.cid')).toBe('123');
+    });
+
+    it('should configure the CID assigner to use cookies if specified', async () => {
+        fetchMock.mock({
+            method: 'GET',
+            matcher: configuration.cidAssignerEndpointUrl,
+            response: '123',
+        });
+
+        const container = new Container({
+            ...configuration,
+            cidCookie: {
+                name: 'croct.cid',
+            },
+        });
+
+        const assigner = container.getCidAssigner();
+
+        await expect(assigner.assignCid()).resolves.toBe('123');
+
+        expect(document.cookie).toBe('croct.cid=123');
+
+        expect(localStorage.getItem('croct.cid')).toBeNull();
+    });
+
+    it('should use existing CID in cookies if available', async () => {
+        document.cookie = 'croct.cid=456';
+
+        const container = new Container({
+            ...configuration,
+            cidCookie: {
+                name: 'croct.cid',
+            },
+        });
+
+        const assigner = container.getCidAssigner();
+
+        await expect(assigner.assignCid()).resolves.toBe('456');
+
+        expect(document.cookie).toBe('croct.cid=456');
+
+        expect(localStorage.getItem('croct.cid')).toBeNull();
+
+        expect(fetchMock.calls()).toHaveLength(0);
     });
 
     it('should use a stub beacon channel in test mode', async () => {

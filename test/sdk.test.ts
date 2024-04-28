@@ -32,6 +32,11 @@ describe('A SDK', () => {
         eventMetadata: {},
         baseEndpointUrl: 'https://localtest',
         cidAssignerEndpointUrl: 'https://localtest/cid',
+        cidCookie: {
+            name: 'croct_cid',
+            domain: 'localtest',
+            sameSite: 'lax',
+        },
     };
 
     const websocketEndpoint = `${configuration.baseEndpointUrl.replace(/^http/i, 'ws')}/client/web/connect`;

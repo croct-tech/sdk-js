@@ -25,6 +25,7 @@ import {
     SandboxChannel,
 } from './channel';
 import {ContentFetcher} from './contentFetcher';
+import {CookieCache, CookieCacheConfiguration} from './cache/cookieCache';
 
 export type Configuration = {
     appId: string,
@@ -32,6 +33,7 @@ export type Configuration = {
     clientId?: string,
     debug: boolean,
     test: boolean,
+    cidCookie?: CookieCacheConfiguration,
     disableCidMirroring: boolean,
     cidAssignerEndpointUrl: string,
     trackerEndpointUrl: string,
@@ -262,7 +264,9 @@ export class Container {
 
         return new CachedAssigner(
             new RemoteAssigner(this.configuration.cidAssignerEndpointUrl, logger),
-            new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),
+            this.configuration.cidCookie !== undefined
+                ? new CookieCache(this.configuration.cidCookie)
+                : new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),
             {
                 logger: logger,
                 mirror: !this.configuration.disableCidMirroring,

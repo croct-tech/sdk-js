@@ -14,6 +14,7 @@ import {CidAssigner} from '../cid';
 import {PartialTrackingEvent} from '../trackingEvents';
 import {UrlSanitizer} from '../tab';
 import {ContentFetcherFacade} from './contentFetcherFacade';
+import {CookieCacheConfiguration} from '../cache/cookieCache';
 
 type Options = {
     preferredLocale?: string,
@@ -34,6 +35,7 @@ export type Configuration = Options & {
     baseEndpointUrl?: string,
     disableCidMirroring?: boolean,
     cidAssignerEndpointUrl?: string,
+    cidCookie?: CookieCacheConfiguration,
 };
 
 function validateConfiguration(configuration: unknown): asserts configuration is Configuration {

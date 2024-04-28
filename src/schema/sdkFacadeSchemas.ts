@@ -1,6 +1,6 @@
 import {ObjectType, StringType, BooleanType, UnionType, NullType, FunctionType} from '../validation';
 import {tokenScopeSchema} from './contextSchemas';
-import {eventMetadataSchema} from './sdkSchemas';
+import {cookieOptionsSchema, eventMetadataSchema} from './sdkSchemas';
 import {loggerSchema} from './loggerSchema';
 
 export const sdkFacadeConfigurationSchema = new ObjectType({
@@ -38,6 +38,7 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
         cidAssignerEndpointUrl: new StringType({
             format: 'url',
         }),
+        cidCookie: cookieOptionsSchema,
         preferredLocale: new StringType({
             pattern: /^[a-z]{2,3}([-_][a-z]{2,3})?$/i,
         }),

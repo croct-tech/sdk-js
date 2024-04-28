@@ -14,6 +14,29 @@ export const eventMetadataSchema = new ObjectType({
     }),
 });
 
+export const cookieOptionsSchema = new ObjectType({
+    required: ['name'],
+    properties: {
+        name: new StringType({
+            minLength: 1,
+        }),
+        domain: new StringType({
+            minLength: 1,
+        }),
+        path: new StringType({
+            minLength: 1,
+        }),
+        secure: new BooleanType(),
+        sameSite: new StringType({
+            enumeration: ['strict', 'lax', 'none'],
+        }),
+        maxAge: new NumberType({
+            minimum: 0,
+            integer: true,
+        }),
+    },
+});
+
 export const sdkConfigurationSchema = new ObjectType({
     required: ['appId', 'tokenScope', 'disableCidMirroring', 'debug', 'test'],
     properties: {
@@ -35,6 +58,7 @@ export const sdkConfigurationSchema = new ObjectType({
             integer: true,
         }),
         disableCidMirroring: new BooleanType(),
+        cidCookie: cookieOptionsSchema,
         debug: new BooleanType(),
         test: new BooleanType(),
         logger: loggerSchema,
