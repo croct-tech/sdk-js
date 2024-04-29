@@ -154,7 +154,7 @@ export class Token {
             {
                 ...this.headers,
                 kid: keyId,
-                alg: 'HMAC',
+                alg: 'HS256',
             },
             this.payload,
             base64UrlDecode(signature),
