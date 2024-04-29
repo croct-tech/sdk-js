@@ -157,7 +157,7 @@ export class Token {
                 alg: 'HMAC',
             },
             this.payload,
-            signature,
+            base64UrlDecode(signature),
         );
     }
 
