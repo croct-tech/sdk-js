@@ -136,20 +136,24 @@ export class Token {
         const signatureData = `${headers}.${payload}`;
 
         const ec = new TextEncoder();
+        const encodedKey = ec.encode(symetricKey);
 
         const keyOptions: HmacImportParams = {
             name: 'HMAC',
             hash: 'SHA-256',
         };
 
-        const key = await crypto.subtle.importKey('raw', ec.encode(symetricKey), keyOptions, false, ['sign']);
+        const key = await crypto.subtle.importKey('raw', encodedKey, keyOptions, false, ['sign']);
 
         const signatureBytes = Buffer.from(await crypto.subtle.sign('HMAC', key, ec.encode(signatureData)));
         const signature = signatureBytes.toString('base64url');
 
+        const keyId = Buffer.from(await crypto.subtle.digest('', encodedKey)).toString('hex');
+
         return new Token(
             {
                 ...this.headers,
+                kid: keyId,
                 alg: 'HMAC',
             },
             this.payload,
