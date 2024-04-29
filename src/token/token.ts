@@ -130,6 +130,33 @@ export class Token {
         return this.payload.iat;
     }
 
+    public async signedWith(symetricKey: string): Promise<Token> {
+        const headers = base64UrlEncode(JSON.stringify(this.headers), true);
+        const payload = base64UrlEncode(JSON.stringify(this.payload), true);
+        const signatureData = `${headers}.${payload}`;
+
+        const ec = new TextEncoder();
+
+        const keyOptions: HmacImportParams = {
+            name: 'HMAC',
+            hash: 'SHA-256',
+        };
+
+        const key = await crypto.subtle.importKey('raw', ec.encode(symetricKey), keyOptions, false, ['sign']);
+
+        const signatureBytes = Buffer.from(await crypto.subtle.sign('HMAC', key, ec.encode(signatureData)));
+        const signature = signatureBytes.toString('base64url');
+
+        return new Token(
+            {
+                ...this.headers,
+                alg: 'HMAC',
+            },
+            this.payload,
+            signature,
+        );
+    }
+
     public toJSON(): string {
         return this.toString();
     }
