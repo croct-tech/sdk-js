@@ -2,6 +2,7 @@ import {JsonObject} from '@croct/json';
 import {base64UrlDecode, base64UrlEncode} from '../base64Url';
 import {tokenSchema} from '../schema';
 import {formatCause} from '../error';
+import {ApiKey} from '../apiKey';
 
 export type Headers = {
     typ: string,
@@ -130,34 +131,24 @@ export class Token {
         return this.payload.iat;
     }
 
-    public async signedWith(symetricKey: string): Promise<Token> {
+    public async signedWith(apiKey: string | ApiKey): Promise<Token> {
         const headers = base64UrlEncode(JSON.stringify(this.headers), true);
         const payload = base64UrlEncode(JSON.stringify(this.payload), true);
         const signatureData = `${headers}.${payload}`;
 
-        const ec = new TextEncoder();
-        const encodedKey = ec.encode(symetricKey);
+        const parsedApiKey = ApiKey.from(apiKey);
 
-        const keyOptions: HmacImportParams = {
-            name: 'HMAC',
-            hash: 'SHA-256',
-        };
-
-        const key = await crypto.subtle.importKey('raw', encodedKey, keyOptions, false, ['sign']);
-
-        const signatureBytes = Buffer.from(await crypto.subtle.sign('HMAC', key, ec.encode(signatureData)));
-        const signature = signatureBytes.toString('base64url');
-
-        const keyId = Buffer.from(await crypto.subtle.digest('', encodedKey)).toString('hex');
+        const keyId = await parsedApiKey.getHash();
+        const signature = await parsedApiKey.signBlob(Buffer.from(signatureData, 'utf-8'));
 
         return new Token(
             {
                 ...this.headers,
                 kid: keyId,
-                alg: 'HS256',
+                alg: 'EdDSA',
             },
             this.payload,
-            base64UrlDecode(signature),
+            signature.toString(),
         );
     }
 
