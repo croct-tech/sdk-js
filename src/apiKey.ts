@@ -32,6 +32,7 @@ export class ApiKey {
 
         if (nodeCrypto === null) {
             throw new Error('The crypto Node module is not available.');
+            // return new ApiKey(identifier);
         }
 
         return new ApiKey(identifier, nodeCrypto.createPrivateKey({
@@ -41,7 +42,7 @@ export class ApiKey {
         }));
     }
 
-    public getHeaderValue(): string {
+    public getIdentifier(): string {
         return this.identifier;
     }
 
@@ -58,14 +59,14 @@ export class ApiKey {
         }
 
         return new Promise((resolve, reject) => {
-        // TS forgets the type narrowing inside the Promise constructor function.
-                crypto!.sign(null, this.privateKey!, blob, (error, signature) => {
-                    if (error == null) {
-                        resolve(signature);
-                    } else {
-                        reject(error);
-                    }
-                });
+            // TS forgets the type narrowing inside the Promise constructor function.
+            nodeCrypto!.sign(null, blob, this.privateKey!, (error, signature) => {
+                if (error == null) {
+                    resolve(signature);
+                } else {
+                    reject(error);
+                }
+            });
         });
     }
 }
