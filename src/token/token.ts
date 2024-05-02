@@ -131,25 +131,21 @@ export class Token {
         return this.payload.iat;
     }
 
-    public async signedWith(apiKey: string | ApiKey): Promise<Token> {
-        const headers = base64UrlEncode(JSON.stringify(this.headers), true);
-        const payload = base64UrlEncode(JSON.stringify(this.payload), true);
-        const signatureData = `${headers}.${payload}`;
+    public async signedWith(apiKey: ApiKey): Promise<Token> {
+        const keyId = await apiKey.getHash();
+        const headers: Headers = {
+            ...this.headers,
+            kid: keyId,
+            alg: 'EdDSA',
+        };
 
-        const parsedApiKey = ApiKey.from(apiKey);
+        const encodedHeader = base64UrlEncode(JSON.stringify(headers), true);
+        const encodedPayload = base64UrlEncode(JSON.stringify(this.payload), true);
+        const signatureData = `${encodedHeader}.${encodedPayload}`;
 
-        const keyId = await parsedApiKey.getHash();
-        const signature = await parsedApiKey.signBlob(Buffer.from(signatureData, 'utf-8'));
+        const signature = await apiKey.signBlob(Buffer.from(signatureData, 'utf-8'));
 
-        return new Token(
-            {
-                ...this.headers,
-                kid: keyId,
-                alg: 'EdDSA',
-            },
-            this.payload,
-            signature.toString(),
-        );
+        return new Token(header, this.payload, signature.toString());
     }
 
     public toJSON(): string {
