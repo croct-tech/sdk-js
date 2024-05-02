@@ -4,6 +4,7 @@ import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
 import {Logger, NullLogger} from './logging';
+import {ApiKey} from './apiKey';
 
 export type Campaign = {
     name?: string,
@@ -94,7 +95,7 @@ export class QueryError extends EvaluationError<QueryErrorResponse> {
 
 export type Configuration = {
     appId?: string,
-    apiKey?: string,
+    apiKey?: ApiKey,
     baseEndpointUrl?: string,
     logger?: Logger,
 };
@@ -243,7 +244,7 @@ export class Evaluator {
         headers['X-Client-Library'] = CLIENT_LIBRARY;
 
         if (apiKey !== undefined) {
-            headers['X-Api-Key'] = apiKey;
+            headers['X-Api-Key'] = apiKey.getIdentifier();
         } else if (appId !== undefined) {
             headers['X-App-Id'] = appId;
         }

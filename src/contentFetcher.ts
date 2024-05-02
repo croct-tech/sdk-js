@@ -4,6 +4,7 @@ import {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from './constants';
 import {formatMessage} from './error';
 import {Logger, NullLogger} from './logging';
+import {ApiKey} from './apiKey';
 
 export type ErrorResponse = {
     type: string,
@@ -76,7 +77,7 @@ export type FetchResponse<P extends JsonObject = JsonObject> = {
 
 export type Configuration = {
     appId?: string,
-    apiKey?: string,
+    apiKey?: ApiKey,
     baseEndpointUrl?: string,
     logger?: Logger,
 };
@@ -182,7 +183,7 @@ export class ContentFetcher {
         }
 
         if (apiKey !== undefined) {
-            headers['X-Api-Key'] = apiKey;
+            headers['X-Api-Key'] = apiKey.getIdentifier();
         }
 
         const payload: FetchPayload = {
