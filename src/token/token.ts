@@ -77,18 +77,15 @@ export class Token {
 
         let headers;
         let payload;
-        let signature;
+        const signature = parts[2];
 
         try {
-            const part0 = base64Encode(parts[0]);
-            const part1 = base64Encode(parts[1]);
+            const part0 = base64Decode(parts[0]);
+            const part1 = base64Decode(parts[1]);
 
             headers = JSON.parse(part0);
             payload = JSON.parse(part1);
 
-            if (parts.length === 3) {
-                signature = base64Encode(parts[2]);
-            }
         } catch (error) {
             throw new Error('The token is corrupted.');
         }
@@ -96,7 +93,7 @@ export class Token {
         return Token.of(headers, payload, signature);
     }
 
-    public static of(headers: Headers, payload: TokenPayload, signature = ''): Token {
+    public static of(headers: Headers, payload: TokenPayload, signature: string = ''): Token {
         try {
             tokenSchema.validate({
                 headers: headers,
@@ -107,7 +104,7 @@ export class Token {
             throw new Error(`The token is invalid: ${formatCause(violation)}`);
         }
 
-        return new Token(headers as Headers, payload as TokenPayload, signature as string);
+        return new Token(headers as Headers, payload as TokenPayload, signature);
     }
 
     public async signedWith(apiKey: ApiKey): Promise<Token> {
@@ -118,12 +115,12 @@ export class Token {
             alg: 'EdDSA',
         };
 
-        const encodedHeader = base64Decode(JSON.stringify(headers));
-        const encodedPayload = base64Decode(JSON.stringify(this.payload));
+        const encodedHeader = base64Encode(JSON.stringify(headers));
+        const encodedPayload = base64Encode(JSON.stringify(this.payload));
         const signatureData = `${encodedHeader}.${encodedPayload}`;
         const signature = await apiKey.sign(Buffer.from(signatureData, 'utf-8'));
 
-        return new Token(headers, this.payload, signature.toString());
+        return new Token(headers, this.payload, signature.toString('base64url'));
     }
 
     public isSigned(): boolean {
@@ -177,11 +174,10 @@ export class Token {
     }
 
     public toString(): string {
-        const headers = base64Decode(JSON.stringify(this.headers));
-        const payload = base64Decode(JSON.stringify(this.payload));
-        const signature = base64Decode(this.signature);
+        const headers = base64Encode(JSON.stringify(this.headers));
+        const payload = base64Encode(JSON.stringify(this.payload));
 
-        return `${headers}.${payload}.${signature}`;
+        return `${headers}.${payload}.${this.signature}`;
     }
 }
 
