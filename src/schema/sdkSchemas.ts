@@ -58,11 +58,17 @@ export const sdkConfigurationSchema = new ObjectType({
             integer: true,
         }),
         disableCidMirroring: new BooleanType(),
-        cidCookie: cookieOptionsSchema,
+        cookie: new ObjectType({
+            properties: {
+                clientId: cookieOptionsSchema,
+                userToken: cookieOptionsSchema,
+            },
+        }),
         debug: new BooleanType(),
         test: new BooleanType(),
         logger: loggerSchema,
         urlSanitizer: new FunctionType(),
         eventMetadata: eventMetadataSchema,
+        eventProcessor: new FunctionType(),
     },
 });

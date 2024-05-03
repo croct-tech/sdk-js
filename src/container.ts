@@ -5,7 +5,7 @@ import {BackoffPolicy, ArbitraryPolicy} from './retry';
 import {PersistentQueue, MonitoredQueue, CapacityRestrictedQueue} from './queue';
 import {Beacon} from './trackingEvents';
 import {CachedTokenStore, TokenStore} from './token';
-import {Tracker} from './tracker';
+import {Tracker, TrackingEventProcessor} from './tracker';
 import {Evaluator} from './evaluator';
 import {encodeJson} from './transformer';
 import {CidAssigner, CachedAssigner, RemoteAssigner, FixedAssigner} from './cid';
@@ -27,13 +27,14 @@ import {
 import {ContentFetcher} from './contentFetcher';
 import {CookieCache, CookieCacheConfiguration} from './cache/cookieCache';
 
+export type DependencyResolver<T> = (container: Container) => T;
+
 export type Configuration = {
     appId: string,
     tokenScope: TokenScope,
     clientId?: string,
     debug: boolean,
     test: boolean,
-    cidCookie?: CookieCacheConfiguration,
     disableCidMirroring: boolean,
     cidAssignerEndpointUrl: string,
     trackerEndpointUrl: string,
@@ -42,7 +43,12 @@ export type Configuration = {
     beaconQueueSize: number,
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
+    cookie?: {
+        clientId?: CookieCacheConfiguration,
+        userToken?: CookieCacheConfiguration,
+    },
     eventMetadata?: {[key: string]: string},
+    eventProcessor?: DependencyResolver<TrackingEventProcessor>,
 };
 
 export class Container {
@@ -138,6 +144,9 @@ export class Container {
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
             eventMetadata: this.configuration.eventMetadata,
+            processor: this.configuration.eventProcessor === undefined
+                ? undefined
+                : this.configuration.eventProcessor(this),
         });
 
         const queue = this.getBeaconQueue();
@@ -172,11 +181,15 @@ export class Container {
     private createContext(): Context {
         const tokenKey = this.resolveStorageNamespace('token');
         const tabKey = this.resolveStorageNamespace('tab');
-        const browserStorage = this.getLocalStorage();
-        const browserCache = new LocalStorageCache(browserStorage, tokenKey);
+        const browserCache = this.configuration.tokenScope === 'global'
+            && this.configuration.cookie?.userToken !== undefined
+            ? new CookieCache(this.configuration.cookie.userToken)
+            : new LocalStorageCache(this.getLocalStorage(), tokenKey);
         const tabStorage = this.getSessionStorage();
 
-        this.removeTokenSyncListener = LocalStorageCache.autoSync(browserCache);
+        if (browserCache instanceof LocalStorageCache) {
+            this.removeTokenSyncListener = LocalStorageCache.autoSync(browserCache);
+        }
 
         return Context.load({
             tokenScope: this.configuration.tokenScope,
@@ -264,8 +277,8 @@ export class Container {
 
         return new CachedAssigner(
             new RemoteAssigner(this.configuration.cidAssignerEndpointUrl, logger),
-            this.configuration.cidCookie !== undefined
-                ? new CookieCache(this.configuration.cidCookie)
+            this.configuration.cookie?.clientId !== undefined
+                ? new CookieCache(this.configuration.cookie?.clientId)
                 : new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),
             {
                 logger: logger,

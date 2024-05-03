@@ -1,13 +1,27 @@
 import {Token, FixedTokenProvider} from '../../src/token';
 import {base64UrlEncode, base64UrlDecode} from '../../src/base64Url';
+import {ApiKey} from '../../src/apiKey';
 
 describe('A token', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
     const anonymousSerializedToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIiwiYXBwSWQiOiI3ZTlkNTlhOS1lNG'
         + 'IzLTQ1ZDQtYjFjNy00ODI4N2YxZTVlOGEifQ.eyJpc3MiOiJjcm9jdC5pbyIsImF1ZCI6ImNyb2N0LmlvIiwiaWF0Ij'
         + 'oxNDQwOTgyOTIzfQ.';
-    const binarySignature = 'VIBocta06jN0I6YXPiqtfAm_QJn64aLaM_'
-        + 'slfBo6MhRApV0znNagbMM5102L5OwtFLDMC8BFHFeKnHxrFKSK0Q';
+
+    const binarySignedSerializedToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSIsImFwcElkIjoiN2U5ZDU5YTktZTRiM'
+        + 'y00NWQ0LWIxYzctNDgyODdmMWU1ZThhIiwia2lkIjoiN2FjMWI4ZDcwMTBiYjZjZDNhM2U4NGU3ZjkwMTM2Yjg4MGJiYzg5OWU0'
+        + 'MjhlY2U0OTMzMzM3MjkxMWFiOTA1MiJ9.eyJpc3MiOiJjcm9jdC5pbyIsImF1ZCI6ImNyb2N0LmlvIiwiaWF0IjoxNDQwOTgyOTIz'
+        + 'LCJzdWIiOiJjNHIwbCJ9.GjTvv73vv73vv73vv70F77-977-977-9Hxfvv71gA--_ve-_vRbvv70xa--_vX3vv73vv73vv70Q77-977'
+        + '-9Syvvv70QLu-_vSRJRO-_ve-_vUhwW8eQVlhhF3Dvv70H77-977-977-9AO-_vXYCZe-_vRcyCg';
+
+    const binarySignature = 'GjTv'
+        + 'v73vv73vv73vv70F77-977-977-9Hxfvv71gA--_ve-_vRbvv70xa--_vX3vv73vv73vv70Q77-977-9Syvvv70QLu-_vSRJRO-'
+        + '_ve-_vUhwW8eQVlhhF3Dvv70H77-977-977-9AO-_vXYCZe-_vRcyCg';
+
+    const apiKey = ApiKey.of(
+        '00000000-0000-0000-0000-000000000000',
+        '302e020100300506032b6570042204206d0e45033d54aa3231fcef9f0eaa1ff559a68884dbcc8931181b312f90513261',
+    );
 
     it('may contain headers', () => {
         const token = Token.issue(appId, 'c4r0l', 1440982923);
@@ -34,7 +48,7 @@ describe('A token', () => {
         const token = Token.parse(`${anonymousSerializedToken}${binarySignature}`);
 
         // The result is a binary string
-        expect(token.getSignature()).toBe(base64UrlDecode(binarySignature, false));
+        expect(token.getSignature()).toBe(base64UrlDecode(binarySignature));
     });
 
     it('should have an issue time', () => {
@@ -155,7 +169,7 @@ describe('A token', () => {
             },
         });
 
-        expect(token.getSignature()).toEqual(base64UrlDecode(binarySignature, false));
+        expect(token.getSignature()).toEqual(base64UrlDecode(binarySignature));
 
         expect(token.toString()).toEqual(data);
     });
@@ -197,6 +211,91 @@ describe('A token', () => {
         expect(invalidToken).toThrow('The token is invalid: invalid uuid format at path \'/headers/appId\'.');
     });
 
+    it('should determine whether the token is valid now', () => {
+        const iat = 1714617288;
+        const exp = 1714620888;
+
+        jest.useFakeTimers();
+
+        const tokenWithExpiration = Token.parse(
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaXNzIjoiQ3JvY3QiLCJh'
+            + 'dWQiOiJjcm9jdC5jb20iLCJpYXQiOjE3MTQ2MTcyODgsImV4cCI6MTcxNDYyMDg4OH0',
+        )!;
+
+        const tokenWithoutExpiration = Token.parse(
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaXNzIjoiQ3JvY3QiLCJhd'
+            + 'WQiOiJjcm9jdC5jb20iLCJpYXQiOjE3MTQ2MTcyODh9',
+        )!;
+
+        expect(tokenWithExpiration).not.toBeNull();
+        expect(tokenWithoutExpiration).not.toBeNull();
+
+        jest.setSystemTime(iat * 1000);
+
+        expect(tokenWithExpiration.isValidNow()).toBeTrue();
+        expect(tokenWithExpiration.isValidNow(iat)).toBeTrue();
+        expect(tokenWithExpiration.isValidNow(iat - 1)).toBeFalse();
+        expect(tokenWithExpiration.isValidNow(exp)).toBeTrue();
+        expect(tokenWithExpiration.isValidNow(exp + 1)).toBeFalse();
+
+        expect(tokenWithoutExpiration.isValidNow()).toBeTrue();
+        expect(tokenWithoutExpiration.isValidNow(iat)).toBeTrue();
+        expect(tokenWithoutExpiration.isValidNow(iat - 1)).toBeFalse();
+        expect(tokenWithoutExpiration.isValidNow(Number.MAX_SAFE_INTEGER)).toBeTrue();
+    });
+
+    it('should determine whether the token is signed', async () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', 1234567890);
+
+        expect(token.isSigned()).toBeFalse();
+        expect((await token.signedWith(apiKey)).isSigned()).toBeTrue();
+    });
+
+    it('should determine if the key ID matches', async () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', 1234567890);
+        const otherKey = ApiKey.of(
+            '00000000-0000-0000-0000-000000000001',
+            '302e020100300506032b6570042204206d0e45033d54aa3231fcef9f0eaa1ff559a68884dbcc8931181b312f90513261',
+        );
+
+        const signedToken = await token.signedWith(apiKey);
+
+        await expect(token.matchesKeyId(otherKey)).resolves.toBeFalse();
+        await expect(signedToken.matchesKeyId(apiKey)).resolves.toBeTrue();
+        await expect(signedToken.matchesKeyId(otherKey)).resolves.toBeFalse();
+    });
+
+    it('should determine whether the token is anonymous', () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000');
+
+        expect(token.isAnonymous()).toBeTrue();
+    });
+
+    it('should determine whether the token is from a specific subject', () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000', 'subject');
+
+        expect(token.isSubject('subject')).toBeTrue();
+        expect(token.isSubject('other')).toBeFalse();
+    });
+
+    it('should determine whether the token is newer than another token', () => {
+        const now = Math.floor(Date.now() / 1000);
+        const oldToken = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', now);
+        const newToken = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', now + 1);
+
+        expect(oldToken.isNewerThan(oldToken)).toBeFalse();
+        expect(newToken.isNewerThan(oldToken)).toBeTrue();
+        expect(oldToken.isNewerThan(newToken)).toBeFalse();
+    });
+
+    it('should sign a token', async () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', 1234567890);
+        const signedToken = await token.signedWith(apiKey);
+
+        expect(signedToken.isSigned()).toBeTrue();
+        await expect(signedToken.matchesKeyId(apiKey)).resolves.toBeTrue();
+    });
+
     it('should be convertible to JSON', () => {
         const anonymousToken = Token.parse(anonymousSerializedToken);
 
@@ -205,8 +304,10 @@ describe('A token', () => {
 
     it('should be convertible to string', () => {
         const anonymousToken = Token.parse(anonymousSerializedToken);
+        const binarySignedToken = Token.parse(binarySignedSerializedToken);
 
         expect(anonymousToken.toString()).toBe(anonymousSerializedToken);
+        expect(binarySignedToken.toString()).toBe(binarySignedSerializedToken);
     });
 });
 

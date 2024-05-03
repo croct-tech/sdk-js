@@ -1,7 +1,8 @@
 import {JsonObject} from '@croct/json';
-import {base64UrlDecode, base64UrlEncode} from '../base64Url';
+import {encodeURI as base64Encode, decode as base64Decode} from 'js-base64';
 import {tokenSchema} from '../schema';
 import {formatCause} from '../error';
+import {ApiKey} from '../apiKey';
 
 export type Headers = {
     typ: string,
@@ -16,7 +17,7 @@ type Claims = {
     iat: number,
     exp?: number,
     sub?: string,
-    jid?: string,
+    jti?: string,
 };
 
 export type TokenPayload = JsonObject & Claims;
@@ -79,13 +80,16 @@ export class Token {
         let signature;
 
         try {
-            headers = JSON.parse(base64UrlDecode(parts[0], true));
-            payload = JSON.parse(base64UrlDecode(parts[1], true));
+            const part0 = base64Encode(parts[0]);
+            const part1 = base64Encode(parts[1]);
+
+            headers = JSON.parse(part0);
+            payload = JSON.parse(part1);
 
             if (parts.length === 3) {
-                signature = base64UrlDecode(parts[2], false);
+                signature = base64Encode(parts[2]);
             }
-        } catch {
+        } catch (error) {
             throw new Error('The token is corrupted.');
         }
 
@@ -106,6 +110,48 @@ export class Token {
         return new Token(headers as Headers, payload as TokenPayload, signature as string);
     }
 
+    public async signedWith(apiKey: ApiKey): Promise<Token> {
+        const keyId = await apiKey.getIdentifierHash();
+        const headers: Headers = {
+            ...this.headers,
+            kid: keyId,
+            alg: 'EdDSA',
+        };
+
+        const encodedHeader = base64Decode(JSON.stringify(headers));
+        const encodedPayload = base64Decode(JSON.stringify(this.payload));
+        const signatureData = `${encodedHeader}.${encodedPayload}`;
+        const signature = await apiKey.sign(Buffer.from(signatureData, 'utf-8'));
+
+        return new Token(headers, this.payload, signature.toString());
+    }
+
+    public isSigned(): boolean {
+        return this.headers.alg !== 'none' && this.signature !== '';
+    }
+
+    public isSubject(subject: string): boolean {
+        return this.getSubject() === subject;
+    }
+
+    public isAnonymous(): boolean {
+        return this.payload.sub === undefined;
+    }
+
+    public isValidNow(now: number = Math.floor(Date.now() / 1000)): boolean {
+        const {exp, iat} = this.payload;
+
+        return (exp === undefined || exp >= now) && iat <= now;
+    }
+
+    public isNewerThan(token: Token): boolean {
+        return this.payload.iat > token.payload.iat;
+    }
+
+    public async matchesKeyId(apiKey: ApiKey): Promise<boolean> {
+        return this.headers.kid === await apiKey.getIdentifierHash();
+    }
+
     public getHeaders(): Headers {
         return {...this.headers};
     }
@@ -116,10 +162,6 @@ export class Token {
 
     public getSignature(): string {
         return this.signature;
-    }
-
-    public isAnonymous(): boolean {
-        return this.payload.sub === undefined;
     }
 
     public getSubject(): string | null {
@@ -135,9 +177,9 @@ export class Token {
     }
 
     public toString(): string {
-        const headers = base64UrlEncode(JSON.stringify(this.headers), true);
-        const payload = base64UrlEncode(JSON.stringify(this.payload), true);
-        const signature = base64UrlEncode(this.signature, false);
+        const headers = base64Decode(JSON.stringify(this.headers));
+        const payload = base64Decode(JSON.stringify(this.payload));
+        const signature = base64Decode(this.signature);
 
         return `${headers}.${payload}.${signature}`;
     }

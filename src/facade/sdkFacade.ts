@@ -15,6 +15,7 @@ import {PartialTrackingEvent} from '../trackingEvents';
 import {UrlSanitizer} from '../tab';
 import {ContentFetcherFacade} from './contentFetcherFacade';
 import {CookieCacheConfiguration} from '../cache/cookieCache';
+import {EventSubjectProcessor} from '../eventSubjectProcessor';
 
 type Options = {
     preferredLocale?: string,
@@ -35,7 +36,10 @@ export type Configuration = Options & {
     baseEndpointUrl?: string,
     disableCidMirroring?: boolean,
     cidAssignerEndpointUrl?: string,
-    cidCookie?: CookieCacheConfiguration,
+    cookie?: {
+        clientId?: CookieCacheConfiguration,
+        userToken?: CookieCacheConfiguration,
+    },
 };
 
 function validateConfiguration(configuration: unknown): asserts configuration is Configuration {
@@ -82,6 +86,7 @@ export class SdkFacade {
                 debug: containerConfiguration.debug ?? false,
                 test: containerConfiguration.test ?? false,
                 disableCidMirroring: containerConfiguration.disableCidMirroring ?? false,
+                eventProcessor: container => new EventSubjectProcessor(container.getLogger('EventSubjectProcessor')),
             }),
             {
                 preferredLocale: preferredLocale,

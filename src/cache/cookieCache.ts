@@ -61,7 +61,7 @@ export class CookieCache implements Cache {
         }
 
         if (config.sameSite !== undefined) {
-            cookie.push(`SameSite=${({strict: 'Strict', lax: 'Lax', none: 'None'})[config.sameSite.toLowerCase()]}`);
+            cookie.push(`SameSite=${({strict: 'Strict', lax: 'Lax', none: 'None'})[config.sameSite]}`);
         }
 
         return cookie.join('; ');

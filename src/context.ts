@@ -3,7 +3,7 @@ import {Tab, UrlSanitizer} from './tab';
 import {uuid4} from './uuid';
 import {EventDispatcher} from './eventManager';
 import {SdkEventMap} from './sdkEvents';
-import {LocalStorageCache} from './cache';
+import {Cache, ObservableCache} from './cache';
 
 export type TokenScope = 'isolated' | 'global' | 'contextual';
 
@@ -12,9 +12,9 @@ export type Configuration = {
     urlSanitizer?: UrlSanitizer,
     eventDispatcher: ContextEventDispatcher,
     cache: {
-        tabId: LocalStorageCache,
-        tabToken: LocalStorageCache,
-        browserToken: LocalStorageCache,
+        tabId: Cache,
+        tabToken: Cache,
+        browserToken: Cache,
     },
 };
 
@@ -63,7 +63,9 @@ export class Context {
             case 'global': {
                 const context = new Context(tab, new CachedTokenStore(cache.browserToken), eventDispatcher);
 
-                cache.browserToken.addListener(context.syncToken);
+                if (ObservableCache.isObservable(cache.browserToken)) {
+                    cache.browserToken.addListener(context.syncToken);
+                }
 
                 return context;
             }

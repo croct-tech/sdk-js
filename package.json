@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@croct/json": "^2.0.1",
+    "js-base64": "^3.7.7",
     "tslib": "^2.5.0"
   },
   "devDependencies": {

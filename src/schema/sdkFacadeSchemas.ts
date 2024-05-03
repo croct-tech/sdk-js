@@ -38,7 +38,12 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
         cidAssignerEndpointUrl: new StringType({
             format: 'url',
         }),
-        cidCookie: cookieOptionsSchema,
+        cookie: new ObjectType({
+            properties: {
+                clientId: cookieOptionsSchema,
+                userToken: cookieOptionsSchema,
+            },
+        }),
         preferredLocale: new StringType({
             pattern: /^[a-z]{2,3}([-_][a-z]{2,3})?$/i,
         }),

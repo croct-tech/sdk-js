@@ -1,10 +1,10 @@
-import {Container} from './container';
+import {Container, DependencyResolver} from './container';
 import {Context, TokenScope} from './context';
 import {Logger} from './logging';
 import {BASE_ENDPOINT_URL, VERSION} from './constants';
 import {sdkConfigurationSchema} from './schema';
 import {formatCause} from './error';
-import {Tracker} from './tracker';
+import {Tracker, TrackingEventProcessor} from './tracker';
 import {Evaluator} from './evaluator';
 import {SdkEventMap} from './sdkEvents';
 import {EventManager} from './eventManager';
@@ -27,7 +27,11 @@ export type Configuration = {
     urlSanitizer?: UrlSanitizer,
     logger?: Logger,
     eventMetadata?: {[key: string]: string},
-    cidCookie?: CookieCacheConfiguration,
+    cookie?: {
+        clientId?: CookieCacheConfiguration,
+        userToken?: CookieCacheConfiguration,
+    },
+    eventProcessor?: DependencyResolver<TrackingEventProcessor>,
 };
 
 function validateConfiguration(configuration: unknown): asserts configuration is Configuration {
@@ -55,7 +59,6 @@ export class Sdk {
         validateConfiguration(configuration);
 
         const {
-            disableCidMirroring,
             eventMetadata: customMetadata = {},
             baseEndpointUrl = BASE_ENDPOINT_URL,
             cidAssignerEndpointUrl,
@@ -75,7 +78,6 @@ export class Sdk {
 
         const container = new Container({
             ...containerConfiguration,
-            disableCidMirroring: disableCidMirroring,
             evaluationBaseEndpointUrl: baseHttpEndpoint,
             contentBaseEndpointUrl: baseHttpEndpoint,
             trackerEndpointUrl: `${baseWsEndpoint}/client/web/connect`,
