@@ -62,7 +62,7 @@ export class ApiKey {
     }
 
     public async getIdentifierHash(): Promise<string> {
-        const identifierBytes = Buffer.from(this.identifier, 'utf-8');
+        const identifierBytes = Buffer.from(this.identifier.replace(/[^a-z0-9]/g, ''), 'hex');
         const rawHash = await crypto.subtle.digest('SHA-256', identifierBytes);
 
         return Buffer.from(rawHash).toString('hex');
