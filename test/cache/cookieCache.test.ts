@@ -1,13 +1,15 @@
 import {CookieCache, CookieCacheConfiguration} from '../../src/cache/cookieCache';
 
 describe('A cookie cache', () => {
-    afterEach(() => {
+    beforeEach(() => {
         for (const cookie of document.cookie.split(';')) {
             const [name] = cookie.split('=');
 
             document.cookie = `${name}=; Max-Age=0`;
         }
+    });
 
+    afterEach(() => {
         jest.restoreAllMocks();
     });
 

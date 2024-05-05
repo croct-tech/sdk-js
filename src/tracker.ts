@@ -355,6 +355,9 @@ export class Tracker {
             ? this.processor.process(queuedEvent)
             : [queuedEvent];
 
+        // sort events by timestamp in ascending order
+        processedEvents.sort((left, right) => left.timestamp - right.timestamp);
+
         let result: Promise<T>|null = null;
 
         for (const processedEvent of processedEvents) {

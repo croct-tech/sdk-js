@@ -1,20 +1,25 @@
 import {WS} from 'jest-websocket-mock';
 import * as fetchMock from 'fetch-mock';
-import {Configuration, Container} from '../src/container';
+import {Configuration, Container, DependencyResolver} from '../src/container';
 import {NullLogger, Logger} from '../src/logging';
-
 import {BeaconPayload, PartialTrackingEvent} from '../src/trackingEvents';
 import {LocalStorageCache} from '../src/cache';
 import {Token} from '../src/token';
+import {TrackingEventProcessor} from '../src/tracker';
 
 describe('A container', () => {
     beforeEach(() => {
         localStorage.clear();
+
+        for (const cookie of document.cookie.split(';')) {
+            const [name] = cookie.split('=');
+
+            document.cookie = `${name}=; Max-Age=0`;
+        }
     });
 
     afterEach(() => {
-        jest.clearAllMocks();
-        jest.restoreAllMocks();
+        jest.resetAllMocks();
         WS.clean();
         fetchMock.reset();
     });
@@ -25,7 +30,7 @@ describe('A container', () => {
         beaconQueueSize: 3,
         debug: false,
         test: false,
-        disableCidMirroring: false,
+        disableCidMirroring: true,
         cidAssignerEndpointUrl: 'https://localtest/cid',
         contentBaseEndpointUrl: 'https://localtest/content',
         evaluationBaseEndpointUrl: 'https://localtest/evaluate',
@@ -79,6 +84,46 @@ describe('A container', () => {
         const context = container.getContext();
 
         expect(context.getTab().url).toBe(sanitizedUrl);
+    });
+
+    it('should configure the token store to use local storage by default', () => {
+        const container = new Container(configuration);
+        const store = container.getUserTokenStore();
+
+        expect(Object.keys(localStorage)).toHaveLength(0);
+
+        const token = Token.issue(configuration.appId, 'c4r0l');
+
+        store.setToken(token);
+
+        expect(store.getToken()?.toString()).toBe(token.toString());
+
+        expect(Object.values(localStorage)).toContain(token.toString());
+    });
+
+    it('should configure token store to use cookies if specified', () => {
+        const container = new Container({
+            ...configuration,
+            cookie: {
+                userToken: {
+                    name: 'croct.token',
+                },
+            },
+        });
+
+        const store = container.getUserTokenStore();
+
+        expect(document.cookie).toBe('');
+
+        expect(store.getToken()).toBeNull();
+
+        const token = Token.issue(configuration.appId, 'c4r0l');
+
+        store.setToken(token);
+
+        expect(store.getToken()?.toString()).toBe(token.toString());
+
+        expect(document.cookie).toBe(`croct.token=${token.toString()}`);
     });
 
     it('should load the tracker only once', () => {
@@ -160,6 +205,32 @@ describe('A container', () => {
             newToken: thirdToken,
             oldToken: secondToken,
         });
+    });
+
+    it('should configure the event tracker with the specified event processor', async () => {
+        const process: TrackingEventProcessor['process'] = jest.fn(event => [event]);
+        const processor: DependencyResolver<TrackingEventProcessor> = jest.fn(() => ({process: process}));
+
+        const container = new Container({
+            ...configuration,
+            test: true,
+            eventProcessor: processor,
+        });
+
+        const tracker = container.getTracker();
+
+        expect(processor).toHaveBeenCalledWith(container);
+
+        const event: PartialTrackingEvent = {
+            type: 'nothingChanged',
+            sinceTime: Date.now(),
+        };
+
+        await tracker.track(event);
+
+        expect(process).toHaveBeenCalledTimes(1);
+
+        expect(process).toHaveBeenCalledWith(expect.objectContaining({event: event}));
     });
 
     it('should flush the beacon queue on initialization', async () => {
@@ -301,6 +372,8 @@ describe('A container', () => {
     });
 
     it('should configure the CID assigner to use cookies if specified', async () => {
+        expect(document.cookie).toBe('');
+
         fetchMock.mock({
             method: 'GET',
             matcher: configuration.cidAssignerEndpointUrl,
@@ -309,8 +382,10 @@ describe('A container', () => {
 
         const container = new Container({
             ...configuration,
-            cidCookie: {
-                name: 'croct.cid',
+            cookie: {
+                clientId: {
+                    name: 'croct.cid',
+                },
             },
         });
 
@@ -324,14 +399,20 @@ describe('A container', () => {
     });
 
     it('should use existing CID in cookies if available', async () => {
+        expect(document.cookie).toBe('');
+
         document.cookie = 'croct.cid=456';
 
         const container = new Container({
             ...configuration,
-            cidCookie: {
-                name: 'croct.cid',
+            cookie: {
+                clientId: {
+                    name: 'croct.cid',
+                },
             },
         });
+
+        expect(document.cookie).toBe('croct.cid=456');
 
         const assigner = container.getCidAssigner();
 

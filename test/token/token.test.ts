@@ -1,5 +1,5 @@
+import {encodeURI as base64Encode} from 'js-base64';
 import {Token, FixedTokenProvider} from '../../src/token';
-import {base64UrlEncode, base64UrlDecode} from '../../src/base64Url';
 import {ApiKey} from '../../src/apiKey';
 
 describe('A token', () => {
@@ -47,8 +47,92 @@ describe('A token', () => {
     it('may contain a signature', () => {
         const token = Token.parse(`${anonymousSerializedToken}${binarySignature}`);
 
-        // The result is a binary string
-        expect(token.getSignature()).toBe(base64UrlDecode(binarySignature));
+        expect(token.getSignature()).toBe(binarySignature);
+    });
+
+    it('should have a type', () => {
+        const type = 'JWT';
+
+        const token = Token.of(
+            {
+                typ: type,
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(token.getType()).toBe(type);
+    });
+
+    it('should have an algorithm', () => {
+        const token = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(token.getAlgorithm()).toBe('none');
+    });
+
+    it('may have an application ID', () => {
+        const tokenWithoutAppId = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithoutAppId.getApplicationId()).toBeNull();
+
+        const tokenWithAppId = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+                appId: appId,
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithAppId.getApplicationId()).toBe(appId);
+    });
+
+    it('may have a key ID', () => {
+        const keyId = '7ac1b8d7010bb6cd3a3e84e7f90136b880bbc899e428ece49333372911ab9052';
+
+        const tokenWithKeyId = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+                appId: appId,
+                kid: keyId,
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithKeyId.getKeyId()).toBe(keyId);
     });
 
     it('should have an issue time', () => {
@@ -57,12 +141,146 @@ describe('A token', () => {
         expect(token.getIssueTime()).toBe(1440982923);
     });
 
-    it('may have a subject', () => {
-        const identifiedToken = Token.issue(appId, 'c4r0l', 1440982923);
-        const anonymousToken = Token.issue(appId, null, 1440982923);
+    it('may have an expiration time', () => {
+        const tokenWithoutExpiration = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
 
-        expect(identifiedToken.getSubject()).toBe('c4r0l');
-        expect(anonymousToken.getSubject()).toBeNull();
+        expect(tokenWithoutExpiration.getExpirationTime()).toBeNull();
+
+        const tokenWithExpiration = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+                exp: 1440982924,
+            },
+        );
+
+        expect(tokenWithExpiration.getExpirationTime()).toBe(1440982924);
+    });
+
+    it('may have a token ID', () => {
+        const tokenWithoutTokenId = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithoutTokenId.getTokenId()).toBeNull();
+
+        const tokenId = '00000000-0000-0000-0000-000000000001';
+
+        const tokenWithTokenId = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+                appId: appId,
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+                jti: tokenId,
+            },
+        );
+
+        expect(tokenWithTokenId.getTokenId()).toBe(tokenId);
+    });
+
+    it('should have an audience', () => {
+        const tokenWithSingleAudience = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithSingleAudience.getAudience()).toBe('croct.io');
+
+        const tokenWithMultipleAudiences = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: ['croct.io', 'admin'],
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithMultipleAudiences.getAudience()).toEqual(['croct.io', 'admin']);
+    });
+
+    it('should have an issuer', () => {
+        const token = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(token.getIssuer()).toBe('croct.io');
+    });
+
+    it('may have a subject', () => {
+        const tokenWithoutSubject = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithoutSubject.getSubject()).toBeNull();
+
+        const tokenWithSubject = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+                sub: 'c4r0l',
+            },
+        );
+
+        expect(tokenWithSubject.getSubject()).toBe('c4r0l');
     });
 
     it('should not have an empty subject', () => {
@@ -92,8 +310,8 @@ describe('A token', () => {
     });
 
     it('should be parsed and serialized', () => {
-        const signature = 'some-signature';
-        const encodedToken = anonymousSerializedToken + base64UrlEncode(signature);
+        const signature = base64Encode('some-signature');
+        const encodedToken = anonymousSerializedToken + signature;
         const anonymousToken = Token.parse(encodedToken);
 
         expect(anonymousToken.getHeaders()).toEqual({
@@ -169,7 +387,7 @@ describe('A token', () => {
             },
         });
 
-        expect(token.getSignature()).toEqual(base64UrlDecode(binarySignature));
+        expect(token.getSignature()).toEqual(binarySignature);
 
         expect(token.toString()).toEqual(data);
     });
@@ -209,6 +427,26 @@ describe('A token', () => {
 
         expect(invalidToken).toThrow();
         expect(invalidToken).toThrow('The token is invalid: invalid uuid format at path \'/headers/appId\'.');
+    });
+
+    it('should allow specifying and retrieving the token identifier', () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', 1234567890);
+
+        expect(token.getTokenId()).toBeNull();
+
+        const tokenWithId = '00000000-0000-0000-0000-000000000001';
+
+        const newToken = token.withTokenId(tokenWithId);
+
+        expect(newToken).not.toBe(token);
+
+        expect(newToken.getTokenId()).toBe(tokenWithId);
+    });
+
+    it('should not allow to set an invalid token identifier', () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000');
+
+        expect(() => token.withTokenId('invalid')).toThrow('The token ID must be a valid UUID.');
     });
 
     it('should determine whether the token is valid now', () => {
@@ -293,6 +531,8 @@ describe('A token', () => {
         const signedToken = await token.signedWith(apiKey);
 
         expect(signedToken.isSigned()).toBeTrue();
+        expect(signedToken.getSignature()).toMatch(/^[A-Za-z0-9_-]+$/);
+
         await expect(signedToken.matchesKeyId(apiKey)).resolves.toBeTrue();
     });
 

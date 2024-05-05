@@ -63,12 +63,21 @@ describe('The SDK facade configuration schema', () => {
                 warn: jest.fn(),
                 error: jest.fn(),
             },
-            cidCookie: {
-                name: 'cid',
-                domain: 'croct.com',
-                path: '/',
-                secure: true,
-                sameSite: 'strict',
+            cookie: {
+                clientId: {
+                    name: 'cid',
+                    domain: 'croct.com',
+                    path: '/',
+                    secure: true,
+                    sameSite: 'strict',
+                },
+                userToken: {
+                    name: 'utk',
+                    domain: 'croct.com',
+                    path: '/',
+                    secure: true,
+                    sameSite: 'strict',
+                },
             },
         }],
     ])('should allow %s', value => {
@@ -206,11 +215,53 @@ describe('The SDK facade configuration schema', () => {
         [
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-                cidCookie: {
-                    name: 1,
+                cookie: null,
+            },
+            "Expected value of type object at path '/cookie', actual null.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                cookie: {
+                    clientId: {
+                        name: null,
+                    },
                 },
             },
-            "Expected value of type string at path '/cidCookie/name', actual integer.",
+            "Expected value of type string at path '/cookie/clientId/name', actual null.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                cookie: {
+                    clientId: {
+                        name: '',
+                    },
+                },
+            },
+            "Expected at least 1 character at path '/cookie/clientId/name', actual 0.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                cookie: {
+                    clientId: {
+                        name: null,
+                    },
+                },
+            },
+            "Expected value of type string at path '/cookie/clientId/name', actual null.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                cookie: {
+                    userToken: {
+                        name: null,
+                    },
+                },
+            },
+            "Expected value of type string at path '/cookie/userToken/name', actual null.",
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {

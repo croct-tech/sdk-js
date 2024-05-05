@@ -77,23 +77,18 @@ export class Token {
 
         let headers;
         let payload;
-        const signature = parts[2];
 
         try {
-            const part0 = base64Decode(parts[0]);
-            const part1 = base64Decode(parts[1]);
-
-            headers = JSON.parse(part0);
-            payload = JSON.parse(part1);
-
+            headers = JSON.parse(base64Decode(parts[0]));
+            payload = JSON.parse(base64Decode(parts[1]));
         } catch (error) {
             throw new Error('The token is corrupted.');
         }
 
-        return Token.of(headers, payload, signature);
+        return Token.of(headers, payload, parts[2]);
     }
 
-    public static of(headers: Headers, payload: TokenPayload, signature: string = ''): Token {
+    public static of(headers: Headers, payload: TokenPayload, signature = ''): Token {
         try {
             tokenSchema.validate({
                 headers: headers,
@@ -104,7 +99,7 @@ export class Token {
             throw new Error(`The token is invalid: ${formatCause(violation)}`);
         }
 
-        return new Token(headers as Headers, payload as TokenPayload, signature);
+        return new Token(headers as Headers, payload as TokenPayload, signature as string);
     }
 
     public async signedWith(apiKey: ApiKey): Promise<Token> {
@@ -149,6 +144,21 @@ export class Token {
         return this.headers.kid === await apiKey.getIdentifierHash();
     }
 
+    public withTokenId(tokenId: string): Token {
+        if (tokenId === '' || !/^[a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12}$/.test(tokenId)) {
+            throw new Error('The token ID must be a valid UUID.');
+        }
+
+        return new Token(
+            this.headers,
+            {
+                ...this.payload,
+                jti: tokenId,
+            },
+            this.signature,
+        );
+    }
+
     public getHeaders(): Headers {
         return {...this.headers};
     }
@@ -161,12 +171,44 @@ export class Token {
         return this.signature;
     }
 
+    public getApplicationId(): string | null {
+        return this.headers.appId ?? null;
+    }
+
+    public getAlgorithm(): string {
+        return this.headers.alg;
+    }
+
+    public getType(): string {
+        return this.headers.typ;
+    }
+
+    public getKeyId(): string | null {
+        return this.headers.kid ?? null;
+    }
+
     public getSubject(): string | null {
-        return this.payload.sub !== undefined ? this.payload.sub : null;
+        return this.payload.sub ?? null;
     }
 
     public getIssueTime(): number {
         return this.payload.iat;
+    }
+
+    public getExpirationTime(): number | null {
+        return this.payload.exp ?? null;
+    }
+
+    public getTokenId(): string | null {
+        return this.payload.jti ?? null;
+    }
+
+    public getAudience(): string | string[] {
+        return this.payload.aud;
+    }
+
+    public getIssuer(): string {
+        return this.payload.iss;
     }
 
     public toJSON(): string {

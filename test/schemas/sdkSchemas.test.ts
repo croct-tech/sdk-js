@@ -225,14 +225,25 @@ describe('The SDK configuration schema', () => {
                 error: jest.fn(),
             },
             eventMetadata: {},
-            cidCookie: {
-                name: 'cid',
-                domain: 'example.com',
-                path: '/',
-                secure: true,
-                sameSite: 'strict',
-                maxAge: 0,
+            cookie: {
+                clientId: {
+                    name: 'cid',
+                    domain: 'example.com',
+                    path: '/',
+                    secure: true,
+                    sameSite: 'strict',
+                    maxAge: 0,
+                },
+                userToken: {
+                    name: 'ut',
+                    domain: 'example.com',
+                    path: '/',
+                    secure: true,
+                    sameSite: 'strict',
+                    maxAge: 0,
+                },
             },
+            eventProcessor: jest.fn(),
         }],
     ])('should allow %s', value => {
         function validate(): void {
@@ -393,16 +404,60 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
-                cidCookie: {
-                    name: '',
-                    domain: 'example.com',
-                    path: '/',
-                    secure: true,
-                    sameSite: 'strict',
-                    maxAge: 0,
+                cookie: null,
+            },
+            "Expected value of type object at path '/cookie', actual null.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                cookie: {
+                    clientId: {
+                        name: '',
+                        domain: 'example.com',
+                        path: '/',
+                        secure: true,
+                        sameSite: 'strict',
+                        maxAge: 0,
+                    },
                 },
             },
-            "Expected at least 1 character at path '/cidCookie/name', actual 0.",
+            "Expected at least 1 character at path '/cookie/clientId/name', actual 0.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                cookie: {
+                    userToken: {
+                        name: '',
+                        domain: 'example.com',
+                        path: '/',
+                        secure: true,
+                        sameSite: 'strict',
+                        maxAge: 0,
+                    },
+                },
+            },
+            "Expected at least 1 character at path '/cookie/userToken/name', actual 0.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                eventProcessor: null,
+            },
+            "Expected value of type function at path '/eventProcessor', actual null.",
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {

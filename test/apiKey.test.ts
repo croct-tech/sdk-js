@@ -20,8 +20,12 @@ describe('An API key', () => {
     });
 
     it('should fail to parse an API key with an malformed private key', () => {
-        expect(() => ApiKey.parse('00000000-0000-0000-0000-000000000000:invalid'))
+        expect(() => ApiKey.parse('00000000-0000-0000-0000-000000000000:foo'))
             .toThrow('The API key private key must be a hexadecimal string.');
+    });
+
+    it('should fail to parse an API key with invalid format', () => {
+        expect(() => ApiKey.parse('00000000-0000-0000-0000-000000000000:0:')).toThrow('Invalid API key format.');
     });
 
     it('should fail to create an API key with a malformed identifier', () => {
@@ -52,7 +56,7 @@ describe('An API key', () => {
 
     it('should return the identifier hash', async () => {
         await expect(apiKey.getIdentifierHash()).resolves.toBe(
-            '12b9377cbe7e5c94e8a70d9d23929523d14afa954793130f8a3959c7b849aca8',
+            '374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb',
         );
     });
 
