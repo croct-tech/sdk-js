@@ -109,11 +109,11 @@ describe('A cookie cache', () => {
             name: 'cookie;name',
         });
 
-        cache.put('cookie,value');
+        cache.put(' cookie,value ');
 
-        expect(document.cookie).toBe('cookie%3Bname=cookie%2Cvalue');
+        expect(document.cookie).toBe('cookie%3Bname=%20cookie%2Cvalue%20');
 
-        expect(cache.get()).toBe('cookie,value');
+        expect(cache.get()).toBe(' cookie,value ');
 
         cache.clear();
 
