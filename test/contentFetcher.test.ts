@@ -18,11 +18,11 @@ jest.mock(
 
 describe('A content fetcher', () => {
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
-    const plainTextApiKey = '00000000-0000-0000-0000-000000000000';
     const parsedApiKey = ApiKey.of(
         '00000000-0000-0000-0000-000000000000',
         '302e020100300506032b6570042204206d0e45033d54aa3231fcef9f0eaa1ff559a68884dbcc8931181b312f90513261',
     );
+    const plainTextApiKey = parsedApiKey.export();
 
     const contentId = 'hero-banner';
     const content = {
