@@ -36,6 +36,10 @@ describe('An API key', () => {
         expect(() => ApiKey.parse(`${identifier}:invalid;secret`)).toThrow('Unsupported signing algorithm "invalid".');
     });
 
+    it('should parse an API key without an empty private key', () => {
+        expect(ApiKey.parse(`${identifier}:`).hasPrivateKey()).toBeFalse();
+    });
+
     it('should fail to create an API key with a malformed identifier', () => {
         expect(() => ApiKey.of('invalid')).toThrow('The identifier must be a UUID.');
     });
@@ -46,6 +50,14 @@ describe('An API key', () => {
 
     it('should fail to create an API key with an invalid private key', () => {
         expect(() => ApiKey.of(identifier, '302e020100')).toThrow('The private key is malformed.');
+    });
+
+    it('should fail to create an API key with an unsupported signing algorithm', () => {
+        expect(() => ApiKey.of(identifier, 'invalid;secret')).toThrow('Unsupported signing algorithm "invalid".');
+    });
+
+    it('should create an API key with an empty private key', () => {
+        expect(ApiKey.of(identifier, '').hasPrivateKey()).toBeFalse();
     });
 
     it('should create an API key from an API key', () => {
