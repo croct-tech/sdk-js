@@ -1,7 +1,8 @@
 import {JsonObject} from '@croct/json';
-import {base64UrlDecode, base64UrlEncode} from '../base64Url';
+import {encodeURI as base64Encode, decode as base64Decode} from 'js-base64';
 import {tokenSchema} from '../schema';
 import {formatCause} from '../error';
+import {ApiKey} from '../apiKey';
 
 export type Headers = {
     typ: string,
@@ -16,12 +17,14 @@ type Claims = {
     iat: number,
     exp?: number,
     sub?: string,
-    jid?: string,
+    jti?: string,
 };
 
 export type TokenPayload = JsonObject & Claims;
 
 export class Token {
+    private static readonly UUID_PATTERN = /^[a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12}$/;
+
     private readonly headers: Headers;
 
     private readonly payload: TokenPayload;
@@ -76,20 +79,15 @@ export class Token {
 
         let headers;
         let payload;
-        let signature;
 
         try {
-            headers = JSON.parse(base64UrlDecode(parts[0], true));
-            payload = JSON.parse(base64UrlDecode(parts[1], true));
-
-            if (parts.length === 3) {
-                signature = base64UrlDecode(parts[2], false);
-            }
-        } catch {
+            headers = JSON.parse(base64Decode(parts[0]));
+            payload = JSON.parse(base64Decode(parts[1]));
+        } catch (error) {
             throw new Error('The token is corrupted.');
         }
 
-        return Token.of(headers, payload, signature);
+        return Token.of(headers, payload, parts[2]);
     }
 
     public static of(headers: Headers, payload: TokenPayload, signature = ''): Token {
@@ -106,6 +104,63 @@ export class Token {
         return new Token(headers as Headers, payload as TokenPayload, signature as string);
     }
 
+    public async signedWith(apiKey: ApiKey): Promise<Token> {
+        const keyId = await apiKey.getIdentifierHash();
+        const headers: Headers = {
+            ...this.headers,
+            kid: keyId,
+            alg: 'EdDSA',
+        };
+
+        const encodedHeader = base64Encode(JSON.stringify(headers));
+        const encodedPayload = base64Encode(JSON.stringify(this.payload));
+        const signatureData = `${encodedHeader}.${encodedPayload}`;
+        const signature = await apiKey.sign(Buffer.from(signatureData, 'utf-8'));
+
+        return new Token(headers, this.payload, signature.toString('base64url'));
+    }
+
+    public isSigned(): boolean {
+        return this.headers.alg !== 'none' && this.signature !== '';
+    }
+
+    public isSubject(subject: string): boolean {
+        return this.getSubject() === subject;
+    }
+
+    public isAnonymous(): boolean {
+        return this.payload.sub === undefined;
+    }
+
+    public isValidNow(now: number = Math.floor(Date.now() / 1000)): boolean {
+        const {exp, iat} = this.payload;
+
+        return (exp === undefined || exp >= now) && iat <= now;
+    }
+
+    public isNewerThan(token: Token): boolean {
+        return this.payload.iat > token.payload.iat;
+    }
+
+    public async matchesKeyId(apiKey: ApiKey): Promise<boolean> {
+        return this.headers.kid === await apiKey.getIdentifierHash();
+    }
+
+    public withTokenId(tokenId: string): Token {
+        if (tokenId === '' || !Token.UUID_PATTERN.test(tokenId)) {
+            throw new Error('The token ID must be a valid UUID.');
+        }
+
+        return new Token(
+            this.headers,
+            {
+                ...this.payload,
+                jti: tokenId,
+            },
+            this.signature,
+        );
+    }
+
     public getHeaders(): Headers {
         return {...this.headers};
     }
@@ -118,16 +173,44 @@ export class Token {
         return this.signature;
     }
 
-    public isAnonymous(): boolean {
-        return this.payload.sub === undefined;
+    public getApplicationId(): string | null {
+        return this.headers.appId ?? null;
+    }
+
+    public getAlgorithm(): string {
+        return this.headers.alg;
+    }
+
+    public getType(): string {
+        return this.headers.typ;
+    }
+
+    public getKeyId(): string | null {
+        return this.headers.kid ?? null;
     }
 
     public getSubject(): string | null {
-        return this.payload.sub !== undefined ? this.payload.sub : null;
+        return this.payload.sub ?? null;
     }
 
     public getIssueTime(): number {
         return this.payload.iat;
+    }
+
+    public getExpirationTime(): number | null {
+        return this.payload.exp ?? null;
+    }
+
+    public getTokenId(): string | null {
+        return this.payload.jti ?? null;
+    }
+
+    public getAudience(): string | string[] {
+        return this.payload.aud;
+    }
+
+    public getIssuer(): string {
+        return this.payload.iss;
     }
 
     public toJSON(): string {
@@ -135,11 +218,10 @@ export class Token {
     }
 
     public toString(): string {
-        const headers = base64UrlEncode(JSON.stringify(this.headers), true);
-        const payload = base64UrlEncode(JSON.stringify(this.payload), true);
-        const signature = base64UrlEncode(this.signature, false);
+        const headers = base64Encode(JSON.stringify(this.headers));
+        const payload = base64Encode(JSON.stringify(this.payload));
 
-        return `${headers}.${payload}.${signature}`;
+        return `${headers}.${payload}.${this.signature}`;
     }
 }
 

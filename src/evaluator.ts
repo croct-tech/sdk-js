@@ -4,6 +4,7 @@ import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
 import {Logger, NullLogger} from './logging';
+import {ApiKey} from './apiKey';
 
 export type Campaign = {
     name?: string,
@@ -94,15 +95,20 @@ export class QueryError extends EvaluationError<QueryErrorResponse> {
 
 export type Configuration = {
     appId?: string,
-    apiKey?: string,
+    apiKey?: string|ApiKey,
     baseEndpointUrl?: string,
     logger?: Logger,
+};
+
+type InternalConfiguration = {
+    appId?: string,
+    apiKey?: ApiKey,
 };
 
 export class Evaluator {
     public static readonly MAX_QUERY_LENGTH = MAX_QUERY_LENGTH;
 
-    private readonly configuration: Pick<Configuration, 'appId' | 'apiKey'>;
+    private readonly configuration: InternalConfiguration;
 
     private readonly endpoint: string;
 
@@ -113,15 +119,20 @@ export class Evaluator {
             throw new Error('Either the application ID or the API key must be provided.');
         }
 
-        const {baseEndpointUrl, apiKey} = configuration;
+        const {baseEndpointUrl} = configuration;
+        const apiKey = configuration.apiKey !== undefined
+            ? ApiKey.from(configuration.apiKey)
+            : undefined;
 
         // eslint-disable-next-line prefer-template -- Better readability
         this.endpoint = (baseEndpointUrl ?? BASE_ENDPOINT_URL).replace(/\/+$/, '')
             + (apiKey === undefined ? '/client' : '/external')
             + '/web/evaluate';
-
-        this.configuration = configuration;
         this.logger = configuration.logger ?? new NullLogger();
+        this.configuration = {
+            appId: configuration.appId,
+            apiKey: apiKey,
+        };
     }
 
     public evaluate(query: string, options: EvaluationOptions = {}): Promise<JsonValue> {
@@ -243,7 +254,7 @@ export class Evaluator {
         headers['X-Client-Library'] = CLIENT_LIBRARY;
 
         if (apiKey !== undefined) {
-            headers['X-Api-Key'] = apiKey;
+            headers['X-Api-Key'] = apiKey.getIdentifier();
         } else if (appId !== undefined) {
             headers['X-App-Id'] = appId;
         }

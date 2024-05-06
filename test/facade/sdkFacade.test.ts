@@ -1,4 +1,5 @@
 import {SdkFacade, Configuration} from '../../src/facade/sdkFacade';
+import {Configuration as ResolvedConfiguration} from '../../src/sdk';
 import {InMemoryTokenStore, Token} from '../../src/token';
 import {Sdk} from '../../src';
 import {Context} from '../../src/context';
@@ -95,7 +96,8 @@ describe('A SDK facade', () => {
                 disableCidMirroring: false,
                 debug: false,
                 test: false,
-            } satisfies Configuration,
+                eventProcessor: expect.any(Function),
+            } satisfies ResolvedConfiguration,
         );
     });
 
@@ -129,7 +131,8 @@ describe('A SDK facade', () => {
                 tokenScope: 'isolated',
                 logger: logger,
                 urlSanitizer: urlSanitizer,
-            } satisfies Configuration,
+                eventProcessor: expect.any(Function),
+            } satisfies ResolvedConfiguration,
         );
     });
 

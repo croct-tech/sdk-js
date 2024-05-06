@@ -63,6 +63,22 @@ describe('The SDK facade configuration schema', () => {
                 warn: jest.fn(),
                 error: jest.fn(),
             },
+            cookie: {
+                clientId: {
+                    name: 'cid',
+                    domain: 'croct.com',
+                    path: '/',
+                    secure: true,
+                    sameSite: 'strict',
+                },
+                userToken: {
+                    name: 'utk',
+                    domain: 'croct.com',
+                    path: '/',
+                    secure: true,
+                    sameSite: 'strict',
+                },
+            },
         }],
     ])('should allow %s', value => {
         function validate(): void {
@@ -195,6 +211,35 @@ describe('The SDK facade configuration schema', () => {
                 preferredLocale: 'foo_baar',
             },
             'Invalid format at path \'/preferredLocale\'.',
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                cookie: null,
+            },
+            "Expected value of type object at path '/cookie', actual null.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                cookie: {
+                    clientId: {
+                        name: null,
+                    },
+                },
+            },
+            "Expected value of type string at path '/cookie/clientId/name', actual null.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                cookie: {
+                    userToken: {
+                        name: null,
+                    },
+                },
+            },
+            "Expected value of type string at path '/cookie/userToken/name', actual null.",
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {

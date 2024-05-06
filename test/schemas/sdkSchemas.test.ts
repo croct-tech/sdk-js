@@ -1,4 +1,4 @@
-import {sdkConfigurationSchema, eventMetadataSchema} from '../../src/schema';
+import {sdkConfigurationSchema, eventMetadataSchema, cookieOptionsSchema} from '../../src/schema';
 import {Configuration} from '../../src';
 
 describe('The event metadata schema', () => {
@@ -64,6 +64,141 @@ describe('The event metadata schema', () => {
     });
 });
 
+describe('The cookie options schema', () => {
+    it.each([
+        [{
+            name: 'foo',
+        }],
+        [{
+            name: 'foo',
+            domain: 'example.com',
+        }],
+        [{
+            name: 'foo',
+            domain: 'example.com',
+            path: '/',
+        }],
+        [{
+            name: 'foo',
+            domain: 'example.com',
+            path: '/',
+            secure: true,
+        }],
+        [{
+            name: 'foo',
+            domain: 'example.com',
+            path: '/',
+            secure: true,
+            sameSite: 'strict',
+        }],
+        [{
+            name: 'foo',
+            domain: 'example.com',
+            path: '/',
+            secure: true,
+            sameSite: 'strict',
+            maxAge: 0,
+        }],
+        [{
+            name: 'foo',
+            domain: 'example.com',
+            path: '/',
+            secure: true,
+            sameSite: 'strict',
+            maxAge: 0,
+        }],
+    ])('should allow %s', value => {
+        function validate(): void {
+            cookieOptionsSchema.validate(value);
+        }
+
+        expect(validate).not.toThrow();
+    });
+
+    it.each([
+        [
+            {
+                domain: 'example.com',
+            },
+            "Missing property '/name'.",
+        ],
+        [
+            {
+                name: '',
+            },
+            "Expected at least 1 character at path '/name', actual 0.",
+        ],
+        [
+            {
+                name: 1,
+            },
+            "Expected value of type string at path '/name', actual integer.",
+        ],
+        [
+            {
+                name: 'foo',
+                domain: '',
+            },
+            "Expected at least 1 character at path '/domain', actual 0.",
+        ],
+        [
+            {
+                name: 'foo',
+                domain: 1,
+            },
+            "Expected value of type string at path '/domain', actual integer.",
+        ],
+        [
+            {
+                name: 'foo',
+                path: '',
+            },
+            "Expected at least 1 character at path '/path', actual 0.",
+        ],
+        [
+            {
+                name: 'foo',
+                path: 1,
+            },
+            "Expected value of type string at path '/path', actual integer.",
+        ],
+        [
+            {
+                name: 'foo',
+                secure: 'foo',
+            },
+            "Expected value of type boolean at path '/secure', actual string.",
+        ],
+        [
+            {
+                name: 'foo',
+                sameSite: 'foo',
+            },
+            "Unexpected value at path '/sameSite', expecting 'strict', 'lax' or 'none', found 'foo'.",
+        ],
+        [
+            {
+                name: 'foo',
+                maxAge: -1,
+            },
+            "Expected a value greater than or equal to 0 at path '/maxAge', actual -1.",
+        ],
+        [
+            {
+                name: 'foo',
+                maxAge: 1.2,
+            },
+            "Expected value of type integer at path '/maxAge', actual number.",
+        ],
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
+        function validate(): void {
+            cookieOptionsSchema.validate(value);
+        }
+
+        expect(validate).toThrowWithMessage(Error, message);
+    });
+});
+
 describe('The SDK configuration schema', () => {
     it.each<Configuration[]>([
         [{
@@ -90,6 +225,25 @@ describe('The SDK configuration schema', () => {
                 error: jest.fn(),
             },
             eventMetadata: {},
+            cookie: {
+                clientId: {
+                    name: 'cid',
+                    domain: 'example.com',
+                    path: '/',
+                    secure: true,
+                    sameSite: 'strict',
+                    maxAge: 0,
+                },
+                userToken: {
+                    name: 'ut',
+                    domain: 'example.com',
+                    path: '/',
+                    secure: true,
+                    sameSite: 'strict',
+                    maxAge: 0,
+                },
+            },
+            eventProcessor: jest.fn(),
         }],
     ])('should allow %s', value => {
         function validate(): void {
@@ -242,6 +396,68 @@ describe('The SDK configuration schema', () => {
                 logger: null,
             },
             "Expected value of type object at path '/logger', actual null.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                cookie: null,
+            },
+            "Expected value of type object at path '/cookie', actual null.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                cookie: {
+                    clientId: {
+                        name: '',
+                        domain: 'example.com',
+                        path: '/',
+                        secure: true,
+                        sameSite: 'strict',
+                        maxAge: 0,
+                    },
+                },
+            },
+            "Expected at least 1 character at path '/cookie/clientId/name', actual 0.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                cookie: {
+                    userToken: {
+                        name: '',
+                        domain: 'example.com',
+                        path: '/',
+                        secure: true,
+                        sameSite: 'strict',
+                        maxAge: 0,
+                    },
+                },
+            },
+            "Expected at least 1 character at path '/cookie/userToken/name', actual 0.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                eventProcessor: null,
+            },
+            "Expected value of type function at path '/eventProcessor', actual null.",
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {

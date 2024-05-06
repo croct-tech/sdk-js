@@ -1,13 +1,27 @@
+import {encodeURI as base64Encode} from 'js-base64';
 import {Token, FixedTokenProvider} from '../../src/token';
-import {base64UrlEncode, base64UrlDecode} from '../../src/base64Url';
+import {ApiKey} from '../../src/apiKey';
 
 describe('A token', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
     const anonymousSerializedToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIiwiYXBwSWQiOiI3ZTlkNTlhOS1lNG'
         + 'IzLTQ1ZDQtYjFjNy00ODI4N2YxZTVlOGEifQ.eyJpc3MiOiJjcm9jdC5pbyIsImF1ZCI6ImNyb2N0LmlvIiwiaWF0Ij'
         + 'oxNDQwOTgyOTIzfQ.';
-    const binarySignature = 'VIBocta06jN0I6YXPiqtfAm_QJn64aLaM_'
-        + 'slfBo6MhRApV0znNagbMM5102L5OwtFLDMC8BFHFeKnHxrFKSK0Q';
+
+    const binarySignedSerializedToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSIsImFwcElkIjoiN2U5ZDU5YTktZTRiM'
+        + 'y00NWQ0LWIxYzctNDgyODdmMWU1ZThhIiwia2lkIjoiN2FjMWI4ZDcwMTBiYjZjZDNhM2U4NGU3ZjkwMTM2Yjg4MGJiYzg5OWU0'
+        + 'MjhlY2U0OTMzMzM3MjkxMWFiOTA1MiJ9.eyJpc3MiOiJjcm9jdC5pbyIsImF1ZCI6ImNyb2N0LmlvIiwiaWF0IjoxNDQwOTgyOTIz'
+        + 'LCJzdWIiOiJjNHIwbCJ9.GjTvv73vv73vv73vv70F77-977-977-9Hxfvv71gA--_ve-_vRbvv70xa--_vX3vv73vv73vv70Q77-977'
+        + '-9Syvvv70QLu-_vSRJRO-_ve-_vUhwW8eQVlhhF3Dvv70H77-977-977-9AO-_vXYCZe-_vRcyCg';
+
+    const binarySignature = 'GjTv'
+        + 'v73vv73vv73vv70F77-977-977-9Hxfvv71gA--_ve-_vRbvv70xa--_vX3vv73vv73vv70Q77-977-9Syvvv70QLu-_vSRJRO-'
+        + '_ve-_vUhwW8eQVlhhF3Dvv70H77-977-977-9AO-_vXYCZe-_vRcyCg';
+
+    const apiKey = ApiKey.of(
+        '00000000-0000-0000-0000-000000000000',
+        '302e020100300506032b6570042204206d0e45033d54aa3231fcef9f0eaa1ff559a68884dbcc8931181b312f90513261',
+    );
 
     it('may contain headers', () => {
         const token = Token.issue(appId, 'c4r0l', 1440982923);
@@ -33,8 +47,92 @@ describe('A token', () => {
     it('may contain a signature', () => {
         const token = Token.parse(`${anonymousSerializedToken}${binarySignature}`);
 
-        // The result is a binary string
-        expect(token.getSignature()).toBe(base64UrlDecode(binarySignature, false));
+        expect(token.getSignature()).toBe(binarySignature);
+    });
+
+    it('should have a type', () => {
+        const type = 'JWT';
+
+        const token = Token.of(
+            {
+                typ: type,
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(token.getType()).toBe(type);
+    });
+
+    it('should have an algorithm', () => {
+        const token = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(token.getAlgorithm()).toBe('none');
+    });
+
+    it('may have an application ID', () => {
+        const tokenWithoutAppId = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithoutAppId.getApplicationId()).toBeNull();
+
+        const tokenWithAppId = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+                appId: appId,
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithAppId.getApplicationId()).toBe(appId);
+    });
+
+    it('may have a key ID', () => {
+        const keyId = '7ac1b8d7010bb6cd3a3e84e7f90136b880bbc899e428ece49333372911ab9052';
+
+        const tokenWithKeyId = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+                appId: appId,
+                kid: keyId,
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithKeyId.getKeyId()).toBe(keyId);
     });
 
     it('should have an issue time', () => {
@@ -43,12 +141,146 @@ describe('A token', () => {
         expect(token.getIssueTime()).toBe(1440982923);
     });
 
-    it('may have a subject', () => {
-        const identifiedToken = Token.issue(appId, 'c4r0l', 1440982923);
-        const anonymousToken = Token.issue(appId, null, 1440982923);
+    it('may have an expiration time', () => {
+        const tokenWithoutExpiration = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
 
-        expect(identifiedToken.getSubject()).toBe('c4r0l');
-        expect(anonymousToken.getSubject()).toBeNull();
+        expect(tokenWithoutExpiration.getExpirationTime()).toBeNull();
+
+        const tokenWithExpiration = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+                exp: 1440982924,
+            },
+        );
+
+        expect(tokenWithExpiration.getExpirationTime()).toBe(1440982924);
+    });
+
+    it('may have a token ID', () => {
+        const tokenWithoutTokenId = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithoutTokenId.getTokenId()).toBeNull();
+
+        const tokenId = '00000000-0000-0000-0000-000000000001';
+
+        const tokenWithTokenId = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+                appId: appId,
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+                jti: tokenId,
+            },
+        );
+
+        expect(tokenWithTokenId.getTokenId()).toBe(tokenId);
+    });
+
+    it('should have an audience', () => {
+        const tokenWithSingleAudience = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithSingleAudience.getAudience()).toBe('croct.io');
+
+        const tokenWithMultipleAudiences = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: ['croct.io', 'admin'],
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithMultipleAudiences.getAudience()).toEqual(['croct.io', 'admin']);
+    });
+
+    it('should have an issuer', () => {
+        const token = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(token.getIssuer()).toBe('croct.io');
+    });
+
+    it('may have a subject', () => {
+        const tokenWithoutSubject = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        expect(tokenWithoutSubject.getSubject()).toBeNull();
+
+        const tokenWithSubject = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+                sub: 'c4r0l',
+            },
+        );
+
+        expect(tokenWithSubject.getSubject()).toBe('c4r0l');
     });
 
     it('should not have an empty subject', () => {
@@ -78,8 +310,8 @@ describe('A token', () => {
     });
 
     it('should be parsed and serialized', () => {
-        const signature = 'some-signature';
-        const encodedToken = anonymousSerializedToken + base64UrlEncode(signature);
+        const signature = base64Encode('some-signature');
+        const encodedToken = anonymousSerializedToken + signature;
         const anonymousToken = Token.parse(encodedToken);
 
         expect(anonymousToken.getHeaders()).toEqual({
@@ -155,7 +387,7 @@ describe('A token', () => {
             },
         });
 
-        expect(token.getSignature()).toEqual(base64UrlDecode(binarySignature, false));
+        expect(token.getSignature()).toEqual(binarySignature);
 
         expect(token.toString()).toEqual(data);
     });
@@ -197,6 +429,113 @@ describe('A token', () => {
         expect(invalidToken).toThrow('The token is invalid: invalid uuid format at path \'/headers/appId\'.');
     });
 
+    it('should allow specifying and retrieving the token identifier', () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', 1234567890);
+
+        expect(token.getTokenId()).toBeNull();
+
+        const tokenWithId = '00000000-0000-0000-0000-000000000001';
+
+        const newToken = token.withTokenId(tokenWithId);
+
+        expect(newToken).not.toBe(token);
+
+        expect(newToken.getTokenId()).toBe(tokenWithId);
+    });
+
+    it('should not allow to set an invalid token identifier', () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000');
+
+        expect(() => token.withTokenId('invalid')).toThrow('The token ID must be a valid UUID.');
+    });
+
+    it('should determine whether the token is valid now', () => {
+        const iat = 1714617288;
+        const exp = 1714620888;
+
+        jest.useFakeTimers();
+
+        const tokenWithExpiration = Token.parse(
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaXNzIjoiQ3JvY3QiLCJh'
+            + 'dWQiOiJjcm9jdC5jb20iLCJpYXQiOjE3MTQ2MTcyODgsImV4cCI6MTcxNDYyMDg4OH0',
+        )!;
+
+        const tokenWithoutExpiration = Token.parse(
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaXNzIjoiQ3JvY3QiLCJhd'
+            + 'WQiOiJjcm9jdC5jb20iLCJpYXQiOjE3MTQ2MTcyODh9',
+        )!;
+
+        expect(tokenWithExpiration).not.toBeNull();
+        expect(tokenWithoutExpiration).not.toBeNull();
+
+        jest.setSystemTime(iat * 1000);
+
+        expect(tokenWithExpiration.isValidNow()).toBeTrue();
+        expect(tokenWithExpiration.isValidNow(iat)).toBeTrue();
+        expect(tokenWithExpiration.isValidNow(iat - 1)).toBeFalse();
+        expect(tokenWithExpiration.isValidNow(exp)).toBeTrue();
+        expect(tokenWithExpiration.isValidNow(exp + 1)).toBeFalse();
+
+        expect(tokenWithoutExpiration.isValidNow()).toBeTrue();
+        expect(tokenWithoutExpiration.isValidNow(iat)).toBeTrue();
+        expect(tokenWithoutExpiration.isValidNow(iat - 1)).toBeFalse();
+        expect(tokenWithoutExpiration.isValidNow(Number.MAX_SAFE_INTEGER)).toBeTrue();
+    });
+
+    it('should determine whether the token is signed', async () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', 1234567890);
+
+        expect(token.isSigned()).toBeFalse();
+        expect((await token.signedWith(apiKey)).isSigned()).toBeTrue();
+    });
+
+    it('should determine if the key ID matches', async () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', 1234567890);
+        const otherKey = ApiKey.of(
+            '00000000-0000-0000-0000-000000000001',
+            '302e020100300506032b6570042204206d0e45033d54aa3231fcef9f0eaa1ff559a68884dbcc8931181b312f90513261',
+        );
+
+        const signedToken = await token.signedWith(apiKey);
+
+        await expect(token.matchesKeyId(otherKey)).resolves.toBeFalse();
+        await expect(signedToken.matchesKeyId(apiKey)).resolves.toBeTrue();
+        await expect(signedToken.matchesKeyId(otherKey)).resolves.toBeFalse();
+    });
+
+    it('should determine whether the token is anonymous', () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000');
+
+        expect(token.isAnonymous()).toBeTrue();
+    });
+
+    it('should determine whether the token is from a specific subject', () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000', 'subject');
+
+        expect(token.isSubject('subject')).toBeTrue();
+        expect(token.isSubject('other')).toBeFalse();
+    });
+
+    it('should determine whether the token is newer than another token', () => {
+        const now = Math.floor(Date.now() / 1000);
+        const oldToken = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', now);
+        const newToken = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', now + 1);
+
+        expect(oldToken.isNewerThan(oldToken)).toBeFalse();
+        expect(newToken.isNewerThan(oldToken)).toBeTrue();
+        expect(oldToken.isNewerThan(newToken)).toBeFalse();
+    });
+
+    it('should sign a token', async () => {
+        const token = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', 1234567890);
+        const signedToken = await token.signedWith(apiKey);
+
+        expect(signedToken.isSigned()).toBeTrue();
+        expect(signedToken.getSignature()).toMatch(/^[A-Za-z0-9_-]+$/);
+
+        await expect(signedToken.matchesKeyId(apiKey)).resolves.toBeTrue();
+    });
+
     it('should be convertible to JSON', () => {
         const anonymousToken = Token.parse(anonymousSerializedToken);
 
@@ -205,8 +544,10 @@ describe('A token', () => {
 
     it('should be convertible to string', () => {
         const anonymousToken = Token.parse(anonymousSerializedToken);
+        const binarySignedToken = Token.parse(binarySignedSerializedToken);
 
         expect(anonymousToken.toString()).toBe(anonymousSerializedToken);
+        expect(binarySignedToken.toString()).toBe(binarySignedSerializedToken);
     });
 });
 

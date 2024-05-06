@@ -4,6 +4,7 @@ import {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from './constants';
 import {formatMessage} from './error';
 import {Logger, NullLogger} from './logging';
+import {ApiKey} from './apiKey';
 
 export type ErrorResponse = {
     type: string,
@@ -76,13 +77,18 @@ export type FetchResponse<P extends JsonObject = JsonObject> = {
 
 export type Configuration = {
     appId?: string,
-    apiKey?: string,
+    apiKey?: string|ApiKey,
     baseEndpointUrl?: string,
     logger?: Logger,
 };
 
+type InternalConfiguration = {
+    appId?: string,
+    apiKey?: ApiKey,
+};
+
 export class ContentFetcher {
-    private readonly configuration: Pick<Configuration, 'appId' | 'apiKey'>;
+    private readonly configuration: InternalConfiguration;
 
     private readonly dynamicEndpoint: string;
 
@@ -95,9 +101,10 @@ export class ContentFetcher {
             throw new Error('Either the application ID or the API key must be provided.');
         }
 
-        this.configuration = configuration;
-
-        const {apiKey, baseEndpointUrl} = configuration;
+        const {baseEndpointUrl} = configuration;
+        const apiKey = configuration.apiKey !== undefined
+            ? ApiKey.from(configuration.apiKey)
+            : undefined;
 
         // eslint-disable-next-line prefer-template -- Better readability
         const baseEndpoint = (baseEndpointUrl ?? BASE_ENDPOINT_URL).replace(/\/+$/, '')
@@ -107,6 +114,10 @@ export class ContentFetcher {
         this.dynamicEndpoint = `${baseEndpoint}/content`;
         this.staticEndpoint = `${baseEndpoint}/static-content`;
         this.logger = configuration.logger ?? new NullLogger();
+        this.configuration = {
+            appId: configuration.appId,
+            apiKey: apiKey,
+        };
     }
 
     public fetch<P extends JsonObject>(slotId: string, options: FetchOptions = {}): Promise<FetchResponse<P>> {
@@ -182,7 +193,7 @@ export class ContentFetcher {
         }
 
         if (apiKey !== undefined) {
-            headers['X-Api-Key'] = apiKey;
+            headers['X-Api-Key'] = apiKey.getIdentifier();
         }
 
         const payload: FetchPayload = {

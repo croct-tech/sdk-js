@@ -36,32 +36,32 @@ describe('A socket channel', () => {
     });
 
     it('should fail to publish messages if an error occurs in the meanwhile', async () => {
-        const server = new WS(url);
-        const channel = new SocketChannel({url: url});
+        const server = new WS(url, {verifyClient: (): boolean => false});
 
-        server.on('connection', socket => {
-            socket.close({code: 1011, reason: 'Server error', wasClean: false});
+        const channel = new SocketChannel({
+            url: url,
+            closeTimeout: 0,
+            connectionTimeout: 0,
         });
 
         await expect(channel.publish('foo')).rejects.toThrow();
+
+        await server.closed;
     });
 
     it('should reconnect if the connection cannot be established', async () => {
-        const server = new WS(url);
-        const channel = new SocketChannel({url: url});
-
         let attempt = 0;
 
-        server.on('connection', socket => {
-            if (attempt === 0) {
-                socket.close({code: 1011, reason: 'Server error', wasClean: false});
-            }
-
-            attempt += 1;
+        const server = new WS(url, {
+            verifyClient: (): boolean => attempt++ > 0,
         });
+
+        const channel = new SocketChannel({url: url});
 
         await expect(channel.publish('foo')).rejects.toThrow();
         await expect(channel.publish('bar')).resolves.toBeUndefined();
+
+        await server.connected;
     });
 
     it('should reconnect when receiving a message after the connection is closed', async () => {

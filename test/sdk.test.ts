@@ -19,7 +19,7 @@ jest.mock(
 
 describe('A SDK', () => {
     const tabEventEmulator = new TabEventEmulator();
-    const configuration: Required<Configuration> = {
+    const configuration: Required<Omit<Configuration, 'eventProcessor'>> = {
         appId: '00000000-0000-0000-0000-000000000000',
         clientId: 'e6a133ffd3d2410681403d5e1bd95505',
         tokenScope: 'global',
@@ -32,6 +32,7 @@ describe('A SDK', () => {
         eventMetadata: {},
         baseEndpointUrl: 'https://localtest',
         cidAssignerEndpointUrl: 'https://localtest/cid',
+        cookie: {},
     };
 
     const websocketEndpoint = `${configuration.baseEndpointUrl.replace(/^http/i, 'ws')}/client/web/connect`;

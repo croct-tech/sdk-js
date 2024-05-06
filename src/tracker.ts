@@ -2,7 +2,7 @@ import {Logger, NullLogger} from './logging';
 import {Tab, TabEvent, TabUrlChangeEvent, TabVisibilityChangeEvent} from './tab';
 import {OutputChannel} from './channel';
 import {formatCause} from './error';
-import {TokenProvider} from './token';
+import {Token, TokenProvider} from './token';
 import {RetryPolicy} from './retry';
 import {
     Beacon,
@@ -23,6 +23,7 @@ export type Configuration = Options & {
     logger?: Logger,
     tab: Tab,
     tokenProvider: TokenProvider,
+    processor?: TrackingEventProcessor,
     inactivityRetryPolicy: RetryPolicy<number>,
 };
 
@@ -37,8 +38,15 @@ type InactivityTimer = {
     since: number,
 };
 
+export interface TrackingEventProcessor {
+    process(event: QueuedEventInfo): QueuedEventInfo[];
+}
+
+export type QueuedEventInfo<T extends TrackingEvent = TrackingEvent> = Omit<EventInfo<T>, 'status'>;
+
 export type EventInfo<T extends TrackingEvent = TrackingEvent> = {
     context: TrackingEventContext,
+    userToken?: Token,
     event: T,
     timestamp: number,
     status: 'pending' | 'confirmed' | 'failed' | 'ignored',
@@ -63,6 +71,8 @@ export class Tracker {
 
     private readonly logger: Logger;
 
+    private readonly processor?: TrackingEventProcessor;
+
     private readonly listeners: EventListener[] = [];
 
     private readonly pending: Array<Promise<void>> = [];
@@ -85,6 +95,7 @@ export class Tracker {
         this.inactivityRetryPolicy = inactivityRetryPolicy;
         this.channel = channel;
         this.logger = logger ?? new NullLogger();
+        this.processor = config.processor;
         this.options = {
             ...options,
             eventMetadata: options.eventMetadata ?? {},
@@ -264,7 +275,7 @@ export class Tracker {
     }
 
     public track<T extends PartialTrackingEvent>(event: T, timestamp: number = Date.now()): Promise<T> {
-        return this.publish(this.enrichEvent(event, timestamp), timestamp).then(() => event);
+        return this.dispatch(this.enrichEvent(event, timestamp), timestamp).then(() => event);
     }
 
     private trackPageOpen({referrer, ...payload}: {url: string, referrer: string}): void {
@@ -315,7 +326,7 @@ export class Tracker {
     }
 
     private enqueue(event: TrackingEvent, timestamp: number = Date.now()): void {
-        this.publish(event, timestamp).catch(() => {
+        this.dispatch(event, timestamp).catch(() => {
             // suppress error
         });
     }
@@ -324,11 +335,8 @@ export class Tracker {
         this.listeners.map(listener => listener(event));
     }
 
-    private publish<T extends TrackingEvent>(event: T, timestamp: number): Promise<T> {
-        if (event.type !== 'nothingChanged') {
-            this.stopInactivityTimer();
-        }
-
+    private dispatch<T extends TrackingEvent>(event: T, timestamp: number): Promise<T> {
+        const userToken = this.tokenProvider.getToken();
         const metadata = this.options.eventMetadata;
         const context: TrackingEventContext = {
             tabId: this.tab.id,
@@ -336,10 +344,48 @@ export class Tracker {
             ...(Object.keys(metadata).length > 0 ? {metadata: metadata} : {}),
         };
 
-        const eventInfo: EventInfo<T> = {
+        const queuedEvent: QueuedEventInfo<T> = {
+            ...(userToken !== null ? {userToken: userToken} : {}),
             event: event,
-            context: context,
             timestamp: timestamp,
+            context: context,
+        };
+
+        const processedEvents = this.processor !== undefined
+            ? this.processor.process(queuedEvent)
+            : [queuedEvent];
+
+        // sort events by timestamp in ascending order
+        processedEvents.sort((left, right) => left.timestamp - right.timestamp);
+
+        let result: Promise<T>|null = null;
+
+        for (const processedEvent of processedEvents) {
+            if (processedEvent === queuedEvent) {
+                result = this.publish(queuedEvent);
+
+                continue;
+            }
+
+            this.publish(processedEvent);
+        }
+
+        if (result === null) {
+            return Promise.reject(new Error('Event suppressed.'));
+        }
+
+        return result;
+    }
+
+    private publish<T extends TrackingEvent>(queuedEvent: QueuedEventInfo<T>): Promise<T> {
+        const {event} = queuedEvent;
+
+        if (event.type !== 'nothingChanged') {
+            this.stopInactivityTimer();
+        }
+
+        const eventInfo: EventInfo<T> = {
+            ...queuedEvent,
             status: 'pending',
         };
 
@@ -357,7 +403,7 @@ export class Tracker {
 
         return new Promise<T>((resolve, reject) => {
             const promise = this.channel
-                .publish(this.createBeacon(event, timestamp, context))
+                .publish(this.createBeacon(queuedEvent))
                 .then(
                     () => {
                         this.logger.debug(`Successfully published event "${event.type}"`);
@@ -403,12 +449,10 @@ export class Tracker {
         return event;
     }
 
-    private createBeacon(event: TrackingEvent, timestamp: number, context: TrackingEventContext): Beacon {
-        const token = this.tokenProvider.getToken();
-
+    private createBeacon({event, timestamp, context, userToken}: QueuedEventInfo): Beacon {
         return {
             timestamp: timestamp,
-            ...(token !== null ? {token: token.toString()} : {}),
+            ...(userToken !== undefined ? {token: userToken.toString()} : {}),
             context: context,
             payload: this.enrichBeaconPayload(this.createBeaconPayload(event)),
         };
