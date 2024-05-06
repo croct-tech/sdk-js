@@ -234,28 +234,6 @@ describe('The SDK facade configuration schema', () => {
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
                 cookie: {
-                    clientId: {
-                        name: '',
-                    },
-                },
-            },
-            "Expected at least 1 character at path '/cookie/clientId/name', actual 0.",
-        ],
-        [
-            {
-                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-                cookie: {
-                    clientId: {
-                        name: null,
-                    },
-                },
-            },
-            "Expected value of type string at path '/cookie/clientId/name', actual null.",
-        ],
-        [
-            {
-                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-                cookie: {
                     userToken: {
                         name: null,
                     },
