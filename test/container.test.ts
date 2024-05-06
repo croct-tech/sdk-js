@@ -101,7 +101,7 @@ describe('A container', () => {
         expect(Object.values(localStorage)).toContain(token.toString());
     });
 
-    it('should configure token store to use cookies if specified', () => {
+    it('should configure user token store to use cookies if specified', () => {
         const container = new Container({
             ...configuration,
             cookie: {
@@ -124,6 +124,31 @@ describe('A container', () => {
         expect(store.getToken()?.toString()).toBe(token.toString());
 
         expect(document.cookie).toBe(`croct.token=${token.toString()}`);
+    });
+
+    it('should configure the preview token store to use cookies if specified', () => {
+        const container = new Container({
+            ...configuration,
+            cookie: {
+                previewToken: {
+                    name: 'croct.preview',
+                },
+            },
+        });
+
+        const store = container.getPreviewTokenStore();
+
+        expect(document.cookie).toBe('');
+
+        expect(store.getToken()).toBeNull();
+
+        const token = Token.issue(configuration.appId);
+
+        store.setToken(token);
+
+        expect(store.getToken()?.toString()).toBe(token.toString());
+
+        expect(document.cookie).toBe(`croct.preview=${token.toString()}`);
     });
 
     it('should load the tracker only once', () => {

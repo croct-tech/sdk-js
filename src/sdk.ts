@@ -30,6 +30,7 @@ export type Configuration = {
     cookie?: {
         clientId?: CookieCacheConfiguration,
         userToken?: CookieCacheConfiguration,
+        previewToken?: CookieCacheConfiguration,
     },
     eventProcessor?: DependencyResolver<TrackingEventProcessor>,
 };

@@ -42,6 +42,7 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
             properties: {
                 clientId: cookieOptionsSchema,
                 userToken: cookieOptionsSchema,
+                previewToken: cookieOptionsSchema,
             },
         }),
         preferredLocale: new StringType({

@@ -62,6 +62,7 @@ export const sdkConfigurationSchema = new ObjectType({
             properties: {
                 clientId: cookieOptionsSchema,
                 userToken: cookieOptionsSchema,
+                previewToken: cookieOptionsSchema,
             },
         }),
         debug: new BooleanType(),

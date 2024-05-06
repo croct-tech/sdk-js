@@ -47,6 +47,7 @@ export type Configuration = {
     cookie?: {
         clientId?: CookieCacheConfiguration,
         userToken?: CookieCacheConfiguration,
+        previewToken?: CookieCacheConfiguration,
     },
     eventMetadata?: {[key: string]: string},
     eventProcessor?: DependencyResolver<TrackingEventProcessor>,
@@ -120,7 +121,9 @@ export class Container {
     public getPreviewTokenStore(): TokenStore {
         if (this.previewTokenStore === undefined) {
             this.previewTokenStore = new CachedTokenStore(
-                new LocalStorageCache(this.getGlobalBrowserStorage('preview'), 'token'),
+                this.configuration.cookie?.previewToken !== undefined
+                    ? new CookieCache(this.configuration.cookie.previewToken)
+                    : new LocalStorageCache(this.getGlobalBrowserStorage('preview'), 'token'),
             );
         }
 

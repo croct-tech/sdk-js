@@ -39,6 +39,7 @@ export type Configuration = Options & {
     cookie?: {
         clientId?: CookieCacheConfiguration,
         userToken?: CookieCacheConfiguration,
+        previewToken?: CookieCacheConfiguration,
     },
 };
 

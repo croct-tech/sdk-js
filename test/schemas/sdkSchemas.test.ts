@@ -242,6 +242,14 @@ describe('The SDK configuration schema', () => {
                     sameSite: 'strict',
                     maxAge: 0,
                 },
+                previewToken: {
+                    name: 'pt',
+                    domain: 'example.com',
+                    path: '/',
+                    secure: true,
+                    sameSite: 'strict',
+                    maxAge: 0,
+                },
             },
             eventProcessor: jest.fn(),
         }],
@@ -447,6 +455,26 @@ describe('The SDK configuration schema', () => {
                 },
             },
             "Expected at least 1 character at path '/cookie/userToken/name', actual 0.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                cookie: {
+                    previewToken: {
+                        name: '',
+                        domain: 'example.com',
+                        path: '/',
+                        secure: true,
+                        sameSite: 'strict',
+                        maxAge: 0,
+                    },
+                },
+            },
+            "Expected at least 1 character at path '/cookie/previewToken/name', actual 0.",
         ],
         [
             {
