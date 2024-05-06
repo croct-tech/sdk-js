@@ -1,4 +1,4 @@
-import {Logger, ConsoleLogger, NullLogger, NamespacedLogger} from './logging';
+import {Logger, ConsoleLogger, NamespacedLogger} from './logging';
 import {Context, TokenScope} from './context';
 import {NamespacedStorage} from './namespacedStorage';
 import {BackoffPolicy, ArbitraryPolicy} from './retry';
@@ -26,6 +26,7 @@ import {
 } from './channel';
 import {ContentFetcher} from './contentFetcher';
 import {CookieCache, CookieCacheConfiguration} from './cache/cookieCache';
+import {FilteredLogger} from './logging/filteredLogger';
 
 export type DependencyResolver<T> = (container: Container) => T;
 
@@ -319,7 +320,7 @@ export class Container {
             return new ConsoleLogger(prefix);
         }
 
-        return new NullLogger();
+        return FilteredLogger.include(new ConsoleLogger(), ['error', 'warn']);
     }
 
     public getTabStorage(namespace: string, ...subnamespace: string[]): Storage {

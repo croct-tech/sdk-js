@@ -481,7 +481,7 @@ describe('A container', () => {
         expect(window.localStorage.removeItem).toHaveBeenCalledWith(namespacedKey);
     });
 
-    it('should suppress log messages if no logger is specified and not in debug mode', () => {
+    it('should only log important messages if no logger is specified and not in debug mode', () => {
         const debug = jest.spyOn(window.console, 'debug').mockImplementation();
         const info = jest.spyOn(window.console, 'info').mockImplementation();
         const warn = jest.spyOn(window.console, 'warn').mockImplementation();
@@ -494,22 +494,26 @@ describe('A container', () => {
 
         const globalLogger = container.getLogger();
 
-        globalLogger.info('Info bar');
-        globalLogger.debug('Debug bar');
-        globalLogger.warn('Warn bar');
-        globalLogger.error('Error bar');
+        globalLogger.info('[Global] Info bar');
+        globalLogger.debug('[Global] Debug bar');
+        globalLogger.warn('[Global] Warn bar');
+        globalLogger.error('[Global] Error bar');
 
         const namespacedLogger = container.getLogger('Foo');
 
-        namespacedLogger.info('Info bar');
-        namespacedLogger.debug('Debug bar');
-        namespacedLogger.warn('Warn bar');
-        namespacedLogger.error('Error bar');
+        namespacedLogger.info('[NS] Info bar');
+        namespacedLogger.debug('[NS] Debug bar');
+        namespacedLogger.warn('[NS] Warn bar');
+        namespacedLogger.error('[NS] Error bar');
 
         expect(info).not.toHaveBeenCalled();
         expect(debug).not.toHaveBeenCalled();
-        expect(warn).not.toHaveBeenCalled();
-        expect(error).not.toHaveBeenCalled();
+        expect(warn).toHaveBeenCalledTimes(2);
+        expect(warn).toHaveBeenNthCalledWith(1, '[Global] Warn bar');
+        expect(warn).toHaveBeenNthCalledWith(2, '[NS] Warn bar');
+        expect(error).toHaveBeenCalledTimes(2);
+        expect(error).toHaveBeenNthCalledWith(1, '[Global] Error bar');
+        expect(error).toHaveBeenNthCalledWith(2, '[NS] Error bar');
     });
 
     it('should provide loggers that logs to the console in debug mode', () => {
