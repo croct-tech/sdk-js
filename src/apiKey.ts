@@ -111,7 +111,7 @@ export class ApiKey {
             await crypto.subtle.sign(
                 ApiKey.ALGORITHMS[algorithm].signatureAlgorithm,
                 key,
-                new TextEncoder().encode(data),
+                ApiKey.createByteArrayFromString(data),
             ),
         );
     }
