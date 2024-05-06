@@ -252,6 +252,17 @@ describe('The SDK facade configuration schema', () => {
             },
             "Expected value of type string at path '/cookie/clientId/name', actual null.",
         ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                cookie: {
+                    userToken: {
+                        name: null,
+                    },
+                },
+            },
+            "Expected value of type string at path '/cookie/userToken/name', actual null.",
+        ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             sdkFacadeConfigurationSchema.validate(value);
