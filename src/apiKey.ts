@@ -11,7 +11,7 @@ type Algorithm = {
 export class ApiKey {
     private static readonly IDENTIFIER_PATTERN = /^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$/i;
 
-    private static readonly PRIVATE_KEY_PATTERN = /^[a-z]+;[^;]+$/i;
+    private static readonly PRIVATE_KEY_PATTERN = /^[a-z0-9]+;[^;]+$/i;
 
     private static readonly ALGORITHMS: Record<string, Algorithm> = {
         ECDSA: {
@@ -65,13 +65,13 @@ export class ApiKey {
         }
 
         if (!ApiKey.PRIVATE_KEY_PATTERN.test(privateKey)) {
-            throw new Error('The API key private key must be a hexadecimal string.');
+            throw new Error('The API key is invalid.');
         }
 
         const [algorithmName, encodedKey] = privateKey.split(';');
 
         if (!(algorithmName in ApiKey.ALGORITHMS)) {
-            throw new Error(`Unsupported algorithm "${algorithmName}".`);
+            throw new Error(`Unsupported signing algorithm "${algorithmName}".`);
         }
 
         return new ApiKey(identifier, {
