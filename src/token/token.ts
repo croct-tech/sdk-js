@@ -1,8 +1,8 @@
 import {JsonObject} from '@croct/json';
-import {encodeURI as base64Encode, decode as base64Decode} from 'js-base64';
 import {tokenSchema} from '../schema';
 import {formatCause} from '../error';
 import {ApiKey} from '../apiKey';
+import {base64UrlDecode, base64UrlEncode} from '../base64Url';
 
 export type Headers = {
     typ: string,
@@ -81,8 +81,8 @@ export class Token {
         let payload;
 
         try {
-            headers = JSON.parse(base64Decode(parts[0]));
-            payload = JSON.parse(base64Decode(parts[1]));
+            headers = JSON.parse(base64UrlDecode(parts[0]));
+            payload = JSON.parse(base64UrlDecode(parts[1]));
         } catch (error) {
             throw new Error('The token is corrupted.');
         }
@@ -112,11 +112,11 @@ export class Token {
             alg: apiKey.getSigningAlgorithm(),
         };
 
-        const encodedHeader = base64Encode(JSON.stringify(headers));
-        const encodedPayload = base64Encode(JSON.stringify(this.payload));
+        const encodedHeader = base64UrlEncode(JSON.stringify(headers));
+        const encodedPayload = base64UrlEncode(JSON.stringify(this.payload));
         const signature = await apiKey.sign(`${encodedHeader}.${encodedPayload}`);
 
-        return new Token(headers, this.payload, base64Encode(signature));
+        return new Token(headers, this.payload, base64UrlEncode(signature.toString()));
     }
 
     public isSigned(): boolean {
@@ -217,8 +217,8 @@ export class Token {
     }
 
     public toString(): string {
-        const headers = base64Encode(JSON.stringify(this.headers));
-        const payload = base64Encode(JSON.stringify(this.payload));
+        const headers = base64UrlEncode(JSON.stringify(this.headers));
+        const payload = base64UrlEncode(JSON.stringify(this.payload));
 
         return `${headers}.${payload}.${this.signature}`;
     }
