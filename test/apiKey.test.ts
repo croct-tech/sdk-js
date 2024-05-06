@@ -19,7 +19,7 @@ describe('An API key', () => {
         expect(() => ApiKey.parse('invalid')).toThrow('The API key identifier must be a UUID.');
     });
 
-    it('should fail to parse an API key with an malformed private key', () => {
+    it('should fail to parse an API key with a malformed private key', () => {
         expect(() => ApiKey.parse('00000000-0000-0000-0000-000000000000:foo'))
             .toThrow('The API key private key must be a hexadecimal string.');
     });

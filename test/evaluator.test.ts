@@ -13,6 +13,7 @@ import {
 import {Token} from '../src/token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
 import {Logger} from '../src/logging';
+import {ApiKey} from '../src/apiKey';
 
 jest.mock(
     '../src/constants',
@@ -26,7 +27,12 @@ jest.mock(
 
 describe('An evaluator', () => {
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
-    const apiKey = '00000000-0000-0000-0000-000000000000';
+    const plainTextApiKey = '00000000-0000-0000-0000-000000000000';
+    const parsedApiKey = ApiKey.of(
+        '00000000-0000-0000-0000-000000000000',
+        '302e020100300506032b6570042204206d0e45033d54aa3231fcef9f0eaa1ff559a68884dbcc8931181b312f90513261',
+    );
+
     const query = 'user\'s name';
     const requestMatcher: MockOptions = {
         method: 'POST',
@@ -50,7 +56,7 @@ describe('An evaluator', () => {
     });
 
     it('should require either an application ID or API key, but not both', async () => {
-        await expect(() => new Evaluator({apiKey: apiKey, appId: appId}))
+        await expect(() => new Evaluator({apiKey: plainTextApiKey, appId: appId}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
@@ -73,7 +79,12 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query)).resolves.toBe(result);
     });
 
-    it('should use the external endpoint when specifying an API key', async () => {
+    it.each<[string, string|ApiKey]>(
+        [
+            ['an API key', parsedApiKey],
+            ['an plain-text API key', plainTextApiKey],
+        ],
+    )('should use the external endpoint for static content passing %s', async (_, apiKey) => {
         const evaluator = new Evaluator({
             apiKey: apiKey,
         });
@@ -85,7 +96,7 @@ describe('An evaluator', () => {
             matcher: `${BASE_ENDPOINT_URL}/external/web/evaluate`,
             headers: {
                 ...requestMatcher.headers,
-                'X-Api-Key': apiKey,
+                'X-Api-Key': plainTextApiKey,
             },
             response: JSON.stringify(result),
         });

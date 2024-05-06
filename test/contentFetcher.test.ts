@@ -5,6 +5,7 @@ import {Token} from '../src/token';
 import {ContentFetcher, ContentError, ContentErrorType, ErrorResponse, FetchOptions} from '../src/contentFetcher';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
 import {Logger} from '../src/logging';
+import {ApiKey} from '../src/apiKey';
 
 jest.mock(
     '../src/constants',
@@ -17,7 +18,11 @@ jest.mock(
 
 describe('A content fetcher', () => {
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
-    const apiKey = '00000000-0000-0000-0000-000000000000';
+    const plainTextApiKey = '00000000-0000-0000-0000-000000000000';
+    const parsedApiKey = ApiKey.of(
+        '00000000-0000-0000-0000-000000000000',
+        '302e020100300506032b6570042204206d0e45033d54aa3231fcef9f0eaa1ff559a68884dbcc8931181b312f90513261',
+    );
 
     const contentId = 'hero-banner';
     const content = {
@@ -48,7 +53,7 @@ describe('A content fetcher', () => {
     });
 
     it('should require either an application ID or API key, but not both', async () => {
-        await expect(() => new ContentFetcher({apiKey: apiKey, appId: appId}))
+        await expect(() => new ContentFetcher({apiKey: plainTextApiKey, appId: appId}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
@@ -69,7 +74,12 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId)).resolves.toEqual(content);
     });
 
-    it('should use the external endpoint for static content', async () => {
+    it.each<[string, string|ApiKey]>(
+        [
+            ['an API key', parsedApiKey],
+            ['an plain-text API key', plainTextApiKey],
+        ],
+    )('should use the external endpoint for static content passing %s', async (_, apiKey) => {
         const fetcher = new ContentFetcher({
             apiKey: apiKey,
         });
@@ -83,7 +93,7 @@ describe('A content fetcher', () => {
             matcher: `${BASE_ENDPOINT_URL}/external/web/static-content`,
             headers: {
                 ...requestMatcher.headers,
-                'X-Api-Key': apiKey,
+                'X-Api-Key': plainTextApiKey,
             },
             response: content,
         });
@@ -102,7 +112,7 @@ describe('A content fetcher', () => {
 
     it('should use the external endpoint when specifying an API key', async () => {
         const fetcher = new ContentFetcher({
-            apiKey: apiKey,
+            apiKey: plainTextApiKey,
         });
 
         fetchMock.mock({
@@ -110,7 +120,7 @@ describe('A content fetcher', () => {
             matcher: `${BASE_ENDPOINT_URL}/external/web/content`,
             headers: {
                 ...requestMatcher.headers,
-                'X-Api-Key': apiKey,
+                'X-Api-Key': plainTextApiKey,
             },
             response: content,
         });
@@ -120,7 +130,7 @@ describe('A content fetcher', () => {
 
     it('should fetch static content for the specified slot version', async () => {
         const fetcher = new ContentFetcher({
-            apiKey: apiKey,
+            apiKey: plainTextApiKey,
         });
 
         const options: FetchOptions = {
@@ -133,7 +143,7 @@ describe('A content fetcher', () => {
             matcher: `${BASE_ENDPOINT_URL}/external/web/static-content`,
             headers: {
                 ...requestMatcher.headers,
-                'X-Api-Key': apiKey,
+                'X-Api-Key': plainTextApiKey,
             },
             body: {
                 ...requestMatcher.body,
@@ -147,7 +157,7 @@ describe('A content fetcher', () => {
 
     it('should fetch static content for the specified preferred locale', async () => {
         const fetcher = new ContentFetcher({
-            apiKey: apiKey,
+            apiKey: plainTextApiKey,
         });
 
         const options: FetchOptions = {
@@ -160,7 +170,7 @@ describe('A content fetcher', () => {
             matcher: `${BASE_ENDPOINT_URL}/external/web/static-content`,
             headers: {
                 ...requestMatcher.headers,
-                'X-Api-Key': apiKey,
+                'X-Api-Key': plainTextApiKey,
             },
             body: {
                 ...requestMatcher.body,

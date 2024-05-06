@@ -23,6 +23,8 @@ type Claims = {
 export type TokenPayload = JsonObject & Claims;
 
 export class Token {
+    private static readonly UUID_PATTERN = /^[a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12}$/;
+
     private readonly headers: Headers;
 
     private readonly payload: TokenPayload;
@@ -145,7 +147,7 @@ export class Token {
     }
 
     public withTokenId(tokenId: string): Token {
-        if (tokenId === '' || !/^[a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12}$/.test(tokenId)) {
+        if (tokenId === '' || !Token.UUID_PATTERN.test(tokenId)) {
             throw new Error('The token ID must be a valid UUID.');
         }
 
