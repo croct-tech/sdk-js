@@ -114,19 +114,15 @@ export const eventOccurred = new ObjectType({
             minLength: 1,
             maxLength: 50,
         }),
-        testId: new StringType({
+        label: new StringType({
             minLength: 1,
             maxLength: 50,
         }),
-        groupId: new StringType({
+        action: new StringType({
             minLength: 1,
             maxLength: 50,
         }),
-        personalizationId: new StringType({
-            minLength: 1,
-            maxLength: 50,
-        }),
-        audience: new StringType({
+        category: new StringType({
             minLength: 1,
             maxLength: 50,
         }),
