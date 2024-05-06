@@ -125,7 +125,7 @@ describe('An API key', () => {
         await expect(verification).resolves.toBeTrue();
     });
 
-    it('should fail to sign a string with the API key does not have a private key', async () => {
+    it('should fail to sign a string when the API key does not have a private key', async () => {
         const apiKeyWithoutPrivateKey = ApiKey.of(identifier);
 
         await expect(apiKeyWithoutPrivateKey.sign('data')).rejects.toThrow(
