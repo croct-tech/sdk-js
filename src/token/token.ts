@@ -116,7 +116,7 @@ export class Token {
         const encodedPayload = base64UrlEncode(JSON.stringify(this.payload));
         const signature = await apiKey.sign(`${encodedHeader}.${encodedPayload}`);
 
-        return new Token(headers, this.payload, base64UrlEncode(signature.toString()));
+        return new Token(headers, this.payload, base64UrlEncode(signature));
     }
 
     public isSigned(): boolean {

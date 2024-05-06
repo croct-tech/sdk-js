@@ -107,13 +107,11 @@ export class ApiKey {
         const key = await this.importKey();
         const algorithm = this.getSigningAlgorithm();
 
-        return btoa(
-            ApiKey.convertBufferToString(
-                await crypto.subtle.sign(
-                    ApiKey.ALGORITHMS[algorithm].signatureAlgorithm,
-                    key,
-                    ApiKey.createByteArrayFromString(data),
-                ),
+        return ApiKey.convertBufferToString(
+            await crypto.subtle.sign(
+                ApiKey.ALGORITHMS[algorithm].signatureAlgorithm,
+                key,
+                new TextEncoder().encode(data),
             ),
         );
     }
