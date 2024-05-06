@@ -79,12 +79,10 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query)).resolves.toBe(result);
     });
 
-    it.each<[string, string|ApiKey]>(
-        [
-            ['an API key', parsedApiKey],
-            ['an plain-text API key', plainTextApiKey],
-        ],
-    )('should use the external endpoint for static content passing %s', async (_, apiKey) => {
+    it.each<[string, string|ApiKey]>([
+        ['an API key', parsedApiKey],
+        ['an plain-text API key', plainTextApiKey],
+    ])('should use the external endpoint for static content passing %s', async (_, apiKey) => {
         const evaluator = new Evaluator({
             apiKey: apiKey,
         });
@@ -96,7 +94,7 @@ describe('An evaluator', () => {
             matcher: `${BASE_ENDPOINT_URL}/external/web/evaluate`,
             headers: {
                 ...requestMatcher.headers,
-                'X-Api-Key': plainTextApiKey,
+                'X-Api-Key': parsedApiKey.getIdentifier(),
             },
             response: JSON.stringify(result),
         });

@@ -74,12 +74,10 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId)).resolves.toEqual(content);
     });
 
-    it.each<[string, string|ApiKey]>(
-        [
-            ['an API key', parsedApiKey],
-            ['an plain-text API key', plainTextApiKey],
-        ],
-    )('should use the external endpoint for static content passing %s', async (_, apiKey) => {
+    it.each<[string, string|ApiKey]>([
+        ['an API key', parsedApiKey],
+        ['an plain-text API key', plainTextApiKey],
+    ])('should use the external endpoint for static content passing %s', async (_, apiKey) => {
         const fetcher = new ContentFetcher({
             apiKey: apiKey,
         });
@@ -93,7 +91,7 @@ describe('A content fetcher', () => {
             matcher: `${BASE_ENDPOINT_URL}/external/web/static-content`,
             headers: {
                 ...requestMatcher.headers,
-                'X-Api-Key': plainTextApiKey,
+                'X-Api-Key': parsedApiKey.getIdentifier(),
             },
             response: content,
         });
@@ -120,7 +118,7 @@ describe('A content fetcher', () => {
             matcher: `${BASE_ENDPOINT_URL}/external/web/content`,
             headers: {
                 ...requestMatcher.headers,
-                'X-Api-Key': plainTextApiKey,
+                'X-Api-Key': parsedApiKey.getIdentifier(),
             },
             response: content,
         });
@@ -143,7 +141,7 @@ describe('A content fetcher', () => {
             matcher: `${BASE_ENDPOINT_URL}/external/web/static-content`,
             headers: {
                 ...requestMatcher.headers,
-                'X-Api-Key': plainTextApiKey,
+                'X-Api-Key': parsedApiKey.getIdentifier(),
             },
             body: {
                 ...requestMatcher.body,
@@ -170,7 +168,7 @@ describe('A content fetcher', () => {
             matcher: `${BASE_ENDPOINT_URL}/external/web/static-content`,
             headers: {
                 ...requestMatcher.headers,
-                'X-Api-Key': plainTextApiKey,
+                'X-Api-Key': parsedApiKey.getIdentifier(),
             },
             body: {
                 ...requestMatcher.body,
