@@ -109,15 +109,15 @@ export class Token {
         const headers: Headers = {
             ...this.headers,
             kid: keyId,
-            alg: 'EdDSA',
+            alg: apiKey.getSigningAlgorithm(),
         };
 
         const encodedHeader = base64Encode(JSON.stringify(headers));
         const encodedPayload = base64Encode(JSON.stringify(this.payload));
         const signatureData = `${encodedHeader}.${encodedPayload}`;
-        const signature = await apiKey.sign(Buffer.from(signatureData, 'utf-8'));
+        const signature = await apiKey.sign(signatureData);
 
-        return new Token(headers, this.payload, signature.toString('base64url'));
+        return new Token(headers, this.payload, base64Encode(signature));
     }
 
     public isSigned(): boolean {
