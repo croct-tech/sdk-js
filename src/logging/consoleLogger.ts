@@ -12,26 +12,26 @@ export class ConsoleLogger implements Logger {
     }
 
     public get debug(): (message: string) => void {
-        return this.bind(window.console.debug);
+        return this.bind(console.debug);
     }
 
     public get info(): (message: string) => void {
-        return this.bind(window.console.info);
+        return this.bind(console.info);
     }
 
     public get warn(): (message: string) => void {
-        return this.bind(window.console.warn);
+        return this.bind(console.warn);
     }
 
     public get error(): (message: string) => void {
-        return this.bind(window.console.error);
+        return this.bind(console.error);
     }
 
     private bind(method: ConsoleMethod): ConsoleMethod {
         if (this.namespace !== undefined) {
-            return method.bind(window.console, `[${this.namespace}]`);
+            return method.bind(console, `[${this.namespace}]`);
         }
 
-        return method.bind(window.console);
+        return method.bind(console);
     }
 }
