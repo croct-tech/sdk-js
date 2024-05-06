@@ -57,15 +57,15 @@ export class ApiKey {
 
     public static of(identifier: string, privateKey?: string): ApiKey {
         if (!ApiKey.IDENTIFIER_PATTERN.test(identifier)) {
-            throw new Error('The API key identifier must be a UUID.');
+            throw new Error('The identifier must be a UUID.');
         }
 
-        if (privateKey === undefined) {
+        if (privateKey === undefined || privateKey === '') {
             return new ApiKey(identifier);
         }
 
         if (!ApiKey.PRIVATE_KEY_PATTERN.test(privateKey)) {
-            throw new Error('The API key is invalid.');
+            throw new Error('The private key is malformed.');
         }
 
         const [algorithmName, encodedKey] = privateKey.split(';');
@@ -85,10 +85,10 @@ export class ApiKey {
     }
 
     public async getIdentifierHash(): Promise<string> {
-        const identifierBytes = Buffer.from(this.identifier.replace(/-/g, ''), 'hex');
+        const identifierBytes = ApiKey.createByteArrayFromHexString(this.identifier.replace(/-/g, ''));
         const rawHash = await crypto.subtle.digest('SHA-256', identifierBytes);
 
-        return Buffer.from(rawHash).toString('hex');
+        return ApiKey.convertByteArrayToHexString(rawHash);
     }
 
     public hasPrivateKey(): boolean {
@@ -150,7 +150,7 @@ export class ApiKey {
     }
 
     public export(): string {
-        return this.identifier + (this.hasPrivateKey() ? '' : `:${this.getPrivateKey()}`);
+        return this.identifier + (this.hasPrivateKey() ? `:${this.getPrivateKey()}` : '');
     }
 
     public toString(): string {
@@ -173,7 +173,7 @@ export class ApiKey {
             bufView[i] = value.charCodeAt(i);
         }
 
-        return buffer;
+        return bufView;
     }
 
     /**
@@ -186,5 +186,26 @@ export class ApiKey {
      */
     private static convertBufferToString(buffer: ArrayBuffer): string {
         return String.fromCharCode.apply(null, new Uint8Array(buffer));
+    }
+
+    private static createByteArrayFromHexString(hexString: string): Uint8Array {
+        const byteArray = new Uint8Array(hexString.length / 2);
+
+        for (let i = 0; i < byteArray.length; i++) {
+            byteArray[i] = parseInt(hexString.substring(i * 2, i * 2 + 2), 16);
+        }
+
+        return byteArray;
+    }
+
+    private static convertByteArrayToHexString(buffer: ArrayBuffer): string {
+        const bytes = new Uint8Array(buffer);
+        let hexString = '';
+
+        for (let i = 0; i < bytes.length; i++) {
+            hexString += bytes[i].toString(16).padStart(2, '0');
+        }
+
+        return hexString;
     }
 }

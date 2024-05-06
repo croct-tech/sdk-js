@@ -114,8 +114,7 @@ export class Token {
 
         const encodedHeader = base64Encode(JSON.stringify(headers));
         const encodedPayload = base64Encode(JSON.stringify(this.payload));
-        const signatureData = `${encodedHeader}.${encodedPayload}`;
-        const signature = await apiKey.sign(signatureData);
+        const signature = await apiKey.sign(`${encodedHeader}.${encodedPayload}`);
 
         return new Token(headers, this.payload, base64Encode(signature));
     }
