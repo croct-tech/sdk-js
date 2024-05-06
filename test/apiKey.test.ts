@@ -36,7 +36,7 @@ describe('An API key', () => {
         expect(() => ApiKey.parse(`${identifier}:invalid;secret`)).toThrow('Unsupported signing algorithm "invalid".');
     });
 
-    it('should parse an API key without an empty private key', () => {
+    it('should parse an API key with an empty private key', () => {
         expect(ApiKey.parse(`${identifier}:`).hasPrivateKey()).toBeFalse();
     });
 
