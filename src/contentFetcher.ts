@@ -4,7 +4,7 @@ import {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from './constants';
 import {formatMessage} from './error';
 import {Logger, NullLogger} from './logging';
-import {ApiKey} from './apiKey';
+import type {ApiKey} from './apiKey';
 
 export type ErrorResponse = {
     type: string,
@@ -84,7 +84,7 @@ export type Configuration = {
 
 type InternalConfiguration = {
     appId?: string,
-    apiKey?: ApiKey,
+    apiKey?: string,
 };
 
 export class ContentFetcher {
@@ -102,9 +102,9 @@ export class ContentFetcher {
         }
 
         const {baseEndpointUrl} = configuration;
-        const apiKey = configuration.apiKey !== undefined
-            ? ApiKey.from(configuration.apiKey)
-            : undefined;
+        const apiKey = typeof configuration.apiKey === 'object'
+            ? configuration.apiKey.getIdentifier()
+            : configuration.apiKey;
 
         // eslint-disable-next-line prefer-template -- Better readability
         const baseEndpoint = (baseEndpointUrl ?? BASE_ENDPOINT_URL).replace(/\/+$/, '')
@@ -193,7 +193,7 @@ export class ContentFetcher {
         }
 
         if (apiKey !== undefined) {
-            headers['X-Api-Key'] = apiKey.getIdentifier();
+            headers['X-Api-Key'] = apiKey;
         }
 
         const payload: FetchPayload = {
