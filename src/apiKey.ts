@@ -88,7 +88,7 @@ export class ApiKey {
         const identifierBytes = ApiKey.createByteArrayFromHexString(this.identifier.replace(/-/g, ''));
         const rawHash = await crypto.subtle.digest('SHA-256', identifierBytes);
 
-        return ApiKey.convertByteArrayToHexString(rawHash);
+        return ApiKey.convertBufferToHexString(rawHash);
     }
 
     public hasPrivateKey(): boolean {
@@ -112,7 +112,7 @@ export class ApiKey {
                 await crypto.subtle.sign(
                     ApiKey.ALGORITHMS[algorithm].signatureAlgorithm,
                     key,
-                    ApiKey.createBufferFromString(data),
+                    ApiKey.createByteArrayFromString(data),
                 ),
             ),
         );
@@ -131,7 +131,7 @@ export class ApiKey {
             this.importedKey = crypto.subtle
                 .importKey(
                     'pkcs8',
-                    ApiKey.createBufferFromString(atob(encodedKey)),
+                    ApiKey.createByteArrayFromString(atob(encodedKey)),
                     ApiKey.ALGORITHMS[algorithm].keyAlgorithm,
                     false,
                     ['sign'],
@@ -162,18 +162,27 @@ export class ApiKey {
      *
      * @see https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
      *
-     * @param value The string to convert.
+     * @param data The string to convert.
      * @returns The array buffer.
      */
-    private static createBufferFromString(value: string): ArrayBuffer {
-        const buffer = new ArrayBuffer(value.length);
-        const bufView = new Uint8Array(buffer);
+    private static createByteArrayFromString(data: string): Uint8Array {
+        const byteArray = new Uint8Array(data.length);
 
-        for (let i = 0, strLen = value.length; i < strLen; i++) {
-            bufView[i] = value.charCodeAt(i);
+        for (let i = 0; i < byteArray.length; i++) {
+            byteArray[i] = data.charCodeAt(i);
         }
 
-        return bufView;
+        return byteArray;
+    }
+
+    private static createByteArrayFromHexString(data: string): Uint8Array {
+        const byteArray = new Uint8Array(data.length / 2);
+
+        for (let i = 0; i < byteArray.length; i++) {
+            byteArray[i] = parseInt(data.substring(i * 2, i * 2 + 2), 16);
+        }
+
+        return byteArray;
     }
 
     /**
@@ -184,21 +193,11 @@ export class ApiKey {
      * @param buffer The buffer to convert.
      * @returns The string.
      */
-    private static convertBufferToString(buffer: ArrayBuffer): string {
+    private static convertBufferToString(buffer: ArrayLike<number> | ArrayBufferLike): string {
         return String.fromCharCode.apply(null, new Uint8Array(buffer));
     }
 
-    private static createByteArrayFromHexString(hexString: string): Uint8Array {
-        const byteArray = new Uint8Array(hexString.length / 2);
-
-        for (let i = 0; i < byteArray.length; i++) {
-            byteArray[i] = parseInt(hexString.substring(i * 2, i * 2 + 2), 16);
-        }
-
-        return byteArray;
-    }
-
-    private static convertByteArrayToHexString(buffer: ArrayBuffer): string {
+    private static convertBufferToHexString(buffer: ArrayLike<number> | ArrayBufferLike): string {
         const bytes = new Uint8Array(buffer);
         let hexString = '';
 
