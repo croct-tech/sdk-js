@@ -4,8 +4,8 @@ export type ParsedPrivateKey = {
 };
 
 type Algorithm = {
-    keyAlgorithm: Exclude<Parameters<typeof crypto.subtle.importKey>[2], string>,
-    signatureAlgorithm: Exclude<Parameters<typeof crypto.subtle.sign>[0], string>,
+    keyAlgorithm: EcKeyImportParams,
+    signatureAlgorithm: EcdsaParams,
 };
 
 export class ApiKey {
@@ -14,7 +14,7 @@ export class ApiKey {
     private static readonly PRIVATE_KEY_PATTERN = /^[a-z0-9]+;[^;]+$/i;
 
     private static readonly ALGORITHMS: Record<string, Algorithm> = {
-        ECDSA: {
+        ES256: {
             keyAlgorithm: {
                 name: 'ECDSA',
                 namedCurve: 'P-256',
@@ -105,11 +105,12 @@ export class ApiKey {
 
     public async sign(data: string): Promise<string> {
         const key = await this.importKey();
+        const algorithm = this.getSigningAlgorithm();
 
         return btoa(
             ApiKey.convertBufferToString(
                 await crypto.subtle.sign(
-                    this.getSigningAlgorithm(),
+                    ApiKey.ALGORITHMS[algorithm].signatureAlgorithm,
                     key,
                     ApiKey.createBufferFromString(data),
                 ),
@@ -120,7 +121,7 @@ export class ApiKey {
     public getSigningAlgorithm(): string {
         const {algorithm} = this.getParsedPrivateKey();
 
-        return ApiKey.ALGORITHMS[algorithm].signatureAlgorithm.name;
+        return algorithm;
     }
 
     private importKey(): Promise<CryptoKey> {
