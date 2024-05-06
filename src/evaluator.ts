@@ -4,7 +4,7 @@ import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
 import {Logger, NullLogger} from './logging';
-import {ApiKey} from './apiKey';
+import type {ApiKey} from './apiKey';
 
 export type Campaign = {
     name?: string,
@@ -102,7 +102,7 @@ export type Configuration = {
 
 type InternalConfiguration = {
     appId?: string,
-    apiKey?: ApiKey,
+    apiKey?: string,
 };
 
 export class Evaluator {
@@ -120,9 +120,9 @@ export class Evaluator {
         }
 
         const {baseEndpointUrl} = configuration;
-        const apiKey = configuration.apiKey !== undefined
-            ? ApiKey.from(configuration.apiKey)
-            : undefined;
+        const apiKey = typeof configuration.apiKey === 'object'
+            ? configuration.apiKey.getIdentifier()
+            : configuration.apiKey;
 
         // eslint-disable-next-line prefer-template -- Better readability
         this.endpoint = (baseEndpointUrl ?? BASE_ENDPOINT_URL).replace(/\/+$/, '')
@@ -254,7 +254,7 @@ export class Evaluator {
         headers['X-Client-Library'] = CLIENT_LIBRARY;
 
         if (apiKey !== undefined) {
-            headers['X-Api-Key'] = apiKey.getIdentifier();
+            headers['X-Api-Key'] = apiKey;
         } else if (appId !== undefined) {
             headers['X-App-Id'] = appId;
         }

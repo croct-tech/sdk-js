@@ -31,7 +31,7 @@ describe('An evaluator', () => {
         '00000000-0000-0000-0000-000000000000',
         '302e020100300506032b6570042204206d0e45033d54aa3231fcef9f0eaa1ff559a68884dbcc8931181b312f90513261',
     );
-    const plainTextApiKey = parsedApiKey.export();
+    const plainTextApiKey = parsedApiKey.getIdentifier();
 
     const query = 'user\'s name';
     const requestMatcher: MockOptions = {
