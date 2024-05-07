@@ -1,7 +1,7 @@
 import {webcrypto} from 'crypto';
 import {Token, FixedTokenProvider} from '../../src/token';
 import {ApiKey} from '../../src/apiKey';
-import {base64UrlEncode} from '../../build/base64Url';
+import {base64UrlEncode} from '../../src/base64Url';
 
 describe('A token', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
