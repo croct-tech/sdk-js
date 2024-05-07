@@ -1,8 +1,8 @@
 import {JsonObject} from '@croct/json';
-import {encodeURI as base64Encode, decode as base64Decode} from 'js-base64';
 import {tokenSchema} from '../schema';
 import {formatCause} from '../error';
 import {ApiKey} from '../apiKey';
+import {base64UrlDecode, base64UrlEncode} from '../base64Url';
 
 export type Headers = {
     typ: string,
@@ -81,8 +81,8 @@ export class Token {
         let payload;
 
         try {
-            headers = JSON.parse(base64Decode(parts[0]));
-            payload = JSON.parse(base64Decode(parts[1]));
+            headers = JSON.parse(base64UrlDecode(parts[0], true));
+            payload = JSON.parse(base64UrlDecode(parts[1], true));
         } catch (error) {
             throw new Error('The token is corrupted.');
         }
@@ -109,15 +109,14 @@ export class Token {
         const headers: Headers = {
             ...this.headers,
             kid: keyId,
-            alg: 'EdDSA',
+            alg: apiKey.getSigningAlgorithm(),
         };
 
-        const encodedHeader = base64Encode(JSON.stringify(headers));
-        const encodedPayload = base64Encode(JSON.stringify(this.payload));
-        const signatureData = `${encodedHeader}.${encodedPayload}`;
-        const signature = await apiKey.sign(Buffer.from(signatureData, 'utf-8'));
+        const encodedHeader = base64UrlEncode(JSON.stringify(headers), true);
+        const encodedPayload = base64UrlEncode(JSON.stringify(this.payload), true);
+        const signature = await apiKey.sign(`${encodedHeader}.${encodedPayload}`);
 
-        return new Token(headers, this.payload, signature.toString('base64url'));
+        return new Token(headers, this.payload, base64UrlEncode(signature, false));
     }
 
     public isSigned(): boolean {
@@ -218,8 +217,8 @@ export class Token {
     }
 
     public toString(): string {
-        const headers = base64Encode(JSON.stringify(this.headers));
-        const payload = base64Encode(JSON.stringify(this.payload));
+        const headers = base64UrlEncode(JSON.stringify(this.headers), true);
+        const payload = base64UrlEncode(JSON.stringify(this.payload), true);
 
         return `${headers}.${payload}.${this.signature}`;
     }

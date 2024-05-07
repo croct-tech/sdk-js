@@ -1,16 +1,38 @@
-import * as crypto from 'crypto';
-import {KeyObject} from 'crypto';
+export type ParsedPrivateKey = {
+    algorithm: string,
+    encodedKey: string,
+};
+
+type Algorithm = {
+    keyAlgorithm: EcKeyImportParams,
+    signatureAlgorithm: EcdsaParams,
+};
 
 export class ApiKey {
     private static readonly IDENTIFIER_PATTERN = /^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$/i;
 
-    private static readonly PRIVATE_KEY_PATTERN = /^[a-f0-9]+$/i;
+    private static readonly PRIVATE_KEY_PATTERN = /^[a-z0-9]+;[^;]+$/i;
+
+    private static readonly ALGORITHMS: Record<string, Algorithm> = {
+        ES256: {
+            keyAlgorithm: {
+                name: 'ECDSA',
+                namedCurve: 'P-256',
+            },
+            signatureAlgorithm: {
+                name: 'ECDSA',
+                hash: 'SHA-256',
+            },
+        },
+    };
 
     private readonly identifier: string;
 
-    private readonly privateKey?: KeyObject;
+    private readonly privateKey?: ParsedPrivateKey;
 
-    private constructor(identifier: string, privateKey?: KeyObject) {
+    private importedKey: Promise<CryptoKey>;
+
+    private constructor(identifier: string, privateKey?: ParsedPrivateKey) {
         this.identifier = identifier;
         this.privateKey = privateKey;
     }
@@ -35,26 +57,27 @@ export class ApiKey {
 
     public static of(identifier: string, privateKey?: string): ApiKey {
         if (!ApiKey.IDENTIFIER_PATTERN.test(identifier)) {
-            throw new Error('The API key identifier must be a UUID.');
+            throw new Error('The identifier must be a UUID.');
         }
 
-        if (privateKey === undefined) {
+        if (privateKey === undefined || privateKey === '') {
             return new ApiKey(identifier);
         }
 
         if (!ApiKey.PRIVATE_KEY_PATTERN.test(privateKey)) {
-            throw new Error('The API key private key must be a hexadecimal string.');
+            throw new Error('The private key is malformed.');
         }
 
-        try {
-            return new ApiKey(identifier, crypto.createPrivateKey({
-                key: Buffer.from(privateKey, 'hex'),
-                format: 'der',
-                type: 'pkcs8',
-            }));
-        } catch {
-            throw new Error('Invalid private key.');
+        const [algorithmName, encodedKey] = privateKey.split(';');
+
+        if (!(algorithmName in ApiKey.ALGORITHMS)) {
+            throw new Error(`Unsupported signing algorithm "${algorithmName}".`);
         }
+
+        return new ApiKey(identifier, {
+            algorithm: algorithmName,
+            encodedKey: encodedKey,
+        });
     }
 
     public getIdentifier(): string {
@@ -62,49 +85,124 @@ export class ApiKey {
     }
 
     public async getIdentifierHash(): Promise<string> {
-        const identifierBytes = Buffer.from(this.identifier.replace(/-/g, ''), 'hex');
+        const identifierBytes = ApiKey.createByteArrayFromHexString(this.identifier.replace(/-/g, ''));
         const rawHash = await crypto.subtle.digest('SHA-256', identifierBytes);
 
-        return Buffer.from(rawHash).toString('hex');
+        return ApiKey.convertBufferToHexString(rawHash);
     }
 
     public hasPrivateKey(): boolean {
         return this.privateKey !== undefined;
     }
 
-    public getPrivateKey(): string|null {
-        return this.privateKey === undefined
-            ? null
-            : this.privateKey
-                .export({format: 'der', type: 'pkcs8'})
-                .toString('hex');
-    }
-
-    public sign(blob: Buffer): Promise<Buffer> {
-        const {privateKey} = this;
-
-        if (privateKey === undefined) {
-            return Promise.reject(new Error('The API key does not have a private key.'));
+    public getPrivateKey(): string {
+        if (this.privateKey === undefined) {
+            throw new Error('The API key does not have a private key.');
         }
 
-        return new Promise((resolve, reject) => {
-            crypto.sign(null, blob, privateKey, (error, signature) => {
-                if (error == null) {
-                    resolve(signature);
-                } else {
-                    reject(error);
-                }
-            });
-        });
+        return `${this.privateKey.algorithm};${this.privateKey.encodedKey}`;
+    }
+
+    public async sign(data: string): Promise<string> {
+        const key = await this.importKey();
+        const algorithm = this.getSigningAlgorithm();
+
+        return ApiKey.convertBufferToString(
+            await crypto.subtle.sign(
+                ApiKey.ALGORITHMS[algorithm].signatureAlgorithm,
+                key,
+                ApiKey.createByteArrayFromString(data),
+            ),
+        );
+    }
+
+    public getSigningAlgorithm(): string {
+        const {algorithm} = this.getParsedPrivateKey();
+
+        return algorithm;
+    }
+
+    private importKey(): Promise<CryptoKey> {
+        const {algorithm, encodedKey} = this.getParsedPrivateKey();
+
+        if (this.importedKey === undefined) {
+            this.importedKey = crypto.subtle
+                .importKey(
+                    'pkcs8',
+                    ApiKey.createByteArrayFromString(atob(encodedKey)),
+                    ApiKey.ALGORITHMS[algorithm].keyAlgorithm,
+                    false,
+                    ['sign'],
+                );
+        }
+
+        return this.importedKey;
+    }
+
+    private getParsedPrivateKey(): ParsedPrivateKey {
+        if (this.privateKey === undefined) {
+            throw new Error('The API key does not have a private key.');
+        }
+
+        return this.privateKey;
     }
 
     public export(): string {
-        const privateKey = this.getPrivateKey();
-
-        return this.identifier + (privateKey === null ? '' : `:${privateKey}`);
+        return this.identifier + (this.hasPrivateKey() ? `:${this.getPrivateKey()}` : '');
     }
 
     public toString(): string {
         return '[redacted]';
+    }
+
+    /**
+     * Create an array buffer from a string.
+     *
+     * @see https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
+     *
+     * @param data The string to convert.
+     * @returns The array buffer.
+     */
+    private static createByteArrayFromString(data: string): Uint8Array {
+        const byteArray = new Uint8Array(data.length);
+
+        for (let i = 0; i < byteArray.length; i++) {
+            byteArray[i] = data.charCodeAt(i);
+        }
+
+        return byteArray;
+    }
+
+    private static createByteArrayFromHexString(data: string): Uint8Array {
+        const byteArray = new Uint8Array(data.length / 2);
+
+        for (let i = 0; i < byteArray.length; i++) {
+            byteArray[i] = parseInt(data.substring(i * 2, i * 2 + 2), 16);
+        }
+
+        return byteArray;
+    }
+
+    /**
+     * Convert an array buffer to a string.
+     *
+     * @see https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
+     *
+     * @param buffer The buffer to convert.
+     * @returns The string.
+     */
+    private static convertBufferToString(buffer: ArrayLike<number> | ArrayBufferLike): string {
+        return String.fromCharCode(...new Uint8Array(buffer));
+    }
+
+    private static convertBufferToHexString(buffer: ArrayLike<number> | ArrayBufferLike): string {
+        const bytes = new Uint8Array(buffer);
+        let hexString = '';
+
+        for (let i = 0; i < bytes.length; i++) {
+            hexString += bytes[i].toString(16).padStart(2, '0');
+        }
+
+        return hexString;
     }
 }

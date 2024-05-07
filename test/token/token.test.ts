@@ -1,6 +1,7 @@
-import {encodeURI as base64Encode} from 'js-base64';
+import {webcrypto} from 'crypto';
 import {Token, FixedTokenProvider} from '../../src/token';
 import {ApiKey} from '../../src/apiKey';
+import {base64UrlEncode} from '../../src/base64Url';
 
 describe('A token', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
@@ -20,8 +21,13 @@ describe('A token', () => {
 
     const apiKey = ApiKey.of(
         '00000000-0000-0000-0000-000000000000',
-        '302e020100300506032b6570042204206d0e45033d54aa3231fcef9f0eaa1ff559a68884dbcc8931181b312f90513261',
+        'ES256;MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQggjT0kWmkzZgekGu76nM5m+uf9WgVp2BeI4'
+        + 'vdR1rNcrChRANCAAQnyWGJSbpr3Tq+tK16eOc9mgtS7K/DpMqlDJLXzvxk6Gg73x1eFVUYvXjiG2CZaItxnBTsWa7tmJNpTQ6xsQjM',
     );
+
+    beforeEach(() => {
+        Object.defineProperty(global, 'crypto', {value: webcrypto});
+    });
 
     it('may contain headers', () => {
         const token = Token.issue(appId, 'c4r0l', 1440982923);
@@ -310,7 +316,7 @@ describe('A token', () => {
     });
 
     it('should be parsed and serialized', () => {
-        const signature = base64Encode('some-signature');
+        const signature = base64UrlEncode('some-signature');
         const encodedToken = anonymousSerializedToken + signature;
         const anonymousToken = Token.parse(encodedToken);
 
@@ -493,7 +499,8 @@ describe('A token', () => {
         const token = Token.issue('00000000-0000-0000-0000-000000000000', 'subject', 1234567890);
         const otherKey = ApiKey.of(
             '00000000-0000-0000-0000-000000000001',
-            '302e020100300506032b6570042204206d0e45033d54aa3231fcef9f0eaa1ff559a68884dbcc8931181b312f90513261',
+            'ES256;MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgU70V9HrpL/EcoF5pWLAHFEbVbvolUpNxFSAC'
+            + 'oza6PNWhRANCAAQkJUbmWcbR6eHeRMEdNgPIJnQ9jgB6zMbwrQo9JrW5POVL2S7Ed4+oW/Q8Ypj9CUw0/g3aUOHKH0JD1QHQaFbx',
         );
 
         const signedToken = await token.signedWith(apiKey);

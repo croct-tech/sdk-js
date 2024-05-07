@@ -29,7 +29,8 @@ describe('An evaluator', () => {
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
     const parsedApiKey = ApiKey.of(
         '00000000-0000-0000-0000-000000000000',
-        '302e020100300506032b6570042204206d0e45033d54aa3231fcef9f0eaa1ff559a68884dbcc8931181b312f90513261',
+        'ES256;MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg3TbbvRM7DNwxY3XGWDmlSRPSfZ9b+ch9TO3jQ6'
+        + '8Zyj+hRANCAASmJj/EiEhUaLAWnbXMTb/85WADkuFgoELGZ5ByV7YPlbb2wY6oLjzGkpF6z8iDrvJ4kV6EhaJ4n0HwSQckVLNE',
     );
     const plainTextApiKey = parsedApiKey.getIdentifier();
 
