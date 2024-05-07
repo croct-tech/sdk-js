@@ -9,10 +9,14 @@ function base64Escape(value: string): string {
         .replace(/=/g, '');
 }
 
-export function base64UrlEncode(value: string): string {
-    return base64Escape(btoa(String.fromCodePoint(...new TextEncoder().encode(value))));
+export function base64UrlEncode(value: string, utf8 = false): string {
+    return utf8
+        ? base64Escape(btoa(String.fromCodePoint(...new TextEncoder().encode(value))))
+        : base64Escape(btoa(value));
 }
 
-export function base64UrlDecode(value: string): string {
-    return new TextDecoder().decode(Uint8Array.from(atob(base64Unescape(value)), m => m.codePointAt(0)!));
+export function base64UrlDecode(value: string, utf8 = false): string {
+    return utf8
+        ? new TextDecoder().decode(Uint8Array.from(atob(base64Unescape(value)), m => m.codePointAt(0)!))
+        : atob(base64Unescape(value));
 }

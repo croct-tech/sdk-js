@@ -81,8 +81,8 @@ export class Token {
         let payload;
 
         try {
-            headers = JSON.parse(base64UrlDecode(parts[0]));
-            payload = JSON.parse(base64UrlDecode(parts[1]));
+            headers = JSON.parse(base64UrlDecode(parts[0], true));
+            payload = JSON.parse(base64UrlDecode(parts[1], true));
         } catch (error) {
             throw new Error('The token is corrupted.');
         }
@@ -112,11 +112,11 @@ export class Token {
             alg: apiKey.getSigningAlgorithm(),
         };
 
-        const encodedHeader = base64UrlEncode(JSON.stringify(headers));
-        const encodedPayload = base64UrlEncode(JSON.stringify(this.payload));
+        const encodedHeader = base64UrlEncode(JSON.stringify(headers), true);
+        const encodedPayload = base64UrlEncode(JSON.stringify(this.payload), true);
         const signature = await apiKey.sign(`${encodedHeader}.${encodedPayload}`);
 
-        return new Token(headers, this.payload, base64UrlEncode(signature));
+        return new Token(headers, this.payload, base64UrlEncode(signature, false));
     }
 
     public isSigned(): boolean {
@@ -217,8 +217,8 @@ export class Token {
     }
 
     public toString(): string {
-        const headers = base64UrlEncode(JSON.stringify(this.headers));
-        const payload = base64UrlEncode(JSON.stringify(this.payload));
+        const headers = base64UrlEncode(JSON.stringify(this.headers), true);
+        const payload = base64UrlEncode(JSON.stringify(this.payload), true);
 
         return `${headers}.${payload}.${this.signature}`;
     }
