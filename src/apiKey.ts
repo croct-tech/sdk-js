@@ -192,7 +192,7 @@ export class ApiKey {
      * @returns The string.
      */
     private static convertBufferToString(buffer: ArrayLike<number> | ArrayBufferLike): string {
-        return String.fromCharCode.apply(null, new Uint8Array(buffer));
+        return String.fromCharCode(...new Uint8Array(buffer));
     }
 
     private static convertBufferToHexString(buffer: ArrayLike<number> | ArrayBufferLike): string {
