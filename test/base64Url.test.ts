@@ -20,6 +20,8 @@ describe('A base64 URL encoder/decoder function', () => {
         ['Jacaré'],
         ['\u00e9'],
         ['\u00e9\u00e9'],
+        [atob('qacWVddeO9x66kkymtPHTvh4hHnhdJ437m1HOSHh1od+aA94EB9bK67QFjaMo4PVxjZxhf2x4dHSCLievgGKpQ')],
+        [atob('qacWVddeO9x66kkymtPHTvh4hHnhdJ437m1HOSHh1od+aA94EB9bK67QFjaMo4PVxjZxhf2x4dHSCLievgGKpQ==')],
     ];
 
     it.each(encodeTests)('should encode "%s" as "%s"', (decoded: string) => {

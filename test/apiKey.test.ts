@@ -102,9 +102,8 @@ describe('An API key', () => {
             ['sign', 'verify'],
         );
 
-        const localPrivateKey = btoa(String.fromCharCode(
-            ...new Uint8Array(await crypto.subtle.exportKey('pkcs8', keyPair.privateKey)),
-        ));
+        const exportedKey = await crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
+        const localPrivateKey = Buffer.from(exportedKey).toString('base64');
 
         const localKey = ApiKey.of(identifier, `ES256;${localPrivateKey}`);
         const payload = 'data';
@@ -118,7 +117,7 @@ describe('An API key', () => {
                 },
             },
             keyPair.publicKey,
-            createArrayBuffer(atob(signature)),
+            createArrayBuffer(signature),
             createArrayBuffer(payload),
         );
 
