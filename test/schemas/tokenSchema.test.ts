@@ -1,8 +1,8 @@
 import {tokenSchema} from '../../src/schema';
-import {TokenPayload, Headers} from '../../src/token';
+import {TokenPayload, TokenHeaders} from '../../src/token';
 
 type ParsedToken = {
-    headers: Headers,
+    headers: TokenHeaders,
     payload: TokenPayload,
     signature?: string,
 };
