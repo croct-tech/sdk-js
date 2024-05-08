@@ -591,11 +591,7 @@ describe('A token', () => {
             sub: 'c4r0l',
         };
 
-        const newToken = token.withPayload({
-            ...payload,
-            // Ensure this prop is removed
-            jti: undefined,
-        });
+        const newToken = token.withPayload(payload);
 
         expect(newToken.getPayload()).toEqual(payload);
         expect(newToken.getHeaders()).toEqual(token.getHeaders());
@@ -625,7 +621,7 @@ describe('A token', () => {
             aud: undefined,
         });
 
-        expect(newToken.getPayload()).toEqual({
+        expect(newToken.getPayload()).toStrictEqual({
             ...token.getPayload(),
             ...addedClaims,
         });
@@ -654,7 +650,7 @@ describe('A token', () => {
             typ: undefined,
         });
 
-        expect(newToken.getHeaders()).toEqual({
+        expect(newToken.getHeaders()).toStrictEqual({
             ...token.getHeaders(),
             ...addedHeaders,
         });
