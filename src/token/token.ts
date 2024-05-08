@@ -4,14 +4,14 @@ import {formatCause} from '../error';
 import {ApiKey} from '../apiKey';
 import {base64UrlDecode, base64UrlEncode} from '../base64Url';
 
-export type Headers = {
+export type TokenHeaders = {
     typ: string,
     alg: string,
     kid?: string,
     appId?: string,
 };
 
-type Claims = {
+export type TokenClaims = {
     iss: string,
     aud: string|string[],
     iat: number,
@@ -20,18 +20,18 @@ type Claims = {
     jti?: string,
 };
 
-export type TokenPayload = JsonObject & Claims;
+export type TokenPayload = JsonObject & TokenClaims;
 
 export class Token {
     private static readonly UUID_PATTERN = /^[a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12}$/;
 
-    private readonly headers: Headers;
+    private readonly headers: TokenHeaders;
 
     private readonly payload: TokenPayload;
 
     private readonly signature: string;
 
-    private constructor(headers: Headers, payload: TokenPayload, signature = '') {
+    private constructor(headers: TokenHeaders, payload: TokenPayload, signature = '') {
         this.headers = headers;
         this.payload = payload;
         this.signature = signature;
@@ -90,7 +90,7 @@ export class Token {
         return Token.of(headers, payload, parts[2]);
     }
 
-    public static of(headers: Headers, payload: TokenPayload, signature = ''): Token {
+    public static of(headers: TokenHeaders, payload: TokenPayload, signature = ''): Token {
         try {
             tokenSchema.validate({
                 headers: headers,
@@ -101,12 +101,12 @@ export class Token {
             throw new Error(`The token is invalid: ${formatCause(violation)}`);
         }
 
-        return new Token(headers as Headers, payload as TokenPayload, signature as string);
+        return new Token(headers as TokenHeaders, payload as TokenPayload, signature as string);
     }
 
     public async signedWith(apiKey: ApiKey): Promise<Token> {
         const keyId = await apiKey.getIdentifierHash();
-        const headers: Headers = {
+        const headers: TokenHeaders = {
             ...this.headers,
             kid: keyId,
             alg: apiKey.getSigningAlgorithm(),
@@ -145,22 +145,7 @@ export class Token {
         return this.headers.kid === await apiKey.getIdentifierHash();
     }
 
-    public withTokenId(tokenId: string): Token {
-        if (tokenId === '' || !Token.UUID_PATTERN.test(tokenId)) {
-            throw new Error('The token ID must be a valid UUID.');
-        }
-
-        return new Token(
-            this.headers,
-            {
-                ...this.payload,
-                jti: tokenId,
-            },
-            this.signature,
-        );
-    }
-
-    public getHeaders(): Headers {
+    public getHeaders(): TokenHeaders {
         return {...this.headers};
     }
 
@@ -210,6 +195,77 @@ export class Token {
 
     public getIssuer(): string {
         return this.payload.iss;
+    }
+
+    public withTokenId(tokenId: string): Token {
+        if (tokenId === '' || !Token.UUID_PATTERN.test(tokenId)) {
+            throw new Error('The token ID must be a valid UUID.');
+        }
+
+        return new Token(
+            this.headers,
+            {
+                ...this.payload,
+                jti: tokenId,
+            },
+            this.signature,
+        );
+    }
+
+    public withDuration(duration: number, now: number = Math.floor(Date.now() / 1000)): Token {
+        return new Token(
+            this.headers,
+            {
+                ...this.payload,
+                iat: now,
+                exp: now + duration,
+            },
+            this.signature,
+        );
+    }
+
+    public withAddedHeaders(headers: Partial<TokenHeaders>): Token {
+        return this.withHeaders({
+            ...this.headers,
+            ...Object.fromEntries(
+                Object.entries(headers)
+                    .filter(([, value]) => value !== undefined),
+            ),
+        });
+    }
+
+    public withAddedClaims(claims: Partial<TokenClaims>): Token {
+        return this.withPayload({
+            ...this.payload,
+            ...Object.fromEntries(
+                Object.entries(claims)
+                    .filter(([, value]) => value !== undefined),
+            ),
+        });
+    }
+
+    public withHeaders(headers: TokenHeaders): Token {
+        return new Token(
+            headers,
+            this.payload,
+            this.signature,
+        );
+    }
+
+    public withPayload(payload: TokenPayload): Token {
+        return new Token(
+            this.headers,
+            payload,
+            this.signature,
+        );
+    }
+
+    public withSignature(signature: string): Token {
+        return new Token(
+            this.headers,
+            this.payload,
+            signature,
+        );
     }
 
     public toJSON(): string {

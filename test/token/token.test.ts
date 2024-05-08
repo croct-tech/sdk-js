@@ -1,5 +1,5 @@
 import {webcrypto} from 'crypto';
-import {Token, FixedTokenProvider} from '../../src/token';
+import {Token, FixedTokenProvider, TokenHeaders, TokenPayload, TokenClaims} from '../../src/token';
 import {ApiKey} from '../../src/apiKey';
 import {base64UrlEncode} from '../../src/base64Url';
 
@@ -541,6 +541,179 @@ describe('A token', () => {
         expect(signedToken.getSignature()).toMatch(/^[A-Za-z0-9_-]+$/);
 
         await expect(signedToken.matchesKeyId(apiKey)).resolves.toBeTrue();
+    });
+
+    it('should create a copy of a token with the given headers', () => {
+        const token = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+            'signature',
+        );
+
+        const headers = {
+            typ: 'JWT',
+            alg: 'other',
+            appId: '00000000-0000-0000-0000-000000000000',
+        };
+
+        const newToken = token.withHeaders(headers);
+
+        expect(newToken.getHeaders()).toEqual(headers);
+        expect(newToken.getPayload()).toEqual(token.getPayload());
+        expect(newToken.getSignature()).toBe(token.getSignature());
+    });
+
+    it('should create a copy of a token with the given payload', () => {
+        const token = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+            'signature',
+        );
+
+        const payload: TokenPayload = {
+            iss: 'test.io',
+            aud: 'test.io',
+            iat: 1440982923,
+            sub: 'c4r0l',
+        };
+
+        const newToken = token.withPayload(payload);
+
+        expect(newToken.getPayload()).toEqual(payload);
+        expect(newToken.getHeaders()).toEqual(token.getHeaders());
+        expect(newToken.getSignature()).toBe(token.getSignature());
+    });
+
+    it('should create a copy of a token with the added claims', () => {
+        const token = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        const addedClaims: Partial<TokenClaims> = {
+            sub: 'c4r0l',
+        };
+
+        const newToken = token.withAddedClaims({
+            ...addedClaims,
+            // Ensure this prop is removed
+            aud: undefined,
+        });
+
+        expect(newToken.getPayload()).toStrictEqual({
+            ...token.getPayload(),
+            ...addedClaims,
+        });
+    });
+
+    it('should create a copy of a token with the added headers', () => {
+        const token = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+        );
+
+        const addedHeaders: Partial<TokenHeaders> = {
+            appId: '00000000-0000-0000-0000-000000000000',
+        };
+
+        const newToken = token.withAddedHeaders({
+            ...addedHeaders,
+            // Ensure this prop is removed
+            typ: undefined,
+        });
+
+        expect(newToken.getHeaders()).toStrictEqual({
+            ...token.getHeaders(),
+            ...addedHeaders,
+        });
+    });
+
+    it('should create a copy of a token with a new signature', () => {
+        const token = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: 1440982923,
+            },
+            'old-signature',
+        );
+
+        const signature = 'signature';
+
+        const newToken = token.withSignature(signature);
+
+        expect(newToken.getSignature()).toBe(signature);
+        expect(newToken.getHeaders()).toEqual(token.getHeaders());
+        expect(newToken.getPayload()).toEqual(token.getPayload());
+    });
+
+    it('should create a copy of a token with an expiration time for a specific duration', () => {
+        const now = Math.floor(Date.now() / 1000);
+        const token = Token.of(
+            {
+                typ: 'JWT',
+                alg: 'none',
+            },
+            {
+                iss: 'croct.io',
+                aud: 'croct.io',
+                iat: now,
+            },
+        );
+
+        const headers = token.getHeaders();
+        const payload = token.getPayload();
+
+        expect(token.getIssueTime()).toBe(now);
+        expect(token.getExpirationTime()).toBeNull();
+
+        const later = now + 3600;
+        const duration = 100;
+
+        const newToken = token.withDuration(duration, later);
+
+        expect(newToken.getIssueTime()).toBe(later);
+        expect(newToken.getExpirationTime()).toBe(later + duration);
+
+        expect(newToken.getHeaders()).toEqual(headers);
+
+        expect(newToken.getPayload()).toEqual({
+            ...payload,
+            iat: newToken.getIssueTime(),
+            exp: newToken.getExpirationTime(),
+        });
     });
 
     it('should be convertible to JSON', () => {
