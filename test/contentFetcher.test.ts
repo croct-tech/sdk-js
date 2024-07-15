@@ -33,6 +33,7 @@ describe('A content fetcher', () => {
     };
 
     const requestMatcher: MockOptions = {
+        functionMatcher: (_, req) => req.mode === 'cors',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
