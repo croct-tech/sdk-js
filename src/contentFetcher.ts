@@ -248,6 +248,13 @@ export class ContentFetcher {
         }
 
         return fetch(dynamic ? this.dynamicEndpoint : this.staticEndpoint, {
+            // Set the request mode to 'cors' when running in the browser.
+            // By default, the request mode is computed based on the referrer policy
+            // and response-tainting rules applied to the script that ultimately
+            // initiated the fetch, make this prone to errors due to unrelated
+            // configurations on the page.
+            // https://fetch.spec.whatwg.org/#origin-header
+            mode: typeof window === 'undefined' ? undefined : 'cors',
             credentials: 'omit',
             ...options.extra,
             method: 'POST',

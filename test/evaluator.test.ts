@@ -36,6 +36,7 @@ describe('An evaluator', () => {
 
     const query = 'user\'s name';
     const requestMatcher: MockOptions = {
+        functionMatcher: (_, req) => req.mode === 'cors',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
