@@ -1,4 +1,3 @@
-import {WS} from 'jest-websocket-mock';
 import * as fetchMock from 'fetch-mock';
 import {Configuration, Container, DependencyResolver} from '../src/container';
 import {NullLogger, Logger} from '../src/logging';
@@ -10,17 +9,15 @@ import {TrackingEventProcessor} from '../src/tracker';
 describe('A container', () => {
     beforeEach(() => {
         localStorage.clear();
+        sessionStorage.clear();
 
         for (const cookie of document.cookie.split(';')) {
             const [name] = cookie.split('=');
 
             document.cookie = `${name}=; Max-Age=0`;
         }
-    });
 
-    afterEach(() => {
         jest.resetAllMocks();
-        WS.clean();
         fetchMock.reset();
     });
 
@@ -34,7 +31,7 @@ describe('A container', () => {
         cidAssignerEndpointUrl: 'https://localtest/cid',
         contentBaseEndpointUrl: 'https://localtest/content',
         evaluationBaseEndpointUrl: 'https://localtest/evaluate',
-        trackerEndpointUrl: 'wss://localtest/connect',
+        trackerEndpointUrl: 'https://localtest/track',
     };
 
     it('should provide its configuration', () => {
@@ -265,6 +262,22 @@ describe('A container', () => {
             response: '123',
         });
 
+        let attempts = 0;
+
+        fetchMock.mock({
+            method: 'POST',
+            matcher: (url: string) => url === configuration.trackerEndpointUrl && attempts++ === 0,
+            response: {
+                status: 500,
+            },
+        });
+
+        fetchMock.mock({
+            method: 'POST',
+            matcher: (url: string) => url === configuration.trackerEndpointUrl && attempts > 0,
+            response: 200,
+        });
+
         let container = new Container(configuration);
         let tracker = container.getTracker();
 
@@ -275,17 +288,19 @@ describe('A container', () => {
 
         const promise = tracker.track(payload);
 
+        await expect(new Promise(resolve => { setTimeout(resolve, 5); })).resolves.toBeUndefined();
+
         await container.dispose();
         await expect(promise).rejects.toThrow();
 
-        const server = new WS(`${configuration.trackerEndpointUrl}/${configuration.appId}`, {jsonProtocol: true});
+        expect(fetchMock.calls(configuration.trackerEndpointUrl)).toHaveLength(1);
 
         container = new Container(configuration);
-
         tracker = container.getTracker();
-        tracker.enable();
 
-        expect(server).toReceiveMessage(expect.objectContaining({payload: payload}));
+        await expect(tracker.flushed).resolves.toBeUndefined();
+
+        expect(fetchMock.calls(configuration.trackerEndpointUrl)).toHaveLength(2);
     });
 
     it.each([

@@ -20,13 +20,12 @@ import {
     RetryChannel,
     GuaranteedChannel,
     EncodedChannel,
-    BeaconSocketChannel,
-    SocketChannel,
     SandboxChannel,
 } from './channel';
 import {ContentFetcher} from './contentFetcher';
 import {CookieCache, CookieCacheConfiguration} from './cache/cookieCache';
 import {FilteredLogger} from './logging/filteredLogger';
+import {HttpBeaconChannel} from './channel/httpBeaconChannel';
 
 export type DependencyResolver<T> = (container: Container) => T;
 
@@ -226,23 +225,18 @@ export class Container {
         const queuedChannel = new QueuedChannel(
             new RetryChannel({
                 channel: new GuaranteedChannel({
-                    channel: new BeaconSocketChannel({
-                        trackerEndpointUrl: `${trackerEndpointUrl}/${appId}`,
-                        tokenParameter: 'token',
-                        loggerFactory: this.getLogger.bind(this),
-                        logger: channelLogger,
-                        channelFactory: (url, logger): SocketChannel<any, any> => (
-                            new SocketChannel({url: url, logger: logger})
-                        ),
+                    channel: new HttpBeaconChannel({
+                        appId: appId,
+                        endpointUrl: trackerEndpointUrl,
                         cidAssigner: this.getCidAssigner(),
-                        cidParameter: 'clientId',
+                        logger: channelLogger,
                     }),
                     stamper: new TimeStamper(),
                     ackTimeout: 10000,
                     logger: channelLogger,
                 }),
                 retryPolicy: new BackoffPolicy({
-                    minRetryDelay: 1000, // 1 second
+                    minRetryDelay: 3000, // 1 second
                     maxRetryDelay: 60 * 1000, // 60 seconds
                     backoffFactor: 1.5, // 1.5 ^ attempt
                     backoffJitter: 1, // add randomness
@@ -300,12 +294,9 @@ export class Container {
     }
 
     private createBeaconQueue(): MonitoredQueue<string> {
-        const context = this.getContext();
-        const tab = context.getTab();
-
         return new MonitoredQueue<string>(
             new CapacityRestrictedQueue(
-                new PersistentQueue(this.getGlobalTabStorage('queue'), tab.id),
+                new PersistentQueue(this.getGlobalTabStorage('queue')),
                 this.configuration.beaconQueueSize,
             ),
             this.getLogger('BeaconQueue'),
@@ -349,9 +340,9 @@ export class Container {
     }
 
     private resolveStorageNamespace(namespace: string, ...subnamespace: string[]): string {
-        return `croct[${this.configuration
-            .appId
-            .toLowerCase()}].${[namespace].concat(subnamespace).join('.')}`;
+        const {appId} = this.configuration;
+
+        return `croct[${appId.toLowerCase()}].${[namespace].concat(subnamespace).join('.')}`;
     }
 
     private getLocalStorage(): Storage {
