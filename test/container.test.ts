@@ -288,7 +288,9 @@ describe('A container', () => {
 
         const promise = tracker.track(payload);
 
-        await expect(new Promise(resolve => { setTimeout(resolve, 5); })).resolves.toBeUndefined();
+        // Add a delay to ensure the beacon is queued before disposing of the container.
+        // Otherwise, the beacon would be immediately rejected because the queue would be closed.
+        await new Promise(resolve => { setTimeout(resolve, 5); });
 
         await container.dispose();
         await expect(promise).rejects.toThrow();
