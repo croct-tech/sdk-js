@@ -1,8 +1,6 @@
 import {Queue} from './queue';
 
 export class PersistentQueue<T> implements Queue<T> {
-    private cache: T[];
-
     private readonly storage: Storage;
 
     private readonly key: string;
@@ -17,7 +15,7 @@ export class PersistentQueue<T> implements Queue<T> {
     }
 
     public getCapacity(): number {
-        return Infinity;
+        return Number.MAX_SAFE_INTEGER;
     }
 
     public isEmpty(): boolean {
@@ -29,9 +27,7 @@ export class PersistentQueue<T> implements Queue<T> {
     }
 
     public push(value: T): void {
-        this.queue.push(value);
-
-        this.flush();
+        this.save([...this.queue, value]);
     }
 
     public peek(): T | null {
@@ -45,30 +41,19 @@ export class PersistentQueue<T> implements Queue<T> {
     }
 
     public shift(): T {
-        const value = this.queue.shift();
+        const queue = [...this.queue];
+        const value = queue.shift();
 
         if (value === undefined) {
             throw new Error('The queue is empty.');
         }
 
-        this.flush();
+        this.save(queue);
 
         return value;
     }
 
-    private get queue(): T[] {
-        if (this.cache === undefined) {
-            this.cache = this.load();
-        }
-
-        return this.cache;
-    }
-
-    private flush(): void {
-        this.storage.setItem(this.key, JSON.stringify(this.cache ?? []));
-    }
-
-    private load(): T[] {
+    private get queue(): readonly T[] {
         const data = this.storage.getItem(this.key);
 
         if (data === null) {
@@ -77,8 +62,12 @@ export class PersistentQueue<T> implements Queue<T> {
 
         try {
             return JSON.parse(data);
-        } catch (error) {
+        } catch {
             return [];
         }
+    }
+
+    private save(data: T[]): void {
+        this.storage.setItem(this.key, JSON.stringify(data));
     }
 }

@@ -75,13 +75,12 @@ export class Sdk {
         }
 
         const baseHttpEndpoint = baseEndpointUrl.replace(/\/+$/, '');
-        const baseWsEndpoint = baseHttpEndpoint.replace(/^http/i, 'ws');
 
         const container = new Container({
             ...containerConfiguration,
             evaluationBaseEndpointUrl: baseHttpEndpoint,
             contentBaseEndpointUrl: baseHttpEndpoint,
-            trackerEndpointUrl: `${baseWsEndpoint}/client/web/connect`,
+            trackerEndpointUrl: `${baseHttpEndpoint}/client/web/track`,
             cidAssignerEndpointUrl: cidAssignerEndpointUrl ?? `${baseHttpEndpoint}/client/web/cid`,
             beaconQueueSize: containerConfiguration.beaconQueueSize ?? 100,
             eventMetadata: eventMetadata,

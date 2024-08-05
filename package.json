@@ -39,8 +39,6 @@
     "jest": "^29.3.1",
     "jest-environment-jsdom": "^29.3.1",
     "jest-extended": "^4.0.0",
-    "jest-websocket-mock": "^2.4.0",
-    "mock-socket": "^9.1.5",
     "node-fetch": "^2.6.7",
     "ts-jest": "^29.0.3",
     "typescript": "^5.0.0"
