@@ -27,6 +27,110 @@ describe('A cookie cache', () => {
         expect(cache.get()).toBe('foo');
     });
 
+    type DefaultOptionsScenario = {
+        https?: boolean,
+        options: Partial<CookieCacheConfiguration>,
+        expectedOptions: {
+            Secure?: boolean,
+            SameSite?: 'Strict' | 'Lax' | 'None',
+        },
+    };
+
+    it.each<DefaultOptionsScenario>([
+        {
+            https: true,
+            options: {},
+            expectedOptions: {
+                Secure: true,
+                SameSite: 'None',
+            },
+        },
+        {
+            https: true,
+            options: {
+                secure: false,
+            },
+            expectedOptions: {
+            },
+        },
+        {
+            https: false,
+            options: {},
+            expectedOptions: {
+            },
+        },
+        {
+            https: false,
+            options: {
+                secure: true,
+            },
+            expectedOptions: {
+                Secure: true,
+                SameSite: 'None',
+            },
+        },
+        {
+            https: true,
+            options: {
+                sameSite: 'lax',
+            },
+            expectedOptions: {
+                Secure: true,
+                SameSite: 'Lax',
+            },
+        },
+        {
+            https: false,
+            options: {
+                sameSite: 'none',
+            },
+            expectedOptions: {
+                SameSite: 'None',
+            },
+        },
+        {
+            https: false,
+            options: {
+                secure: false,
+            },
+            expectedOptions: {
+            },
+        },
+        {
+            https: undefined,
+            options: {},
+            expectedOptions: {
+            },
+        },
+    ])('should use default values for missing configuration (https: $https, options: $options)', scenario => {
+        const {https, options, expectedOptions} = scenario;
+        const cache = new CookieCache({name: 'cid', ...options}, https);
+
+        let jar = '';
+
+        jest.spyOn(document, 'cookie', 'set').mockImplementation(value => {
+            jar = value;
+        });
+
+        cache.put('foo');
+
+        expect(jar).not.toBeEmpty();
+
+        const cookie: Record<string, string|boolean> = {};
+
+        for (const entry of jar.split(';')) {
+            const [name, value = ''] = entry.split('=');
+
+            cookie[decodeURIComponent(name).trim()] = value === '' ? true : decodeURIComponent(value.trim());
+        }
+
+        expect(cookie).toEqual({
+            cid: 'foo',
+            Path: '/',
+            ...expectedOptions,
+        });
+    });
+
     it('should cache a value using the provided configuration', () => {
         const cache = new CookieCache({
             name: 'cookie name',

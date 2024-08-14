@@ -12,8 +12,19 @@ export type CookieCacheConfiguration = {
 export class CookieCache implements Cache {
     private readonly config: CookieCacheConfiguration;
 
-    public constructor(config: CookieCacheConfiguration) {
-        this.config = config;
+    public constructor(config: CookieCacheConfiguration, defaultSecure = window.location.protocol === 'https:') {
+        this.config = {
+            ...config,
+            path: config.path ?? '/',
+        };
+
+        if (defaultSecure && this.config.secure === undefined) {
+            this.config.secure = true;
+        }
+
+        if (this.config.secure === true && this.config.sameSite === undefined) {
+            this.config.sameSite = 'none';
+        }
     }
 
     public get(): string | null {
