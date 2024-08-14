@@ -16,9 +16,15 @@ export class CookieCache implements Cache {
         this.config = {
             ...config,
             path: config.path ?? '/',
-            secure: config.secure ?? defaultSecure,
-            sameSite: config.sameSite ?? (defaultSecure ? 'none' : 'lax'),
         };
+
+        if (defaultSecure && this.config.secure === undefined) {
+            this.config.secure = true;
+        }
+
+        if (this.config.secure === true && this.config.sameSite === undefined) {
+            this.config.sameSite = 'none';
+        }
     }
 
     public get(): string | null {

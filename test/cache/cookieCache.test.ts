@@ -28,34 +28,83 @@ describe('A cookie cache', () => {
     });
 
     type DefaultOptionsScenario = {
-        secure?: boolean,
-        options: {
+        https?: boolean,
+        options: Partial<CookieCacheConfiguration>,
+        expectedOptions: {
             Secure?: boolean,
-            SameSite: 'Strict' | 'Lax' | 'None',
+            SameSite?: 'Strict' | 'Lax' | 'None',
         },
     };
 
     it.each<DefaultOptionsScenario>([
         {
-            secure: true,
-            options: {
+            https: true,
+            options: {},
+            expectedOptions: {
                 Secure: true,
                 SameSite: 'None',
             },
         },
         {
-            secure: false,
+            https: true,
             options: {
+                secure: false,
+            },
+            expectedOptions: {
+            },
+        },
+        {
+            https: false,
+            options: {},
+            expectedOptions: {
+            },
+        },
+        {
+            https: false,
+            options: {
+                secure: true,
+            },
+            expectedOptions: {
+                Secure: true,
+                SameSite: 'None',
+            },
+        },
+        {
+            https: true,
+            options: {
+                sameSite: 'lax',
+            },
+            expectedOptions: {
+                Secure: true,
                 SameSite: 'Lax',
             },
         },
         {
+            https: false,
             options: {
-                SameSite: 'Lax',
+                sameSite: 'none',
+            },
+            expectedOptions: {
+                SameSite: 'None',
             },
         },
-    ])('should use default values for missing configuration (secure: $secure)', ({secure, options}) => {
-        const cache = new CookieCache({name: 'cid'}, secure);
+        {
+            https: false,
+            options: {
+                secure: false,
+            },
+            expectedOptions: {
+            },
+        },
+        {
+            https: undefined,
+            options: {},
+            expectedOptions: {
+            },
+        },
+    ])('should use default values for missing configuration (https: $https, options: $options)', scenario => {
+        const {https, options, expectedOptions} = scenario;
+        const cache = new CookieCache({name: 'cid', ...options}, https);
 
         let jar = '';
 
@@ -78,7 +127,7 @@ describe('A cookie cache', () => {
         expect(cookie).toEqual({
             cid: 'foo',
             Path: '/',
-            ...options,
+            ...expectedOptions,
         });
     });
 
