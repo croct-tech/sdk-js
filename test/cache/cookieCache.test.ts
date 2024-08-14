@@ -27,12 +27,35 @@ describe('A cookie cache', () => {
         expect(cache.get()).toBe('foo');
     });
 
-    it('should use default values for missing configuration', () => {
-        const cache = new CookieCache({
-            name: 'cid',
-        });
+    type DefaultOptionsScenario = {
+        secure?: boolean,
+        options: {
+            Secure?: boolean,
+            SameSite: 'Strict' | 'Lax' | 'None',
+        },
+    };
 
-        expect(cache.get()).toBeNull();
+    it.each<DefaultOptionsScenario>([
+        {
+            secure: true,
+            options: {
+                Secure: true,
+                SameSite: 'None',
+            },
+        },
+        {
+            secure: false,
+            options: {
+                SameSite: 'Lax',
+            },
+        },
+        {
+            options: {
+                SameSite: 'Lax',
+            },
+        },
+    ])('should use default values for missing configuration (secure: $secure)', ({secure, options}) => {
+        const cache = new CookieCache({name: 'cid'}, secure);
 
         let jar = '';
 
@@ -44,19 +67,18 @@ describe('A cookie cache', () => {
 
         expect(jar).not.toBeEmpty();
 
-        const cookie: Record<string, string> = {};
+        const cookie: Record<string, string|boolean> = {};
 
         for (const entry of jar.split(';')) {
             const [name, value = ''] = entry.split('=');
 
-            cookie[decodeURIComponent(name).trim()] = decodeURIComponent(value.trim());
+            cookie[decodeURIComponent(name).trim()] = value === '' ? true : decodeURIComponent(value.trim());
         }
 
         expect(cookie).toEqual({
             cid: 'foo',
             Path: '/',
-            SameSite: 'None',
-            Secure: '',
+            ...options,
         });
     });
 
