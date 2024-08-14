@@ -13,7 +13,12 @@ export class CookieCache implements Cache {
     private readonly config: CookieCacheConfiguration;
 
     public constructor(config: CookieCacheConfiguration) {
-        this.config = config;
+        this.config = {
+            ...config,
+            path: config.path ?? '/',
+            secure: config.secure ?? true,
+            sameSite: config.sameSite ?? 'none',
+        };
     }
 
     public get(): string | null {

@@ -27,6 +27,39 @@ describe('A cookie cache', () => {
         expect(cache.get()).toBe('foo');
     });
 
+    it('should use default values for missing configuration', () => {
+        const cache = new CookieCache({
+            name: 'cid',
+        });
+
+        expect(cache.get()).toBeNull();
+
+        let jar = '';
+
+        jest.spyOn(document, 'cookie', 'set').mockImplementation(value => {
+            jar = value;
+        });
+
+        cache.put('foo');
+
+        expect(jar).not.toBeEmpty();
+
+        const cookie: Record<string, string> = {};
+
+        for (const entry of jar.split(';')) {
+            const [name, value = ''] = entry.split('=');
+
+            cookie[decodeURIComponent(name).trim()] = decodeURIComponent(value.trim());
+        }
+
+        expect(cookie).toEqual({
+            cid: 'foo',
+            Path: '/',
+            SameSite: 'None',
+            Secure: '',
+        });
+    });
+
     it('should cache a value using the provided configuration', () => {
         const cache = new CookieCache({
             name: 'cookie name',
