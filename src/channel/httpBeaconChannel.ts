@@ -52,6 +52,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
                 'X-App-Id': appId,
                 'X-Client-Id': await cidAssigner.assignCid(),
                 'X-Client-Library': CLIENT_LIBRARY,
+                'Content-Type': 'application/json',
                 ...(token !== undefined ? {'X-Token': token} : {}),
             },
             body: JSON.stringify({
