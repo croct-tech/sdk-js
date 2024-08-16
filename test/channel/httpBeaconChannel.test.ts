@@ -25,7 +25,6 @@ describe('An HTTP beacon channel', () => {
         error: jest.fn(),
     };
 
-
     const endpointUrl = 'http://api.croct.io/web/client/track';
 
     it('should send a beacon to the specified URL', async () => {

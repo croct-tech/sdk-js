@@ -3,6 +3,7 @@ import {Envelope} from './guaranteedChannel';
 import {Logger, NullLogger} from '../logging';
 import {CidAssigner} from '../cid';
 import {formatMessage} from '../error';
+import {CLIENT_LIBRARY} from '../constants';
 
 export type Configuration = {
     appId: string,
@@ -48,8 +49,9 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
         return fetch(endpointUrl, {
             method: 'POST',
             headers: {
-                'X-Application-Id': appId,
+                'X-App-Id': appId,
                 'X-Client-Id': await cidAssigner.assignCid(),
+                'X-Client-Library': CLIENT_LIBRARY,
                 ...(token !== undefined ? {'X-Token': token} : {}),
             },
             body: JSON.stringify({
