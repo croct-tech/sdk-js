@@ -325,10 +325,6 @@ export interface PostViewed extends BaseEvent {
 export interface EventOccurred extends BaseEvent {
     type: 'eventOccurred';
     name: string;
-    testId?: string;
-    groupId?: string;
-    personalizationId?: string;
-    audience?: string;
     details?: {[key: string]: string|number|boolean|null};
 }
 
