@@ -404,8 +404,9 @@ describe('A SDK', () => {
             const request = lastCall[1] as fetchMock.MockRequest;
 
             expect(request.headers).toEqual(expect.objectContaining({
-                'X-Application-Id': configuration.appId,
                 'X-Client-Id': 'e6a133ffd3d2410681403d5e1bd95505',
+                'X-App-Id': configuration.appId,
+                'Content-Type': 'application/json',
             }));
 
             expect(JSON.parse(request.body as string)).toEqual(expect.objectContaining({

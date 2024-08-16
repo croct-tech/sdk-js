@@ -4,6 +4,7 @@ import {Logger} from '../../src/logging';
 import {FixedAssigner} from '../../src/cid';
 import {Beacon} from '../../src/trackingEvents';
 import {Token} from '../../src/token';
+import {CLIENT_LIBRARY} from '../../src/constants';
 
 describe('An HTTP beacon channel', () => {
     beforeEach(() => {
@@ -78,9 +79,11 @@ describe('An HTTP beacon channel', () => {
         const {timestamp: originalTime, token, ...expectedBeacon} = beacon;
 
         expect(lastRequest.headers).toEqual({
-            'X-Application-Id': appId,
             'X-Client-Id': clientId,
             'X-Token': token,
+            'X-App-Id': appId,
+            'X-Client-Library': CLIENT_LIBRARY,
+            'Content-Type': 'application/json',
         });
 
         expect(JSON.parse(lastRequest.body as string)).toEqual({
