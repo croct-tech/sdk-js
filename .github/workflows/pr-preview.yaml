@@ -6,6 +6,10 @@ on:
       - synchronize
       - opened
 
+env:
+  BASE_ENDPOINT: https://api.croct.io
+  MAX_QUERY_LENGTH: 500
+
 jobs:
   preview:
     runs-on: ubuntu-latest
@@ -34,8 +38,7 @@ jobs:
           cp package.json LICENSE README.md build/
           cd build
           find . -type f -path '*/*\.js.map' -exec sed -i -e "s~../src~src~" {} +          
-          sed -i -e "s~\"version\": \"0.0.0-dev\"~\"version\": \"${GITHUB_REF##*/}\"~" package.json
-          sed -i -e "s~<@version@>~${GITHUB_REF##*/}~" constants.*
+          sed -i -e "s~<@version@>~0.0.0-dev~" constants.*
           sed -i -e "s~<@baseEndpointUrl@>~${BASE_ENDPOINT}~" constants.*
           sed -i -e "s~parseInt('<@maxQueryLength@>', 10)~${MAX_QUERY_LENGTH}~" constants.*
           cp -r ../src src
