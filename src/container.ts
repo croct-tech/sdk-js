@@ -236,7 +236,7 @@ export class Container {
                     logger: channelLogger,
                 }),
                 retryPolicy: new BackoffPolicy({
-                    minRetryDelay: 3000, // 3 second
+                    minRetryDelay: 3000, // 3 seconds
                     maxRetryDelay: 60 * 1000, // 60 seconds
                     backoffFactor: 1.5, // 1.5 ^ attempt
                     backoffJitter: 1, // add randomness
