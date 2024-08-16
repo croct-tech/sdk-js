@@ -215,10 +215,6 @@ describe('The "eventOccurred" payload schema', () => {
         }],
         [{
             name: 'event-name',
-            personalizationId: 'foo',
-            audience: 'bar',
-            testId: 'baz',
-            groupId: 'barbaz',
             details: {
                 number: 10,
                 null: null,
@@ -250,54 +246,6 @@ describe('The "eventOccurred" payload schema', () => {
         [
             {name: null},
             'Expected value of type string at path \'/name\', actual null.',
-        ],
-        [
-            {name: 'foo', personalizationId: ''},
-            'Expected at least 1 character at path \'/personalizationId\', actual 0.',
-        ],
-        [
-            {name: 'foo', personalizationId: 'x'.repeat(51)},
-            'Expected at most 50 characters at path \'/personalizationId\', actual 51.',
-        ],
-        [
-            {name: 'foo', personalizationId: null},
-            'Expected value of type string at path \'/personalizationId\', actual null.',
-        ],
-        [
-            {name: 'foo', audience: ''},
-            'Expected at least 1 character at path \'/audience\', actual 0.',
-        ],
-        [
-            {name: 'foo', audience: 'x'.repeat(51)},
-            'Expected at most 50 characters at path \'/audience\', actual 51.',
-        ],
-        [
-            {name: 'foo', audience: null},
-            'Expected value of type string at path \'/audience\', actual null.',
-        ],
-        [
-            {name: 'foo', testId: ''},
-            'Expected at least 1 character at path \'/testId\', actual 0.',
-        ],
-        [
-            {name: 'foo', testId: 'x'.repeat(51)},
-            'Expected at most 50 characters at path \'/testId\', actual 51.',
-        ],
-        [
-            {name: 'foo', testId: null},
-            'Expected value of type string at path \'/testId\', actual null.',
-        ],
-        [
-            {name: 'foo', groupId: ''},
-            'Expected at least 1 character at path \'/groupId\', actual 0.',
-        ],
-        [
-            {name: 'foo', groupId: 'x'.repeat(51)},
-            'Expected at most 50 characters at path \'/groupId\', actual 51.',
-        ],
-        [
-            {name: 'foo', groupId: null},
-            'Expected value of type string at path \'/groupId\', actual null.',
         ],
         [
             {name: 'foo', details: null},
