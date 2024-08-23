@@ -9,7 +9,7 @@ export class SandboxChannel<I, O> implements DuplexChannel<I, O> {
 
     public publish(message: O): Promise<void> {
         if (this.closed) {
-            return Promise.reject(new MessageDeliveryError('Channel is closed.', false));
+            return Promise.reject(MessageDeliveryError.nonRetryable('Channel is closed.'));
         }
 
         this.messages.push(message);

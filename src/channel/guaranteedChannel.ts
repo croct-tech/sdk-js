@@ -49,7 +49,7 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
 
     public publish(message: M): Promise<void> {
         if (this.closed) {
-            return Promise.reject(new MessageDeliveryError('Channel is closed.', false));
+            return Promise.reject(MessageDeliveryError.nonRetryable('Channel is closed.'));
         }
 
         return new Promise((resolve, reject): void => {
@@ -99,7 +99,7 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
                     () => {
                         if (this.closed) {
                             // Cancel delay immediately when the channel is closed
-                            abort(new MessageDeliveryError('Connection deliberately closed.', false));
+                            abort(MessageDeliveryError.nonRetryable('Connection deliberately closed.'));
                         }
                     },
                     0,
@@ -109,7 +109,7 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
 
                 timeoutTimer = window.setTimeout(
                     () => {
-                        abort(new MessageDeliveryError('Maximum confirmation time reached.', true));
+                        abort(MessageDeliveryError.retryable('Maximum confirmation time reached.'));
                     },
                     this.options.ackTimeout,
                 );

@@ -35,7 +35,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
 
     public async publish({id: receiptId, message}: Envelope<string, string>): Promise<void> {
         if (this.closed) {
-            return Promise.reject(new MessageDeliveryError('Channel is closed', false));
+            return Promise.reject(MessageDeliveryError.nonRetryable('Channel is closed'));
         }
 
         const {token, timestamp, context, payload} = JSON.parse(message);
@@ -77,11 +77,15 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
                 this.logger.error(`Beacon rejected with non-retryable status: ${problem.title}`);
             }
 
-            return Promise.reject(new MessageDeliveryError(problem.title, isRetryable));
+            return Promise.reject(
+                isRetryable
+                    ? MessageDeliveryError.retryable(problem.title)
+                    : MessageDeliveryError.nonRetryable(problem.title),
+            );
         }).catch(error => {
             this.logger.error(`Failed to publish beacon: ${formatMessage(error)}`);
 
-            return Promise.reject(MessageDeliveryError.fromCause(error, true));
+            return Promise.reject(MessageDeliveryError.retryable(error));
         });
     }
 

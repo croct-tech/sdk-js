@@ -29,19 +29,19 @@ export class QueuedChannel<T> implements OutputChannel<T> {
 
     public publish(message: T): Promise<void> {
         if (this.closed) {
-            return Promise.reject(new MessageDeliveryError('Channel is closed.', false));
+            return Promise.reject(MessageDeliveryError.nonRetryable('Channel is closed.'));
         }
 
         if (this.queue.length() >= this.queue.getCapacity()) {
             this.logger.warn('The queue is full, message rejected.');
 
-            return Promise.reject(new MessageDeliveryError('The queue is full.', true));
+            return Promise.reject(MessageDeliveryError.retryable('The queue is full.'));
         }
 
         if (this.pending === undefined) {
             this.pending = this.queue.isEmpty()
                 ? Promise.resolve()
-                : Promise.reject(new MessageDeliveryError('The queue must be flushed.', true));
+                : Promise.reject(MessageDeliveryError.retryable('The queue must be flushed.'));
         }
 
         this.enqueue(message);
@@ -71,7 +71,7 @@ export class QueuedChannel<T> implements OutputChannel<T> {
 
     private requeue(): Promise<void> {
         if (this.closed) {
-            return Promise.reject(new MessageDeliveryError('Channel is closed.', false));
+            return Promise.reject(MessageDeliveryError.nonRetryable('Channel is closed.'));
         }
 
         this.pending = Promise.resolve();

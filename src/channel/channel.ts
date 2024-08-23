@@ -3,7 +3,7 @@ import {formatMessage} from '../error';
 export class MessageDeliveryError extends Error {
     public readonly retryable: boolean;
 
-    public constructor(message: string, retryable: boolean) {
+    private constructor(message: string, retryable: boolean) {
         super(message);
 
         this.retryable = retryable;
@@ -11,12 +11,16 @@ export class MessageDeliveryError extends Error {
         Object.setPrototypeOf(this, MessageDeliveryError.prototype);
     }
 
-    public static fromCause(cause: any, retryable?: boolean): MessageDeliveryError {
-        if (cause instanceof MessageDeliveryError) {
-            return cause;
-        }
+    public static retryable(cause: unknown): MessageDeliveryError {
+        return MessageDeliveryError.fromCause(cause, true);
+    }
 
-        const error = new MessageDeliveryError(formatMessage(cause), retryable ?? true);
+    public static nonRetryable(cause: unknown): MessageDeliveryError {
+        return MessageDeliveryError.fromCause(cause, false);
+    }
+
+    private static fromCause(cause: any, retryable: boolean): MessageDeliveryError {
+        const error = new MessageDeliveryError(formatMessage(cause), retryable);
 
         if (cause instanceof Error) {
             error.stack = cause.stack;
