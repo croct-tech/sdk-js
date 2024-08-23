@@ -76,7 +76,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
             switch (response.status) {
                 case 401:
                     this.logger.error(
-                        'The application ID or token is not authorized. '
+                        'The request was not authorized, most likely due to invalid credentials. '
                         + 'For help, see https://croct.help/sdk/js/invalid-credentials',
                     );
 
@@ -85,7 +85,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
                 case 403:
                     this.logger.error(
                         'The origin of the request is not allowed in your application settings. '
-                            + 'For help, see https://croct.help/sdk/js/invalid-origin',
+                        + 'For help, see https://croct.help/sdk/js/cors',
                     );
 
                     break;
@@ -93,7 +93,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
                 case 423:
                     this.logger.error(
                         'The application has exceeded the monthly active users (MAU) quota. '
-                        + 'For help, see https://croct.help/sdk/js/mau-quota-exceeded',
+                        + 'For help, see https://croct.help/sdk/js/mau-exceeded',
                     );
 
                     break;

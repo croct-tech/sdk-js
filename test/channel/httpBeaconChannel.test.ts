@@ -181,8 +181,8 @@ describe('An HTTP beacon channel', () => {
         },
         {
             status: 401,
-            title: 'Unallowed origin',
-            log: 'The application ID or token is not authorized. '
+            title: 'Unauthorized request',
+            log: 'The request was not authorized, most likely due to invalid credentials. '
                 + 'For help, see https://croct.help/sdk/js/invalid-credentials',
         },
         {
@@ -194,13 +194,13 @@ describe('An HTTP beacon channel', () => {
             status: 403,
             title: 'Unallowed origin',
             log: 'The origin of the request is not allowed in your application settings. '
-                + 'For help, see https://croct.help/sdk/js/invalid-origin',
+                + 'For help, see https://croct.help/sdk/js/cors',
         },
         {
             status: 423,
             title: 'Quota exceeded',
             log: 'The application has exceeded the monthly active users (MAU) quota. '
-                + 'For help, see https://croct.help/sdk/js/mau-quota-exceeded',
+                + 'For help, see https://croct.help/sdk/js/mau-exceeded',
         },
     ])('should report a non-retryable error if the response status is $status', async scenario => {
         const {status, title, log} = scenario;
