@@ -1,5 +1,5 @@
 import {Logger, NullLogger} from '../logging';
-import {DuplexChannel, OutputChannel} from './channel';
+import {DuplexChannel, MessageDeliveryError, OutputChannel} from './channel';
 
 export type MessageStamper<M, S> = {
     generate(message: M): S,
@@ -49,7 +49,7 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
 
     public publish(message: M): Promise<void> {
         if (this.closed) {
-            return Promise.reject(new Error('Channel is closed.'));
+            return Promise.reject(MessageDeliveryError.nonRetryable('Channel is closed.'));
         }
 
         return new Promise((resolve, reject): void => {
@@ -99,7 +99,7 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
                     () => {
                         if (this.closed) {
                             // Cancel delay immediately when the channel is closed
-                            abort(new Error('Connection deliberately closed.'));
+                            abort(MessageDeliveryError.nonRetryable('Connection deliberately closed.'));
                         }
                     },
                     0,
@@ -109,7 +109,7 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
 
                 timeoutTimer = window.setTimeout(
                     () => {
-                        abort(new Error('Maximum confirmation time reached.'));
+                        abort(MessageDeliveryError.retryable('Maximum confirmation time reached.'));
                     },
                     this.options.ackTimeout,
                 );

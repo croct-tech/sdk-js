@@ -1,4 +1,4 @@
-import {ChannelListener, DuplexChannel} from './channel';
+import {ChannelListener, DuplexChannel, MessageDeliveryError} from './channel';
 
 export class SandboxChannel<I, O> implements DuplexChannel<I, O> {
     private readonly listeners: Array<ChannelListener<I>> = [];
@@ -8,6 +8,10 @@ export class SandboxChannel<I, O> implements DuplexChannel<I, O> {
     private closed = false;
 
     public publish(message: O): Promise<void> {
+        if (this.closed) {
+            return Promise.reject(MessageDeliveryError.nonRetryable('Channel is closed.'));
+        }
+
         this.messages.push(message);
 
         return Promise.resolve();

@@ -1,4 +1,4 @@
-import {OutputChannel} from './channel';
+import {MessageDeliveryError, OutputChannel} from './channel';
 import {Logger, NullLogger} from '../logging';
 import {RetryPolicy} from '../retry';
 
@@ -25,7 +25,7 @@ export class RetryChannel<T> implements OutputChannel<T> {
 
     public publish(message: T): Promise<void> {
         if (this.closed) {
-            return Promise.reject(new Error('The channel is closed.'));
+            return Promise.reject(MessageDeliveryError.nonRetryable('The channel is closed.'));
         }
 
         return this.channel
@@ -34,11 +34,15 @@ export class RetryChannel<T> implements OutputChannel<T> {
     }
 
     public async retry(message: T, error: unknown): Promise<void> {
+        if (error instanceof MessageDeliveryError && !error.retryable) {
+            throw error;
+        }
+
         let attempt = 0;
 
         while (this.retryPolicy.shouldRetry(attempt, message, error)) {
             if (this.closed) {
-                throw new Error('Connection deliberately closed.');
+                throw MessageDeliveryError.nonRetryable('Connection deliberately closed.');
             }
 
             const delay = this.retryPolicy.getDelay(attempt);
@@ -55,7 +59,7 @@ export class RetryChannel<T> implements OutputChannel<T> {
                                 // Cancel delay immediately when the channel is closed
                                 window.clearInterval(closeWatcher);
 
-                                reject(new Error('Connection deliberately closed.'));
+                                reject(MessageDeliveryError.nonRetryable('Connection deliberately closed.'));
                             }
                         },
                         0,
@@ -79,7 +83,7 @@ export class RetryChannel<T> implements OutputChannel<T> {
             }
         }
 
-        throw new Error('Maximum retry attempts reached.');
+        throw MessageDeliveryError.nonRetryable('Maximum retry attempts reached.');
     }
 
     public close(): Promise<void> {

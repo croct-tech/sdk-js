@@ -14,7 +14,7 @@ describe('A persistent queue', () => {
     it('should have unlimited capacity', () => {
         const queue = new PersistentQueue<string>(new DumbStorage());
 
-        expect(queue.getCapacity()).toBe(Infinity);
+        expect(queue.getCapacity()).toBe(Number.MAX_SAFE_INTEGER);
     });
 
     it('should determine whether the queue is empty', () => {

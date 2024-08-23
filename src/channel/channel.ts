@@ -1,3 +1,35 @@
+import {formatMessage} from '../error';
+
+export class MessageDeliveryError extends Error {
+    public readonly retryable: boolean;
+
+    public constructor(message: string, retryable: boolean) {
+        super(message);
+
+        this.retryable = retryable;
+
+        Object.setPrototypeOf(this, MessageDeliveryError.prototype);
+    }
+
+    public static retryable(cause: unknown): MessageDeliveryError {
+        return MessageDeliveryError.fromCause(cause, true);
+    }
+
+    public static nonRetryable(cause: unknown): MessageDeliveryError {
+        return MessageDeliveryError.fromCause(cause, false);
+    }
+
+    private static fromCause(cause: unknown, retryable: boolean): MessageDeliveryError {
+        const error = new MessageDeliveryError(formatMessage(cause), retryable);
+
+        if (cause instanceof Error) {
+            error.stack = cause.stack;
+        }
+
+        return error;
+    }
+}
+
 export interface Closeable {
     close(): Promise<void>;
 }

@@ -1,6 +1,6 @@
-import {WS} from 'jest-websocket-mock';
 import * as fetchMock from 'fetch-mock';
-import {Sdk, Configuration, VERSION} from '../src';
+import {MockMatcher} from 'fetch-mock';
+import {Sdk, Configuration} from '../src';
 import {NullLogger, Logger} from '../src/logging';
 import {Token} from '../src/token';
 import {TabEventEmulator} from './utils/tabEventEmulator';
@@ -35,33 +35,12 @@ describe('A SDK', () => {
         cookie: {},
     };
 
-    const websocketEndpoint = `${configuration.baseEndpointUrl.replace(/^http/i, 'ws')}/client/web/connect`;
-
-    // Mock Socket does not support query strings:
-    // https://github.com/thoov/mock-socket/pull/231
-    function creatWebSocketMock(endpoint: string): WS {
-        const ws = new WS(endpoint, {jsonProtocol: true});
-
-        window.WebSocket = class WebSocket extends window.WebSocket {
-            public constructor(originalUrl: string) {
-                const url = new URL(originalUrl);
-
-                url.search = '';
-
-                super(url.toString());
-            }
-        };
-
-        return ws;
-    }
-
     beforeEach(() => {
         tabEventEmulator.registerListeners();
     });
 
     afterEach(() => {
         jest.clearAllMocks();
-        WS.clean();
         tabEventEmulator.reset();
         fetchMock.reset();
         localStorage.clear();
@@ -278,7 +257,7 @@ describe('A SDK', () => {
         [configuration.baseEndpointUrl, `${configuration.baseEndpointUrl}/client/web/cid`],
     ])(
         'should configure the CID assigner with the base endpoint',
-        async (baseEndpoint: string|undefined, expectedEndpoint: string) => {
+        async (baseEndpoint: string | undefined, expectedEndpoint: string) => {
             fetchMock.mock({
                 method: 'GET',
                 matcher: expectedEndpoint,
@@ -299,98 +278,97 @@ describe('A SDK', () => {
     );
 
     it('should ensure that events are delivered one at a time and in order', async () => {
+        const now = Date.now();
+
+        function createMatcher(index: number, negated: boolean = false): MockMatcher {
+            return (url: string, {body}: fetchMock.MockRequest) => {
+                if (url !== `${configuration.baseEndpointUrl}/client/web/track`) {
+                    return false;
+                }
+
+                const {payload: {sinceTime}} = JSON.parse(body as string);
+
+                return negated ? sinceTime !== now + index : sinceTime === now + index;
+            };
+        }
+
         fetchMock.mock({
             method: 'GET',
             matcher: configuration.cidAssignerEndpointUrl,
             response: '123',
         });
 
-        const server = creatWebSocketMock(`${websocketEndpoint}/${configuration.appId}`);
-        const receiptIds: string[] = [];
+        fetchMock.mock({
+            method: 'POST',
+            matcher: createMatcher(1),
+            // Add a delay to ensure the second message is sent before the first one is processed
+            delay: 200,
+            response: {
+                ok: true,
+            },
+        });
 
-        server.on('connection', socket => {
-            socket.on('message', message => {
-                const {receiptId} = JSON.parse(message as unknown as string);
-
-                receiptIds.push(receiptId);
-            });
+        fetchMock.mock({
+            method: 'POST',
+            matcher: createMatcher(1, true),
+            response: {
+                ok: true,
+            },
         });
 
         const sdk = Sdk.init(configuration);
 
         const firstEvent: BeaconPayload = {
             type: 'nothingChanged',
-            sinceTime: Date.now() + 1,
+            sinceTime: now + 1,
         };
 
         const firstPromise = sdk.tracker.track(firstEvent);
 
         const secondEvent: BeaconPayload = {
             type: 'nothingChanged',
-            sinceTime: Date.now() + 1,
+            sinceTime: now + 2,
         };
 
         const secondPromise = sdk.tracker.track(secondEvent);
 
-        await expect(server).toReceiveMessage(
-            expect.objectContaining({
-                payload: firstEvent,
-            }),
-        );
+        await expect(Promise.all([firstPromise, secondPromise])).resolves.toEqual([firstEvent, secondEvent]);
 
-        // Wait a few milliseconds more to ensure no other message was sent
-        await new Promise(resolve => { window.setTimeout(resolve, 30); });
+        const calls = fetchMock.calls();
 
-        expect(receiptIds.length).toBe(1);
+        expect(calls).toHaveLength(2);
 
-        server.send({
-            receiptId: receiptIds[0],
-            violations: [],
-        });
+        const firstCall = calls[0][1] as fetchMock.MockRequest;
 
-        await expect(firstPromise).resolves.toBe(firstEvent);
+        expect(JSON.parse(firstCall.body as string)).toEqual(expect.objectContaining({
+            payload: firstEvent,
+        }));
 
-        await expect(server).toReceiveMessage(
-            expect.objectContaining({
-                payload: secondEvent,
-            }),
-        );
+        const secondCall = calls[1][1] as fetchMock.MockRequest;
 
-        expect(receiptIds.length).toBe(2);
-
-        server.send({
-            receiptId: receiptIds[1],
-            violations: [],
-        });
-
-        await expect(secondPromise).resolves.toBe(secondEvent);
+        expect(JSON.parse(secondCall.body as string)).toEqual(expect.objectContaining({
+            payload: secondEvent,
+        }));
     });
 
     it.each([
-        [undefined, `${BASE_ENDPOINT_URL.replace(/^http/i, 'ws')}/client/web/connect`],
-        [configuration.baseEndpointUrl, websocketEndpoint],
+        [undefined, `${BASE_ENDPOINT_URL}/client/web/track`],
+        [configuration.baseEndpointUrl, `${configuration.baseEndpointUrl}/client/web/track`],
     ])(
         'should configure the tracker with the specified base endpoint',
-        async (baseEndpoint: string|undefined, expectedEndpoint: string) => {
+        async (baseEndpoint: string | undefined, expectedEndpoint: string) => {
             fetchMock.mock({
                 method: 'GET',
                 matcher: configuration.cidAssignerEndpointUrl,
                 response: '123',
             });
 
-            const server = creatWebSocketMock(
-                `${expectedEndpoint}/${configuration.appId}`,
-            );
-
-            server.on('connection', socket => {
-                socket.on('message', message => {
-                    const {receiptId} = JSON.parse(message as unknown as string);
-
-                    server.send({
-                        receiptId: receiptId,
-                        violations: [],
-                    });
-                });
+            fetchMock.mock({
+                method: 'POST',
+                matcher: expectedEndpoint,
+                response: {
+                    ok: true,
+                },
             });
 
             const metaName = 'foo';
@@ -415,16 +393,24 @@ describe('A SDK', () => {
 
             await expect(promise).resolves.toEqual(event);
 
-            await expect(server).toReceiveMessage(expect.objectContaining({
-                receiptId: expect.stringMatching(/^\d+$/),
-                originalTime: expect.any(Number),
-                departureTime: expect.any(Number),
-                context: expect.objectContaining({
-                    metadata: {
-                        sdkVersion: VERSION,
-                        [`custom_${metaName}`]: metaValue,
-                    },
-                }),
+            const calls = fetchMock.calls();
+
+            expect(calls).toHaveLength(1);
+
+            const lastCall = calls[0];
+
+            expect(lastCall[0]).toEqual(expectedEndpoint);
+
+            const request = lastCall[1] as fetchMock.MockRequest;
+
+            expect(request.headers).toEqual(expect.objectContaining({
+                'X-Client-Id': 'e6a133ffd3d2410681403d5e1bd95505',
+                'X-App-Id': configuration.appId,
+                'Content-Type': 'application/json',
+            }));
+
+            expect(JSON.parse(request.body as string)).toEqual(expect.objectContaining({
+                payload: event,
             }));
         },
     );
@@ -434,7 +420,7 @@ describe('A SDK', () => {
         [configuration.baseEndpointUrl, configuration.baseEndpointUrl],
     ])(
         'should configure the evaluator',
-        async (baseEndpoint: string|undefined, expectedEndpoint: string) => {
+        async (baseEndpoint: string | undefined, expectedEndpoint: string) => {
             const query = '1 + 2';
             const result = 3;
 
@@ -471,7 +457,7 @@ describe('A SDK', () => {
         [configuration.baseEndpointUrl, configuration.baseEndpointUrl],
     ])(
         'should configure the content fetcher',
-        async (baseEndpoint: string|undefined, expectedEndpoint: string) => {
+        async (baseEndpoint: string | undefined, expectedEndpoint: string) => {
             const slotId = 'home-banner';
             const result: FetchResponse = {
                 content: {
@@ -577,8 +563,6 @@ describe('A SDK', () => {
             response: '123',
         });
 
-        const server = creatWebSocketMock(`${websocketEndpoint}/${configuration.appId}`);
-
         const log = jest.fn();
 
         const sdk = Sdk.init({
@@ -601,11 +585,8 @@ describe('A SDK', () => {
                 // suppress error;
             });
 
-        const connection = await server.connected;
-
         await expect(sdk.close()).resolves.toBeUndefined();
 
-        expect(connection.readyState).toBe(WebSocket.CLOSED);
         expect(tracker.isSuspended()).toBe(true);
 
         expect(log).toHaveBeenLastCalledWith('[Croct] SDK closed.');
