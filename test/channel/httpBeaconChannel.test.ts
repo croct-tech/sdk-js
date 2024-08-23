@@ -167,12 +167,44 @@ describe('An HTTP beacon channel', () => {
         expect(logger.error).toHaveBeenCalledWith('Failed to publish beacon: Internal Server Error');
     });
 
-    it.each([
-        [401, 'Invalid token'],
-        [403, 'Unallowed origin'],
-        [423, 'API usage limit exceeded'],
-        [402, 'Payment overdue'],
-    ])('should report a non-retryable error if the response status is %i', async (status, title) => {
+    type NonRetryableErrorScenario = {
+        status: number,
+        title: string,
+        log: string,
+    };
+
+    it.each<NonRetryableErrorScenario>([
+        {
+            status: 400,
+            title: 'Invalid token',
+            log: 'Beacon rejected with non-retryable status: Invalid token',
+        },
+        {
+            status: 401,
+            title: 'Unallowed origin',
+            log: 'The application ID or token is invalid not authorized. '
+                + 'For help, see https://croct.help/sdk/js/invalid-credentials',
+        },
+        {
+            status: 402,
+            title: 'Payment overdue',
+            log: 'Beacon rejected with non-retryable status: Payment overdue',
+        },
+        {
+            status: 403,
+            title: 'Unallowed origin',
+            log: 'The origin of the request is not allowed in your application settings. '
+                + 'For help, see https://croct.help/sdk/js/invalid-origin',
+        },
+        {
+            status: 423,
+            title: 'Quota exceeded',
+            log: 'The application has exceeded the monthly active users (MAU) quota. '
+                + 'For help, see https://croct.help/sdk/js/mau-quota-exceeded',
+        },
+    ])('should report a non-retryable error if the response status is $status', async scenario => {
+        const {status, title, log} = scenario;
+
         fetchMock.mock(endpointUrl, {
             status: status,
             body: JSON.stringify({
@@ -215,7 +247,8 @@ describe('An HTTP beacon channel', () => {
 
         expect(listener).not.toHaveBeenCalled();
 
-        expect(logger.error).toHaveBeenCalledWith(`Beacon rejected with non-retryable status: ${title}`);
+        expect(logger.error).toHaveBeenCalledWith(log);
+        expect(logger.error).toHaveBeenCalledWith(`Failed to publish beacon: ${title}`);
     });
 
     it.each([
