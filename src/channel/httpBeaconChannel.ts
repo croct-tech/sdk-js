@@ -76,7 +76,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
             switch (response.status) {
                 case 401:
                     this.logger.error(
-                        'The application ID or token is invalid not authorized. '
+                        'The application ID or token is not authorized. '
                         + 'For help, see https://croct.help/sdk/js/invalid-credentials',
                     );
 

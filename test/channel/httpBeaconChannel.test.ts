@@ -182,7 +182,7 @@ describe('An HTTP beacon channel', () => {
         {
             status: 401,
             title: 'Unallowed origin',
-            log: 'The application ID or token is invalid not authorized. '
+            log: 'The application ID or token is not authorized. '
                 + 'For help, see https://croct.help/sdk/js/invalid-credentials',
         },
         {
