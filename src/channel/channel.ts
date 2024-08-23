@@ -19,7 +19,7 @@ export class MessageDeliveryError extends Error {
         return MessageDeliveryError.fromCause(cause, false);
     }
 
-    private static fromCause(cause: any, retryable: boolean): MessageDeliveryError {
+    private static fromCause(cause: unknown, retryable: boolean): MessageDeliveryError {
         const error = new MessageDeliveryError(formatMessage(cause), retryable);
 
         if (cause instanceof Error) {
