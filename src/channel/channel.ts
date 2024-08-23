@@ -3,7 +3,7 @@ import {formatMessage} from '../error';
 export class MessageDeliveryError extends Error {
     public readonly retryable: boolean;
 
-    private constructor(message: string, retryable: boolean) {
+    public constructor(message: string, retryable: boolean) {
         super(message);
 
         this.retryable = retryable;
