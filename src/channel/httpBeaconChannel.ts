@@ -85,7 +85,11 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
         }).catch(error => {
             this.logger.error(`Failed to publish beacon: ${formatMessage(error)}`);
 
-            return Promise.reject(MessageDeliveryError.retryable(error));
+            return Promise.reject(
+                error instanceof MessageDeliveryError
+                    ? error
+                    : MessageDeliveryError.retryable(error),
+            );
         });
     }
 
