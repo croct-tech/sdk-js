@@ -1,4 +1,4 @@
-import {SandboxChannel} from '../../src/channel';
+import {MessageDeliveryError, SandboxChannel} from '../../src/channel';
 
 describe('A sandbox channel', () => {
     afterEach(() => {
@@ -45,5 +45,10 @@ describe('A sandbox channel', () => {
         await channel.close();
 
         expect(channel.isClosed()).toBe(true);
+
+        const promise = channel.publish('foo');
+
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Channel is closed.');
+        await expect(promise).rejects.toHaveProperty('retryable', false);
     });
 });

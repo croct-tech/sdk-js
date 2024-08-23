@@ -1,5 +1,5 @@
 import * as fetchMock from 'fetch-mock';
-import {HttpBeaconChannel} from '../../src/channel';
+import {HttpBeaconChannel, MessageDeliveryError} from '../../src/channel';
 import {Logger} from '../../src/logging';
 import {FixedAssigner} from '../../src/cid';
 import {Beacon} from '../../src/trackingEvents';
@@ -159,7 +159,8 @@ describe('An HTTP beacon channel', () => {
             }),
         });
 
-        await expect(promise).rejects.toThrow('Internal Server Error');
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Internal Server Error');
+        await expect(promise).rejects.toHaveProperty('retryable', true);
 
         expect(listener).not.toHaveBeenCalled();
 
@@ -167,9 +168,11 @@ describe('An HTTP beacon channel', () => {
     });
 
     it.each([
-        [403, 'API usage limit exceeded'],
         [401, 'Invalid token'],
-    ])('should log an error and resolve the promise if the response status is %i', async (status, title) => {
+        [403, 'Unallowed origin'],
+        [423, 'API usage limit exceeded'],
+        [402, 'Payment overdue'],
+    ])('should report a non-retryable error if the response status is %i', async (status, title) => {
         fetchMock.mock(endpointUrl, {
             status: status,
             body: JSON.stringify({
@@ -207,11 +210,61 @@ describe('An HTTP beacon channel', () => {
             }),
         });
 
-        await expect(promise).resolves.toBeUndefined();
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, title);
+        await expect(promise).rejects.toHaveProperty('retryable', false);
 
-        expect(listener).toHaveBeenCalledWith(receiptId);
+        expect(listener).not.toHaveBeenCalled();
 
         expect(logger.error).toHaveBeenCalledWith(`Beacon rejected with non-retryable status: ${title}`);
+    });
+
+    it.each([
+        [429, 'Rate limit exceeded'],
+        [408, 'Request timeout'],
+        [503, 'Service unavailable'],
+        [504, 'Gateway timeout'],
+    ])('should report a retryable error if the response status is %i', async (status, title) => {
+        fetchMock.mock(endpointUrl, {
+            status: status,
+            body: JSON.stringify({
+                type: 'https://croct.help/api/event-tracker#error',
+                title: title,
+                status: status,
+            }),
+        });
+
+        const channel = new HttpBeaconChannel({
+            appId: appId,
+            endpointUrl: endpointUrl,
+            cidAssigner: cidAssigner,
+            logger: logger,
+        });
+
+        const listener = jest.fn();
+
+        channel.subscribe(listener);
+
+        const receiptId = 'receipt-id';
+
+        const promise = channel.publish({
+            id: receiptId,
+            message: JSON.stringify({
+                context: {
+                    tabId: tabId,
+                    url: 'http://example.com',
+                },
+                payload: {
+                    type: 'nothingChanged',
+                    sinceTime: 0,
+                },
+                timestamp: 1,
+            }),
+        });
+
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, title);
+        await expect(promise).rejects.toHaveProperty('retryable', true);
+
+        expect(listener).not.toHaveBeenCalled();
     });
 
     it('should not notify listeners that have been unsubscribed', async () => {
@@ -281,9 +334,8 @@ describe('An HTTP beacon channel', () => {
             message: JSON.stringify(beacon),
         });
 
-        await expect(promise).rejects.toThrow('Channel is closed');
-
-        expect(listener).not.toHaveBeenCalled();
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Channel is closed');
+        await expect(promise).rejects.toHaveProperty('retryable', false);
 
         expect(fetchMock.calls()).toHaveLength(0);
     });

@@ -1,5 +1,5 @@
 import {Envelope, GuaranteedChannel, MessageStamper, TimeStamper} from '../../src/channel/guaranteedChannel';
-import {SandboxChannel} from '../../src/channel';
+import {MessageDeliveryError, SandboxChannel} from '../../src/channel';
 
 describe('A guaranteed channel', () => {
     let stamper: MessageStamper<string, string>;
@@ -54,7 +54,8 @@ describe('A guaranteed channel', () => {
         // Invalid acknowledge stamp
         sandboxChannel.notify('pong_stamp');
 
-        await expect(promise).rejects.toThrow('Maximum confirmation time reached.');
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Maximum confirmation time reached.');
+        await expect(promise).rejects.toHaveProperty('retryable', true);
     });
 
     it('should stop waiting for confirmation if the channel is closed in the meanwhile', async () => {
@@ -64,7 +65,8 @@ describe('A guaranteed channel', () => {
 
         await channel.close();
 
-        await expect(promise).rejects.toEqual(new Error('Connection deliberately closed.'));
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Connection deliberately closed.');
+        await expect(promise).rejects.toHaveProperty('retryable', false);
     });
 
     it('should close the output channel on close', async () => {
@@ -76,7 +78,10 @@ describe('A guaranteed channel', () => {
     it('should fail to publish messages if the channel is closed', async () => {
         await channel.close();
 
-        await expect(channel.publish('foo')).rejects.toEqual(new Error('Channel is closed.'));
+        const promise = channel.publish('foo');
+
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Channel is closed.');
+        await expect(promise).rejects.toHaveProperty('retryable', false);
     });
 });
 

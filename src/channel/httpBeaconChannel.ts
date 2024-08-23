@@ -1,4 +1,4 @@
-import {ChannelListener, DuplexChannel} from './channel';
+import {ChannelListener, DuplexChannel, MessageDeliveryError} from './channel';
 import {Envelope} from './guaranteedChannel';
 import {Logger, NullLogger} from '../logging';
 import {CidAssigner} from '../cid';
@@ -20,11 +20,6 @@ type ApiProblem = {
 };
 
 export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string, string>> {
-    private static readonly NON_RETRYABLE_STATUSES: ReadonlySet<number> = new Set([
-        403, // API usage limit exceeded
-        401, // Invalid token
-    ]);
-
     private readonly configuration: Omit<Configuration, 'logger'>;
 
     private readonly logger: Logger;
@@ -40,7 +35,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
 
     public async publish({id: receiptId, message}: Envelope<string, string>): Promise<void> {
         if (this.closed) {
-            return Promise.reject(new Error('Channel is closed'));
+            return Promise.reject(new MessageDeliveryError('Channel is closed', false));
         }
 
         const {token, timestamp, context, payload} = JSON.parse(message);
@@ -76,19 +71,17 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
                 }),
             );
 
-            if (HttpBeaconChannel.NON_RETRYABLE_STATUSES.has(problem.status)) {
+            const isRetryable = HttpBeaconChannel.isRetryable(problem.status);
+
+            if (!isRetryable) {
                 this.logger.error(`Beacon rejected with non-retryable status: ${problem.title}`);
-
-                this.notify(receiptId);
-
-                return Promise.resolve();
             }
 
-            return Promise.reject(new Error(problem.title));
+            return Promise.reject(new MessageDeliveryError(problem.title, isRetryable));
         }).catch(error => {
             this.logger.error(`Failed to publish beacon: ${formatMessage(error)}`);
 
-            return Promise.reject(error);
+            return Promise.reject(MessageDeliveryError.fromCause(error, true));
         });
     }
 
@@ -114,5 +107,10 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
         this.closed = true;
 
         return Promise.resolve();
+    }
+
+    private static isRetryable(status: number): boolean {
+        // Retry any non-4xx error except 429 (rate limit) and 408 (timeout)
+        return status >= 500 || status === 429 || status === 408;
     }
 }

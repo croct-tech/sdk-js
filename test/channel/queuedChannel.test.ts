@@ -1,5 +1,5 @@
 import {InMemoryQueue, CapacityRestrictedQueue} from '../../src/queue';
-import {QueuedChannel, OutputChannel} from '../../src/channel';
+import {QueuedChannel, OutputChannel, MessageDeliveryError} from '../../src/channel';
 
 describe('A queued channel', () => {
     afterEach(() => {
@@ -11,7 +11,7 @@ describe('A queued channel', () => {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn()
                 .mockResolvedValueOnce(undefined)
-                .mockRejectedValueOnce(new Error('Rejected'))
+                .mockRejectedValueOnce(new MessageDeliveryError('Rejected', true))
                 .mockResolvedValue(undefined),
         };
         const channel = new QueuedChannel(outputChannel, new InMemoryQueue('foo', 'bar'));
@@ -89,7 +89,10 @@ describe('A queued channel', () => {
 
         await channel.close();
 
-        await expect(channel.flush()).rejects.toEqual(new Error('Channel is closed.'));
+        const promise = channel.flush();
+
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Channel is closed.');
+        await expect(promise).rejects.toHaveProperty('retryable', false);
     });
 
     it('should fail to publish messages if the queue is full', async () => {
@@ -99,7 +102,10 @@ describe('A queued channel', () => {
         };
         const channel = new QueuedChannel(outputChannel, new CapacityRestrictedQueue(new InMemoryQueue('foo'), 1));
 
-        await expect(channel.publish('bar')).rejects.toThrow('The queue is full.');
+        const promise = channel.publish('bar');
+
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'The queue is full.');
+        await expect(promise).rejects.toHaveProperty('retryable', true);
     });
 
     it('should fail to publish messages if the channel is closed', async () => {
@@ -111,7 +117,10 @@ describe('A queued channel', () => {
 
         await channel.close();
 
-        await expect(channel.publish('foo')).rejects.toEqual(new Error('Channel is closed.'));
+        const promise = channel.publish('foo');
+
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Channel is closed.');
+        await expect(promise).rejects.toHaveProperty('retryable', false);
     });
 
     it('should fail to publish messages if queue has pending messages', async () => {
@@ -121,7 +130,10 @@ describe('A queued channel', () => {
         };
         const channel = new QueuedChannel(outputChannel, new InMemoryQueue('foo'));
 
-        await expect(channel.publish('bar')).rejects.toEqual(expect.any(Error));
+        const promise = channel.publish('bar');
+
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'The queue must be flushed.');
+        await expect(promise).rejects.toHaveProperty('retryable', true);
 
         await channel.flush();
 
