@@ -12,8 +12,9 @@ import {
 } from '../src/evaluator';
 import {Token} from '../src/token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
-import {Logger} from '../src/logging';
 import {ApiKey} from '../src/apiKey';
+import {Logger} from '../src/logging';
+import {Help} from '../src/help';
 
 jest.mock(
     '../src/constants',
@@ -219,43 +220,6 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
     });
 
-    it('should warn when passing a userAgent option', async () => {
-        const logger: Logger = {
-            debug: jest.fn(),
-            info: jest.fn(),
-            warn: jest.fn(),
-            error: jest.fn(),
-        };
-
-        const evaluator = new Evaluator({
-            appId: appId,
-            logger: logger,
-        });
-
-        const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
-
-        const result = 'Carol';
-
-        fetchMock.mock({
-            ...requestMatcher,
-            headers: {
-                ...requestMatcher.headers,
-                'X-Client-Agent': userAgent,
-            },
-            response: JSON.stringify(result),
-        });
-
-        const options: EvaluationOptions = {
-            userAgent: userAgent,
-        };
-
-        await expect(evaluator.evaluate(query, options)).resolves.toBe(result);
-
-        expect(logger.warn).toHaveBeenCalledWith(
-            expect.stringContaining('The `userAgent` option is deprecated '),
-        );
-    });
-
     it('should fetch using the extra options', async () => {
         const evaluator = new Evaluator({
             appId: appId,
@@ -293,8 +257,16 @@ describe('An evaluator', () => {
     });
 
     it('should abort the evaluation if the timeout is reached', async () => {
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
         const evaluator = new Evaluator({
             appId: appId,
+            logger: logger,
         });
 
         fetchMock.mock({
@@ -314,16 +286,15 @@ describe('An evaluator', () => {
         expect(fetchOptions?.signal).toBeDefined();
 
         await expect(promise).rejects.toThrow(EvaluationError);
-        await expect(promise).rejects.toThrow(expect.objectContaining({
-            response: {
-                title: 'Maximum evaluation timeout reached before evaluation could complete.',
-                type: EvaluationErrorType.TIMEOUT,
-                detail: 'The evaluation took more than 10ms to complete.',
-                status: 408,
-            },
-        }));
+        await expect(promise).rejects.toHaveProperty('response', {
+            title: 'Maximum evaluation timeout reached before evaluation could complete.',
+            type: EvaluationErrorType.TIMEOUT,
+            detail: 'The evaluation took more than 10ms to complete.',
+            status: 408,
+        });
 
         expect(fetchOptions?.signal.aborted).toBe(true);
+        expect(logger.error).toHaveBeenCalledWith(Help.forStatusCode(408));
     });
 
     it('should evaluate queries using the provided context', async () => {
@@ -388,7 +359,7 @@ describe('An evaluator', () => {
         const promise = evaluator.evaluate(query);
 
         await expect(promise).rejects.toThrow(EvaluationError);
-        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+        await expect(promise).rejects.toHaveProperty('response', response);
     });
 
     it.each([
@@ -434,7 +405,7 @@ describe('An evaluator', () => {
             const promise = evaluator.evaluate(query);
 
             await expect(promise).rejects.toThrow(QueryError);
-            await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+            await expect(promise).rejects.toHaveProperty('response', response);
         },
     );
 
@@ -470,7 +441,7 @@ describe('An evaluator', () => {
         const promise = evaluator.evaluate('_'.repeat(length));
 
         await expect(promise).rejects.toThrow(QueryError);
-        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+        await expect(promise).rejects.toHaveProperty('response', response);
     });
 
     it('should catch deserialization errors', async () => {
@@ -496,7 +467,7 @@ describe('An evaluator', () => {
         const promise = evaluator.evaluate(query);
 
         await expect(promise).rejects.toThrow(EvaluationError);
-        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+        await expect(promise).rejects.toHaveProperty('response', response);
     });
 
     it('should catch unexpected error responses', async () => {
@@ -547,7 +518,63 @@ describe('An evaluator', () => {
         const promise = evaluator.evaluate(query);
 
         await expect(promise).rejects.toThrow(EvaluationError);
-        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+        await expect(promise).rejects.toHaveProperty('response', response);
+    });
+
+    type HelpScenario = {
+        status: number,
+        title: string,
+    };
+
+    it.each<HelpScenario>([
+        {
+            status: 401,
+            title: 'Unauthorized request',
+        },
+        {
+            status: 403,
+            title: 'Unallowed origin',
+        },
+        {
+            status: 423,
+            title: 'Quota exceeded',
+        },
+    ])('should log help messages for status code $status', async scenario => {
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
+        const evaluator = new Evaluator({
+            appId: appId,
+            logger: logger,
+        });
+
+        const response: ErrorResponse = {
+            title: scenario.title,
+            type: EvaluationErrorType.UNEXPECTED_ERROR,
+            status: scenario.status,
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                status: scenario.status,
+                body: response,
+            },
+        });
+
+        const promise = evaluator.evaluate(query);
+
+        await expect(promise).rejects.toThrowWithMessage(EvaluationError, scenario.title);
+
+        const help = Help.forStatusCode(scenario.status);
+
+        expect(help).toBeDefined();
+
+        expect(logger.error).toHaveBeenCalledWith(help);
     });
 
     it('should not be serializable', () => {

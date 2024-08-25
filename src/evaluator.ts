@@ -5,6 +5,7 @@ import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
 import {Logger, NullLogger} from './logging';
 import type {ApiKey} from './apiKey';
+import {Help} from './help';
 
 export type Campaign = {
     name?: string,
@@ -37,10 +38,6 @@ export type EvaluationOptions = {
     clientId?: string,
     clientIp?: string,
     clientAgent?: string,
-    /**
-     * @deprecated Use `clientAgent` instead. This option will be removed in future releases.
-     */
-    userAgent?: string,
     userToken?: Token|string,
     timeout?: number,
     context?: EvaluationContext,
@@ -154,12 +151,12 @@ export class Evaluator {
             return Promise.reject(new QueryError(response));
         }
 
-        const body: JsonObject = {
+        const payload: JsonObject = {
             query: query,
         };
 
         if (options.context !== undefined) {
-            body.context = options.context;
+            payload.context = options.context;
         }
 
         return new Promise((resolve, reject) => {
@@ -177,33 +174,37 @@ export class Evaluator {
 
                         abortController.abort();
 
+                        this.logHelp(response.status);
+
                         reject(new EvaluationError(response));
                     },
                     options.timeout,
                 );
             }
 
-            const promise = this.fetch(body, abortController.signal, options);
+            const promise = this.fetch(payload, abortController.signal, options);
 
             promise.then(
                 response => response.json()
-                    .then(data => {
+                    .then(body => {
                         if (response.ok) {
-                            return resolve(data);
+                            return resolve(body);
                         }
 
-                        const errorResponse: ErrorResponse = data;
+                        this.logHelp(response.status);
 
-                        switch (errorResponse.type) {
+                        const problem: ErrorResponse = body;
+
+                        switch (problem.type) {
                             case EvaluationErrorType.INVALID_QUERY:
                             case EvaluationErrorType.EVALUATION_FAILED:
                             case EvaluationErrorType.TOO_COMPLEX_QUERY:
-                                reject(new QueryError(errorResponse as QueryErrorResponse));
+                                reject(new QueryError(problem as QueryErrorResponse));
 
                                 break;
 
                             default:
-                                reject(new EvaluationError(errorResponse));
+                                reject(new EvaluationError(problem));
 
                                 break;
                         }
@@ -215,37 +216,26 @@ export class Evaluator {
 
                         throw error;
                     }),
-            )
-                .catch(
-                    error => {
-                        if (!abortController.signal.aborted) {
-                            reject(
-                                new EvaluationError({
-                                    title: formatMessage(error),
-                                    type: EvaluationErrorType.UNEXPECTED_ERROR,
-                                    detail: 'Please try again or contact Croct support if the error persists.',
-                                    status: 500, // Internal Server Error
-                                }),
-                            );
-                        }
-                    },
-                );
+            ).catch(
+                error => {
+                    if (!abortController.signal.aborted) {
+                        reject(
+                            new EvaluationError({
+                                title: formatMessage(error),
+                                type: EvaluationErrorType.UNEXPECTED_ERROR,
+                                detail: 'Please try again or contact Croct support if the error persists.',
+                                status: 500, // Internal Server Error
+                            }),
+                        );
+                    }
+                },
+            );
         });
     }
 
     private fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
         const {appId, apiKey} = this.configuration;
-        const {clientId, clientIp, userToken} = options;
-        const clientAgent = options.clientAgent ?? options.userAgent;
-
-        if (options.userAgent !== undefined) {
-            this.logger.warn(
-                'The `userAgent` option is deprecated and '
-                + 'will be removed in future releases. '
-                + 'Please update the part of your code calling the `evaluate` method '
-                + 'to use the `clientAgent` option instead.',
-            );
-        }
+        const {clientId, clientIp, userToken, clientAgent} = options;
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
@@ -290,6 +280,14 @@ export class Evaluator {
             signal: signal,
             body: JSON.stringify(body),
         });
+    }
+
+    private logHelp(statusCode: number): void {
+        const help = Help.forStatusCode(statusCode);
+
+        if (help !== undefined) {
+            this.logger.error(help);
+        }
     }
 
     public toJSON(): never {
