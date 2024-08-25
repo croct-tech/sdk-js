@@ -5,6 +5,7 @@ import {FixedAssigner} from '../../src/cid';
 import {Beacon} from '../../src/trackingEvents';
 import {Token} from '../../src/token';
 import {CLIENT_LIBRARY} from '../../src/constants';
+import {Help} from '../../src/help';
 
 describe('An HTTP beacon channel', () => {
     beforeEach(() => {
@@ -170,7 +171,7 @@ describe('An HTTP beacon channel', () => {
     type NonRetryableErrorScenario = {
         status: number,
         title: string,
-        log: string,
+        log?: string,
     };
 
     it.each<NonRetryableErrorScenario>([
@@ -182,8 +183,6 @@ describe('An HTTP beacon channel', () => {
         {
             status: 401,
             title: 'Unauthorized request',
-            log: 'The request was not authorized, most likely due to invalid credentials. '
-                + 'For help, see https://croct.help/sdk/js/invalid-credentials',
         },
         {
             status: 402,
@@ -193,17 +192,16 @@ describe('An HTTP beacon channel', () => {
         {
             status: 403,
             title: 'Unallowed origin',
-            log: 'The origin of the request is not allowed in your application settings. '
-                + 'For help, see https://croct.help/sdk/js/cors',
         },
         {
             status: 423,
             title: 'Quota exceeded',
-            log: 'The application has exceeded the monthly active users (MAU) quota. '
-                + 'For help, see https://croct.help/sdk/js/mau-exceeded',
         },
     ])('should report a non-retryable error if the response status is $status', async scenario => {
-        const {status, title, log} = scenario;
+        const {status, title} = scenario;
+        const log = scenario.log ?? Help.forStatusCode(status);
+
+        expect(log).toBeDefined();
 
         fetchMock.mock(endpointUrl, {
             status: status,

@@ -4,8 +4,9 @@ import {EvaluationContext} from '../src/evaluator';
 import {Token} from '../src/token';
 import {ContentFetcher, ContentError, ContentErrorType, ErrorResponse, FetchOptions} from '../src/contentFetcher';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
-import {Logger} from '../src/logging';
 import {ApiKey} from '../src/apiKey';
+import {Logger} from '../src/logging';
+import {Help} from '../src/help';
 
 jest.mock(
     '../src/constants',
@@ -251,41 +252,6 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
     });
 
-    it('should warn when passing a userAgent option', async () => {
-        const logger: Logger = {
-            debug: jest.fn(),
-            info: jest.fn(),
-            warn: jest.fn(),
-            error: jest.fn(),
-        };
-
-        const fetcher = new ContentFetcher({
-            appId: appId,
-            logger: logger,
-        });
-
-        const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
-
-        const options: FetchOptions = {
-            userAgent: userAgent,
-        };
-
-        fetchMock.mock({
-            ...requestMatcher,
-            headers: {
-                ...requestMatcher.headers,
-                'X-Client-Agent': userAgent,
-            },
-            response: content,
-        });
-
-        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
-
-        expect(logger.warn).toHaveBeenCalledWith(
-            expect.stringContaining('The `userAgent` option is deprecated'),
-        );
-    });
-
     it('should fetch dynamic content using the provided user token', async () => {
         const token = Token.issue(appId, 'foo', Date.now());
 
@@ -369,8 +335,16 @@ describe('A content fetcher', () => {
     });
 
     it('should abort after reaching the timeout', async () => {
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
         const fetcher = new ContentFetcher({
             appId: appId,
+            logger: logger,
         });
 
         fetchMock.mock({
@@ -391,16 +365,16 @@ describe('A content fetcher', () => {
 
         await expect(promise).rejects.toThrow(ContentError);
 
-        await expect(promise).rejects.toEqual(expect.objectContaining({
-            response: {
-                title: 'Maximum timeout reached before content could be loaded.',
-                type: ContentErrorType.TIMEOUT,
-                detail: 'The content took more than 10ms to load.',
-                status: 408,
-            },
-        }));
+        await expect(promise).rejects.toHaveProperty('response', {
+            title: 'Maximum timeout reached before content could be loaded.',
+            type: ContentErrorType.TIMEOUT,
+            detail: 'The content took more than 10ms to load.',
+            status: 408,
+        });
 
         expect(fetchOptions?.signal.aborted).toBe(true);
+
+        expect(logger.error).toHaveBeenCalledWith(Help.forStatusCode(408));
     });
 
     it('should fetch dynamic content using the provided context', async () => {
@@ -505,7 +479,7 @@ describe('A content fetcher', () => {
         const promise = fetcher.fetch(contentId);
 
         await expect(promise).rejects.toThrow(ContentError);
-        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+        await expect(promise).rejects.toHaveProperty('response', response);
     });
 
     it('should catch deserialization errors', async () => {
@@ -531,7 +505,7 @@ describe('A content fetcher', () => {
         const promise = fetcher.fetch(contentId);
 
         await expect(promise).rejects.toThrow(ContentError);
-        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+        await expect(promise).rejects.toHaveProperty('response', response);
     });
 
     it('should catch unexpected error responses', async () => {
@@ -582,7 +556,60 @@ describe('A content fetcher', () => {
         const promise = fetcher.fetch(contentId);
 
         await expect(promise).rejects.toThrow(ContentError);
-        await expect(promise).rejects.toEqual(expect.objectContaining({response: response}));
+        await expect(promise).rejects.toHaveProperty('response', response);
+    });
+
+    type HelpScenario = {
+        status: number,
+        title: string,
+    };
+
+    it.each<HelpScenario>([
+        {
+            status: 401,
+            title: 'Unauthorized request',
+        },
+        {
+            status: 403,
+            title: 'Unallowed origin',
+        },
+        {
+            status: 423,
+            title: 'Quota exceeded',
+        },
+    ])('should log help messages for status code $status', async scenario => {
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
+        const fetcher = new ContentFetcher({
+            appId: appId,
+            logger: logger,
+        });
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                status: scenario.status,
+                body: {
+                    type: 'https://croct.help/api/content',
+                    status: scenario.status,
+                    title: scenario.title,
+                } satisfies ErrorResponse,
+            },
+        });
+
+        const promise = fetcher.fetch(contentId);
+
+        await expect(promise).rejects.toThrowWithMessage(ContentError, scenario.title);
+
+        const log = Help.forStatusCode(scenario.status);
+
+        expect(log).toBeDefined();
+        expect(logger.error).toHaveBeenCalledWith(log);
     });
 
     it('should not be serializable', () => {

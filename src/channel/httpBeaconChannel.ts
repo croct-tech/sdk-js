@@ -4,6 +4,7 @@ import {Logger, NullLogger} from '../logging';
 import {CidAssigner} from '../cid';
 import {formatMessage} from '../error';
 import {CLIENT_LIBRARY} from '../constants';
+import {Help} from '../help';
 
 export type Configuration = {
     appId: string,
@@ -72,38 +73,12 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
             );
 
             const isRetryable = HttpBeaconChannel.isRetryable(problem.status);
+            const help = Help.forStatusCode(problem.status);
 
-            switch (response.status) {
-                case 401:
-                    this.logger.error(
-                        'The request was not authorized, most likely due to invalid credentials. '
-                        + 'For help, see https://croct.help/sdk/js/invalid-credentials',
-                    );
-
-                    break;
-
-                case 403:
-                    this.logger.error(
-                        'The origin of the request is not allowed in your application settings. '
-                        + 'For help, see https://croct.help/sdk/js/cors',
-                    );
-
-                    break;
-
-                case 423:
-                    this.logger.error(
-                        'The application has exceeded the monthly active users (MAU) quota. '
-                        + 'For help, see https://croct.help/sdk/js/mau-exceeded',
-                    );
-
-                    break;
-
-                default:
-                    if (!isRetryable) {
-                        this.logger.error(`Beacon rejected with non-retryable status: ${problem.title}`);
-                    }
-
-                    break;
+            if (help !== undefined) {
+                this.logger.error(help);
+            } else if (!isRetryable) {
+                this.logger.error(`Beacon rejected with non-retryable status: ${problem.title}`);
             }
 
             return Promise.reject(

@@ -5,6 +5,7 @@ import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from './constants';
 import {formatMessage} from './error';
 import {Logger, NullLogger} from './logging';
 import type {ApiKey} from './apiKey';
+import {Help} from './help';
 
 export type ErrorResponse = {
     type: string,
@@ -54,10 +55,6 @@ export type DynamicContentOptions = BasicOptions & {
     clientId?: string,
     clientIp?: string,
     clientAgent?: string,
-    /**
-     * @deprecated Use `clientAgent` instead. This option will be removed in future releases.
-     */
-    userAgent?: string,
     userToken?: Token|string,
     previewToken?: Token|string,
     context?: EvaluationContext,
@@ -140,6 +137,8 @@ export class ContentFetcher {
 
                         abortController.abort();
 
+                        this.logHelp(response.status);
+
                         reject(new ContentError(response));
                     },
                     options.timeout,
@@ -151,10 +150,12 @@ export class ContentFetcher {
                     response => response.json()
                         .then(body => {
                             if (response.ok) {
-                                resolve(body);
-                            } else {
-                                reject(new ContentError(body));
+                                return resolve(body);
                             }
+
+                            this.logHelp(response.status);
+
+                            reject(new ContentError(body));
                         })
                         .catch(error => {
                             if (!response.ok) {
@@ -211,15 +212,6 @@ export class ContentFetcher {
         const dynamic = ContentFetcher.isDynamicContent(options);
 
         if (dynamic) {
-            if (options.userAgent !== undefined) {
-                this.logger.warn(
-                    'The `userAgent` option is deprecated and '
-                    + 'will be removed in future releases. '
-                    + 'Please update the part of your code calling the `fetch` method '
-                    + 'to use the `clientAgent` option instead.',
-                );
-            }
-
             if (options.clientId !== undefined) {
                 headers['X-Client-Id'] = options.clientId;
             }
@@ -232,10 +224,8 @@ export class ContentFetcher {
                 headers['X-Token'] = options.userToken.toString();
             }
 
-            const clientAgent = options.clientAgent ?? options.userAgent;
-
-            if (clientAgent !== undefined) {
-                headers['X-Client-Agent'] = clientAgent;
+            if (options.clientAgent !== undefined) {
+                headers['X-Client-Agent'] = options.clientAgent;
             }
 
             if (options.context !== undefined) {
@@ -262,6 +252,14 @@ export class ContentFetcher {
             signal: signal,
             body: JSON.stringify(payload),
         });
+    }
+
+    private logHelp(statusCode: number): void {
+        const help = Help.forStatusCode(statusCode);
+
+        if (help !== undefined) {
+            this.logger.error(help);
+        }
     }
 
     private static isDynamicContent(options: FetchOptions): options is DynamicContentOptions {
