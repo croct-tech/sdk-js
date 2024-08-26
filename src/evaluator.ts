@@ -185,37 +185,44 @@ export class Evaluator {
             const promise = this.fetch(payload, abortController.signal, options);
 
             promise.then(
-                response => response.json()
-                    .then(body => {
-                        if (response.ok) {
-                            return resolve(body);
-                        }
+                response => {
+                    const region = response.headers.get('X-Croct-Region');
+                    const timing = response.headers.get('X-Croct-Timing');
 
-                        this.logHelp(response.status);
+                    this.logger.debug(`Request processed by region ${region} in ${timing}`);
 
-                        const problem: ErrorResponse = body;
+                    return response.json()
+                        .then(body => {
+                            if (response.ok) {
+                                return resolve(body);
+                            }
 
-                        switch (problem.type) {
-                            case EvaluationErrorType.INVALID_QUERY:
-                            case EvaluationErrorType.EVALUATION_FAILED:
-                            case EvaluationErrorType.TOO_COMPLEX_QUERY:
-                                reject(new QueryError(problem as QueryErrorResponse));
+                            this.logHelp(response.status);
 
-                                break;
+                            const problem: ErrorResponse = body;
 
-                            default:
-                                reject(new EvaluationError(problem));
+                            switch (problem.type) {
+                                case EvaluationErrorType.INVALID_QUERY:
+                                case EvaluationErrorType.EVALUATION_FAILED:
+                                case EvaluationErrorType.TOO_COMPLEX_QUERY:
+                                    reject(new QueryError(problem as QueryErrorResponse));
 
-                                break;
-                        }
-                    })
-                    .catch(error => {
-                        if (!response.ok) {
-                            throw new Error(`Error ${response.status} - ${response.statusText}`);
-                        }
+                                    break;
 
-                        throw error;
-                    }),
+                                default:
+                                    reject(new EvaluationError(problem));
+
+                                    break;
+                            }
+                        })
+                        .catch(error => {
+                            if (!response.ok) {
+                                throw new Error(`Error ${response.status} - ${response.statusText}`);
+                            }
+
+                            throw error;
+                        });
+                },
             ).catch(
                 error => {
                     if (!abortController.signal.aborted) {

@@ -577,6 +577,38 @@ describe('An evaluator', () => {
         expect(logger.error).toHaveBeenCalledWith(help);
     });
 
+    it('should log the region and processing time', async () => {
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
+        const evaluator = new Evaluator({
+            appId: appId,
+            logger: logger,
+        });
+
+        const result = true;
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                status: 200,
+                body: JSON.stringify(result),
+                headers: {
+                    'X-Croct-Region': 'us-central1',
+                    'X-Croct-Timing': '120.1234ms',
+                },
+            },
+        });
+
+        await evaluator.evaluate(query);
+
+        expect(logger.debug).toHaveBeenCalledWith('Request processed by region us-central1 in 120.1234ms');
+    });
+
     it('should not be serializable', () => {
         expect(() => new Evaluator({appId: appId}).toJSON())
             .toThrowWithMessage(Error, 'Unserializable value.');
