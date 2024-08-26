@@ -146,8 +146,13 @@ export class ContentFetcher {
             }
 
             this.load(slotId, abortController.signal, options)
-                .then(
-                    response => response.json()
+                .then(response => {
+                    const region = response.headers.get('X-Croct-Region');
+                    const timing = response.headers.get('X-Croct-Timing');
+
+                    this.logger.debug(`Request processed by region ${region} in ${timing}`);
+
+                    return response.json()
                         .then(body => {
                             if (response.ok) {
                                 return resolve(body);
@@ -163,8 +168,8 @@ export class ContentFetcher {
                             }
 
                             throw error;
-                        }),
-                )
+                        });
+                })
                 .catch(error => {
                     if (!abortController.signal.aborted) {
                         reject(

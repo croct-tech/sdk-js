@@ -612,6 +612,36 @@ describe('A content fetcher', () => {
         expect(logger.error).toHaveBeenCalledWith(log);
     });
 
+    it('should log the region and processing time', async () => {
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
+        const fetcher = new ContentFetcher({
+            appId: appId,
+            logger: logger,
+        });
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                status: 200,
+                body: content,
+                headers: {
+                    'X-Croct-Region': 'us-central1',
+                    'X-Croct-Timing': '120.1234ms',
+                },
+            },
+        });
+
+        await fetcher.fetch(contentId);
+
+        expect(logger.debug).toHaveBeenCalledWith('Request processed by region us-central1 in 120.1234ms');
+    });
+
     it('should not be serializable', () => {
         expect(() => new ContentFetcher({appId: appId}).toJSON())
             .toThrowWithMessage(Error, 'Unserializable value.');
