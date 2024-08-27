@@ -33,6 +33,7 @@ describe('A SDK', () => {
         baseEndpointUrl: 'https://localtest',
         cidAssignerEndpointUrl: 'https://localtest/cid',
         cookie: {},
+        defaultFetchTimeout: 1000,
     };
 
     beforeEach(() => {
@@ -451,6 +452,37 @@ describe('A SDK', () => {
             await expect(promise).resolves.toBe(result);
         },
     );
+
+    it('should configure the content fetcher with the default timeout', async () => {
+        const slotId = 'home-banner';
+        const result: FetchResponse = {
+            content: {
+                title: 'Hello world',
+            },
+        };
+
+        fetchMock.mock({
+            method: 'GET',
+            matcher: configuration.cidAssignerEndpointUrl,
+            response: '123',
+        });
+
+        fetchMock.mock({
+            method: 'POST',
+            matcher: `begin:${configuration.baseEndpointUrl}`,
+            delay: 200,
+            response: result,
+        });
+
+        const sdk = Sdk.init({
+            ...configuration,
+            defaultFetchTimeout: 5,
+        });
+
+        const promise = sdk.contentFetcher.fetch(slotId);
+
+        await expect(promise).rejects.toThrow('Maximum timeout reached before content could be loaded.');
+    });
 
     it.each([
         [undefined, BASE_ENDPOINT_URL],

@@ -345,6 +345,8 @@ describe('A content fetcher', () => {
         const fetcher = new ContentFetcher({
             appId: appId,
             logger: logger,
+            // Ensure the specified timeout has precedence over the default timeout
+            defaultTimeout: 10,
         });
 
         fetchMock.mock({
@@ -375,6 +377,32 @@ describe('A content fetcher', () => {
         expect(fetchOptions?.signal.aborted).toBe(true);
 
         expect(logger.error).toHaveBeenCalledWith(Help.forStatusCode(408));
+    });
+
+    it('should use the default timeout if none is specified', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+            defaultTimeout: 10,
+        });
+
+        fetchMock.mock({
+            ...requestMatcher,
+            delay: 20,
+            response: {
+                result: 'Carol',
+            },
+        });
+
+        const promise = fetcher.fetch(contentId);
+
+        await expect(promise).rejects.toThrow(ContentError);
+
+        await expect(promise).rejects.toHaveProperty('response', {
+            title: 'Maximum timeout reached before content could be loaded.',
+            type: ContentErrorType.TIMEOUT,
+            detail: 'The content took more than 10ms to load.',
+            status: 408,
+        });
     });
 
     it('should fetch dynamic content using the provided context', async () => {

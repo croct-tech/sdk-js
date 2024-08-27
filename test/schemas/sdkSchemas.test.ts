@@ -252,6 +252,7 @@ describe('The SDK configuration schema', () => {
                 },
             },
             eventProcessor: jest.fn(),
+            defaultFetchTimeout: 1000,
         }],
     ])('should allow %s', value => {
         function validate(): void {
@@ -486,6 +487,17 @@ describe('The SDK configuration schema', () => {
                 eventProcessor: null,
             },
             "Expected value of type function at path '/eventProcessor', actual null.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                defaultFetchTimeout: 0,
+            },
+            "Expected a value greater than or equal to 1 at path '/defaultFetchTimeout', actual 0.",
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {

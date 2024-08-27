@@ -50,6 +50,7 @@ export type Configuration = {
     },
     eventMetadata?: {[key: string]: string},
     eventProcessor?: DependencyResolver<TrackingEventProcessor>,
+    defaultFetchTimeout?: number,
 };
 
 export class Container {
@@ -98,6 +99,7 @@ export class Container {
             appId: this.configuration.appId,
             baseEndpointUrl: this.configuration.evaluationBaseEndpointUrl,
             logger: this.getLogger('Evaluator'),
+            defaultTimeout: this.configuration.defaultFetchTimeout,
         });
     }
 
@@ -114,6 +116,7 @@ export class Container {
             appId: this.configuration.appId,
             baseEndpointUrl: this.configuration.contentBaseEndpointUrl,
             logger: this.getLogger('ContentFetcher'),
+            defaultTimeout: this.configuration.defaultFetchTimeout,
         });
     }
 

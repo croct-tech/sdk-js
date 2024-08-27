@@ -1,4 +1,12 @@
-import {ObjectType, StringType, BooleanType, UnionType, NullType, FunctionType} from '../validation';
+import {
+    ObjectType,
+    StringType,
+    BooleanType,
+    UnionType,
+    NullType,
+    FunctionType,
+    NumberType,
+} from '../validation';
 import {tokenScopeSchema} from './contextSchemas';
 import {cookieOptionsSchema, eventMetadataSchema} from './sdkSchemas';
 import {loggerSchema} from './loggerSchema';
@@ -44,6 +52,10 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
                 userToken: cookieOptionsSchema,
                 previewToken: cookieOptionsSchema,
             },
+        }),
+        defaultFetchTimeout: new NumberType({
+            integer: true,
+            minimum: 1,
         }),
         preferredLocale: new StringType({
             pattern: /^[a-z]{2,3}([-_][a-z]{2,3})?$/i,
