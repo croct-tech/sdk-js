@@ -78,12 +78,14 @@ export type Configuration = {
     baseEndpointUrl?: string,
     logger?: Logger,
     defaultTimeout?: number,
+    defaultPreferredLocale?: string,
 };
 
 type InternalConfiguration = {
     appId?: string,
     apiKey?: string,
     defaultTimeout?: number,
+    defaultPreferredLocale?: string,
 };
 
 export class ContentFetcher {
@@ -117,6 +119,7 @@ export class ContentFetcher {
             appId: configuration.appId,
             apiKey: apiKey,
             defaultTimeout: configuration.defaultTimeout,
+            defaultPreferredLocale: configuration.defaultPreferredLocale,
         };
     }
 
@@ -214,8 +217,10 @@ export class ContentFetcher {
             payload.version = `${options.version}`;
         }
 
-        if (options.preferredLocale !== undefined) {
-            payload.preferredLocale = options.preferredLocale;
+        const preferredLocale = options.preferredLocale ?? this.configuration.defaultPreferredLocale;
+
+        if (preferredLocale !== undefined) {
+            payload.preferredLocale = preferredLocale;
         }
 
         const dynamic = ContentFetcher.isDynamicContent(options);

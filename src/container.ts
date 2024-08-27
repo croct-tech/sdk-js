@@ -51,6 +51,7 @@ export type Configuration = {
     eventMetadata?: {[key: string]: string},
     eventProcessor?: DependencyResolver<TrackingEventProcessor>,
     defaultFetchTimeout?: number,
+    defaultPreferredLocale?: string,
 };
 
 export class Container {
@@ -119,6 +120,7 @@ export class Container {
             baseEndpointUrl: this.configuration.contentBaseEndpointUrl,
             logger: this.getLogger('ContentFetcher'),
             defaultTimeout: this.configuration.defaultFetchTimeout ?? Container.DEFAULT_FETCH_TIMEOUT,
+            defaultPreferredLocale: this.configuration.defaultPreferredLocale,
         });
     }
 

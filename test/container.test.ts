@@ -32,6 +32,8 @@ describe('A container', () => {
         contentBaseEndpointUrl: 'https://localtest/content',
         evaluationBaseEndpointUrl: 'https://localtest/evaluate',
         trackerEndpointUrl: 'https://localtest/track',
+        defaultFetchTimeout: 5000,
+        defaultPreferredLocale: 'en-us',
     };
 
     it('should provide its configuration', () => {
