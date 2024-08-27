@@ -48,6 +48,7 @@ describe('A content fetcher', () => {
     afterEach(() => {
         fetchMock.reset();
         jest.clearAllMocks();
+        jest.useRealTimers();
     });
 
     it('should require either an application ID or API key', async () => {
@@ -335,6 +336,8 @@ describe('A content fetcher', () => {
     });
 
     it('should abort after reaching the timeout', async () => {
+        jest.useFakeTimers();
+
         const logger: Logger = {
             debug: jest.fn(),
             info: jest.fn(),
@@ -345,6 +348,8 @@ describe('A content fetcher', () => {
         const fetcher = new ContentFetcher({
             appId: appId,
             logger: logger,
+            // Ensure the specified timeout has precedence over the default timeout
+            defaultTimeout: 15,
         });
 
         fetchMock.mock({
@@ -358,6 +363,8 @@ describe('A content fetcher', () => {
         const promise = fetcher.fetch(contentId, {
             timeout: 10,
         });
+
+        jest.advanceTimersByTime(11);
 
         const fetchOptions = fetchMock.lastOptions() as MockOptions & {signal: AbortSignal} | undefined;
 
@@ -375,6 +382,36 @@ describe('A content fetcher', () => {
         expect(fetchOptions?.signal.aborted).toBe(true);
 
         expect(logger.error).toHaveBeenCalledWith(Help.forStatusCode(408));
+    });
+
+    it('should use the default timeout if none is specified', async () => {
+        jest.useFakeTimers();
+
+        const fetcher = new ContentFetcher({
+            appId: appId,
+            defaultTimeout: 10,
+        });
+
+        fetchMock.mock({
+            ...requestMatcher,
+            delay: 20,
+            response: {
+                result: 'Carol',
+            },
+        });
+
+        const promise = fetcher.fetch(contentId);
+
+        jest.advanceTimersByTime(11);
+
+        await expect(promise).rejects.toThrow(ContentError);
+
+        await expect(promise).rejects.toHaveProperty('response', {
+            title: 'Maximum timeout reached before content could be loaded.',
+            type: ContentErrorType.TIMEOUT,
+            detail: 'The content took more than 10ms to load.',
+            status: 408,
+        });
     });
 
     it('should fetch dynamic content using the provided context', async () => {

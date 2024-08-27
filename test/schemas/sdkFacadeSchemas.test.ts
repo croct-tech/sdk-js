@@ -86,6 +86,7 @@ describe('The SDK facade configuration schema', () => {
                     sameSite: 'strict',
                 },
             },
+            defaultFetchTimeout: 1000,
         }],
     ])('should allow %s', value => {
         function validate(): void {
@@ -258,6 +259,13 @@ describe('The SDK facade configuration schema', () => {
                 },
             },
             "Expected value of type string at path '/cookie/previewToken/name', actual null.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                defaultFetchTimeout: 0,
+            },
+            'Expected a value greater than or equal to 1 at path \'/defaultFetchTimeout\', actual 0.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {

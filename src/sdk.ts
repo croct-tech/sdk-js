@@ -33,6 +33,7 @@ export type Configuration = {
         previewToken?: CookieCacheConfiguration,
     },
     eventProcessor?: DependencyResolver<TrackingEventProcessor>,
+    defaultFetchTimeout?: number,
 };
 
 function validateConfiguration(configuration: unknown): asserts configuration is Configuration {

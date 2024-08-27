@@ -49,6 +49,7 @@ describe('An evaluator', () => {
     };
 
     afterEach(() => {
+        jest.useRealTimers();
         fetchMock.reset();
         jest.clearAllMocks();
     });
@@ -257,6 +258,8 @@ describe('An evaluator', () => {
     });
 
     it('should abort the evaluation if the timeout is reached', async () => {
+        jest.useFakeTimers();
+
         const logger: Logger = {
             debug: jest.fn(),
             info: jest.fn(),
@@ -267,6 +270,8 @@ describe('An evaluator', () => {
         const evaluator = new Evaluator({
             appId: appId,
             logger: logger,
+            // Ensure the specified timeout has precedence over the default timeout
+            defaultTimeout: 15,
         });
 
         fetchMock.mock({
@@ -280,6 +285,8 @@ describe('An evaluator', () => {
         const promise = evaluator.evaluate(query, {
             timeout: 10,
         });
+
+        jest.advanceTimersByTime(10);
 
         const fetchOptions = fetchMock.lastOptions() as MockOptions & {signal: AbortSignal} | undefined;
 
@@ -295,6 +302,35 @@ describe('An evaluator', () => {
 
         expect(fetchOptions?.signal.aborted).toBe(true);
         expect(logger.error).toHaveBeenCalledWith(Help.forStatusCode(408));
+    });
+
+    it('should use the default timeout if none is specified', async () => {
+        jest.useFakeTimers();
+
+        const evaluator = new Evaluator({
+            appId: appId,
+            defaultTimeout: 10,
+        });
+
+        fetchMock.mock({
+            ...requestMatcher,
+            delay: 20,
+            response: {
+                result: 'Carol',
+            },
+        });
+
+        const promise = evaluator.evaluate(query);
+
+        jest.advanceTimersByTime(10);
+
+        await expect(promise).rejects.toThrow(EvaluationError);
+        await expect(promise).rejects.toHaveProperty('response', {
+            title: 'Maximum evaluation timeout reached before evaluation could complete.',
+            type: EvaluationErrorType.TIMEOUT,
+            detail: 'The evaluation took more than 10ms to complete.',
+            status: 408,
+        });
     });
 
     it('should evaluate queries using the provided context', async () => {

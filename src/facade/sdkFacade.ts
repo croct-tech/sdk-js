@@ -41,6 +41,7 @@ export type Configuration = Options & {
         userToken?: CookieCacheConfiguration,
         previewToken?: CookieCacheConfiguration,
     },
+    defaultFetchTimeout?: number,
 };
 
 function validateConfiguration(configuration: unknown): asserts configuration is Configuration {

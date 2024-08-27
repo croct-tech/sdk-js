@@ -4,10 +4,11 @@ import {Sdk, Configuration} from '../src';
 import {NullLogger, Logger} from '../src/logging';
 import {Token} from '../src/token';
 import {TabEventEmulator} from './utils/tabEventEmulator';
-
 import {BeaconPayload, NothingChanged} from '../src/trackingEvents';
-import {FetchResponse} from '../src/contentFetcher';
+import {ContentError, ErrorResponse as ContentFetchErrorResponse, FetchResponse} from '../src/contentFetcher';
 import {BASE_ENDPOINT_URL} from '../src/constants';
+import {ErrorResponse as EvaluationErrorResponse, EvaluationError} from '../src/evaluator';
+import {Container} from '../src/container';
 
 jest.mock(
     '../src/constants',
@@ -33,6 +34,7 @@ describe('A SDK', () => {
         baseEndpointUrl: 'https://localtest',
         cidAssignerEndpointUrl: 'https://localtest/cid',
         cookie: {},
+        defaultFetchTimeout: 1000,
     };
 
     beforeEach(() => {
@@ -41,6 +43,7 @@ describe('A SDK', () => {
 
     afterEach(() => {
         jest.clearAllMocks();
+        jest.useRealTimers();
         tabEventEmulator.reset();
         fetchMock.reset();
         localStorage.clear();
@@ -451,6 +454,164 @@ describe('A SDK', () => {
             await expect(promise).resolves.toBe(result);
         },
     );
+
+    it('should configure the evaluator with the specified default timeout', async () => {
+        jest.useFakeTimers();
+
+        const query = '1 + 2';
+        const result = 3;
+
+        fetchMock.mock({
+            method: 'GET',
+            matcher: configuration.cidAssignerEndpointUrl,
+            response: '123',
+        });
+
+        fetchMock.mock({
+            method: 'POST',
+            matcher: `begin:${configuration.baseEndpointUrl}`,
+            delay: 200,
+            response: JSON.stringify(result),
+        });
+
+        const sdk = Sdk.init({
+            ...configuration,
+            defaultFetchTimeout: 5,
+        });
+
+        const promise = sdk.evaluator.evaluate(query);
+
+        jest.advanceTimersByTime(6);
+
+        await expect(promise).rejects.toThrowWithMessage(
+            EvaluationError,
+            'Maximum evaluation timeout reached before evaluation could complete.',
+        );
+
+        await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
+            detail: 'The evaluation took more than 5ms to complete.',
+        } satisfies Partial<EvaluationErrorResponse>));
+    });
+
+    it('should configure the evaluator with the default timeout', async () => {
+        jest.useFakeTimers();
+
+        const query = '1 + 2';
+        const result = 3;
+
+        fetchMock.mock({
+            method: 'GET',
+            matcher: configuration.cidAssignerEndpointUrl,
+            response: '123',
+        });
+
+        fetchMock.mock({
+            method: 'POST',
+            matcher: `begin:${configuration.baseEndpointUrl}`,
+            delay: Container.DEFAULT_FETCH_TIMEOUT * 2,
+            response: JSON.stringify(result),
+        });
+
+        const {defaultFetchTimeout: _, ...sdkConfiguration} = configuration;
+
+        const sdk = Sdk.init(sdkConfiguration);
+
+        const promise = sdk.evaluator.evaluate(query);
+
+        jest.advanceTimersByTime(Container.DEFAULT_FETCH_TIMEOUT + 1);
+
+        await expect(promise).rejects.toThrowWithMessage(
+            EvaluationError,
+            'Maximum evaluation timeout reached before evaluation could complete.',
+        );
+
+        await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
+            detail: 'The evaluation took more than 5000ms to complete.',
+        } satisfies Partial<EvaluationErrorResponse>));
+    });
+
+    it('should configure the content fetcher with the specified default timeout', async () => {
+        jest.useFakeTimers();
+
+        const slotId = 'home-banner';
+        const result: FetchResponse = {
+            content: {
+                title: 'Hello world',
+            },
+        };
+
+        fetchMock.mock({
+            method: 'GET',
+            matcher: configuration.cidAssignerEndpointUrl,
+            response: '123',
+        });
+
+        fetchMock.mock({
+            method: 'POST',
+            matcher: `begin:${configuration.baseEndpointUrl}`,
+            delay: 200,
+            response: result,
+        });
+
+        const sdk = Sdk.init({
+            ...configuration,
+            defaultFetchTimeout: 5,
+        });
+
+        const promise = sdk.contentFetcher.fetch(slotId);
+
+        jest.advanceTimersByTime(6);
+
+        await expect(promise).rejects.toThrowWithMessage(
+            ContentError,
+            'Maximum timeout reached before content could be loaded.',
+        );
+
+        await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
+            detail: 'The content took more than 5ms to load.',
+        } satisfies Partial<ContentFetchErrorResponse>));
+    });
+
+    it('should configure the content fetcher with the default timeout', async () => {
+        jest.useFakeTimers();
+
+        const slotId = 'home-banner';
+        const result: FetchResponse = {
+            content: {
+                title: 'Hello world',
+            },
+        };
+
+        fetchMock.mock({
+            method: 'GET',
+            matcher: configuration.cidAssignerEndpointUrl,
+            response: '123',
+        });
+
+        fetchMock.mock({
+            method: 'POST',
+            matcher: `begin:${configuration.baseEndpointUrl}`,
+            delay: Container.DEFAULT_FETCH_TIMEOUT * 2,
+            response: result,
+        });
+
+        const {defaultFetchTimeout: _, ...sdkConfiguration} = configuration;
+
+        const sdk = Sdk.init(sdkConfiguration);
+
+        const promise = sdk.contentFetcher.fetch(slotId);
+
+        jest.advanceTimersByTime(Container.DEFAULT_FETCH_TIMEOUT + 1);
+
+        await expect(promise).rejects.toThrowWithMessage(
+            ContentError,
+            'Maximum timeout reached before content could be loaded.',
+        );
+
+        await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
+            detail: 'The content took more than 5000ms to load.',
+        } satisfies Partial<ContentFetchErrorResponse>));
+    });
 
     it.each([
         [undefined, BASE_ENDPOINT_URL],

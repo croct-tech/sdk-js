@@ -95,11 +95,13 @@ export type Configuration = {
     apiKey?: string|ApiKey,
     baseEndpointUrl?: string,
     logger?: Logger,
+    defaultTimeout?: number,
 };
 
 type InternalConfiguration = {
     appId?: string,
     apiKey?: string,
+    defaultTimeout?: number,
 };
 
 export class Evaluator {
@@ -129,6 +131,7 @@ export class Evaluator {
         this.configuration = {
             appId: configuration.appId,
             apiKey: apiKey,
+            defaultTimeout: configuration.defaultTimeout,
         };
     }
 
@@ -161,14 +164,15 @@ export class Evaluator {
 
         return new Promise((resolve, reject) => {
             const abortController = new AbortController();
+            const timeout = options.timeout ?? this.configuration.defaultTimeout;
 
-            if (options.timeout !== undefined) {
+            if (timeout !== undefined) {
                 setTimeout(
                     () => {
                         const response: ErrorResponse = {
                             title: 'Maximum evaluation timeout reached before evaluation could complete.',
                             type: EvaluationErrorType.TIMEOUT,
-                            detail: `The evaluation took more than ${options.timeout}ms to complete.`,
+                            detail: `The evaluation took more than ${timeout}ms to complete.`,
                             status: 408, // Request Timeout
                         };
 
@@ -178,7 +182,7 @@ export class Evaluator {
 
                         reject(new EvaluationError(response));
                     },
-                    options.timeout,
+                    timeout,
                 );
             }
 

@@ -50,9 +50,12 @@ export type Configuration = {
     },
     eventMetadata?: {[key: string]: string},
     eventProcessor?: DependencyResolver<TrackingEventProcessor>,
+    defaultFetchTimeout?: number,
 };
 
 export class Container {
+    public static readonly DEFAULT_FETCH_TIMEOUT = 5_000; // 5 seconds
+
     private readonly configuration: Configuration;
 
     private context?: Context;
@@ -98,6 +101,7 @@ export class Container {
             appId: this.configuration.appId,
             baseEndpointUrl: this.configuration.evaluationBaseEndpointUrl,
             logger: this.getLogger('Evaluator'),
+            defaultTimeout: this.configuration.defaultFetchTimeout ?? Container.DEFAULT_FETCH_TIMEOUT,
         });
     }
 
@@ -114,6 +118,7 @@ export class Container {
             appId: this.configuration.appId,
             baseEndpointUrl: this.configuration.contentBaseEndpointUrl,
             logger: this.getLogger('ContentFetcher'),
+            defaultTimeout: this.configuration.defaultFetchTimeout ?? Container.DEFAULT_FETCH_TIMEOUT,
         });
     }
 
