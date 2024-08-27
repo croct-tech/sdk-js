@@ -118,6 +118,7 @@ describe('A SDK facade', () => {
             token: Token.issue(appId, 'c4r0l').toString(),
             logger: logger,
             urlSanitizer: urlSanitizer,
+            defaultFetchTimeout: 5,
         });
 
         expect(initialize).toHaveBeenCalledWith(
@@ -132,6 +133,7 @@ describe('A SDK facade', () => {
                 logger: logger,
                 urlSanitizer: urlSanitizer,
                 eventProcessor: expect.any(Function),
+                defaultFetchTimeout: 5,
             } satisfies ResolvedConfiguration,
         );
     });
