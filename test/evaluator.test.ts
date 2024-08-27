@@ -49,6 +49,7 @@ describe('An evaluator', () => {
     };
 
     afterEach(() => {
+        jest.useRealTimers();
         fetchMock.reset();
         jest.clearAllMocks();
     });
@@ -257,6 +258,8 @@ describe('An evaluator', () => {
     });
 
     it('should abort the evaluation if the timeout is reached', async () => {
+        jest.useFakeTimers();
+
         const logger: Logger = {
             debug: jest.fn(),
             info: jest.fn(),
@@ -283,6 +286,8 @@ describe('An evaluator', () => {
             timeout: 10,
         });
 
+        jest.advanceTimersByTime(10);
+
         const fetchOptions = fetchMock.lastOptions() as MockOptions & {signal: AbortSignal} | undefined;
 
         expect(fetchOptions?.signal).toBeDefined();
@@ -300,6 +305,8 @@ describe('An evaluator', () => {
     });
 
     it('should use the default timeout if none is specified', async () => {
+        jest.useFakeTimers();
+
         const evaluator = new Evaluator({
             appId: appId,
             defaultTimeout: 10,
@@ -314,6 +321,8 @@ describe('An evaluator', () => {
         });
 
         const promise = evaluator.evaluate(query);
+
+        jest.advanceTimersByTime(10);
 
         await expect(promise).rejects.toThrow(EvaluationError);
         await expect(promise).rejects.toHaveProperty('response', {

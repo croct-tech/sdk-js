@@ -53,6 +53,8 @@ export type Configuration = {
     defaultFetchTimeout?: number,
 };
 
+const defaultFetchTimeout = 5000;
+
 export class Container {
     private readonly configuration: Configuration;
 
@@ -99,7 +101,7 @@ export class Container {
             appId: this.configuration.appId,
             baseEndpointUrl: this.configuration.evaluationBaseEndpointUrl,
             logger: this.getLogger('Evaluator'),
-            defaultTimeout: this.configuration.defaultFetchTimeout,
+            defaultTimeout: this.configuration.defaultFetchTimeout ?? defaultFetchTimeout,
         });
     }
 
@@ -116,7 +118,7 @@ export class Container {
             appId: this.configuration.appId,
             baseEndpointUrl: this.configuration.contentBaseEndpointUrl,
             logger: this.getLogger('ContentFetcher'),
-            defaultTimeout: this.configuration.defaultFetchTimeout,
+            defaultTimeout: this.configuration.defaultFetchTimeout ?? defaultFetchTimeout,
         });
     }
 
