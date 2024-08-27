@@ -119,6 +119,7 @@ describe('A SDK facade', () => {
             logger: logger,
             urlSanitizer: urlSanitizer,
             defaultFetchTimeout: 5,
+            defaultPreferredLocale: 'en-us',
         });
 
         expect(initialize).toHaveBeenCalledWith(
@@ -134,6 +135,7 @@ describe('A SDK facade', () => {
                 urlSanitizer: urlSanitizer,
                 eventProcessor: expect.any(Function),
                 defaultFetchTimeout: 5,
+                defaultPreferredLocale: 'en-us',
             } satisfies ResolvedConfiguration,
         );
     });
@@ -392,21 +394,28 @@ describe('A SDK facade', () => {
         const sdkFacade = SdkFacade.init({
             appId: appId,
             track: false,
-            preferredLocale: preferredLocale,
         });
 
         const options: FetchOptions = {
             timeout: 5,
-        };
-
-        const expectedOptions: FetchOptions = {
-            ...options,
+            version: '1',
             preferredLocale: preferredLocale,
+            attributes: {
+                foo: 'bar',
+            },
         };
 
         await expect(sdkFacade.contentFetcher.fetch(slotId, options)).resolves.toBe(result);
 
-        expect(fetcher.fetch).toHaveBeenCalledWith(slotId, expect.objectContaining(expectedOptions));
+        expect(fetcher.fetch).toHaveBeenCalledWith(slotId, expect.objectContaining({
+            timeout: options.timeout,
+            version: options.version,
+            preferredLocale: preferredLocale,
+            context: expect.objectContaining({
+                attributes: options.attributes,
+            }),
+        }));
+
         expect(fetcher.fetch).toHaveBeenCalledTimes(1);
     });
 

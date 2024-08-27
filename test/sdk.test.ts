@@ -35,6 +35,7 @@ describe('A SDK', () => {
         cidAssignerEndpointUrl: 'https://localtest/cid',
         cookie: {},
         defaultFetchTimeout: 1000,
+        defaultPreferredLocale: 'en-us',
     };
 
     beforeEach(() => {
@@ -528,6 +529,37 @@ describe('A SDK', () => {
         await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
             detail: 'The evaluation took more than 5000ms to complete.',
         } satisfies Partial<EvaluationErrorResponse>));
+    });
+
+    it('should configure the content fetch with the default preferred locale', async () => {
+        const slotId = 'home-banner';
+        const result: FetchResponse = {
+            content: {
+                title: 'Hello world',
+            },
+        };
+
+        fetchMock.mock({
+            method: 'GET',
+            matcher: configuration.cidAssignerEndpointUrl,
+            response: '123',
+        });
+
+        fetchMock.mock({
+            method: 'POST',
+            matcher: `begin:${configuration.baseEndpointUrl}`,
+            body: {
+                slotId: slotId,
+                preferredLocale: configuration.defaultPreferredLocale,
+            },
+            response: result,
+        });
+
+        const sdk = Sdk.init(configuration);
+
+        const promise = sdk.contentFetcher.fetch(slotId);
+
+        await expect(promise).resolves.toEqual(result);
     });
 
     it('should configure the content fetcher with the specified default timeout', async () => {

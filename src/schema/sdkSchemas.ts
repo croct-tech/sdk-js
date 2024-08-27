@@ -75,5 +75,8 @@ export const sdkConfigurationSchema = new ObjectType({
             integer: true,
             minimum: 1,
         }),
+        defaultPreferredLocale: new StringType({
+            pattern: /^[a-z]{2,3}([-_][a-z]{2,3})?$/i,
+        }),
     },
 });

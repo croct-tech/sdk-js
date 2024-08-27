@@ -210,6 +210,54 @@ describe('The SDK configuration schema', () => {
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            tokenScope: 'global',
+            disableCidMirroring: true,
+            debug: true,
+            test: true,
+            defaultPreferredLocale: 'pt',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            tokenScope: 'global',
+            disableCidMirroring: true,
+            debug: true,
+            test: true,
+            defaultPreferredLocale: 'pt_br',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            tokenScope: 'global',
+            disableCidMirroring: true,
+            debug: true,
+            test: true,
+            defaultPreferredLocale: 'pt_BR',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            tokenScope: 'global',
+            disableCidMirroring: true,
+            debug: true,
+            test: true,
+            defaultPreferredLocale: 'pt-br',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            tokenScope: 'global',
+            disableCidMirroring: true,
+            debug: true,
+            test: true,
+            defaultPreferredLocale: 'pt-BR',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            tokenScope: 'global',
+            disableCidMirroring: true,
+            debug: true,
+            test: true,
+            defaultPreferredLocale: 'abc_cde',
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             clientId: '9f62d6343c8742028df3e9e3ec596526',
             tokenScope: 'isolated',
             baseEndpointUrl: 'https://api.croct.io',
@@ -253,6 +301,7 @@ describe('The SDK configuration schema', () => {
             },
             eventProcessor: jest.fn(),
             defaultFetchTimeout: 1000,
+            defaultPreferredLocale: 'en-us',
         }],
     ])('should allow %s', value => {
         function validate(): void {
@@ -498,6 +547,39 @@ describe('The SDK configuration schema', () => {
                 defaultFetchTimeout: 0,
             },
             "Expected a value greater than or equal to 1 at path '/defaultFetchTimeout', actual 0.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                defaultPreferredLocale: '',
+            },
+            "Invalid format at path '/defaultPreferredLocale'.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                defaultPreferredLocale: 'fooo',
+            },
+            'Invalid format at path \'/defaultPreferredLocale\'.',
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                defaultPreferredLocale: 'foo-baar',
+            },
+            'Invalid format at path \'/defaultPreferredLocale\'.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {

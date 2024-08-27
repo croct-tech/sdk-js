@@ -57,7 +57,7 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
             integer: true,
             minimum: 1,
         }),
-        preferredLocale: new StringType({
+        defaultPreferredLocale: new StringType({
             pattern: /^[a-z]{2,3}([-_][a-z]{2,3})?$/i,
         }),
     },

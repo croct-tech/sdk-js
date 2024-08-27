@@ -100,7 +100,6 @@ describe('A content fetcher facade', () => {
             userTokenProvider: new FixedTokenProvider(userToken),
             previewTokenProvider: new FixedTokenProvider(previewToken),
             contextFactory: new TabContextFactory(tab),
-            preferredLocale: 'pt-br',
         });
 
         const options: FetchOptions = {
@@ -131,10 +130,7 @@ describe('A content fetcher facade', () => {
             attributes: options?.context?.attributes,
         });
 
-        expect(fetcher.fetch).toHaveBeenNthCalledWith(1, slotId, {
-            ...options,
-            preferredLocale: 'pt-br',
-        });
+        expect(fetcher.fetch).toHaveBeenNthCalledWith(1, slotId, options);
 
         await fetcherFacade.fetch(slotId, {
             timeout: options.timeout,

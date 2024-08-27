@@ -24,27 +24,27 @@ describe('The SDK facade configuration schema', () => {
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            preferredLocale: 'pt',
+            defaultPreferredLocale: 'pt',
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            preferredLocale: 'pt_br',
+            defaultPreferredLocale: 'pt_br',
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            preferredLocale: 'pt_BR',
+            defaultPreferredLocale: 'pt_BR',
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            preferredLocale: 'pt-br',
+            defaultPreferredLocale: 'pt-br',
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            preferredLocale: 'pt-BR',
+            defaultPreferredLocale: 'pt-BR',
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            preferredLocale: 'abc_cde',
+            defaultPreferredLocale: 'abc_cde',
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
@@ -195,30 +195,30 @@ describe('The SDK facade configuration schema', () => {
         [
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-                preferredLocale: '',
+                defaultPreferredLocale: '',
             },
-            "Invalid format at path '/preferredLocale'.",
+            "Invalid format at path '/defaultPreferredLocale'.",
         ],
         [
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-                preferredLocale: 'fooo',
+                defaultPreferredLocale: 'fooo',
             },
-            'Invalid format at path \'/preferredLocale\'.',
+            'Invalid format at path \'/defaultPreferredLocale\'.',
         ],
         [
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-                preferredLocale: 'foo-baar',
+                defaultPreferredLocale: 'foo-baar',
             },
-            'Invalid format at path \'/preferredLocale\'.',
+            'Invalid format at path \'/defaultPreferredLocale\'.',
         ],
         [
             {
                 appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-                preferredLocale: 'foo_baar',
+                defaultPreferredLocale: 'foo_baar',
             },
-            'Invalid format at path \'/preferredLocale\'.',
+            'Invalid format at path \'/defaultPreferredLocale\'.',
         ],
         [
             {

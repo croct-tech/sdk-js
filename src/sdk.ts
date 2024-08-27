@@ -34,6 +34,7 @@ export type Configuration = {
     },
     eventProcessor?: DependencyResolver<TrackingEventProcessor>,
     defaultFetchTimeout?: number,
+    defaultPreferredLocale?: string,
 };
 
 function validateConfiguration(configuration: unknown): asserts configuration is Configuration {

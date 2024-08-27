@@ -473,12 +473,32 @@ describe('A content fetcher', () => {
         await expect(promise).resolves.toEqual(content);
     });
 
+    it('should fetch dynamic content for the default preferred locale', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+            defaultPreferredLocale: 'en-us',
+        });
+
+        fetchMock.mock({
+            ...requestMatcher,
+            body: {
+                ...requestMatcher.body,
+                preferredLocale: 'en-us',
+            },
+            response: content,
+        });
+
+        const promise = fetcher.fetch(contentId);
+
+        await expect(promise).resolves.toEqual(content);
+    });
+
     it('should fetch dynamic content for the specified preferred locale', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
 
-        const preferredLocale = 'pt_BR';
+        const preferredLocale = 'pt-br';
 
         fetchMock.mock({
             ...requestMatcher,
