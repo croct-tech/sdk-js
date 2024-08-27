@@ -549,6 +549,7 @@ describe('A SDK', () => {
             method: 'POST',
             matcher: `begin:${configuration.baseEndpointUrl}`,
             body: {
+                slotId: slotId,
                 preferredLocale: configuration.defaultPreferredLocale,
             },
             response: result,
