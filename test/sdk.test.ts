@@ -8,6 +8,7 @@ import {BeaconPayload, NothingChanged} from '../src/trackingEvents';
 import {ContentError, ErrorResponse as ContentFetchErrorResponse, FetchResponse} from '../src/contentFetcher';
 import {BASE_ENDPOINT_URL} from '../src/constants';
 import {ErrorResponse as EvaluationErrorResponse, EvaluationError} from '../src/evaluator';
+import {Container} from '../src/container';
 
 jest.mock(
     '../src/constants',
@@ -507,7 +508,7 @@ describe('A SDK', () => {
         fetchMock.mock({
             method: 'POST',
             matcher: `begin:${configuration.baseEndpointUrl}`,
-            delay: 10_000,
+            delay: Container.DEFAULT_FETCH_TIMEOUT * 2,
             response: JSON.stringify(result),
         });
 
@@ -517,7 +518,7 @@ describe('A SDK', () => {
 
         const promise = sdk.evaluator.evaluate(query);
 
-        jest.advanceTimersByTime(5_001);
+        jest.advanceTimersByTime(Container.DEFAULT_FETCH_TIMEOUT + 1);
 
         await expect(promise).rejects.toThrowWithMessage(
             EvaluationError,
@@ -590,7 +591,7 @@ describe('A SDK', () => {
         fetchMock.mock({
             method: 'POST',
             matcher: `begin:${configuration.baseEndpointUrl}`,
-            delay: 10_000,
+            delay: Container.DEFAULT_FETCH_TIMEOUT * 2,
             response: result,
         });
 
@@ -600,7 +601,7 @@ describe('A SDK', () => {
 
         const promise = sdk.contentFetcher.fetch(slotId);
 
-        jest.advanceTimersByTime(5_001);
+        jest.advanceTimersByTime(Container.DEFAULT_FETCH_TIMEOUT + 1);
 
         await expect(promise).rejects.toThrowWithMessage(
             ContentError,

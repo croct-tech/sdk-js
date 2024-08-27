@@ -271,7 +271,7 @@ describe('An evaluator', () => {
             appId: appId,
             logger: logger,
             // Ensure the specified timeout has precedence over the default timeout
-            defaultTimeout: 10,
+            defaultTimeout: 15,
         });
 
         fetchMock.mock({
