@@ -459,7 +459,7 @@ describe('A SDK', () => {
     it('should configure the evaluator with the specified default timeout', async () => {
         jest.useFakeTimers();
 
-        const query = '1 + 2';
+        const query = '1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10';
         const result = 3;
 
         fetchMock.mock({
@@ -486,7 +486,7 @@ describe('A SDK', () => {
 
         await expect(promise).rejects.toThrowWithMessage(
             EvaluationError,
-            'Maximum evaluation timeout reached before evaluation could complete.',
+            'Evaluation could not be completed in time for query "1 + 2 + 3 + 4 + 5 + ...".',
         );
 
         await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
@@ -497,7 +497,7 @@ describe('A SDK', () => {
     it('should configure the evaluator with the default timeout', async () => {
         jest.useFakeTimers();
 
-        const query = '1 + 2';
+        const query = '1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10';
         const result = 3;
 
         fetchMock.mock({
@@ -523,7 +523,7 @@ describe('A SDK', () => {
 
         await expect(promise).rejects.toThrowWithMessage(
             EvaluationError,
-            'Maximum evaluation timeout reached before evaluation could complete.',
+            'Evaluation could not be completed in time for query "1 + 2 + 3 + 4 + 5 + ...".',
         );
 
         await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
@@ -596,7 +596,7 @@ describe('A SDK', () => {
 
         await expect(promise).rejects.toThrowWithMessage(
             ContentError,
-            'Maximum timeout reached before content could be loaded.',
+            `Content could not be loaded in time for slot '${slotId}'.`,
         );
 
         await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
@@ -637,7 +637,7 @@ describe('A SDK', () => {
 
         await expect(promise).rejects.toThrowWithMessage(
             ContentError,
-            'Maximum timeout reached before content could be loaded.',
+            `Content could not be loaded in time for slot '${slotId}'.`,
         );
 
         await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
