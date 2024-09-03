@@ -294,7 +294,7 @@ describe('An evaluator', () => {
 
         await expect(promise).rejects.toThrow(EvaluationError);
         await expect(promise).rejects.toHaveProperty('response', {
-            title: 'Maximum evaluation timeout reached before evaluation could complete.',
+            title: 'Evaluation could not be completed in time for query "user\'s name".',
             type: EvaluationErrorType.TIMEOUT,
             detail: 'The evaluation took more than 10ms to complete.',
             status: 408,
@@ -326,7 +326,7 @@ describe('An evaluator', () => {
 
         await expect(promise).rejects.toThrow(EvaluationError);
         await expect(promise).rejects.toHaveProperty('response', {
-            title: 'Maximum evaluation timeout reached before evaluation could complete.',
+            title: 'Evaluation could not be completed in time for query "user\'s name".',
             type: EvaluationErrorType.TIMEOUT,
             detail: 'The evaluation took more than 10ms to complete.',
             status: 408,
@@ -455,7 +455,7 @@ describe('An evaluator', () => {
             title: 'The query is too complex.',
             status: 422,
             type: EvaluationErrorType.TOO_COMPLEX_QUERY,
-            detail: `The query must be at most ${Evaluator.MAX_QUERY_LENGTH} `
+            detail: `The query "____________________..." must be at most ${Evaluator.MAX_QUERY_LENGTH} `
                 + `characters long, but it is ${length} characters long.`,
             errors: [{
                 cause: 'The query is longer than expected.',
@@ -627,6 +627,8 @@ describe('An evaluator', () => {
         });
 
         const result = true;
+        const region = 'us-central1';
+        const timing = 120.1234;
 
         fetchMock.mock({
             ...requestMatcher,
@@ -642,7 +644,9 @@ describe('An evaluator', () => {
 
         await evaluator.evaluate(query);
 
-        expect(logger.debug).toHaveBeenCalledWith('Request processed by region us-central1 in 120.1234ms');
+        expect(logger.debug).toHaveBeenCalledWith(
+            `Evaluation of the query "${query}" processed by region ${region} in ${timing}ms.`,
+        );
     });
 
     it('should not be serializable', () => {

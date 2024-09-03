@@ -26,7 +26,7 @@ describe('A content fetcher', () => {
     );
     const plainTextApiKey = parsedApiKey.getIdentifier();
 
-    const contentId = 'hero-banner';
+    const slotId = 'hero-banner';
     const content = {
         content: {
             title: 'Hello World',
@@ -41,7 +41,7 @@ describe('A content fetcher', () => {
             'X-Client-Library': CLIENT_LIBRARY,
         },
         body: {
-            slotId: contentId,
+            slotId: slotId,
         },
     };
 
@@ -75,7 +75,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        await expect(fetcher.fetch(contentId)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId)).resolves.toEqual(content);
     });
 
     it.each<[string, string|ApiKey]>([
@@ -100,7 +100,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
     });
 
     it('should require an API key to fetch static content', async () => {
@@ -108,7 +108,7 @@ describe('A content fetcher', () => {
             appId: appId,
         });
 
-        await expect(() => fetcher.fetch(contentId, {static: true}))
+        await expect(() => fetcher.fetch(slotId, {static: true}))
             .toThrowWithMessage(Error, 'The API key must be provided to fetch static content.');
     });
 
@@ -127,7 +127,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        await expect(fetcher.fetch(contentId)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId)).resolves.toEqual(content);
     });
 
     it('should fetch static content for the specified slot version', async () => {
@@ -154,7 +154,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
     });
 
     it('should fetch static content for the specified preferred locale', async () => {
@@ -181,7 +181,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
     });
 
     it('should fetch dynamic content using the provided client ID', async () => {
@@ -204,7 +204,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
     });
 
     it('should fetch dynamic content passing the provided client IP', async () => {
@@ -227,7 +227,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
     });
 
     it('should fetch dynamic content passing the provided client agent', async () => {
@@ -250,7 +250,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
     });
 
     it('should fetch dynamic content using the provided user token', async () => {
@@ -273,7 +273,7 @@ describe('A content fetcher', () => {
             userToken: token,
         };
 
-        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
     });
 
     it('should fetch dynamic content using the provided preview token', async () => {
@@ -296,7 +296,7 @@ describe('A content fetcher', () => {
             previewToken: token,
         };
 
-        await expect(fetcher.fetch(contentId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
     });
 
     it('should fetch using the extra options', async () => {
@@ -329,7 +329,7 @@ describe('A content fetcher', () => {
             ...nonOverridableOptions,
         };
 
-        await fetcher.fetch(contentId, {extra: extraOptions as FetchOptions['extra']});
+        await fetcher.fetch(slotId, {extra: extraOptions as FetchOptions['extra']});
 
         expect(fetchMock.lastOptions()).toEqual(expect.objectContaining(overridableOptions));
         expect(fetchMock.lastOptions()).not.toEqual(expect.objectContaining(nonOverridableOptions));
@@ -360,7 +360,7 @@ describe('A content fetcher', () => {
             },
         });
 
-        const promise = fetcher.fetch(contentId, {
+        const promise = fetcher.fetch(slotId, {
             timeout: 10,
         });
 
@@ -373,7 +373,7 @@ describe('A content fetcher', () => {
         await expect(promise).rejects.toThrow(ContentError);
 
         await expect(promise).rejects.toHaveProperty('response', {
-            title: 'Maximum timeout reached before content could be loaded.',
+            title: `Content could not be loaded in time for slot '${slotId}'.`,
             type: ContentErrorType.TIMEOUT,
             detail: 'The content took more than 10ms to load.',
             status: 408,
@@ -400,14 +400,14 @@ describe('A content fetcher', () => {
             },
         });
 
-        const promise = fetcher.fetch(contentId);
+        const promise = fetcher.fetch(slotId);
 
         jest.advanceTimersByTime(11);
 
         await expect(promise).rejects.toThrow(ContentError);
 
         await expect(promise).rejects.toHaveProperty('response', {
-            title: 'Maximum timeout reached before content could be loaded.',
+            title: `Content could not be loaded in time for slot '${slotId}'.`,
             type: ContentErrorType.TIMEOUT,
             detail: 'The content took more than 10ms to load.',
             status: 408,
@@ -447,7 +447,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        const promise = fetcher.fetch(contentId, {context: context});
+        const promise = fetcher.fetch(slotId, {context: context});
 
         await expect(promise).resolves.toEqual(content);
     });
@@ -468,7 +468,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        const promise = fetcher.fetch(contentId, {version: version});
+        const promise = fetcher.fetch(slotId, {version: version});
 
         await expect(promise).resolves.toEqual(content);
     });
@@ -488,7 +488,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        const promise = fetcher.fetch(contentId);
+        const promise = fetcher.fetch(slotId);
 
         await expect(promise).resolves.toEqual(content);
     });
@@ -509,7 +509,7 @@ describe('A content fetcher', () => {
             response: content,
         });
 
-        const promise = fetcher.fetch(contentId, {preferredLocale: preferredLocale});
+        const promise = fetcher.fetch(slotId, {preferredLocale: preferredLocale});
 
         await expect(promise).resolves.toEqual(content);
     });
@@ -533,7 +533,7 @@ describe('A content fetcher', () => {
             },
         });
 
-        const promise = fetcher.fetch(contentId);
+        const promise = fetcher.fetch(slotId);
 
         await expect(promise).rejects.toThrow(ContentError);
         await expect(promise).rejects.toHaveProperty('response', response);
@@ -559,7 +559,7 @@ describe('A content fetcher', () => {
             },
         });
 
-        const promise = fetcher.fetch(contentId);
+        const promise = fetcher.fetch(slotId);
 
         await expect(promise).rejects.toThrow(ContentError);
         await expect(promise).rejects.toHaveProperty('response', response);
@@ -585,7 +585,7 @@ describe('A content fetcher', () => {
             },
         });
 
-        const promise = fetcher.fetch(contentId);
+        const promise = fetcher.fetch(slotId);
 
         await expect(promise).rejects.toThrow(ContentError);
         await expect(promise.catch((error: ContentError) => error.response)).resolves.toEqual(response);
@@ -610,7 +610,7 @@ describe('A content fetcher', () => {
             },
         });
 
-        const promise = fetcher.fetch(contentId);
+        const promise = fetcher.fetch(slotId);
 
         await expect(promise).rejects.toThrow(ContentError);
         await expect(promise).rejects.toHaveProperty('response', response);
@@ -659,7 +659,7 @@ describe('A content fetcher', () => {
             },
         });
 
-        const promise = fetcher.fetch(contentId);
+        const promise = fetcher.fetch(slotId);
 
         await expect(promise).rejects.toThrowWithMessage(ContentError, scenario.title);
 
@@ -682,21 +682,26 @@ describe('A content fetcher', () => {
             logger: logger,
         });
 
+        const region = 'us-central1';
+        const processingTime = 120.1234;
+
         fetchMock.mock({
             ...requestMatcher,
             response: {
                 status: 200,
                 body: content,
                 headers: {
-                    'X-Croct-Region': 'us-central1',
-                    'X-Croct-Timing': '120.1234ms',
+                    'X-Croct-Region': region,
+                    'X-Croct-Timing': processingTime,
                 },
             },
         });
 
-        await fetcher.fetch(contentId);
+        await fetcher.fetch(slotId);
 
-        expect(logger.debug).toHaveBeenCalledWith('Request processed by region us-central1 in 120.1234ms');
+        expect(logger.debug).toHaveBeenCalledWith(
+            `Content for slot '${slotId}' processed by region ${region} in ${processingTime}.`,
+        );
     });
 
     it('should not be serializable', () => {

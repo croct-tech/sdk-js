@@ -136,7 +136,7 @@ export class ContentFetcher {
                 setTimeout(
                     () => {
                         const response: ErrorResponse = {
-                            title: 'Maximum timeout reached before content could be loaded.',
+                            title: `Content could not be loaded in time for slot '${slotId}'.`,
                             type: ContentErrorType.TIMEOUT,
                             detail: `The content took more than ${timeout}ms to load.`,
                             status: 408, // Request Timeout
@@ -157,7 +157,7 @@ export class ContentFetcher {
                     const region = response.headers.get('X-Croct-Region');
                     const timing = response.headers.get('X-Croct-Timing');
 
-                    this.logger.debug(`Request processed by region ${region} in ${timing}`);
+                    this.logger.debug(`Content for slot '${slotId}' processed by region ${region} in ${timing}.`);
 
                     return response.json()
                         .then(body => {

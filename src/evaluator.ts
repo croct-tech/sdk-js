@@ -137,13 +137,14 @@ export class Evaluator {
 
     public evaluate(query: string, options: EvaluationOptions = {}): Promise<JsonValue> {
         const length = getLength(query);
+        const reference = query.length > 20 ? `${query.slice(0, 20)}...` : query;
 
         if (length > Evaluator.MAX_QUERY_LENGTH) {
             const response: QueryErrorResponse = {
                 title: 'The query is too complex.',
                 status: 422, // Unprocessable Entity
                 type: EvaluationErrorType.TOO_COMPLEX_QUERY,
-                detail: `The query must be at most ${Evaluator.MAX_QUERY_LENGTH} characters long, `
+                detail: `The query "${reference}" must be at most ${Evaluator.MAX_QUERY_LENGTH} characters long, `
                     + `but it is ${length} characters long.`,
                 errors: [{
                     cause: 'The query is longer than expected.',
@@ -170,7 +171,7 @@ export class Evaluator {
                 setTimeout(
                     () => {
                         const response: ErrorResponse = {
-                            title: 'Maximum evaluation timeout reached before evaluation could complete.',
+                            title: `Evaluation could not be completed in time for query "${reference}".`,
                             type: EvaluationErrorType.TIMEOUT,
                             detail: `The evaluation took more than ${timeout}ms to complete.`,
                             status: 408, // Request Timeout
@@ -193,7 +194,9 @@ export class Evaluator {
                     const region = response.headers.get('X-Croct-Region');
                     const timing = response.headers.get('X-Croct-Timing');
 
-                    this.logger.debug(`Request processed by region ${region} in ${timing}`);
+                    this.logger.debug(
+                        `Evaluation of the query "${reference}" processed by region ${region} in ${timing}.`,
+                    );
 
                     return response.json()
                         .then(body => {
