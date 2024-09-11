@@ -128,12 +128,15 @@ export class ContentFetcher {
             throw new Error('The API key must be provided to fetch static content.');
         }
 
-        return new Promise((resolve, reject) => {
+        // Types for Browser and Node environment
+        let timeoutReference: number | NodeJS.Timeout | undefined;
+
+        return new Promise<FetchResponse<P>>((resolve, reject) => {
             const abortController = new AbortController();
             const timeout = options.timeout ?? this.configuration.defaultTimeout;
 
             if (timeout !== undefined) {
-                setTimeout(
+                timeoutReference = setTimeout(
                     () => {
                         const response: ErrorResponse = {
                             title: `Content could not be loaded in time for slot '${slotId}'.`,
@@ -189,7 +192,12 @@ export class ContentFetcher {
                         );
                     }
                 });
-        });
+        })
+            .finally(() => {
+                // Once the fetch completes, regardless of outcome, cancel the timeout
+                // to avoid logging an error that didn't happen.
+                clearTimeout(timeoutReference);
+            });
     }
 
     private load(slotId: string, signal: AbortSignal, options: FetchOptions): Promise<Response> {

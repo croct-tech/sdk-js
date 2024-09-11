@@ -414,6 +414,36 @@ describe('A content fetcher', () => {
         });
     });
 
+    it('should not log a timeout error message when request completes before the timeout', async () => {
+        jest.useFakeTimers();
+
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
+        const fetcher = new ContentFetcher({
+            appId: appId,
+            logger: logger,
+            defaultTimeout: 10,
+        });
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                result: 'Carol',
+            },
+        });
+
+        await fetcher.fetch(slotId);
+
+        jest.advanceTimersByTime(11);
+
+        expect(logger.error).not.toHaveBeenCalled();
+    });
+
     it('should fetch dynamic content using the provided context', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
