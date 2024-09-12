@@ -133,6 +133,7 @@ export class ContentFetcher {
         return new Promise<FetchResponse<P>>((resolve, reject) => {
             const abortController = new AbortController();
             const timeout = options.timeout ?? this.configuration.defaultTimeout;
+
             let timer: number | NodeJS.Timeout | undefined;
 
             if (timeout !== undefined) {
