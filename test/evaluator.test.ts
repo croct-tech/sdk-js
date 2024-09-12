@@ -277,9 +277,7 @@ describe('An evaluator', () => {
         fetchMock.mock({
             ...requestMatcher,
             delay: 20,
-            response: {
-                result: 'Carol',
-            },
+            response: JSON.stringify('Carol'),
         });
 
         const promise = evaluator.evaluate(query, {
@@ -315,9 +313,7 @@ describe('An evaluator', () => {
         fetchMock.mock({
             ...requestMatcher,
             delay: 20,
-            response: {
-                result: 'Carol',
-            },
+            response: JSON.stringify('Carol'),
         });
 
         const promise = evaluator.evaluate(query);
@@ -331,6 +327,31 @@ describe('An evaluator', () => {
             detail: 'The evaluation took more than 10ms to complete.',
             status: 408,
         });
+    });
+
+    it('should not log a timeout error message when request completes before the timeout', async () => {
+        jest.useFakeTimers();
+
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
+        const evaluator = new Evaluator({
+            appId: appId,
+            logger: logger,
+        });
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: JSON.stringify('Carol'),
+        });
+
+        await expect(evaluator.evaluate(query, {timeout: 10})).resolves.toBe('Carol');
+
+        expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('should evaluate queries using the provided context', async () => {
