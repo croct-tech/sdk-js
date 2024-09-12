@@ -128,7 +128,6 @@ export class ContentFetcher {
             throw new Error('The API key must be provided to fetch static content.');
         }
 
-        // Types for Browser and Node environment
 
         return new Promise<FetchResponse<P>>((resolve, reject) => {
             const abortController = new AbortController();
