@@ -1,14 +1,14 @@
 import * as fetchMock from 'fetch-mock';
 import {MockOptions} from 'fetch-mock';
 import {
-    Evaluator,
     ErrorResponse,
     EvaluationContext,
     EvaluationError,
     EvaluationErrorType,
+    EvaluationOptions,
+    Evaluator,
     QueryError,
     QueryErrorResponse,
-    EvaluationOptions,
 } from '../src/evaluator';
 import {Token} from '../src/token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';

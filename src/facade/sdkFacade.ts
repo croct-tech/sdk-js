@@ -87,12 +87,13 @@ export class SdkFacade {
         );
 
         if (userId !== undefined) {
-            if (userId === null) {
-                sdk.unsetToken();
-            } else {
-                const currentToken = sdk.context.getToken();
+            const currentToken = sdk.context.getToken();
+            const currentSubject = currentToken?.getSubject() ?? null;
 
-                if (currentToken?.getSubject() !== userId) {
+            if (currentSubject !== userId) {
+                if (userId === null) {
+                    sdk.unsetToken();
+                } else {
                     sdk.identify(userId);
                 }
             }
