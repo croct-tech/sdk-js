@@ -494,7 +494,7 @@ describe('A SDK facade', () => {
         expect(context.setToken).not.toHaveBeenCalled();
     });
 
-    it('should allow anonymizing a user', () => {
+    it('should allow anonymizing a user passing a null user ID', () => {
         const context = createContextMock();
 
         jest.spyOn(context, 'getToken')
@@ -587,6 +587,7 @@ describe('A SDK facade', () => {
         jest.spyOn(context, 'getToken')
             .mockImplementation()
             .mockImplementation(() => token);
+
         jest.spyOn(context, 'setToken')
             .mockImplementation()
             .mockImplementation(newToken => {
