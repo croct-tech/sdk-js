@@ -167,6 +167,8 @@ export class Evaluator {
             const abortController = new AbortController();
             const timeout = options.timeout ?? this.configuration.defaultTimeout;
 
+            let timer: number | NodeJS.Timeout | undefined;
+
             if (timeout !== undefined) {
                 setTimeout(
                     () => {
@@ -187,63 +189,64 @@ export class Evaluator {
                 );
             }
 
-            const promise = this.fetch(payload, abortController.signal, options);
+            this.fetch(payload, abortController.signal, options)
+                .finally(() => clearTimeout(timer))
+                .then(
+                    response => {
+                        const region = response.headers.get('X-Croct-Region');
+                        const timing = response.headers.get('X-Croct-Timing');
 
-            promise.then(
-                response => {
-                    const region = response.headers.get('X-Croct-Region');
-                    const timing = response.headers.get('X-Croct-Timing');
-
-                    this.logger.debug(
-                        `Evaluation of the query "${reference}" processed by region ${region} in ${timing}.`,
-                    );
-
-                    return response.json()
-                        .then(body => {
-                            if (response.ok) {
-                                return resolve(body);
-                            }
-
-                            this.logHelp(response.status);
-
-                            const problem: ErrorResponse = body;
-
-                            switch (problem.type) {
-                                case EvaluationErrorType.INVALID_QUERY:
-                                case EvaluationErrorType.EVALUATION_FAILED:
-                                case EvaluationErrorType.TOO_COMPLEX_QUERY:
-                                    reject(new QueryError(problem as QueryErrorResponse));
-
-                                    break;
-
-                                default:
-                                    reject(new EvaluationError(problem));
-
-                                    break;
-                            }
-                        })
-                        .catch(error => {
-                            if (!response.ok) {
-                                throw new Error(`Error ${response.status} - ${response.statusText}`);
-                            }
-
-                            throw error;
-                        });
-                },
-            ).catch(
-                error => {
-                    if (!abortController.signal.aborted) {
-                        reject(
-                            new EvaluationError({
-                                title: formatMessage(error),
-                                type: EvaluationErrorType.UNEXPECTED_ERROR,
-                                detail: 'Please try again or contact Croct support if the error persists.',
-                                status: 500, // Internal Server Error
-                            }),
+                        this.logger.debug(
+                            `Evaluation of the query "${reference}" processed by region ${region} in ${timing}.`,
                         );
-                    }
-                },
-            );
+
+                        return response.json()
+                            .then(body => {
+                                if (response.ok) {
+                                    return resolve(body);
+                                }
+
+                                this.logHelp(response.status);
+
+                                const problem: ErrorResponse = body;
+
+                                switch (problem.type) {
+                                    case EvaluationErrorType.INVALID_QUERY:
+                                    case EvaluationErrorType.EVALUATION_FAILED:
+                                    case EvaluationErrorType.TOO_COMPLEX_QUERY:
+                                        reject(new QueryError(problem as QueryErrorResponse));
+
+                                        break;
+
+                                    default:
+                                        reject(new EvaluationError(problem));
+
+                                        break;
+                                }
+                            })
+                            .catch(error => {
+                                if (!response.ok) {
+                                    throw new Error(`Error ${response.status} - ${response.statusText}`);
+                                }
+
+                                throw error;
+                            });
+                    },
+                )
+                .catch(
+                    error => {
+                        if (!abortController.signal.aborted) {
+                            reject(
+                                new EvaluationError({
+                                    title: formatMessage(error),
+                                    type: EvaluationErrorType.UNEXPECTED_ERROR,
+                                    detail: 'Please try again or contact Croct support if the error persists.',
+                                    status: 500, // Internal Server Error
+                                }),
+                            );
+                        }
+                    },
+                );
         });
     }
 
