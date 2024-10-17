@@ -7,7 +7,7 @@ describe('A queued channel', () => {
         jest.restoreAllMocks();
     });
 
-    it('should resume flushing from the last failed message', async () => {
+    it('should resume flushing from the oldest message', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn()
@@ -15,21 +15,25 @@ describe('A queued channel', () => {
                 .mockRejectedValueOnce(new MessageDeliveryError('Rejected', true))
                 .mockResolvedValue(undefined),
         };
-        const channel = new QueuedChannel(outputChannel, new InMemoryQueue('foo', 'bar'));
+        const queue = new InMemoryQueue('foo', 'bar');
+        const channel = new QueuedChannel(outputChannel, queue);
 
         await expect(channel.flush()).rejects.toEqual(expect.any(Error));
+
         expect(outputChannel.publish).toHaveBeenNthCalledWith(1, 'foo');
         expect(outputChannel.publish).toHaveBeenNthCalledWith(2, 'bar');
 
         await channel.flush();
 
-        expect(outputChannel.publish).toHaveBeenNthCalledWith(3, 'bar');
+        expect(outputChannel.publish).toHaveBeenCalledTimes(2);
+        expect(queue.isEmpty()).toBe(true);
 
-        await channel.flush();
+        await expect(channel.publish('baz')).resolves.toBeUndefined();
 
-        expect(outputChannel.publish).toHaveBeenNthCalledWith(3, 'bar');
+        expect(outputChannel.publish).toHaveBeenNthCalledWith(3, 'baz');
 
         expect(outputChannel.publish).toHaveBeenCalledTimes(3);
+        expect(queue.isEmpty()).toBe(true);
     });
 
     it('should do nothing when flushing an empty queue', async () => {
@@ -124,27 +128,27 @@ describe('A queued channel', () => {
         await expect(promise).rejects.toHaveProperty('retryable', false);
     });
 
-    it('should fail to publish messages if queue has pending messages', async () => {
+    it('should automatically requeue messages on the first publish', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn().mockResolvedValue(undefined),
         };
-        const channel = new QueuedChannel(outputChannel, new InMemoryQueue('foo'));
 
-        const promise = channel.publish('bar');
+        const queue = new InMemoryQueue('foo', 'bar');
+        const channel = new QueuedChannel(outputChannel, queue);
 
-        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'The queue must be flushed.');
-        await expect(promise).rejects.toHaveProperty('retryable', true);
-
-        await channel.flush();
+        await expect(channel.publish('baz')).resolves.toBeUndefined();
 
         expect(outputChannel.publish).toHaveBeenNthCalledWith(1, 'foo');
         expect(outputChannel.publish).toHaveBeenNthCalledWith(2, 'bar');
-
-        await channel.publish('baz');
-
         expect(outputChannel.publish).toHaveBeenNthCalledWith(3, 'baz');
-        expect(outputChannel.publish).toHaveBeenCalledTimes(3);
+
+        expect(queue.isEmpty()).toBe(true);
+
+        await channel.publish('qux');
+
+        expect(outputChannel.publish).toHaveBeenNthCalledWith(4, 'qux');
+        expect(outputChannel.publish).toHaveBeenCalledTimes(4);
     });
 
     it('should publish messages if queue has no pending messages', async () => {

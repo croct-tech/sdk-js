@@ -39,9 +39,7 @@ export class QueuedChannel<T> implements OutputChannel<T> {
         }
 
         if (this.pending === undefined) {
-            this.pending = this.queue.isEmpty()
-                ? Promise.resolve()
-                : Promise.reject(MessageDeliveryError.retryable('The queue must be flushed.'));
+            this.pending = this.requeue();
         }
 
         this.enqueue(message);
@@ -51,7 +49,7 @@ export class QueuedChannel<T> implements OutputChannel<T> {
             .then(
                 () => this.channel
                     .publish(message)
-                    .then(this.dequeue.bind(this)),
+                    .finally(this.dequeue.bind(this)),
             );
 
         return this.pending;
@@ -88,11 +86,13 @@ export class QueuedChannel<T> implements OutputChannel<T> {
         this.logger.debug(`Queue length: ${length}`);
 
         for (const message of this.queue.all()) {
-            this.pending = this.pending.then(
-                () => this.channel
-                    .publish(message)
-                    .then(this.dequeue.bind(this)),
-            );
+            this.pending = this.pending
+                .catch(() => this.logger.debug('Failed to publish message, skipping...'))
+                .then(
+                    () => this.channel
+                        .publish(message)
+                        .finally(this.dequeue.bind(this)),
+                );
         }
 
         return this.pending;
