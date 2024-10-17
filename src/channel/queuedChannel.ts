@@ -109,9 +109,14 @@ export class QueuedChannel<T> implements OutputChannel<T> {
             return result;
         } catch (error) {
             if (!(error instanceof MessageDeliveryError) || !error.retryable) {
-                // Discard the message if it's non-retryable so that the next message
-                // in the queue can be processed
+                // Discard the message if it's non-retryable
                 this.dequeue();
+
+                if (!enqueue) {
+                    // If the message was not enqueued, suppress the error
+                    // so that the next message in the queue can be immediately
+                    return;
+                }
             }
 
             throw error;

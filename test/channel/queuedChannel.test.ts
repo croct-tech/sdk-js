@@ -208,6 +208,48 @@ describe('A queued channel', () => {
         expect(outputChannel.publish).toHaveBeenNthCalledWith(2, 'bar');
     });
 
+    it('should not require flush for processing re-enqueued messages', async () => {
+        const outputChannel: OutputChannel<string> = {
+            close: jest.fn().mockResolvedValue(undefined),
+            publish: jest.fn()
+                .mockRejectedValueOnce(new Error('Failed'))
+                .mockRejectedValueOnce(new Error('Failed'))
+                .mockResolvedValue(undefined),
+        };
+
+        const queue = new InMemoryQueue('foo', 'bar');
+        const channel = new QueuedChannel(outputChannel, queue);
+
+        await expect(channel.publish('baz')).resolves.toBeUndefined();
+
+        expect(outputChannel.publish).toHaveBeenCalledTimes(3);
+        expect(outputChannel.publish).toHaveBeenNthCalledWith(1, 'foo');
+        expect(outputChannel.publish).toHaveBeenNthCalledWith(2, 'bar');
+        expect(outputChannel.publish).toHaveBeenNthCalledWith(3, 'baz');
+
+        expect(queue.isEmpty()).toBe(true);
+    });
+
+    it('should flush all non-retryable messages even if an error occurs', async () => {
+        const outputChannel: OutputChannel<string> = {
+            close: jest.fn().mockResolvedValue(undefined),
+            publish: jest.fn()
+                .mockRejectedValueOnce(new Error('Failed'))
+                .mockRejectedValueOnce(new Error('Failed')),
+        };
+
+        const queue = new InMemoryQueue('foo', 'bar');
+        const channel = new QueuedChannel(outputChannel, queue);
+
+        await expect(channel.flush()).resolves.toBeUndefined();
+
+        expect(outputChannel.publish).toHaveBeenCalledTimes(2);
+        expect(outputChannel.publish).toHaveBeenNthCalledWith(1, 'foo');
+        expect(outputChannel.publish).toHaveBeenNthCalledWith(2, 'bar');
+
+        expect(queue.isEmpty()).toBe(true);
+    });
+
     it('should not dequeue messages if an retryable error occurs', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
