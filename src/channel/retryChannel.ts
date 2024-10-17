@@ -42,7 +42,7 @@ export class RetryChannel<T> implements OutputChannel<T> {
 
         while (this.retryPolicy.shouldRetry(attempt, message, error)) {
             if (this.closed) {
-                throw MessageDeliveryError.nonRetryable('Connection deliberately closed.');
+                throw MessageDeliveryError.retryable('Connection deliberately closed.');
             }
 
             const delay = this.retryPolicy.getDelay(attempt);
@@ -59,7 +59,7 @@ export class RetryChannel<T> implements OutputChannel<T> {
                                 // Cancel delay immediately when the channel is closed
                                 window.clearInterval(closeWatcher);
 
-                                reject(MessageDeliveryError.nonRetryable('Connection deliberately closed.'));
+                                reject(MessageDeliveryError.retryable('Connection deliberately closed.'));
                             }
                         },
                         0,

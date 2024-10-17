@@ -66,7 +66,7 @@ describe('A guaranteed channel', () => {
         await channel.close();
 
         await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Connection deliberately closed.');
-        await expect(promise).rejects.toHaveProperty('retryable', false);
+        await expect(promise).rejects.toHaveProperty('retryable', true);
     });
 
     it('should close the output channel on close', async () => {

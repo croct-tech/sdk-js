@@ -42,15 +42,7 @@ export class QueuedChannel<T> implements OutputChannel<T> {
             this.pending = this.requeue();
         }
 
-        this.enqueue(message);
-
-        this.pending = this.pending
-            .catch(() => this.logger.debug('Failed to publish message, skipping...'))
-            .then(
-                () => this.channel
-                    .publish(message)
-                    .finally(this.dequeue.bind(this)),
-            );
+        this.pending = this.chainNext(this.pending, message, true);
 
         return this.pending;
     }
@@ -86,16 +78,44 @@ export class QueuedChannel<T> implements OutputChannel<T> {
         this.logger.debug(`Queue length: ${length}`);
 
         for (const message of this.queue.all()) {
-            this.pending = this.pending
-                .catch(() => this.logger.debug('Failed to publish message, skipping...'))
-                .then(
-                    () => this.channel
-                        .publish(message)
-                        .finally(this.dequeue.bind(this)),
-                );
+            this.pending = this.chainNext(this.pending, message);
         }
 
         return this.pending;
+    }
+
+    private async chainNext(promise: Promise<void>, message: T, enqueue = false): Promise<void> {
+        if (enqueue) {
+            this.enqueue(message);
+        }
+
+        try {
+            await promise;
+        } catch (error) {
+            if (error instanceof MessageDeliveryError && error.retryable) {
+                // If the previous message failed to deliver, requeue all messages
+                // including the current one that was just enqueued
+                return this.requeue();
+            }
+
+            throw error;
+        }
+
+        try {
+            const result = await this.channel.publish(message);
+
+            this.dequeue();
+
+            return result;
+        } catch (error) {
+            if (!(error instanceof MessageDeliveryError) || !error.retryable) {
+                // Discard the message if it's non-retryable so that the next message
+                // in the queue can be processed
+                this.dequeue();
+            }
+
+            throw error;
+        }
     }
 
     public async close(): Promise<void> {

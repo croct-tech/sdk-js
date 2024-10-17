@@ -76,7 +76,7 @@ describe('A retry channel', () => {
         await channel.close();
 
         await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Connection deliberately closed.');
-        await expect(promise).rejects.toHaveProperty('retryable', false);
+        await expect(promise).rejects.toHaveProperty('retryable', true);
     });
 
     it('should fail to publish a message if the channel is closed while retrying', async () => {
@@ -96,7 +96,7 @@ describe('A retry channel', () => {
         await channel.close();
 
         await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Connection deliberately closed.');
-        await expect(promise).rejects.toHaveProperty('retryable', false);
+        await expect(promise).rejects.toHaveProperty('retryable', true);
     });
 
     it('should fail to publish a message if maximum retry attempts is reached', async () => {
