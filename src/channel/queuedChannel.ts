@@ -84,13 +84,13 @@ export class QueuedChannel<T> implements OutputChannel<T> {
         return this.pending;
     }
 
-    private async chainNext(promise: Promise<void>, message: T, enqueue = false): Promise<void> {
+    private async chainNext(previous: Promise<void>, message: T, enqueue = false): Promise<void> {
         if (enqueue) {
             this.enqueue(message);
         }
 
         try {
-            await promise;
+            await previous;
         } catch (error) {
             if (error instanceof MessageDeliveryError && error.retryable) {
                 // If the previous message failed to deliver, requeue all messages
