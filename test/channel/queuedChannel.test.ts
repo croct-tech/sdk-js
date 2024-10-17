@@ -314,13 +314,30 @@ describe('A queued channel', () => {
     it('should close the output channel and wait for pending messages', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
-            publish: jest.fn().mockResolvedValue(undefined),
+            publish: jest.fn()
+                .mockImplementationOnce(
+                    () => new Promise(resolve => {
+                        setTimeout(resolve, 2);
+                    }),
+                ),
         };
-        const channel = new QueuedChannel(outputChannel, new InMemoryQueue('foo'));
 
-        await expect(channel.flush()).resolves.toBeUndefined();
+        const queue = new InMemoryQueue();
+        const channel = new QueuedChannel(outputChannel, queue);
 
-        await channel.close();
+        const firstPromise = channel.publish('foo');
+        const secondPromise = channel.publish('bar');
+
+        const close = new Promise(resolve => { setTimeout(() => resolve(channel.close()), 1); });
+
+        await expect(firstPromise).resolves.toBeUndefined();
+        await expect(secondPromise).rejects.toThrowWithMessage(MessageDeliveryError, 'Connection deliberately closed.');
+        await expect(close).resolves.toBeUndefined();
+
+        expect(outputChannel.publish).toHaveBeenCalledTimes(1);
+
+        expect(queue.length()).toBe(1);
+        expect(queue.peek()).toBe('bar');
 
         expect(outputChannel.close).toHaveBeenCalled();
     });

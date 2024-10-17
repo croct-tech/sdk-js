@@ -101,6 +101,10 @@ export class QueuedChannel<T> implements OutputChannel<T> {
             throw error;
         }
 
+        if (this.closed) {
+            throw MessageDeliveryError.retryable('Connection deliberately closed.');
+        }
+
         try {
             const result = await this.channel.publish(message);
 
