@@ -208,7 +208,7 @@ describe('A queued channel', () => {
         expect(outputChannel.publish).toHaveBeenNthCalledWith(2, 'bar');
     });
 
-    it('should not require flush for processing re-enqueued messages', async () => {
+    it('should resume processing on re-enqueued message errors', async () => {
         const outputChannel: OutputChannel<string> = {
             close: jest.fn().mockResolvedValue(undefined),
             publish: jest.fn()
