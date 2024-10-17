@@ -46,11 +46,13 @@ export class QueuedChannel<T> implements OutputChannel<T> {
 
         this.enqueue(message);
 
-        this.pending = this.pending.then(
-            () => this.channel
-                .publish(message)
-                .then(this.dequeue.bind(this)),
-        );
+        this.pending = this.pending
+            .catch(() => this.logger.debug('Failed to publish message, skipping...'))
+            .then(
+                () => this.channel
+                    .publish(message)
+                    .then(this.dequeue.bind(this)),
+            );
 
         return this.pending;
     }

@@ -1,5 +1,6 @@
 import {InMemoryQueue, CapacityRestrictedQueue} from '../../src/queue';
 import {QueuedChannel, OutputChannel, MessageDeliveryError} from '../../src/channel';
+import {Logger} from '../../src/logging';
 
 describe('A queued channel', () => {
     afterEach(() => {
@@ -164,6 +165,39 @@ describe('A queued channel', () => {
         expect(outputChannel.publish).toHaveBeenNthCalledWith(2, 'bar');
 
         expect(outputChannel.publish).toHaveBeenCalledTimes(2);
+    });
+
+    it('should publish the next message after a failed message', async () => {
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
+        const outputChannel: OutputChannel<string> = {
+            close: jest.fn().mockResolvedValue(undefined),
+            publish: jest.fn()
+                .mockImplementationOnce(
+                    () => new Promise((_, reject) => {
+                        setTimeout(() => reject(new Error('Failed')), 1);
+                    }),
+                )
+                .mockImplementationOnce(() => Promise.resolve(undefined)),
+        };
+
+        const channel = new QueuedChannel(outputChannel, new InMemoryQueue(), logger);
+
+        const failedPromise = channel.publish('foo');
+        const successPromise = channel.publish('bar');
+
+        await expect(failedPromise).rejects.toEqual(expect.any(Error));
+        await expect(successPromise).resolves.toBeUndefined();
+
+        expect(outputChannel.publish).toHaveBeenNthCalledWith(1, 'foo');
+        expect(outputChannel.publish).toHaveBeenNthCalledWith(2, 'bar');
+
+        expect(logger.debug).toHaveBeenCalledWith('Failed to publish message, skipping...');
     });
 
     it('should close the output channel and wait for pending messages', async () => {
