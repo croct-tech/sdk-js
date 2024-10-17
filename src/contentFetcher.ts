@@ -128,7 +128,6 @@ export class ContentFetcher {
             throw new Error('The API key must be provided to fetch static content.');
         }
 
-
         return new Promise<FetchResponse<P>>((resolve, reject) => {
             const abortController = new AbortController();
             const timeout = options.timeout ?? this.configuration.defaultTimeout;

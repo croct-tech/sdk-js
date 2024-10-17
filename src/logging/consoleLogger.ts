@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- This is a logging utility */
 import {Logger} from './logger';
 
 type ConsoleMethod = {
