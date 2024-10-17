@@ -39,18 +39,10 @@ export class QueuedChannel<T> implements OutputChannel<T> {
         }
 
         if (this.pending === undefined) {
-            this.pending = this.queue.isEmpty()
-                ? Promise.resolve()
-                : Promise.reject(MessageDeliveryError.retryable('The queue must be flushed.'));
+            this.pending = this.requeue();
         }
 
-        this.enqueue(message);
-
-        this.pending = this.pending.then(
-            () => this.channel
-                .publish(message)
-                .then(this.dequeue.bind(this)),
-        );
+        this.pending = this.chainNext(this.pending, message, true);
 
         return this.pending;
     }
@@ -86,14 +78,53 @@ export class QueuedChannel<T> implements OutputChannel<T> {
         this.logger.debug(`Queue length: ${length}`);
 
         for (const message of this.queue.all()) {
-            this.pending = this.pending.then(
-                () => this.channel
-                    .publish(message)
-                    .then(this.dequeue.bind(this)),
-            );
+            this.pending = this.chainNext(this.pending, message);
         }
 
         return this.pending;
+    }
+
+    private async chainNext(previous: Promise<void>, message: T, enqueue = false): Promise<void> {
+        if (enqueue) {
+            this.enqueue(message);
+        }
+
+        try {
+            await previous;
+        } catch (error) {
+            if (error instanceof MessageDeliveryError && error.retryable) {
+                // If the previous message failed to deliver, requeue all messages
+                // including the current one that was just enqueued
+                return this.requeue();
+            }
+
+            throw error;
+        }
+
+        if (this.closed) {
+            throw MessageDeliveryError.retryable('Connection deliberately closed.');
+        }
+
+        try {
+            const result = await this.channel.publish(message);
+
+            this.dequeue();
+
+            return result;
+        } catch (error) {
+            if (!(error instanceof MessageDeliveryError) || !error.retryable) {
+                // Discard the message if it's non-retryable
+                this.dequeue();
+
+                if (!enqueue) {
+                    // If the message was not enqueued, suppress the error
+                    // so that the next message in the queue can be immediately
+                    return;
+                }
+            }
+
+            throw error;
+        }
     }
 
     public async close(): Promise<void> {

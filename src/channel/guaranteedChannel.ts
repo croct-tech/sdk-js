@@ -99,7 +99,7 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
                     () => {
                         if (this.closed) {
                             // Cancel delay immediately when the channel is closed
-                            abort(MessageDeliveryError.nonRetryable('Connection deliberately closed.'));
+                            abort(MessageDeliveryError.retryable('Connection deliberately closed.'));
                         }
                     },
                     0,
