@@ -181,10 +181,6 @@ describe('An HTTP beacon channel', () => {
             log: 'Beacon rejected with non-retryable status: Invalid token',
         },
         {
-            status: 401,
-            title: 'Unauthorized request',
-        },
-        {
             status: 402,
             title: 'Payment overdue',
             log: 'Beacon rejected with non-retryable status: Payment overdue',
@@ -254,6 +250,7 @@ describe('An HTTP beacon channel', () => {
         [408, 'Request timeout'],
         [503, 'Service unavailable'],
         [504, 'Gateway timeout'],
+        [401, 'Unauthorized'],
     ])('should report a retryable error if the response status is %i', async (status, title) => {
         fetchMock.mock(endpointUrl, {
             status: status,

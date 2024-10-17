@@ -122,7 +122,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
     }
 
     private static isRetryable(status: number): boolean {
-        // Retry on any server error and client errors 429 (rate limit) and 408 (request timeout)
-        return status >= 500 || status === 429 || status === 408;
+        // Retry on any server error and client errors 429 (rate limit), 408 (request timeout) and 401 (unauthorized)
+        return status >= 500 || status === 429 || status === 408 || status === 401;
     }
 }
