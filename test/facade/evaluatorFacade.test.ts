@@ -214,6 +214,7 @@ describe('An evaluator facade', () => {
                         fourth: {
                             fifth: '',
                             ['x'.repeat(50)]: 'x'.repeat(255),
+                            'multi-byte character': '♥'.repeat(255),
                         },
                         'fourth-arr': [
                             null,
