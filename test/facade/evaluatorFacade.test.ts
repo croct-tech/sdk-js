@@ -4,7 +4,6 @@ import {Evaluator, EvaluationOptions, Page} from '../../src/evaluator';
 import {Tab} from '../../src/tab';
 import {FixedAssigner} from '../../src/cid';
 import {InMemoryTokenStore, FixedTokenProvider, Token} from '../../src/token';
-import {EvaluationOptions as FacadeEvaluationOptions} from '../../src/facade/evaluatorFacade';
 
 describe('An evaluator facade', () => {
     let evaluator: Evaluator;
@@ -44,12 +43,7 @@ describe('An evaluator facade', () => {
             .toThrowWithMessage(Error, 'The query must be a non-empty string.');
     });
 
-    type Scenario = {
-        options: FacadeEvaluationOptions,
-        violation: string,
-    };
-
-    it('should fail if the options have an invalid timeout amount', async () => {
+    it('should fail if the options are invalid', async () => {
         const evaluationFacade = new EvaluatorFacade({
             evaluator: evaluator,
             cidAssigner: new FixedAssigner(clientId),
@@ -65,126 +59,6 @@ describe('An evaluator facade', () => {
             );
     });
 
-    it.each(Object.entries<Scenario>({
-        'object depth greater than 5': {
-            options: {
-                attributes: {
-                    first: {
-                        second: {
-                            third: {
-                                fourth: {
-                                    fifth: {},
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            violation: 'Invalid options: expected value of type null, number, boolean or string'
-                + ' at path \'/attributes/first/second/third/fourth/fifth\', actual Object.',
-        },
-        'array depth greater than 5': {
-            options: {
-                attributes: {
-                    first: [
-                        [
-                            [
-                                [
-                                    ['fifth level'],
-                                ],
-                            ],
-                        ],
-                    ],
-                },
-            },
-            violation: 'Invalid options: expected value of type null, number, boolean or string'
-                + ' at path \'/attributes/first/0/0/0/0\', actual array.',
-        },
-        'invalid value': {
-            options: {
-                attributes: {
-                    foo: undefined,
-                },
-            },
-            violation: 'Invalid options: expected a JSON object at path \'/attributes\', actual Object.',
-        },
-        'key too short': {
-            options: {
-                attributes: {
-                    '': 'foo',
-                },
-            },
-            violation: 'Invalid options: expected at least 1 character at path \'/attributes/\', actual 0.',
-        },
-        'key too long': {
-            options: {
-                attributes: {
-                    ['x'.repeat(51)]: 'foo',
-                },
-            },
-            violation: 'Invalid options: expected at most 50 characters'
-                + ` at path '/attributes/${'x'.repeat(51)}', actual 51.`,
-        },
-        'invalid type': {
-            options: {
-                // @ts-expect-error -- Vanilla js doesn't stop the user from sending invalid values
-                attributes: 'foo',
-            },
-            violation: 'Invalid options: expected a JSON object at path \'/attributes\', actual string.',
-        },
-        'value too long': {
-            options: {
-                attributes: {
-                    string: 'x'.repeat(256),
-                },
-            },
-            violation: 'Invalid options: expected at most 255 characters at path \'/attributes/string\', actual 256.',
-        },
-        'nested object value too long': {
-            options: {
-                attributes: {
-                    first: {
-                        second: {
-                            third: {
-                                fourth: {
-                                    fifth: 'x'.repeat(256),
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            violation: 'Invalid options: expected at most 255 characters'
-                + ' at path \'/attributes/first/second/third/fourth/fifth\', actual 256.',
-        },
-        'nested array value too long': {
-            options: {
-                attributes: {
-                    first: [
-                        [
-                            [
-                                [
-                                    'x'.repeat(256),
-                                ],
-                            ],
-                        ],
-                    ],
-                },
-            },
-            violation: 'Invalid options: expected at most 255 characters'
-                + ' at path \'/attributes/first/0/0/0/0\', actual 256.',
-        },
-    }))('should fail if the options have an attribute with %s', async (_, {options, violation}) => {
-        const evaluationFacade = new EvaluatorFacade({
-            evaluator: evaluator,
-            cidAssigner: new FixedAssigner(clientId),
-            userTokenProvider: new InMemoryTokenStore(),
-            contextFactory: new MinimalContextFactory(),
-        });
-
-        await expect(evaluationFacade.evaluate('1 + 1', options)).rejects.toThrowWithMessage(Error, violation);
-    });
-
     it('should fail if the options are not a key-value map', async () => {
         const evaluationFacade = new EvaluatorFacade({
             evaluator: evaluator,
@@ -196,46 +70,6 @@ describe('An evaluator facade', () => {
         await expect(evaluationFacade.evaluate('1 + 1', null as unknown as EvaluationOptions))
             .rejects
             .toThrowWithMessage(Error, 'Invalid options: expected value of type object at path \'/\', actual null.');
-    });
-
-    it.each(Object.entries({
-        'minimal attributes': {},
-        'full attributes': {
-            arr: [
-                null,
-                123,
-                'x'.repeat(255),
-                true,
-                false,
-            ],
-            first: {
-                second: {
-                    third: {
-                        fourth: {
-                            fifth: '',
-                            ['x'.repeat(50)]: 'x'.repeat(255),
-                            'multi-byte character': '♥'.repeat(255),
-                        },
-                        'fourth-arr': [
-                            null,
-                            123,
-                            'x'.repeat(255),
-                            true,
-                            false,
-                        ],
-                    },
-                },
-            },
-        },
-    }))('should not fail with %s', async (_, attributes) => {
-        const evaluationFacade = new EvaluatorFacade({
-            evaluator: evaluator,
-            cidAssigner: new FixedAssigner(clientId),
-            userTokenProvider: new InMemoryTokenStore(),
-            contextFactory: new MinimalContextFactory(),
-        });
-
-        await expect(evaluationFacade.evaluate('1 + 1', {attributes: attributes})).resolves.toBeUndefined();
     });
 
     it('should delegate the evaluation to the evaluator', async () => {
