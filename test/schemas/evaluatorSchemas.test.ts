@@ -1,7 +1,7 @@
 import {evaluationOptionsSchema} from '../../src/schema';
 import {EvaluationOptions} from '../../src/facade/evaluatorFacade';
 
-describe('The evaluator option schema', () => {
+describe('The evaluator options schema', () => {
     it.each<EvaluationOptions[]>([
         [{}],
         [{
