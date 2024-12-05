@@ -351,6 +351,8 @@ describe('An evaluator', () => {
 
         await expect(evaluator.evaluate(query, {timeout: 10})).resolves.toBe('Carol');
 
+        jest.advanceTimersByTime(11);
+
         expect(logger.error).not.toHaveBeenCalled();
     });
 

@@ -170,7 +170,7 @@ export class Evaluator {
             let timer: number | NodeJS.Timeout | undefined;
 
             if (timeout !== undefined) {
-                setTimeout(
+                timer = setTimeout(
                     () => {
                         const response: ErrorResponse = {
                             title: `Evaluation could not be completed in time for query "${reference}".`,
