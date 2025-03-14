@@ -39,10 +39,10 @@ function updateExports() {
             };
         }
 
-        if (file.endsWith('.mjs')) {
-            pkg.exports[relativeDir].import = relativeFile;
-        } else {
+        if (file.endsWith('.cjs')) {
             pkg.exports[relativeDir].require = relativeFile;
+        } else {
+            pkg.exports[relativeDir].import = relativeFile;
         }
     }
 
