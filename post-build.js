@@ -30,7 +30,7 @@ function updateExports() {
     pkg.exports = pkg.exports || {};
 
     for (const file of indexFiles) {
-        const relativeDir = `./${path.relative(BUILD_DIR, path.dirname(file)).replace(/\\/g, '/')}`;
+        const relativeDir = `./${path.relative(BUILD_DIR, path.dirname(file)).replace(/\\/g, '/')}`.replace(/\/$/, '');
         const relativeFile = `./${path.relative(BUILD_DIR, file).replace(/\\/g, '/')}`;
 
         if (pkg.exports[relativeDir] === undefined) {
