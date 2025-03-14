@@ -30,22 +30,20 @@ function updateExports() {
     pkg.exports = pkg.exports || {};
 
     for (const file of indexFiles) {
-        const relativeDir = path.relative(BUILD_DIR, path.dirname(file)).replace(/\\/g, '/');
-        const relativeFile = path.relative(BUILD_DIR, file).replace(/\\/g, '/');
+        const relativeDir = `./${path.relative(BUILD_DIR, path.dirname(file)).replace(/\\/g, '/')}`;
+        const relativeFile = `./${path.relative(BUILD_DIR, file).replace(/\\/g, '/')}`;
 
-        const exportKey = `./${relativeDir}`;
-
-        if (pkg.exports[exportKey] === undefined) {
-            pkg.exports[exportKey] = {
+        if (pkg.exports[relativeDir] === undefined) {
+            pkg.exports[relativeDir] = {
                 import: {},
                 require: {},
             };
         }
 
         if (file.endsWith('.mjs')) {
-            pkg.exports[exportKey].import = relativeFile;
+            pkg.exports[relativeDir].import = relativeFile;
         } else {
-            pkg.exports[exportKey].require = relativeFile;
+            pkg.exports[relativeDir].require = relativeFile;
         }
     }
 
