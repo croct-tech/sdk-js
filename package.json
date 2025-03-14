@@ -8,8 +8,6 @@
     "email": "sdk-js+lib@croct.com",
     "url": "https://croct.com"
   },
-  "main": "./index.js",
-  "types": "./index.d.ts",
   "exports": {
     "./*": {
       "import": "./*.mjs",
@@ -51,7 +49,7 @@
     "typescript": "^5.0.0"
   },
   "files": [
-    "**/*.js",
+    "**/*.mjs",
     "**/*.cjs",
     "**/*.ts",
     "**/*.map"
