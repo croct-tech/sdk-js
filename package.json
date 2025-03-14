@@ -8,9 +8,15 @@
     "email": "sdk-js+lib@croct.com",
     "url": "https://croct.com"
   },
+  "type": "module",
   "main": "./index.js",
   "types": "./index.d.ts",
-  "type": "module",
+  "exports": {
+    "./*": {
+      "import": "./dist/*.js",
+      "require": "./dist/*.cjs"
+    }
+  },
   "engines": {
     "node": ">=10"
   },
@@ -42,6 +48,7 @@
     "jest-extended": "^4.0.0",
     "node-fetch": "^2.6.7",
     "ts-jest": "^29.0.3",
+    "tsup": "^8.4.0",
     "typescript": "^5.0.0"
   },
   "files": [
