@@ -1,10 +1,9 @@
 #!/usr/bin/env node
+import fs from 'fs';
+import path from 'path';
 
-const fs = require('fs');
-const path = require('path');
-
-const BUILD_DIR = path.resolve(__dirname, 'build');
-const PACKAGE_JSON = path.resolve(__dirname, 'package.json');
+const BUILD_DIR = path.resolve('build');
+const PACKAGE_JSON = path.resolve('package.json');
 
 function findIndexFiles(dir, fileList = []) {
     const files = fs.readdirSync(dir);

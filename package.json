@@ -33,7 +33,7 @@
     "test": "jest -c jest.config.mjs --coverage",
     "validate": "tsc --noEmit",
     "build": "tsup",
-    "postbuild": "./post-build.js"
+    "postbuild": "./post-build.mjs"
   },
   "dependencies": {
     "@croct/json": "^2.0.1",
