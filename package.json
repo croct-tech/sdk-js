@@ -8,6 +8,9 @@
     "email": "sdk-js+lib@croct.com",
     "url": "https://croct.com"
   },
+  "type": "module",
+  "main": "./index.mjs",
+  "types": "./index.d.mts",
   "exports": {
     "./*": {
       "import": "./*.mjs",
