@@ -14,7 +14,7 @@ function findIndexFiles(dir, fileList = []) {
 
         if (stats.isDirectory()) {
             findIndexFiles(filePath, fileList);
-        } else if (/^index\.(js|mjs|cjs|ts)$/.test(file)) {
+        } else if (/^index\.(js|mjs|cjs)$/.test(file)) {
             fileList.push(filePath);
         }
     }
