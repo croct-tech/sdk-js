@@ -13,8 +13,8 @@
   "types": "./index.d.ts",
   "exports": {
     "./*": {
-      "import": "./dist/*.js",
-      "require": "./dist/*.cjs"
+      "import": "./*.js",
+      "require": "./*.cjs"
     }
   },
   "engines": {
