@@ -9,12 +9,12 @@
     "url": "https://croct.com"
   },
   "type": "module",
-  "main": "./index.mjs",
-  "types": "./index.d.mts",
+  "main": "./index.js",
+  "types": "./index.d.js",
   "exports": {
     "./*": {
-      "import": "./*.mjs",
-      "require": "./*.js"
+      "import": "./*.js",
+      "require": "./*.cjs"
     }
   },
   "engines": {
