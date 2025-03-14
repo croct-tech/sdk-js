@@ -8,8 +8,15 @@
     "email": "sdk-js+lib@croct.com",
     "url": "https://croct.com"
   },
-  "main": "./index.js",
-  "types": "./index.d.ts",
+  "type": "module",
+  "main": "./index.mjs",
+  "types": "./index.d.mts",
+  "exports": {
+    "./*": {
+      "import": "./*.mjs",
+      "require": "./*.js"
+    }
+  },
   "engines": {
     "node": ">=10"
   },
@@ -23,9 +30,10 @@
   "homepage": "https://github.com/croct-tech/sdk-js#readme",
   "scripts": {
     "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
-    "test": "jest -c jest.config.js --coverage",
+    "test": "jest -c jest.config.mjs --coverage",
     "validate": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json"
+    "build": "tsup",
+    "postbuild": "./post-build.mjs"
   },
   "dependencies": {
     "@croct/json": "^2.0.1",
@@ -41,9 +49,11 @@
     "jest-extended": "^4.0.0",
     "node-fetch": "^2.6.7",
     "ts-jest": "^29.0.3",
+    "tsup": "^8.4.0",
     "typescript": "^5.0.0"
   },
   "files": [
+    "**/*.mjs",
     "**/*.js",
     "**/*.ts",
     "**/*.map"
