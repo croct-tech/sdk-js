@@ -45,7 +45,6 @@ jobs:
           sed -i -e "s~<@version@>~${GITHUB_REF##*/}~" constants.*
           sed -i -e "s~<@baseEndpointUrl@>~${BASE_ENDPOINT}~" constants.*
           sed -i -e "s~parseInt('<@maxQueryLength@>', 10)~${MAX_QUERY_LENGTH}~" constants.*
-          cp -r ../src src
 
       - name: Publish pre-release to NPM
         if: ${{ github.event.release.prerelease }}

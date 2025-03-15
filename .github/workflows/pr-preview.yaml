@@ -41,7 +41,6 @@ jobs:
           sed -i -e "s~<@version@>~0.0.0-dev~" constants.*
           sed -i -e "s~<@baseEndpointUrl@>~${BASE_ENDPOINT}~" constants.*
           sed -i -e "s~parseInt('<@maxQueryLength@>', 10)~${MAX_QUERY_LENGTH}~" constants.*
-          cp -r ../src src
 
       - name: Publish preview
         run: |-
