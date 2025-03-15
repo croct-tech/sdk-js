@@ -40,6 +40,7 @@
     "tslib": "^2.5.0"
   },
   "devDependencies": {
+    "esbuild-fix-imports-plugin": "^1.0.19",
     "@croct/eslint-plugin": "^0.7.0",
     "@types/jest": "^29.2.3",
     "eslint": "^8.57.0",
