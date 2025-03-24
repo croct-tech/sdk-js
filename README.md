@@ -1,24 +1,22 @@
 <p align="center">
-    <a href="https://croct.com">
-        <img src="https://cdn.croct.io/brand/logo/repo-icon-green.svg" alt="Croct" height="80" />
-    </a>
-    <br />
-    <strong>SDK JS</strong>
-    <br />
-    The official Croct SDK for JavaScript.
+  <a href="https://croct.com" target="_blank">
+    <picture>
+        <source media="(min-width: 769px) and (prefers-color-scheme: light)" srcset="https://github.com/croct-tech/plug-js/blob/master/.github/assets/header-light.svg">
+        <source media="(min-width: 769px) and (prefers-color-scheme: dark)" srcset="https://github.com/croct-tech/plug-js/blob/master/.github/assets/header-dark.svg">
+        <source media="(max-width: 768px) and (prefers-color-scheme: dark)" srcset="https://github.com/croct-tech/plug-js/blob/master/.github/assets/header-dark-mobile.svg">
+        <source media="(max-width: 768px) and (prefers-color-scheme: light)" srcset="https://github.com/croct-tech/plug-js/blob/master/.github/assets/header-light-mobile.svg">
+        <img src="https://github.com/croct-tech/plug-js/blob/master/.github/assets/header-light-mobile.svg" alt="Croct JavaScript SDK" title="Croct JavaScript SDK" width="100%">
+    </picture>
+  </a>
+  <br/>
+  <strong>SDK JS</strong><br/>
+  The official Croct SDK for JavaScript.
 </p>
+
 <p align="center">
     <a href="https://www.npmjs.com/package/@croct/sdk"><img alt="Version" src="https://img.shields.io/npm/v/@croct/sdk"/></a>
     <a href="https://github.com/croct-tech/sdk-js/actions?query=workflow%3AValidations"><img alt="Build" src="https://github.com/croct-tech/sdk-js/workflows/Validations/badge.svg"/></a>
-    <a href="https://codeclimate.com/repos/5e7251b3172af05fe9000e27/maintainability"><img alt="Maintainability" src="https://api.codeclimate.com/v1/badges/c44df78a3ed891af11bb/maintainability"/></a>
     <a href="https://codeclimate.com/repos/5e7251b3172af05fe9000e27/test_coverage"><img alt="Coverage" src="https://api.codeclimate.com/v1/badges/c44df78a3ed891af11bb/test_coverage"/></a>
-    <br />
-    <br />
-    <a href="https://github.com/croct-tech/sdk-js/releases">📦Releases</a>
-    ·
-    <a href="https://github.com/croct-tech/sdk-js/issues/new?labels=bug&template=bug-report.md">🐞Report Bug</a>
-    ·
-    <a href="https://github.com/croct-tech/sdk-js/issues/new?labels=enhancement&template=feature-request.md">✨Request Feature</a>
 </p>
 
 ## Installation
