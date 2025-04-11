@@ -341,4 +341,46 @@ describe('A queued channel', () => {
 
         expect(outputChannel.close).toHaveBeenCalled();
     });
+
+    it('should not dequeue if the query is already empty', async () => {
+        const outputChannel: OutputChannel<string> = {
+            close: jest.fn().mockResolvedValue(undefined),
+            publish: jest.fn().mockResolvedValue(undefined),
+        };
+
+        const logger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
+        const queue = new class extends InMemoryQueue<any> {
+            public push(): void {
+            }
+        }();
+
+        const dequeue = jest.spyOn(queue, 'shift').mockReturnValue(undefined);
+        const push = jest.spyOn(queue, 'push').mockReturnValue(undefined);
+
+        const channel = new QueuedChannel(outputChannel, queue, logger);
+
+        await channel.publish('foo');
+
+        expect(outputChannel.publish).toHaveBeenCalledTimes(1);
+        expect(push).toHaveBeenCalledTimes(1);
+
+        expect(dequeue).toHaveBeenCalledTimes(0);
+
+        expect(logger.debug).toHaveBeenCalledTimes(5);
+
+        expect(logger.debug).toHaveBeenNthCalledWith(1, 'Enqueueing message...');
+        expect(logger.debug).toHaveBeenNthCalledWith(2, 'Queue length: 1');
+        expect(logger.debug).toHaveBeenNthCalledWith(3, 'Dequeuing message...');
+        expect(logger.debug).toHaveBeenNthCalledWith(4, 'Queue length: 0');
+        expect(logger.debug).toHaveBeenNthCalledWith(
+            5,
+            'Queue unexpectedly empty, possibly due to concurrent modification.',
+        );
+    });
 });
