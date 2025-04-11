@@ -58,7 +58,11 @@ export class QueuedChannel<T> implements OutputChannel<T> {
         this.logger.debug('Dequeuing message...');
         this.logger.debug(`Queue length: ${Math.max(0, this.queue.length() - 1)}`);
 
-        this.queue.shift();
+        if (this.queue.length() === 0) {
+            this.logger.debug('Queue unexpectedly empty, possibly due to concurrent modification.');
+        } else {
+            this.queue.shift();
+        }
     }
 
     private requeue(): Promise<void> {
