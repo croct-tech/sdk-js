@@ -215,6 +215,9 @@ describe('The "eventOccurred" payload schema', () => {
         }],
         [{
             name: 'event-name',
+            label: 'foo',
+            action: 'bar',
+            category: 'baz',
             details: {
                 number: 10,
                 null: null,
@@ -246,6 +249,38 @@ describe('The "eventOccurred" payload schema', () => {
         [
             {name: null},
             'Expected value of type string at path \'/name\', actual null.',
+        ],
+        [
+            {name: 'foo', label: 'x'.repeat(51)},
+            'Expected at most 50 characters at path \'/label\', actual 51.',
+        ],
+        [
+            {name: 'foo', label: null},
+            'Expected value of type string at path \'/label\', actual null.',
+        ],
+        [
+            {name: 'foo', action: ''},
+            'Expected at least 1 character at path \'/action\', actual 0.',
+        ],
+        [
+            {name: 'foo', action: 'x'.repeat(51)},
+            'Expected at most 50 characters at path \'/action\', actual 51.',
+        ],
+        [
+            {name: 'foo', action: null},
+            'Expected value of type string at path \'/action\', actual null.',
+        ],
+        [
+            {name: 'foo', category: ''},
+            'Expected at least 1 character at path \'/category\', actual 0.',
+        ],
+        [
+            {name: 'foo', category: 'x'.repeat(51)},
+            'Expected at most 50 characters at path \'/category\', actual 51.',
+        ],
+        [
+            {name: 'foo', category: null},
+            'Expected value of type string at path \'/category\', actual null.',
         ],
         [
             {name: 'foo', details: null},

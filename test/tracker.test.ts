@@ -1204,6 +1204,9 @@ describe('A tracker', () => {
             {
                 type: 'eventOccurred',
                 name: 'event-name',
+                label: 'foo',
+                action: 'bar',
+                category: 'baz',
                 details: {
                     foo: 'bar',
                 },

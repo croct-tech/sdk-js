@@ -232,6 +232,9 @@ describe('A tracker facade', () => {
             {
                 type: 'eventOccurred',
                 name: 'event-name',
+                label: 'foo',
+                action: 'bar',
+                category: 'baz',
                 details: {
                     foo: 'bar',
                 },
