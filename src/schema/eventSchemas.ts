@@ -114,6 +114,18 @@ export const eventOccurred = new ObjectType({
             minLength: 1,
             maxLength: 50,
         }),
+        label: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+        action: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
+        category: new StringType({
+            minLength: 1,
+            maxLength: 50,
+        }),
         details: new ObjectType({
             additionalProperties: new UnionType(
                 new NullType(),
