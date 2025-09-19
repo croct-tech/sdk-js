@@ -57,6 +57,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
                 originalTime: timestamp,
                 departureTime: Date.now(),
             }),
+            keepalive: true,
         }).then(async response => {
             if (response.ok) {
                 this.notify(receiptId);
