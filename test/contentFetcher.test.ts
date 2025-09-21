@@ -19,12 +19,15 @@ jest.mock(
 
 describe('A content fetcher', () => {
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
+    const plainTextApiKey = '00000000-0000-0000-0000-000000000000:ES256;'
+        + 'MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg3TbbvRM7DNwxY3XGWDmlSRPSfZ9b+ch9TO3jQ6'
+        + '8Zyj+hRANCAASmJj/EiEhUaLAWnbXMTb/85WADkuFgoELGZ5ByV7YPlbb2wY6oLjzGkpF6z8iDrvJ4kV6EhaJ4n0HwSQckVLNE';
     const parsedApiKey = ApiKey.of(
         '00000000-0000-0000-0000-000000000000',
         'ES256;MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg3TbbvRM7DNwxY3XGWDmlSRPSfZ9b+ch9TO3jQ6'
         + '8Zyj+hRANCAASmJj/EiEhUaLAWnbXMTb/85WADkuFgoELGZ5ByV7YPlbb2wY6oLjzGkpF6z8iDrvJ4kV6EhaJ4n0HwSQckVLNE',
     );
-    const plainTextApiKey = parsedApiKey.getIdentifier();
+    const plainTextApiKeyIdentifier = parsedApiKey.getIdentifier();
 
     const slotId = 'hero-banner';
     const content = {
@@ -57,7 +60,7 @@ describe('A content fetcher', () => {
     });
 
     it('should require either an application ID or API key, but not both', async () => {
-        await expect(() => new ContentFetcher({apiKey: plainTextApiKey, appId: appId}))
+        await expect(() => new ContentFetcher({apiKey: plainTextApiKeyIdentifier, appId: appId}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
@@ -80,6 +83,7 @@ describe('A content fetcher', () => {
 
     it.each<[string, string|ApiKey]>([
         ['an API key', parsedApiKey],
+        ['an plain-text API key identifier', plainTextApiKeyIdentifier],
         ['an plain-text API key', plainTextApiKey],
     ])('should use the external endpoint for static content passing %s', async (_, apiKey) => {
         const fetcher = new ContentFetcher({
@@ -114,7 +118,7 @@ describe('A content fetcher', () => {
 
     it('should use the external endpoint when specifying an API key', async () => {
         const fetcher = new ContentFetcher({
-            apiKey: plainTextApiKey,
+            apiKey: plainTextApiKeyIdentifier,
         });
 
         fetchMock.mock({
@@ -132,7 +136,7 @@ describe('A content fetcher', () => {
 
     it('should fetch static content for the specified slot version', async () => {
         const fetcher = new ContentFetcher({
-            apiKey: plainTextApiKey,
+            apiKey: plainTextApiKeyIdentifier,
         });
 
         const options: FetchOptions = {
@@ -159,7 +163,7 @@ describe('A content fetcher', () => {
 
     it('should fetch static content for the specified preferred locale', async () => {
         const fetcher = new ContentFetcher({
-            apiKey: plainTextApiKey,
+            apiKey: plainTextApiKeyIdentifier,
         });
 
         const options: FetchOptions = {
