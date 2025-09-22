@@ -4,7 +4,7 @@ import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
 import {getLength, getLocation, Location} from './sourceLocation';
 import {Logger, NullLogger} from './logging';
-import type {ApiKey} from './apiKey';
+import {ApiKey} from './apiKey';
 import {Help} from './help';
 
 export type Campaign = {
@@ -130,7 +130,7 @@ export class Evaluator {
         this.logger = configuration.logger ?? new NullLogger();
         this.configuration = {
             appId: configuration.appId,
-            apiKey: apiKey,
+            apiKey: typeof apiKey === 'string' ? ApiKey.from(apiKey).getIdentifier() : apiKey,
             defaultTimeout: configuration.defaultTimeout,
         };
     }

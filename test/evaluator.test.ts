@@ -28,12 +28,15 @@ jest.mock(
 
 describe('An evaluator', () => {
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
+    const plainTextApiKey = '00000000-0000-0000-0000-000000000000:ES256;'
+        + 'MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg3TbbvRM7DNwxY3XGWDmlSRPSfZ9b+ch9TO3jQ6'
+        + '8Zyj+hRANCAASmJj/EiEhUaLAWnbXMTb/85WADkuFgoELGZ5ByV7YPlbb2wY6oLjzGkpF6z8iDrvJ4kV6EhaJ4n0HwSQckVLNE';
     const parsedApiKey = ApiKey.of(
         '00000000-0000-0000-0000-000000000000',
         'ES256;MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg3TbbvRM7DNwxY3XGWDmlSRPSfZ9b+ch9TO3jQ6'
         + '8Zyj+hRANCAASmJj/EiEhUaLAWnbXMTb/85WADkuFgoELGZ5ByV7YPlbb2wY6oLjzGkpF6z8iDrvJ4kV6EhaJ4n0HwSQckVLNE',
     );
-    const plainTextApiKey = parsedApiKey.getIdentifier();
+    const plainTextApiKeyIdentifier = parsedApiKey.getIdentifier();
 
     const query = 'user\'s name';
     const requestMatcher: MockOptions = {
@@ -60,7 +63,7 @@ describe('An evaluator', () => {
     });
 
     it('should require either an application ID or API key, but not both', async () => {
-        await expect(() => new Evaluator({apiKey: plainTextApiKey, appId: appId}))
+        await expect(() => new Evaluator({apiKey: plainTextApiKeyIdentifier, appId: appId}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
@@ -85,6 +88,7 @@ describe('An evaluator', () => {
 
     it.each<[string, string|ApiKey]>([
         ['an API key', parsedApiKey],
+        ['an plain-text API key identifier', plainTextApiKeyIdentifier],
         ['an plain-text API key', plainTextApiKey],
     ])('should use the external endpoint for static content passing %s', async (_, apiKey) => {
         const evaluator = new Evaluator({
