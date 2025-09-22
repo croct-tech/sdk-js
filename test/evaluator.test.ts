@@ -28,15 +28,13 @@ jest.mock(
 
 describe('An evaluator', () => {
     const appId = '06e3d5fb-cdfd-4270-8eba-de7a7bb04b5f';
-    const plainTextApiKey = '00000000-0000-0000-0000-000000000000:ES256;'
-        + 'MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg3TbbvRM7DNwxY3XGWDmlSRPSfZ9b+ch9TO3jQ6'
-        + '8Zyj+hRANCAASmJj/EiEhUaLAWnbXMTb/85WADkuFgoELGZ5ByV7YPlbb2wY6oLjzGkpF6z8iDrvJ4kV6EhaJ4n0HwSQckVLNE';
-    const parsedApiKey = ApiKey.of(
-        '00000000-0000-0000-0000-000000000000',
-        'ES256;MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg3TbbvRM7DNwxY3XGWDmlSRPSfZ9b+ch9TO3jQ6'
-        + '8Zyj+hRANCAASmJj/EiEhUaLAWnbXMTb/85WADkuFgoELGZ5ByV7YPlbb2wY6oLjzGkpF6z8iDrvJ4kV6EhaJ4n0HwSQckVLNE',
+    const apiKey = ApiKey.parse(
+        '00000000-0000-0000-0000-000000000000:ES256;'
+        + 'MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg3TbbvRM7DNwxY3XGWDmlSRPSfZ9b+ch9TO3jQ68Zyj+'
+        + 'hRANCAASmJj/EiEhUaLAWnbXMTb/85WADkuFgoELGZ5ByV7YPlbb2wY6oLjzGkpF6z8iDrvJ4kV6EhaJ4n0HwSQckVLNE',
     );
-    const plainTextApiKeyIdentifier = parsedApiKey.getIdentifier();
+    const apiKeyIdentifier = apiKey.getIdentifier();
+    const plainTextApiKey = `${apiKey.getIdentifier()}:${apiKey.getPrivateKey()}`;
 
     const query = 'user\'s name';
     const requestMatcher: MockOptions = {
@@ -63,7 +61,7 @@ describe('An evaluator', () => {
     });
 
     it('should require either an application ID or API key, but not both', async () => {
-        await expect(() => new Evaluator({apiKey: plainTextApiKeyIdentifier, appId: appId}))
+        await expect(() => new Evaluator({apiKey: apiKeyIdentifier, appId: appId}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
@@ -87,12 +85,12 @@ describe('An evaluator', () => {
     });
 
     it.each<[string, string|ApiKey]>([
-        ['an API key', parsedApiKey],
-        ['an plain-text API key identifier', plainTextApiKeyIdentifier],
+        ['an API key', apiKey],
+        ['an plain-text API key identifier', apiKeyIdentifier],
         ['an plain-text API key', plainTextApiKey],
-    ])('should use the external endpoint for static content passing %s', async (_, apiKey) => {
+    ])('should use the external endpoint for static content passing %s', async (_, value) => {
         const evaluator = new Evaluator({
-            apiKey: apiKey,
+            apiKey: value,
         });
 
         const result = 'Anonymous';
@@ -102,7 +100,7 @@ describe('An evaluator', () => {
             matcher: `${BASE_ENDPOINT_URL}/external/web/evaluate`,
             headers: {
                 ...requestMatcher.headers,
-                'X-Api-Key': parsedApiKey.getIdentifier(),
+                'X-Api-Key': apiKey.getIdentifier(),
             },
             response: JSON.stringify(result),
         });
