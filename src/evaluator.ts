@@ -119,18 +119,17 @@ export class Evaluator {
         }
 
         const {baseEndpointUrl} = configuration;
-        const apiKey = typeof configuration.apiKey === 'object'
-            ? configuration.apiKey.getIdentifier()
-            : configuration.apiKey;
 
         // eslint-disable-next-line prefer-template -- Better readability
         this.endpoint = (baseEndpointUrl ?? BASE_ENDPOINT_URL).replace(/\/+$/, '')
-            + (apiKey === undefined ? '/client' : '/external')
+            + (configuration.apiKey === undefined ? '/client' : '/external')
             + '/web/evaluate';
         this.logger = configuration.logger ?? new NullLogger();
         this.configuration = {
             appId: configuration.appId,
-            apiKey: typeof apiKey === 'string' ? ApiKey.from(apiKey).getIdentifier() : apiKey,
+            apiKey: configuration.apiKey !== undefined
+                ? ApiKey.from(configuration.apiKey).getIdentifier()
+                : configuration.apiKey,
             defaultTimeout: configuration.defaultTimeout,
         };
     }
