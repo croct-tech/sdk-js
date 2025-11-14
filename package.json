@@ -40,14 +40,17 @@
     "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "esbuild-fix-imports-plugin": "^1.0.19",
     "@croct/eslint-plugin": "^0.7.0",
+    "@noble/curves": "^1.9.2",
     "@types/jest": "^30.0.0",
+    "elliptic": "^6.6.1",
+    "esbuild-fix-imports-plugin": "^1.0.19",
     "eslint": "^8.57.0",
     "fetch-mock": "^9.11.0",
     "jest": "^30.0.0",
     "jest-environment-jsdom": "^30.0.0",
     "jest-extended": "^6.0.0",
+    "jose": "^6.0.11",
     "node-fetch": "^2.6.7",
     "ts-jest": "^29.0.3",
     "tsup": "^8.4.0",

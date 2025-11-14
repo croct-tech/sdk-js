@@ -7,11 +7,11 @@ import {RetryPolicy} from './retry';
 import {
     Beacon,
     BeaconPayload,
-    TrackingEvent,
-    TrackingEventContext,
     isCartPartialEvent,
     isIdentifiedUserEvent,
     PartialTrackingEvent,
+    TrackingEvent,
+    TrackingEventContext,
 } from './trackingEvents';
 
 type Options = {
@@ -459,6 +459,23 @@ export class Tracker {
     }
 
     private createBeaconPayload(event: TrackingEvent): BeaconPayload {
+        if (event.type === 'leadGenerated' && event.lead !== undefined) {
+            const {lead, ...payload} = event;
+
+            return {
+                ...payload,
+                patch: {
+                    operations: [
+                        {
+                            type: 'merge',
+                            path: '.',
+                            value: lead,
+                        },
+                    ],
+                },
+            };
+        }
+
         if (!isIdentifiedUserEvent(event)) {
             return event;
         }

@@ -17,6 +17,7 @@ import {
     productViewed,
     userSignedUp,
     linkOpened,
+    leadGenerated,
 } from '../schema';
 
 const eventSchemas = {
@@ -31,6 +32,7 @@ const eventSchemas = {
     postViewed: postViewed,
     goalCompleted: goalCompleted,
     linkOpened: linkOpened,
+    leadGenerated: leadGenerated,
 };
 
 type UnknownEvent<T extends ExternalEventType> = Pick<ExternalEvent<T>, 'type'>;
