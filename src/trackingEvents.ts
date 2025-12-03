@@ -115,6 +115,7 @@ export const miscEventTypes = [
     'postViewed',
     'eventOccurred',
     'linkOpened',
+    'leadGenerated',
 ] as const;
 
 export const eventTypes = [
@@ -333,6 +334,14 @@ export interface LinkOpened extends BaseEvent {
     link: string;
 }
 
+export interface LeadGenerated extends BaseEvent {
+    type: 'leadGenerated';
+    leadId?: string;
+    currency?: string;
+    value?: number;
+    lead?: UserProfile;
+}
+
 export type MiscEvent =
       NothingChanged
     | SessionAttributesChanged
@@ -340,7 +349,8 @@ export type MiscEvent =
     | GoalCompleted
     | InterestShown
     | PostViewed
-    | LinkOpened;
+    | LinkOpened
+    | LeadGenerated;
 
 type EventMap = {
     // Tab events
@@ -369,6 +379,7 @@ type EventMap = {
     postViewed: PostViewed,
     eventOccurred: EventOccurred,
     linkOpened: LinkOpened,
+    leadGenerated: LeadGenerated,
 };
 
 export type TrackingEventType = keyof EventMap;
@@ -401,6 +412,7 @@ type ExternalEventMap = {
     postViewed: PostViewed,
     linkOpened: LinkOpened,
     eventOccurred: EventOccurred,
+    leadGenerated: LeadGenerated,
 };
 
 export type ExternalTrackingEventType = keyof ExternalEventMap;
@@ -435,14 +447,16 @@ export type TrackingEventContext = {
 };
 
 export type BeaconPayload =
-      Exclude<TrackingEvent, IdentifiedUserEvent>
+      Exclude<TrackingEvent, IdentifiedUserEvent | LeadGenerated>
     // Renames "userId" to "externalUserId"
     | DistributiveOmit<Exclude<IdentifiedUserEvent, UserSignedUp>, 'userId'>
         & Record<'externalUserId', IdentifiedUserEvent['userId']>
     // Renames "userId" to "externalUserId", remove "profile" and add "patch"
     | Omit<UserSignedUp, 'userId' | 'profile'>
         & Record<'externalUserId', IdentifiedUserEvent['userId']>
-        & {patch?: Patch};
+        & {patch?: Patch}
+    // Remove "lead" and add "patch"
+    | Omit<LeadGenerated, 'lead'> & {patch?: Patch};
 
 export type Beacon = {
     timestamp: number,

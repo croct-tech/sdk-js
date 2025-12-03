@@ -1,28 +1,30 @@
 import {
     Cart,
     CartItem,
+    EventOccurred,
     ExternalTrackingEvent,
     GoalCompleted,
     InterestShown,
+    LeadGenerated,
     LinkOpened,
     Order,
     OrderItem,
     PostViewed,
     ProductDetails,
-    EventOccurred,
 } from '../../src/trackingEvents';
 import {
-    cartViewed,
     cartModified,
+    cartViewed,
     checkoutStarted,
-    orderPlaced,
-    productViewed,
-    userSignedUp,
     eventOccurred,
     goalCompleted,
     interestShown,
-    postViewed,
+    leadGenerated,
     linkOpened,
+    orderPlaced,
+    postViewed,
+    productViewed,
+    userSignedUp,
 } from '../../src/schema';
 import {Optional} from '../../src/utilityTypes';
 
@@ -516,6 +518,75 @@ describe('The "linkOpened" payload schema', () => {
     ])('shout not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             linkOpened.validate(value);
+        }
+
+        expect(validate).toThrowWithMessage(Error, message);
+    });
+});
+
+describe('The "leadGenerated" payload schema', () => {
+    it.each<Array<Omit<LeadGenerated, 'type'>>>([
+        [{}],
+        [{
+            leadId: 'x',
+        }],
+        [{
+            leadId: 'x'.repeat(50),
+        }],
+        [{
+            currency: 'x',
+        }],
+        [{
+            currency: 'x'.repeat(10),
+        }],
+        [{
+            value: 0,
+        }],
+        [{
+            value: 1.0,
+        }],
+        [{
+            leadId: 'x',
+            currency: 'x',
+            value: 0,
+            lead: {firstName: 'John'},
+        }],
+    ])('should allow %s', value => {
+        function validate(): void {
+            leadGenerated.validate(value);
+        }
+
+        expect(validate).not.toThrow();
+    });
+
+    it.each([
+        [
+            {leadId: ''},
+            'Expected at least 1 character at path \'/leadId\', actual 0.',
+        ],
+        [
+            {leadId: 'x'.repeat(101)},
+            'Expected at most 100 characters at path \'/leadId\', actual 101.',
+        ],
+        [
+            {currency: ''},
+            'Expected at least 1 character at path \'/currency\', actual 0.',
+        ],
+        [
+            {currency: 'x'.repeat(11)},
+            'Expected at most 10 characters at path \'/currency\', actual 11.',
+        ],
+        [
+            {value: -1},
+            'Expected a value greater than or equal to 0 at path \'/value\', actual -1.',
+        ],
+        [
+            {lead: null},
+            'Expected value of type object at path \'/lead\', actual null.',
+        ],
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
+        function validate(): void {
+            leadGenerated.validate(value);
         }
 
         expect(validate).toThrowWithMessage(Error, message);

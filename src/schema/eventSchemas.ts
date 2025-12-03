@@ -132,3 +132,20 @@ export const eventOccurred = new ObjectType({
         }),
     },
 });
+
+export const leadGenerated = new ObjectType({
+    properties: {
+        leadId: new StringType({
+            minLength: 1,
+            maxLength: 100,
+        }),
+        currency: new StringType({
+            maxLength: 10,
+            minLength: 1,
+        }),
+        value: new NumberType({
+            minimum: 0,
+        }),
+        lead: userProfileSchema,
+    },
+});
