@@ -16,7 +16,6 @@
 <p align="center">
     <a href="https://www.npmjs.com/package/@croct/sdk"><img alt="Version" src="https://img.shields.io/npm/v/@croct/sdk"/></a>
     <a href="https://github.com/croct-tech/sdk-js/actions?query=workflow%3AValidations"><img alt="Build" src="https://github.com/croct-tech/sdk-js/workflows/Validations/badge.svg"/></a>
-    <a href="https://codeclimate.com/repos/5e7251b3172af05fe9000e27/test_coverage"><img alt="Coverage" src="https://api.codeclimate.com/v1/badges/c44df78a3ed891af11bb/test_coverage"/></a>
 </p>
 
 ## Installation
