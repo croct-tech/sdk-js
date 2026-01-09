@@ -3,7 +3,7 @@ import {Logger} from './logger';
 export class DeduplicatedLogger implements Logger {
     private readonly logger: Logger;
 
-    private readonly recentMessages: Map<string, number> = new Map();
+    private readonly recentMessages = new Set<string>();
 
     private readonly maxSize: number;
 
@@ -40,19 +40,19 @@ export class DeduplicatedLogger implements Logger {
         if (this.recentMessages.has(message)) {
             // Move to end (most recent)
             this.recentMessages.delete(message);
-            this.recentMessages.set(message, Date.now());
+            this.recentMessages.add(message);
 
             return false;
         }
 
         // Evict oldest if at capacity
         if (this.recentMessages.size >= this.maxSize) {
-            const oldest = this.recentMessages.keys().next().value;
+            const oldest = this.recentMessages.values().next().value;
 
             this.recentMessages.delete(oldest);
         }
 
-        this.recentMessages.set(message, Date.now());
+        this.recentMessages.add(message);
 
         return true;
     }
