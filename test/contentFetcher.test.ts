@@ -446,6 +446,29 @@ describe('A content fetcher', () => {
         expect(logger.error).not.toHaveBeenCalled();
     });
 
+    it('should reject with a suspended service error when the response status is 204', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+        });
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                status: 202,
+                body: '',
+            },
+        });
+
+        await expect(fetcher.fetch(slotId)).rejects.toEqual(
+            new ContentError({
+                status: 202,
+                type: ContentErrorType.SUSPENDED_SERVICE,
+                title: 'Service is suspended.',
+                detail: Help.forStatusCode(204),
+            }),
+        );
+    });
+
     it('should fetch dynamic content using the provided context', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,

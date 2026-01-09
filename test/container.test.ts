@@ -560,6 +560,24 @@ describe('A container', () => {
         expect(error).toHaveBeenNthCalledWith(2, '[NS] Error bar');
     });
 
+    it('should deduplicate log messages if no logger is specified and not in debug mode', () => {
+        const warn = jest.spyOn(window.console, 'warn').mockImplementation();
+
+        const container = new Container({
+            ...configuration,
+            debug: false,
+        });
+
+        const logger = container.getLogger('Foo');
+
+        logger.warn('Warn bar');
+        logger.warn('Warn bar');
+        logger.warn('Warn bar');
+
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(warn).toHaveBeenCalledWith('Warn bar');
+    });
+
     it('should provide loggers that logs to the console in debug mode', () => {
         const debug = jest.spyOn(window.console, 'debug').mockImplementation();
         const info = jest.spyOn(window.console, 'info').mockImplementation();

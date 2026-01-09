@@ -15,8 +15,9 @@ export type ErrorResponse = {
 };
 
 export enum ContentErrorType {
-    TIMEOUT = 'https://croct.help/api/content#timeout',
-    UNEXPECTED_ERROR = 'https://croct.help/api/content#unexpected-error',
+    TIMEOUT = 'https://croct.help/sdk/javascript/request-timeout',
+    UNEXPECTED_ERROR = 'https://croct.help/sdk/javascript/unexpected-error',
+    SUSPENDED_SERVICE = 'https://croct.help/sdk/javascript/suspended-service',
 }
 
 type FetchPayload = {
@@ -160,6 +161,15 @@ export class ContentFetcher {
                     const timing = response.headers.get('X-Croct-Timing');
 
                     this.logger.debug(`Content for slot '${slotId}' processed by region ${region} in ${timing}.`);
+
+                    if (response.status === 202) {
+                        return reject(new ContentError({
+                            status: 204,
+                            title: 'Service is suspended.',
+                            type: ContentErrorType.SUSPENDED_SERVICE,
+                            detail: Help.forStatusCode(204),
+                        }));
+                    }
 
                     return response.json()
                         .then(body => {

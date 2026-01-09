@@ -298,6 +298,50 @@ describe('An HTTP beacon channel', () => {
         expect(listener).not.toHaveBeenCalled();
     });
 
+    it('should log a warning if the response status is 202', async () => {
+        fetchMock.mock(endpointUrl, {
+            status: 202,
+            body: '',
+        });
+
+        const channel = new HttpBeaconChannel({
+            appId: appId,
+            endpointUrl: endpointUrl,
+            cidAssigner: cidAssigner,
+            logger: logger,
+        });
+
+        const listener = jest.fn();
+
+        channel.subscribe(listener);
+
+        const receiptId = 'receipt-id';
+
+        const promise = channel.publish({
+            id: receiptId,
+            message: JSON.stringify({
+                context: {
+                    tabId: tabId,
+                    url: 'http://example.com',
+                },
+                payload: {
+                    type: 'nothingChanged',
+                    sinceTime: 0,
+                },
+                timestamp: 1,
+            }),
+        });
+
+        await expect(promise).resolves.toBeUndefined();
+
+        expect(logger.warn).toHaveBeenCalledWith(
+            'Event tracking is currently suspended for this application, check the workspace settings. '
+            + 'For help, see https://croct.help/sdk/javascript/suspended-service',
+        );
+
+        expect(listener).toHaveBeenCalledWith(receiptId);
+    });
+
     it('should not notify listeners that have been unsubscribed', async () => {
         fetchMock.mock(endpointUrl, 200);
 

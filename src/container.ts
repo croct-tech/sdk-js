@@ -26,6 +26,7 @@ import {ContentFetcher} from './contentFetcher';
 import {CookieCache, CookieCacheConfiguration} from './cache/cookieCache';
 import {FilteredLogger} from './logging/filteredLogger';
 import {HttpBeaconChannel} from './channel/httpBeaconChannel';
+import {DeduplicatedLogger} from './logging/deduplicatedLogger';
 
 export type DependencyResolver<T> = (container: Container) => T;
 
@@ -321,7 +322,7 @@ export class Container {
             return new ConsoleLogger(prefix);
         }
 
-        return FilteredLogger.include(new ConsoleLogger(), ['error', 'warn']);
+        return new DeduplicatedLogger(FilteredLogger.include(new ConsoleLogger(), ['error', 'warn']));
     }
 
     public getTabStorage(namespace: string, ...subnamespace: string[]): Storage {
