@@ -446,7 +446,7 @@ describe('A content fetcher', () => {
         expect(logger.error).not.toHaveBeenCalled();
     });
 
-    it('should reject with a suspended service error when the response status is 204', async () => {
+    it('should reject with a suspended service error when the response status is 202', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -459,14 +459,15 @@ describe('A content fetcher', () => {
             },
         });
 
-        await expect(fetcher.fetch(slotId)).rejects.toEqual(
-            new ContentError({
-                status: 202,
-                type: ContentErrorType.SUSPENDED_SERVICE,
-                title: 'Service is suspended.',
-                detail: Help.forStatusCode(204),
-            }),
-        );
+        const promise = fetcher.fetch(slotId);
+
+        await expect(promise).rejects.toThrow(ContentError);
+        await expect(promise.catch((error: ContentError) => error.response)).resolves.toStrictEqual({
+            status: 202,
+            type: ContentErrorType.SUSPENDED_SERVICE,
+            title: 'Service is suspended.',
+            detail: Help.forStatusCode(202),
+        });
     });
 
     it('should fetch dynamic content using the provided context', async () => {

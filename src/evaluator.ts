@@ -202,10 +202,10 @@ export class Evaluator {
 
                         if (response.status === 202) {
                             return reject(new EvaluationError({
-                                status: 204,
+                                status: 202,
                                 type: EvaluationErrorType.SUSPENDED_SERVICE,
                                 title: 'Service is suspended.',
-                                detail: Help.forStatusCode(204),
+                                detail: Help.forStatusCode(202),
                             }));
                         }
 
