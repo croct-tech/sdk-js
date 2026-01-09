@@ -8,6 +8,10 @@ describe('A function to provide help for errors', () => {
 
     it.each<StatusCodeScenario>([
         {
+            status: 202,
+            help: 'https://croct.help/sdk/javascript/suspended-service',
+        },
+        {
             status: 401,
             help: 'https://croct.help/sdk/javascript/invalid-credentials',
         },
