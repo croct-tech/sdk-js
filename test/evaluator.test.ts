@@ -358,6 +358,30 @@ describe('An evaluator', () => {
         expect(logger.error).not.toHaveBeenCalled();
     });
 
+    it('should reject with a suspended service error when the response status is 204', async () => {
+        const evaluator = new Evaluator({
+            appId: appId,
+        });
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: {
+                status: 202,
+                body: '',
+            },
+        });
+
+        const promise = evaluator.evaluate(query);
+
+        await expect(promise).rejects.toThrow(EvaluationError);
+        await expect(promise.catch((error: EvaluationError) => error.response)).resolves.toEqual({
+            status: 202,
+            type: EvaluationErrorType.SUSPENDED_SERVICE,
+            title: 'Service is suspended.',
+            detail: Help.forStatusCode(202),
+        });
+    });
+
     it('should evaluate queries using the provided context', async () => {
         const evaluator = new Evaluator({
             appId: appId,

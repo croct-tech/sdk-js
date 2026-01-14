@@ -60,6 +60,13 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
             keepalive: true,
         }).then(async response => {
             if (response.ok) {
+                if (response.status === 202) {
+                    this.logger.warn(
+                        'Event tracking is currently suspended for this application, check the workspace settings. '
+                        + 'For help, see https://croct.help/sdk/javascript/suspended-service',
+                    );
+                }
+
                 this.notify(receiptId);
 
                 return;

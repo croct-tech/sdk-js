@@ -45,13 +45,14 @@ export type EvaluationOptions = {
 };
 
 export enum EvaluationErrorType {
-    TIMEOUT = 'https://croct.help/api/evaluation#timeout',
-    UNEXPECTED_ERROR = 'https://croct.help/api/evaluation#unexpected-error',
-    INVALID_QUERY = 'https://croct.help/api/evaluation#invalid-query',
-    TOO_COMPLEX_QUERY = 'https://croct.help/api/evaluation#too-complex-query',
-    EVALUATION_FAILED = 'https://croct.help/api/evaluation#evaluation-failed',
-    UNALLOWED_RESULT = 'https://croct.help/api/evaluation#unallowed-result',
-    UNSERIALIZABLE_RESULT = 'https://croct.help/api/evaluation#unserializable-result',
+    TIMEOUT = 'https://croct.help/sdk/javascript/request-timeout',
+    UNEXPECTED_ERROR = 'https://croct.help/sdk/javascript/unexpected-error',
+    INVALID_QUERY = 'https://croct.help/sdk/javascript/invalid-query',
+    TOO_COMPLEX_QUERY = 'https://croct.help/sdk/javascript/too-complex-query',
+    EVALUATION_FAILED = 'https://croct.help/sdk/javascript/evaluation-failed',
+    UNALLOWED_RESULT = 'https://croct.help/sdk/javascript/unallowed-result',
+    SUSPENDED_SERVICE = 'https://croct.help/sdk/javascript/suspended-service',
+    UNSERIALIZABLE_RESULT = 'https://croct.help/sdk/javascript/unserializable-result',
 }
 
 export type ErrorResponse = {
@@ -198,6 +199,15 @@ export class Evaluator {
                         this.logger.debug(
                             `Evaluation of the query "${reference}" processed by region ${region} in ${timing}.`,
                         );
+
+                        if (response.status === 202) {
+                            return reject(new EvaluationError({
+                                status: 202,
+                                type: EvaluationErrorType.SUSPENDED_SERVICE,
+                                title: 'Service is suspended.',
+                                detail: Help.forStatusCode(202),
+                            }));
+                        }
 
                         return response.json()
                             .then(body => {
