@@ -553,11 +553,11 @@ describe('A container', () => {
         expect(info).not.toHaveBeenCalled();
         expect(debug).not.toHaveBeenCalled();
         expect(warn).toHaveBeenCalledTimes(2);
-        expect(warn).toHaveBeenNthCalledWith(1, '[Global] Warn bar');
-        expect(warn).toHaveBeenNthCalledWith(2, '[NS] Warn bar');
+        expect(warn).toHaveBeenNthCalledWith(1, '[Croct]', '[Global] Warn bar');
+        expect(warn).toHaveBeenNthCalledWith(2, '[Croct:Foo]', '[NS] Warn bar');
         expect(error).toHaveBeenCalledTimes(2);
-        expect(error).toHaveBeenNthCalledWith(1, '[Global] Error bar');
-        expect(error).toHaveBeenNthCalledWith(2, '[NS] Error bar');
+        expect(error).toHaveBeenNthCalledWith(1, '[Croct]', '[Global] Error bar');
+        expect(error).toHaveBeenNthCalledWith(2, '[Croct:Foo]', '[NS] Error bar');
     });
 
     it('should deduplicate log messages if no logger is specified and not in debug mode', () => {
@@ -575,7 +575,7 @@ describe('A container', () => {
         logger.warn('Warn bar');
 
         expect(warn).toHaveBeenCalledTimes(1);
-        expect(warn).toHaveBeenCalledWith('Warn bar');
+        expect(warn).toHaveBeenCalledWith('[Croct:Foo]', 'Warn bar');
     });
 
     it('should provide loggers that logs to the console in debug mode', () => {

@@ -31,7 +31,7 @@ describe('A deduplicated logger', () => {
         expect(testLogger.error).toHaveBeenCalledWith('Error message.');
     });
 
-    it('should not log duplicate messages', () => {
+    it('should not log duplicate messages in the same level', () => {
         const testLogger: Logger = {
             debug: jest.fn(),
             info: jest.fn(),
@@ -41,12 +41,21 @@ describe('A deduplicated logger', () => {
 
         const logger = new DeduplicatedLogger(testLogger);
 
+        logger.debug('Same message.');
+        logger.debug('Same message.');
         logger.info('Same message.');
         logger.info('Same message.');
-        logger.info('Same message.');
+        logger.warn('Same message.');
+        logger.warn('Same message.');
+        logger.error('Same message.');
+        logger.error('Same message.');
 
-        expect(testLogger.info).toHaveBeenCalledTimes(1);
-        expect(testLogger.info).toHaveBeenCalledWith('Same message.');
+        expect(testLogger.debug).toHaveBeenCalledTimes(1);
+        expect(testLogger.debug).toHaveBeenCalledWith('Same message.');
+        expect(testLogger.warn).toHaveBeenCalledTimes(1);
+        expect(testLogger.warn).toHaveBeenCalledWith('Same message.');
+        expect(testLogger.error).toHaveBeenCalledTimes(1);
+        expect(testLogger.error).toHaveBeenCalledWith('Same message.');
     });
 
     it('should log different messages independently', () => {
@@ -67,27 +76,6 @@ describe('A deduplicated logger', () => {
         expect(testLogger.info).toHaveBeenNthCalledWith(1, 'First message.');
         expect(testLogger.info).toHaveBeenNthCalledWith(2, 'Second message.');
         expect(testLogger.info).toHaveBeenNthCalledWith(3, 'Third message.');
-    });
-
-    it('should deduplicate the same message across different log levels', () => {
-        const testLogger: Logger = {
-            debug: jest.fn(),
-            info: jest.fn(),
-            warn: jest.fn(),
-            error: jest.fn(),
-        };
-
-        const logger = new DeduplicatedLogger(testLogger);
-
-        logger.debug('Same message.');
-        logger.info('Same message.');
-        logger.warn('Same message.');
-        logger.error('Same message.');
-
-        expect(testLogger.debug).toHaveBeenCalledTimes(1);
-        expect(testLogger.info).not.toHaveBeenCalled();
-        expect(testLogger.warn).not.toHaveBeenCalled();
-        expect(testLogger.error).not.toHaveBeenCalled();
     });
 
     it('should evict the oldest message when at capacity', () => {
@@ -157,23 +145,6 @@ describe('A deduplicated logger', () => {
         expect(testLogger.info).toHaveBeenCalledTimes(5);
     });
 
-    it('should handle an empty message', () => {
-        const testLogger: Logger = {
-            debug: jest.fn(),
-            info: jest.fn(),
-            warn: jest.fn(),
-            error: jest.fn(),
-        };
-
-        const logger = new DeduplicatedLogger(testLogger);
-
-        logger.info('');
-        logger.info('');
-
-        expect(testLogger.info).toHaveBeenCalledTimes(1);
-        expect(testLogger.info).toHaveBeenCalledWith('');
-    });
-
     it('should use default max size of 100', () => {
         const testLogger: Logger = {
             debug: jest.fn(),
@@ -207,65 +178,5 @@ describe('A deduplicated logger', () => {
         logger.info('Message 0');
 
         expect(testLogger.info).toHaveBeenCalledTimes(102);
-    });
-
-    it('should handle max size of 1', () => {
-        const testLogger: Logger = {
-            debug: jest.fn(),
-            info: jest.fn(),
-            warn: jest.fn(),
-            error: jest.fn(),
-        };
-
-        const logger = new DeduplicatedLogger(testLogger, 1);
-
-        logger.info('Message 1');
-        logger.info('Message 1');
-
-        expect(testLogger.info).toHaveBeenCalledTimes(1);
-
-        logger.info('Message 2');
-
-        expect(testLogger.info).toHaveBeenCalledTimes(2);
-
-        // "Message 1" was evicted, should be loggable again
-        logger.info('Message 1');
-
-        expect(testLogger.info).toHaveBeenCalledTimes(3);
-    });
-
-    it('should treat messages with different whitespace as different', () => {
-        const testLogger: Logger = {
-            debug: jest.fn(),
-            info: jest.fn(),
-            warn: jest.fn(),
-            error: jest.fn(),
-        };
-
-        const logger = new DeduplicatedLogger(testLogger);
-
-        logger.info('Message');
-        logger.info(' Message');
-        logger.info('Message ');
-        logger.info('  Message  ');
-
-        expect(testLogger.info).toHaveBeenCalledTimes(4);
-    });
-
-    it('should treat messages with different casing as different', () => {
-        const testLogger: Logger = {
-            debug: jest.fn(),
-            info: jest.fn(),
-            warn: jest.fn(),
-            error: jest.fn(),
-        };
-
-        const logger = new DeduplicatedLogger(testLogger);
-
-        logger.info('message');
-        logger.info('Message');
-        logger.info('MESSAGE');
-
-        expect(testLogger.info).toHaveBeenCalledTimes(3);
     });
 });

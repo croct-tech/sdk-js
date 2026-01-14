@@ -322,7 +322,7 @@ export class Container {
             return new ConsoleLogger(prefix);
         }
 
-        return new DeduplicatedLogger(FilteredLogger.include(new ConsoleLogger(), ['error', 'warn']));
+        return new DeduplicatedLogger(FilteredLogger.include(new ConsoleLogger(prefix), ['error', 'warn']));
     }
 
     public getTabStorage(namespace: string, ...subnamespace: string[]): Storage {
