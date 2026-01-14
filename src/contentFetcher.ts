@@ -252,8 +252,11 @@ export class ContentFetcher {
 
         const payload: FetchPayload = {
             slotId: slotId,
-            schema: options.schema === true,
         };
+
+        if (options.schema === true) {
+            payload.schema = true;
+        }
 
         if (options.version !== undefined) {
             payload.version = `${options.version}`;

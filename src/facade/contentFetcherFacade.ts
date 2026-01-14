@@ -57,20 +57,20 @@ export class ContentFetcherFacade {
             throw new Error('The slot ID must be a non-empty string.');
         }
 
-        const facadeOptions = {...options};
-
-        validate(facadeOptions);
+        if (options !== undefined) {
+            validate(options);
+        }
 
         const resolvedOptions: ResolvedFetchOptions & O = {
             static: false,
             clientId: await this.cidAssigner.assignCid(),
             userToken: this.userTokenProvider.getToken() ?? undefined,
             previewToken: this.previewTokenProvider.getToken() ?? undefined,
-            version: facadeOptions.version,
-            context: this.contextFactory.createContext(facadeOptions.attributes),
-            timeout: facadeOptions.timeout,
-            preferredLocale: facadeOptions.preferredLocale,
-            schema: facadeOptions.schema,
+            version: options?.version,
+            context: this.contextFactory.createContext(options?.attributes),
+            timeout: options?.timeout,
+            preferredLocale: options?.preferredLocale,
+            schema: options?.schema,
         } satisfies ResolvedFetchOptions & O;
 
         return this.fetcher.fetch<P, O>(slotId, resolvedOptions);

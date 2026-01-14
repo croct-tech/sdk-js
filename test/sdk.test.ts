@@ -534,6 +534,9 @@ describe('A SDK', () => {
     it('should configure the content fetch with the default preferred locale', async () => {
         const slotId = 'home-banner';
         const result: FetchResponse = {
+            metadata: {
+                version: '1.0',
+            },
             content: {
                 title: 'Hello world',
             },
@@ -567,6 +570,9 @@ describe('A SDK', () => {
 
         const slotId = 'home-banner';
         const result: FetchResponse = {
+            metadata: {
+                version: '1.0',
+            },
             content: {
                 title: 'Hello world',
             },
@@ -609,6 +615,9 @@ describe('A SDK', () => {
 
         const slotId = 'home-banner';
         const result: FetchResponse = {
+            metadata: {
+                version: '1.0',
+            },
             content: {
                 title: 'Hello world',
             },
@@ -653,6 +662,9 @@ describe('A SDK', () => {
         async (baseEndpoint: string | undefined, expectedEndpoint: string) => {
             const slotId = 'home-banner';
             const result: FetchResponse = {
+                metadata: {
+                    version: '1.0',
+                },
                 content: {
                     title: 'Hello world',
                 },

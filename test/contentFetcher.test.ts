@@ -53,7 +53,6 @@ describe('A content fetcher', () => {
         },
         body: {
             slotId: slotId,
-            schema: false,
         },
     };
 

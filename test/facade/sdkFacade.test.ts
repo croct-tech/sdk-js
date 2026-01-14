@@ -363,6 +363,9 @@ describe('A SDK facade', () => {
     it('should provide a content fetcher facade', async () => {
         const tab = new Tab('1', true);
         const result: FetchResponse<{example: string}> = {
+            metadata: {
+                version: '1.0',
+            },
             content: {
                 example: 'example',
             },
