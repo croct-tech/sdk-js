@@ -78,7 +78,7 @@ export type FetchOptions = StaticContentOptions | DynamicContentOptions;
 type With<T, K extends keyof T> = T & {[P in K]-?: T[P]};
 
 export type SlotMetadata<M extends FetchResponseOptions = FetchResponseOptions> = With<{
-    version: `${number}.${number}`,
+    version: string,
     schema?: ContentDefinitionBundle,
     experience?: {
         experienceId: string,
