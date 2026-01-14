@@ -1,6 +1,6 @@
 import {JsonObject} from '@croct/json';
 import {formatCause} from '../error';
-import {ContentFetcher, FetchResponse} from '../contentFetcher';
+import {ContentFetcher, FetchResponse, FetchOptions as ResolvedFetchOptions} from '../contentFetcher';
 import {ContextFactory} from './evaluatorFacade';
 import {fetchOptionsSchema as optionsSchema} from '../schema';
 import {TokenProvider} from '../token';
@@ -10,6 +10,7 @@ export type FetchOptions = {
     version?: `${number}`|number,
     preferredLocale?: string,
     timeout?: number,
+    schema?: boolean,
     attributes?: JsonObject,
 };
 
@@ -48,22 +49,30 @@ export class ContentFetcherFacade {
         this.contextFactory = configuration.contextFactory;
     }
 
-    public async fetch<P extends JsonObject>(slotId: string, options: FetchOptions = {}): Promise<FetchResponse<P>> {
+    public async fetch<P extends JsonObject, O extends FetchOptions>(
+        slotId: string,
+        options?: O,
+    ): Promise<FetchResponse<P, O>> {
         if (typeof slotId !== 'string' || slotId.length === 0) {
             throw new Error('The slot ID must be a non-empty string.');
         }
 
-        validate(options);
+        const facadeOptions = {...options};
 
-        return this.fetcher.fetch(slotId, {
+        validate(facadeOptions);
+
+        const resolvedOptions: ResolvedFetchOptions & O = {
             static: false,
             clientId: await this.cidAssigner.assignCid(),
             userToken: this.userTokenProvider.getToken() ?? undefined,
             previewToken: this.previewTokenProvider.getToken() ?? undefined,
-            version: options.version,
-            context: this.contextFactory.createContext(options.attributes),
-            timeout: options.timeout,
-            preferredLocale: options.preferredLocale,
-        });
+            version: facadeOptions.version,
+            context: this.contextFactory.createContext(facadeOptions.attributes),
+            timeout: facadeOptions.timeout,
+            preferredLocale: facadeOptions.preferredLocale,
+            schema: facadeOptions.schema,
+        } satisfies ResolvedFetchOptions & O;
+
+        return this.fetcher.fetch<P, O>(slotId, resolvedOptions);
     }
 }

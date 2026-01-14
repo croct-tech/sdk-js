@@ -1,4 +1,5 @@
 import {JsonObject} from '@croct/json';
+import type {ContentDefinitionBundle} from '@croct/content-model/definition';
 import {EvaluationContext} from './evaluator';
 import {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from './constants';
@@ -23,6 +24,7 @@ export enum ContentErrorType {
 type FetchPayload = {
     slotId: string,
     version?: string,
+    schema?: boolean,
     preferredLocale?: string,
     previewToken?: string,
     context?: EvaluationContext,
@@ -45,6 +47,7 @@ type BasicOptions = {
     preferredLocale?: string,
     timeout?: number,
     extra?: ExtraFetchOptions,
+    schema?: boolean,
 };
 
 export type StaticContentOptions = BasicOptions & {
@@ -69,7 +72,30 @@ type ExtraFetchOptions<T extends keyof RequestInit = AllowedFetchOptions> = Pick
 
 export type FetchOptions = StaticContentOptions | DynamicContentOptions;
 
-export type FetchResponse<P extends JsonObject = JsonObject> = {
+type SlotMetadata = {
+    version: `${number}.${number}`,
+    schema?: ContentDefinitionBundle,
+    experience?: {
+        experienceId: string,
+        audienceId: string,
+        experiment?: {
+            experimentId: string,
+            variantId: string,
+        },
+    },
+};
+
+type FetchResponseOptions = {
+    schema?: boolean,
+};
+
+type With<T, K extends keyof T> = T & {[P in K]-?: T[P]};
+
+export type FetchResponse<P extends JsonObject = JsonObject, M extends FetchResponseOptions = FetchResponseOptions> = {
+    metadata: With<
+        SlotMetadata,
+        M extends {schema: true} ? 'schema' : never
+    >,
     content: P,
 };
 
@@ -123,14 +149,17 @@ export class ContentFetcher {
         };
     }
 
-    public fetch<P extends JsonObject>(slotId: string, options: FetchOptions = {}): Promise<FetchResponse<P>> {
-        if (options.static === true && this.configuration.apiKey === undefined) {
+    public fetch<P extends JsonObject, O extends FetchOptions>(
+        slotId: string,
+        options?: O,
+    ): Promise<FetchResponse<P, O>> {
+        if (options?.static === true && this.configuration.apiKey === undefined) {
             throw new Error('The API key must be provided to fetch static content.');
         }
 
-        return new Promise<FetchResponse<P>>((resolve, reject) => {
+        return new Promise<FetchResponse<P, O>>((resolve, reject) => {
             const abortController = new AbortController();
-            const timeout = options.timeout ?? this.configuration.defaultTimeout;
+            const timeout = options?.timeout ?? this.configuration.defaultTimeout;
 
             let timer: number | NodeJS.Timeout | undefined;
 
@@ -154,7 +183,7 @@ export class ContentFetcher {
                 );
             }
 
-            this.load(slotId, abortController.signal, options)
+            this.load(slotId, abortController.signal, options ?? {})
                 .finally(() => clearTimeout(timer))
                 .then(response => {
                     const region = response.headers.get('X-Croct-Region');
@@ -223,6 +252,7 @@ export class ContentFetcher {
 
         const payload: FetchPayload = {
             slotId: slotId,
+            schema: options.schema === true,
         };
 
         if (options.version !== undefined) {
