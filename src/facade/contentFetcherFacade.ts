@@ -71,7 +71,7 @@ export class ContentFetcherFacade {
             timeout: options?.timeout,
             preferredLocale: options?.preferredLocale,
             schema: options?.schema,
-        } satisfies ResolvedFetchOptions & O;
+        };
 
         return this.fetcher.fetch<P, O>(slotId, resolvedOptions);
     }
