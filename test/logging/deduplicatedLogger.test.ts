@@ -179,4 +179,17 @@ describe('A deduplicated logger', () => {
 
         expect(testLogger.info).toHaveBeenCalledTimes(102);
     });
+
+    it('should throw an error for non-positive max size', () => {
+        const testLogger: Logger = {
+            debug: jest.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+
+        expect(() => new DeduplicatedLogger(testLogger, 0)).toThrow('maxSize must be greater than 0');
+        expect(() => new DeduplicatedLogger(testLogger, -10)).toThrow('maxSize must be greater than 0');
+        expect(() => new DeduplicatedLogger(testLogger, 2.5)).toThrow('maxSize must be greater than 0');
+    });
 });
