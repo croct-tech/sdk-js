@@ -42,12 +42,15 @@ export class ContentError<T extends ErrorResponse = ErrorResponse> extends Error
     }
 }
 
-type BasicOptions = {
+export type FetchResponseOptions = {
+    schema?: boolean,
+};
+
+type BasicOptions = FetchResponseOptions & {
     version?: `${number}` | number,
     preferredLocale?: string,
     timeout?: number,
     extra?: ExtraFetchOptions,
-    schema?: boolean,
 };
 
 export type StaticContentOptions = BasicOptions & {
@@ -72,7 +75,9 @@ type ExtraFetchOptions<T extends keyof RequestInit = AllowedFetchOptions> = Pick
 
 export type FetchOptions = StaticContentOptions | DynamicContentOptions;
 
-type SlotMetadata = {
+type With<T, K extends keyof T> = T & {[P in K]-?: T[P]};
+
+export type SlotMetadata<M extends FetchResponseOptions = FetchResponseOptions> = With<{
     version: `${number}.${number}`,
     schema?: ContentDefinitionBundle,
     experience?: {
@@ -83,19 +88,10 @@ type SlotMetadata = {
             variantId: string,
         },
     },
-};
-
-type FetchResponseOptions = {
-    schema?: boolean,
-};
-
-type With<T, K extends keyof T> = T & {[P in K]-?: T[P]};
+}, M extends {schema: true} ? 'schema' : never>;
 
 export type FetchResponse<P extends JsonObject = JsonObject, M extends FetchResponseOptions = FetchResponseOptions> = {
-    metadata: With<
-        SlotMetadata,
-        M extends {schema: true} ? 'schema' : never
-    >,
+    metadata: SlotMetadata<M>,
     content: P,
 };
 
