@@ -77,7 +77,7 @@ export type FetchOptions = StaticContentOptions | DynamicContentOptions;
 
 type With<T, K extends keyof T> = T & {[P in K]-?: T[P]};
 
-export type SlotMetadata<M extends FetchResponseOptions = FetchResponseOptions> = With<{
+export type SlotMetadata = {
     version: string,
     schema?: ContentDefinitionBundle,
     experience?: {
@@ -88,10 +88,10 @@ export type SlotMetadata<M extends FetchResponseOptions = FetchResponseOptions> 
             variantId: string,
         },
     },
-}, M extends {schema: true} ? 'schema' : never>;
+};
 
 export type FetchResponse<P extends JsonObject = JsonObject, M extends FetchResponseOptions = FetchResponseOptions> = {
-    metadata: SlotMetadata<M>,
+    metadata: With<SlotMetadata, M extends {schema: true} ? 'schema' : never>,
     content: P,
 };
 
