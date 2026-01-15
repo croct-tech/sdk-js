@@ -1,16 +1,20 @@
 import {JsonObject} from '@croct/json';
 import {formatCause} from '../error';
-import {ContentFetcher, FetchResponse, FetchOptions as ResolvedFetchOptions} from '../contentFetcher';
+import {
+    ContentFetcher,
+    FetchResponse,
+    FetchOptions as ResolvedFetchOptions,
+    FetchResponseOptions,
+} from '../contentFetcher';
 import {ContextFactory} from './evaluatorFacade';
 import {fetchOptionsSchema as optionsSchema} from '../schema';
 import {TokenProvider} from '../token';
 import {CidAssigner} from '../cid';
 
-export type FetchOptions = {
+export type FetchOptions = FetchResponseOptions & {
     version?: `${number}`|number,
     preferredLocale?: string,
     timeout?: number,
-    schema?: boolean,
     attributes?: JsonObject,
 };
 
