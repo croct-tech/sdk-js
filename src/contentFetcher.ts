@@ -90,8 +90,8 @@ export type SlotMetadata = {
     },
 };
 
-export type FetchResponse<P extends JsonObject = JsonObject, M extends FetchResponseOptions = FetchResponseOptions> = {
-    metadata: With<SlotMetadata, M extends {schema: true} ? 'schema' : never>,
+export type FetchResponse<P = JsonObject, O = FetchResponseOptions> = {
+    metadata: With<SlotMetadata, O extends {schema: true} ? 'schema' : never>,
     content: P,
 };
 
