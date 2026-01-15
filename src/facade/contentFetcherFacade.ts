@@ -53,9 +53,9 @@ export class ContentFetcherFacade {
         this.contextFactory = configuration.contextFactory;
     }
 
-    public async fetch<P extends JsonObject, O extends FetchOptions>(
+    public async fetch<P extends JsonObject, O extends FetchResponseOptions>(
         slotId: string,
-        options?: O,
+        options?: O & FetchOptions,
     ): Promise<FetchResponse<P, O>> {
         if (typeof slotId !== 'string' || slotId.length === 0) {
             throw new Error('The slot ID must be a non-empty string.');
@@ -65,7 +65,7 @@ export class ContentFetcherFacade {
             validate(options);
         }
 
-        const resolvedOptions: ResolvedFetchOptions & O = {
+        return this.fetcher.fetch<P, ResolvedFetchOptions & O>(slotId, {
             static: false,
             clientId: await this.cidAssigner.assignCid(),
             userToken: this.userTokenProvider.getToken() ?? undefined,
@@ -75,8 +75,6 @@ export class ContentFetcherFacade {
             timeout: options?.timeout,
             preferredLocale: options?.preferredLocale,
             schema: options?.schema,
-        };
-
-        return this.fetcher.fetch<P, O>(slotId, resolvedOptions);
+        });
     }
 }

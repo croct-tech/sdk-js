@@ -145,9 +145,9 @@ export class ContentFetcher {
         };
     }
 
-    public fetch<P extends JsonObject, O extends FetchOptions>(
+    public fetch<P extends JsonObject, O extends FetchResponseOptions>(
         slotId: string,
-        options?: O,
+        options?: O & FetchOptions,
     ): Promise<FetchResponse<P, O>> {
         if (options?.static === true && this.configuration.apiKey === undefined) {
             throw new Error('The API key must be provided to fetch static content.');
