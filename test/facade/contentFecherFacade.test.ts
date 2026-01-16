@@ -143,5 +143,17 @@ describe('A content fetcher facade', () => {
             ...options,
             preferredLocale: 'en-us',
         });
+
+        await fetcherFacade.fetch(slotId, {
+            timeout: options.timeout,
+            version: options.version,
+            attributes: options?.context?.attributes,
+            schema: true,
+        });
+
+        expect(fetcher.fetch).toHaveBeenNthCalledWith(3, slotId, {
+            ...options,
+            schema: true,
+        });
     });
 });

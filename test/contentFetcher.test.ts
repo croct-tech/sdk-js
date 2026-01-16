@@ -2,7 +2,14 @@ import * as fetchMock from 'fetch-mock';
 import {MockOptions} from 'fetch-mock';
 import {EvaluationContext} from '../src/evaluator';
 import {Token} from '../src/token';
-import {ContentFetcher, ContentError, ContentErrorType, ErrorResponse, FetchOptions} from '../src/contentFetcher';
+import {
+    ContentFetcher,
+    ContentError,
+    ContentErrorType,
+    ErrorResponse,
+    FetchOptions,
+    FetchResponse,
+} from '../src/contentFetcher';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
 import {ApiKey} from '../src/apiKey';
 import {Logger} from '../src/logging';
@@ -28,7 +35,10 @@ describe('A content fetcher', () => {
     const plainTextApiKey = `${apiKey.getIdentifier()}:${apiKey.getPrivateKey()}`;
 
     const slotId = 'hero-banner';
-    const content = {
+    const result: FetchResponse = {
+        metadata: {
+            version: '1.0',
+        },
         content: {
             title: 'Hello World',
         },
@@ -73,10 +83,10 @@ describe('A content fetcher', () => {
         fetchMock.mock({
             ...requestMatcher,
             matcher: `${customEndpoint}/client/web/content`,
-            response: content,
+            response: result,
         });
 
-        await expect(fetcher.fetch(slotId)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId)).resolves.toEqual(result);
     });
 
     it.each<[string, string|ApiKey]>([
@@ -99,10 +109,10 @@ describe('A content fetcher', () => {
                 ...requestMatcher.headers,
                 'X-Api-Key': apiKey.getIdentifier(),
             },
-            response: content,
+            response: result,
         });
 
-        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(result);
     });
 
     it('should require an API key to fetch static content', async () => {
@@ -126,10 +136,10 @@ describe('A content fetcher', () => {
                 ...requestMatcher.headers,
                 'X-Api-Key': apiKey.getIdentifier(),
             },
-            response: content,
+            response: result,
         });
 
-        await expect(fetcher.fetch(slotId)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId)).resolves.toEqual(result);
     });
 
     it('should fetch static content for the specified slot version', async () => {
@@ -153,10 +163,10 @@ describe('A content fetcher', () => {
                 ...requestMatcher.body,
                 version: `${options.version}`,
             },
-            response: content,
+            response: result,
         });
 
-        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(result);
     });
 
     it('should fetch static content for the specified preferred locale', async () => {
@@ -180,10 +190,10 @@ describe('A content fetcher', () => {
                 ...requestMatcher.body,
                 preferredLocale: options.preferredLocale,
             },
-            response: content,
+            response: result,
         });
 
-        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(result);
     });
 
     it('should fetch dynamic content using the provided client ID', async () => {
@@ -203,10 +213,10 @@ describe('A content fetcher', () => {
                 ...requestMatcher.headers,
                 'X-Client-Id': clientId,
             },
-            response: content,
+            response: result,
         });
 
-        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(result);
     });
 
     it('should fetch dynamic content passing the provided client IP', async () => {
@@ -226,10 +236,10 @@ describe('A content fetcher', () => {
                 ...requestMatcher.headers,
                 'X-Client-Ip': clientIp,
             },
-            response: content,
+            response: result,
         });
 
-        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(result);
     });
 
     it('should fetch dynamic content passing the provided client agent', async () => {
@@ -249,10 +259,10 @@ describe('A content fetcher', () => {
                 ...requestMatcher.headers,
                 'X-Client-Agent': userAgent,
             },
-            response: content,
+            response: result,
         });
 
-        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(result);
     });
 
     it('should fetch dynamic content using the provided user token', async () => {
@@ -268,14 +278,14 @@ describe('A content fetcher', () => {
                 ...requestMatcher.headers,
                 'X-Token': token.toString(),
             },
-            response: content,
+            response: result,
         });
 
         const options: FetchOptions = {
             userToken: token,
         };
 
-        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(result);
     });
 
     it('should fetch dynamic content using the provided preview token', async () => {
@@ -291,14 +301,66 @@ describe('A content fetcher', () => {
                 ...requestMatcher.body,
                 previewToken: token.toString(),
             },
-            response: content,
+            response: result,
         });
 
         const options: FetchOptions = {
             previewToken: token,
         };
 
-        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(content);
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(result);
+    });
+
+    it('should not include the schema if not requested', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+        });
+
+        fetchMock.mock({
+            ...requestMatcher,
+            response: result,
+        });
+
+        const options: FetchOptions = {
+            schema: false,
+        };
+
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(result);
+    });
+
+    it('should fetch content including the schema', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+        });
+
+        const resultWithSchema: FetchResponse = {
+            ...result,
+            metadata: {
+                ...result.metadata,
+                schema: {
+                    root: {
+                        type: 'structure',
+                        attributes: {},
+                    },
+                    definitions: {},
+                },
+            },
+        };
+
+        fetchMock.mock({
+            ...requestMatcher,
+            body: {
+                ...requestMatcher.body,
+                schema: true,
+            },
+            response: resultWithSchema,
+        });
+
+        const options: FetchOptions = {
+            schema: true,
+        };
+
+        await expect(fetcher.fetch(slotId, options)).resolves.toEqual(resultWithSchema);
     });
 
     it('should fetch using the extra options', async () => {
@@ -500,12 +562,12 @@ describe('A content fetcher', () => {
                 ...requestMatcher.body,
                 context: context,
             },
-            response: content,
+            response: result,
         });
 
         const promise = fetcher.fetch(slotId, {context: context});
 
-        await expect(promise).resolves.toEqual(content);
+        await expect(promise).resolves.toEqual(result);
     });
 
     it('should fetch dynamic content for the specified slot version', async () => {
@@ -521,12 +583,12 @@ describe('A content fetcher', () => {
                 ...requestMatcher.body,
                 version: `${version}`,
             },
-            response: content,
+            response: result,
         });
 
         const promise = fetcher.fetch(slotId, {version: version});
 
-        await expect(promise).resolves.toEqual(content);
+        await expect(promise).resolves.toEqual(result);
     });
 
     it('should fetch dynamic content for the default preferred locale', async () => {
@@ -541,12 +603,12 @@ describe('A content fetcher', () => {
                 ...requestMatcher.body,
                 preferredLocale: 'en-us',
             },
-            response: content,
+            response: result,
         });
 
         const promise = fetcher.fetch(slotId);
 
-        await expect(promise).resolves.toEqual(content);
+        await expect(promise).resolves.toEqual(result);
     });
 
     it('should fetch dynamic content for the specified preferred locale', async () => {
@@ -562,12 +624,12 @@ describe('A content fetcher', () => {
                 ...requestMatcher.body,
                 preferredLocale: preferredLocale,
             },
-            response: content,
+            response: result,
         });
 
         const promise = fetcher.fetch(slotId, {preferredLocale: preferredLocale});
 
-        await expect(promise).resolves.toEqual(content);
+        await expect(promise).resolves.toEqual(result);
     });
 
     it('should report errors if the fetch fails', async () => {
@@ -745,7 +807,7 @@ describe('A content fetcher', () => {
             ...requestMatcher,
             response: {
                 status: 200,
-                body: content,
+                body: result,
                 headers: {
                     'X-Croct-Region': region,
                     'X-Croct-Timing': processingTime,
