@@ -337,7 +337,7 @@ describe('A content fetcher', () => {
             ...result,
             metadata: {
                 ...result.metadata,
-                includeSchema: {
+                schema: {
                     root: {
                         type: 'structure',
                         attributes: {},
