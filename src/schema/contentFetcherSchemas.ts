@@ -18,7 +18,7 @@ export const fetchOptionsSchema = new ObjectType({
         preferredLocale: new StringType({
             pattern: /^[a-z]{2,3}([-_][a-z]{2,3})?$/i,
         }),
-        schema: new BooleanType(),
+        includeSchema: new BooleanType(),
         attributes: new JsonObjectType(),
     },
 });

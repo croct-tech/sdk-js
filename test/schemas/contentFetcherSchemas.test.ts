@@ -37,7 +37,7 @@ describe('The content fetcher option schema', () => {
         [{
             timeout: 1,
             attributes: {foo: 'bar'},
-            schema: true,
+            includeSchema: true,
         }],
     ])('should allow %s', value => {
         function validate(): void {
@@ -81,8 +81,8 @@ describe('The content fetcher option schema', () => {
             'Expected a JSON object at path \'/attributes\', actual integer.',
         ],
         [
-            {schema: 'true'},
-            'Expected value of type boolean at path \'/schema\', actual string.',
+            {includeSchema: 'true'},
+            'Expected value of type boolean at path \'/includeSchema\', actual string.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {

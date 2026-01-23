@@ -74,7 +74,7 @@ export class ContentFetcherFacade {
             context: this.contextFactory.createContext(options?.attributes),
             timeout: options?.timeout,
             preferredLocale: options?.preferredLocale,
-            schema: options?.schema,
+            includeSchema: options?.includeSchema,
         });
     }
 }
