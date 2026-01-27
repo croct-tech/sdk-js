@@ -322,7 +322,7 @@ describe('A content fetcher', () => {
         });
 
         const options: FetchOptions = {
-            schema: false,
+            includeSchema: false,
         };
 
         await expect(fetcher.fetch(slotId, options)).resolves.toEqual(result);
@@ -351,13 +351,13 @@ describe('A content fetcher', () => {
             ...requestMatcher,
             body: {
                 ...requestMatcher.body,
-                schema: true,
+                includeSchema: true,
             },
             response: resultWithSchema,
         });
 
         const options: FetchOptions = {
-            schema: true,
+            includeSchema: true,
         };
 
         await expect(fetcher.fetch(slotId, options)).resolves.toEqual(resultWithSchema);
