@@ -36,20 +36,20 @@
     "postbuild": "./post-build.mjs"
   },
   "dependencies": {
-    "@croct/json": "^2.0.1",
     "@croct/content-model": "^0.21.1",
+    "@croct/json": "^2.0.1",
     "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "esbuild-fix-imports-plugin": "^1.0.19",
     "@croct/eslint-plugin": "^0.7.0",
+    "@fetch-mock/jest": "^0.2.20",
     "@types/jest": "^30.0.0",
+    "esbuild-fix-imports-plugin": "^1.0.19",
     "eslint": "^8.57.0",
-    "fetch-mock": "^9.11.0",
+    "fetch-mock": "^12.6.0",
     "jest": "^30.0.0",
     "jest-environment-jsdom": "^30.0.0",
     "jest-extended": "^6.0.0",
-    "node-fetch": "^2.6.7",
     "ts-jest": "^29.0.3",
     "tsup": "^8.4.0",
     "typescript": "^5.0.0"

@@ -1,4 +1,4 @@
-import * as fetchMock from 'fetch-mock';
+import fetchMock from '@fetch-mock/jest';
 import {HttpBeaconChannel, MessageDeliveryError} from '../../src/channel';
 import {Logger} from '../../src/logging';
 import {FixedAssigner} from '../../src/cid';
@@ -9,10 +9,15 @@ import {Help} from '../../src/help';
 
 describe('An HTTP beacon channel', () => {
     beforeEach(() => {
-        fetchMock.reset();
+        fetchMock.removeRoutes();
+        fetchMock.clearHistory();
         jest.clearAllMocks();
         jest.clearAllTimers();
         jest.useRealTimers();
+    });
+
+    afterEach(() => {
+        fetchMock.unmockGlobal();
     });
 
     const appId = '00000000-0000-0000-0000-000000000000';
@@ -30,7 +35,7 @@ describe('An HTTP beacon channel', () => {
     const endpointUrl = 'http://api.croct.io/web/client/track';
 
     it('should send a beacon to the specified URL', async () => {
-        fetchMock.mock(endpointUrl, 200);
+        fetchMock.mockGlobal().route(endpointUrl, 200);
 
         const channel = new HttpBeaconChannel({
             appId: appId,
@@ -68,14 +73,18 @@ describe('An HTTP beacon channel', () => {
 
         expect(listener).toHaveBeenCalledWith(receiptId);
 
-        const calls = fetchMock.calls();
+        const calls = fetchMock.callHistory.calls();
 
         expect(calls).toHaveLength(1);
 
-        const lastCall = calls[0] as fetchMock.MockCall;
-        const lastRequest = lastCall[1] as fetchMock.MockRequest;
+        const lastCall = calls[0];
+        const {args} = lastCall;
 
-        expect(lastCall[0]).toBe(endpointUrl);
+        expect(args).toHaveLength(2);
+
+        const [endpoint, lastRequest] = lastCall.args as [string, {headers: Record<string, string>, body: string}];
+
+        expect(endpoint).toBe(endpointUrl);
 
         const {timestamp: originalTime, token, ...expectedBeacon} = beacon;
 
@@ -95,7 +104,7 @@ describe('An HTTP beacon channel', () => {
     });
 
     it('should not send the token header if the token is not provided', async () => {
-        fetchMock.mock(endpointUrl, 200);
+        fetchMock.mockGlobal().route(endpointUrl, 200);
 
         const channel = new HttpBeaconChannel({
             appId: appId,
@@ -124,15 +133,24 @@ describe('An HTTP beacon channel', () => {
 
         await expect(promise).resolves.toBeUndefined();
 
-        const lastRequest = fetchMock.lastCall(endpointUrl)?.[1] as fetchMock.MockRequest;
+        const calls = fetchMock.callHistory.calls();
 
-        expect(lastRequest).not.toBeUndefined();
+        expect(calls).toHaveLength(1);
+
+        const lastCall = calls[0];
+        const {args} = lastCall;
+
+        expect(args).toHaveLength(2);
+
+        const [, lastRequest] = lastCall.args as [string, {headers: Record<string, string>, body: string}];
+
+        expect(lastRequest).toBeDefined();
 
         expect(lastRequest.headers).not.toContainKey('X-Token');
     });
 
     it('should reject the promise if the response status is not OK', async () => {
-        fetchMock.mock(endpointUrl, 500);
+        fetchMock.mockGlobal().route(endpointUrl, 500);
 
         const channel = new HttpBeaconChannel({
             appId: appId,
@@ -203,7 +221,7 @@ describe('An HTTP beacon channel', () => {
 
         expect(log).toBeDefined();
 
-        fetchMock.mock(endpointUrl, {
+        fetchMock.mockGlobal().route(endpointUrl, {
             status: status,
             body: JSON.stringify({
                 type: 'https://croct.help/api/event-tracker#error',
@@ -255,7 +273,7 @@ describe('An HTTP beacon channel', () => {
         [503, 'Service unavailable'],
         [504, 'Gateway timeout'],
     ])('should report a retryable error if the response status is %i', async (status, title) => {
-        fetchMock.mock(endpointUrl, {
+        fetchMock.mockGlobal().route(endpointUrl, {
             status: status,
             body: JSON.stringify({
                 type: 'https://croct.help/api/event-tracker#error',
@@ -299,7 +317,7 @@ describe('An HTTP beacon channel', () => {
     });
 
     it('should log a warning if the response status is 202', async () => {
-        fetchMock.mock(endpointUrl, {
+        fetchMock.mockGlobal().route(endpointUrl, {
             status: 202,
             body: '',
         });
@@ -343,7 +361,7 @@ describe('An HTTP beacon channel', () => {
     });
 
     it('should not notify listeners that have been unsubscribed', async () => {
-        fetchMock.mock(endpointUrl, 200);
+        fetchMock.mockGlobal().route(endpointUrl, 200);
 
         const channel = new HttpBeaconChannel({
             appId: appId,
@@ -412,6 +430,6 @@ describe('An HTTP beacon channel', () => {
         await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Channel is closed');
         await expect(promise).rejects.toHaveProperty('retryable', false);
 
-        expect(fetchMock.calls()).toHaveLength(0);
+        expect(fetchMock.callHistory.calls()).toHaveLength(0);
     });
 });

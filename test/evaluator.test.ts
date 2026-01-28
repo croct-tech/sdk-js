@@ -1,5 +1,4 @@
-import * as fetchMock from 'fetch-mock';
-import {MockOptions} from 'fetch-mock';
+import fetchMock, {CallLog, UserRouteConfig} from 'fetch-mock';
 import {
     ErrorResponse,
     EvaluationContext,
@@ -37,8 +36,8 @@ describe('An evaluator', () => {
     const plainTextApiKey = `${apiKey.getIdentifier()}:${apiKey.getPrivateKey()}`;
 
     const query = 'user\'s name';
-    const requestMatcher: MockOptions = {
-        functionMatcher: (_, req) => req.mode === 'cors',
+    const requestMatcher: UserRouteConfig = {
+        matcherFunction: (callLog: CallLog) => callLog !== undefined && callLog.options.mode === 'cors',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -49,9 +48,14 @@ describe('An evaluator', () => {
         },
     };
 
+    beforeEach(() => {
+        fetchMock.removeRoutes();
+        fetchMock.clearHistory();
+    });
+
     afterEach(() => {
         jest.useRealTimers();
-        fetchMock.reset();
+        fetchMock.unmockGlobal();
         jest.clearAllMocks();
     });
 
@@ -75,7 +79,7 @@ describe('An evaluator', () => {
 
         const result = 'Anonymous';
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             matcher: `${customEndpoint}/client/web/evaluate`,
             response: JSON.stringify(result),
@@ -95,7 +99,7 @@ describe('An evaluator', () => {
 
         const result = 'Anonymous';
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             matcher: `${BASE_ENDPOINT_URL}/external/web/evaluate`,
             headers: {
@@ -115,7 +119,7 @@ describe('An evaluator', () => {
 
         const result = 'Anonymous';
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: JSON.stringify(result),
         });
@@ -132,7 +136,7 @@ describe('An evaluator', () => {
 
         const result = 'Carol';
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             headers: {
                 ...requestMatcher.headers,
@@ -157,7 +161,7 @@ describe('An evaluator', () => {
 
         const result = 'Carol';
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             headers: {
                 ...requestMatcher.headers,
@@ -182,7 +186,7 @@ describe('An evaluator', () => {
 
         const result = 'Carol';
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             headers: {
                 ...requestMatcher.headers,
@@ -207,7 +211,7 @@ describe('An evaluator', () => {
 
         const result = 'Carol';
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             headers: {
                 ...requestMatcher.headers,
@@ -230,7 +234,7 @@ describe('An evaluator', () => {
 
         const result = 'Carol';
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: JSON.stringify(result),
         });
@@ -255,8 +259,11 @@ describe('An evaluator', () => {
 
         await evaluator.evaluate(query, {extra: extraOptions as EvaluationOptions['extra']});
 
-        expect(fetchMock.lastOptions()).toEqual(expect.objectContaining(overridableOptions));
-        expect(fetchMock.lastOptions()).not.toEqual(expect.objectContaining(nonOverridableOptions));
+        const calls = fetchMock.callHistory.lastCall();
+
+        expect(calls).toBeDefined();
+        expect(calls!.options).toEqual(expect.objectContaining(overridableOptions));
+        expect(calls!.options).not.toEqual(expect.objectContaining(nonOverridableOptions));
     });
 
     it('should abort the evaluation if the timeout is reached', async () => {
@@ -276,7 +283,7 @@ describe('An evaluator', () => {
             defaultTimeout: 15,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             delay: 20,
             response: JSON.stringify('Carol'),
@@ -288,9 +295,10 @@ describe('An evaluator', () => {
 
         jest.advanceTimersByTime(10);
 
-        const fetchOptions = fetchMock.lastOptions() as MockOptions & {signal: AbortSignal} | undefined;
+        const lastCall = fetchMock.callHistory.lastCall();
 
-        expect(fetchOptions?.signal).toBeDefined();
+        expect(lastCall).toBeDefined();
+        const fetchOptions = lastCall!.options;
 
         await expect(promise).rejects.toThrow(EvaluationError);
         await expect(promise).rejects.toHaveProperty('response', {
@@ -300,7 +308,8 @@ describe('An evaluator', () => {
             status: 408,
         });
 
-        expect(fetchOptions?.signal.aborted).toBe(true);
+        expect(fetchOptions!.signal).toBeDefined();
+        expect(fetchOptions!.signal!.aborted).toBe(true);
         expect(logger.error).toHaveBeenCalledWith(Help.forStatusCode(408));
     });
 
@@ -312,7 +321,7 @@ describe('An evaluator', () => {
             defaultTimeout: 10,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             delay: 20,
             response: JSON.stringify('Carol'),
@@ -346,7 +355,7 @@ describe('An evaluator', () => {
             logger: logger,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: JSON.stringify('Carol'),
         });
@@ -363,7 +372,7 @@ describe('An evaluator', () => {
             appId: appId,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 status: 202,
@@ -408,7 +417,7 @@ describe('An evaluator', () => {
 
         const result = 'Carol';
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             body: {
                 ...requestMatcher.body,
@@ -433,7 +442,7 @@ describe('An evaluator', () => {
             status: 400,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 status: 400,
@@ -479,7 +488,7 @@ describe('An evaluator', () => {
                 }],
             };
 
-            fetchMock.mock({
+            fetchMock.mockGlobal().route({
                 ...requestMatcher,
                 response: {
                     status: response.status,
@@ -541,7 +550,7 @@ describe('An evaluator', () => {
             status: 500,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 status: 500,
@@ -561,14 +570,13 @@ describe('An evaluator', () => {
         });
 
         const response: ErrorResponse = {
-            title: `Invalid json response body at ${BASE_ENDPOINT_URL}/client/web/evaluate reason: `
-                + 'Unexpected token \'I\', "Invalid JSON payload" is not valid JSON',
+            title: 'Unknown error',
             type: EvaluationErrorType.UNEXPECTED_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 body: 'Invalid JSON payload',
@@ -593,7 +601,7 @@ describe('An evaluator', () => {
             status: 500,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 throws: new Error(response.title),
@@ -643,7 +651,7 @@ describe('An evaluator', () => {
             status: scenario.status,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 status: scenario.status,
@@ -679,7 +687,7 @@ describe('An evaluator', () => {
         const region = 'us-central1';
         const timing = 120.1234;
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 status: 200,
@@ -699,8 +707,9 @@ describe('An evaluator', () => {
     });
 
     it('should not be serializable', () => {
-        expect(() => new Evaluator({appId: appId}).toJSON())
-            .toThrowWithMessage(Error, 'Unserializable value.');
+        expect(() => {
+            new Evaluator({appId: appId}).toJSON();
+        }).toThrowWithMessage(Error, 'Unserializable value.');
     });
 });
 
