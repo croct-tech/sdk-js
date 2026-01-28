@@ -366,17 +366,17 @@ describe('A SDK', () => {
         async (baseEndpoint: string | undefined, expectedEndpoint: string) => {
             fetchMock.mockGlobal()
                 .route({
-                method: 'GET',
-                matcher: configuration.cidAssignerEndpointUrl,
-                response: '123',
-            })
-            .route({
-                method: 'POST',
-                matcher: expectedEndpoint,
-                response: {
-                    ok: true,
-                },
-            });
+                    method: 'GET',
+                    matcher: configuration.cidAssignerEndpointUrl,
+                    response: '123',
+                })
+                .route({
+                    method: 'POST',
+                    matcher: expectedEndpoint,
+                    response: {
+                        ok: true,
+                    },
+                });
 
             const metaName = 'foo';
             const metaValue = 'bar';
@@ -430,19 +430,19 @@ describe('A SDK', () => {
             const result = 3;
 
             fetchMock.mockGlobal()
-            .route({
-                method: 'GET',
-                matcher: configuration.cidAssignerEndpointUrl,
-                response: '123',
-            })
-            .route({
-                method: 'POST',
-                matcher: `begin:${expectedEndpoint}`,
-                body: {
-                    query: query,
-                },
-                response: JSON.stringify(result),
-            });
+                .route({
+                    method: 'GET',
+                    matcher: configuration.cidAssignerEndpointUrl,
+                    response: '123',
+                })
+                .route({
+                    method: 'POST',
+                    matcher: `begin:${expectedEndpoint}`,
+                    body: {
+                        query: query,
+                    },
+                    response: JSON.stringify(result),
+                });
 
             const {baseEndpointUrl: _, ...baseConfiguration} = configuration;
 
@@ -544,20 +544,20 @@ describe('A SDK', () => {
         };
 
         fetchMock.mockGlobal()
-        .route({
-            method: 'GET',
-            matcher: configuration.cidAssignerEndpointUrl,
-            response: '123',
-        })
-        .route({
-            method: 'POST',
-            matcher: `begin:${configuration.baseEndpointUrl}`,
-            body: {
-                slotId: slotId,
-                preferredLocale: configuration.defaultPreferredLocale,
-            },
-            response: result,
-        });
+            .route({
+                method: 'GET',
+                matcher: configuration.cidAssignerEndpointUrl,
+                response: '123',
+            })
+            .route({
+                method: 'POST',
+                matcher: `begin:${configuration.baseEndpointUrl}`,
+                body: {
+                    slotId: slotId,
+                    preferredLocale: configuration.defaultPreferredLocale,
+                },
+                response: result,
+            });
 
         const sdk = Sdk.init(configuration);
 
@@ -672,16 +672,16 @@ describe('A SDK', () => {
             };
 
             fetchMock.mockGlobal()
-            .route({
-                method: 'GET',
-                matcher: configuration.cidAssignerEndpointUrl,
-                response: '123',
-            })
-            .route({
-                method: 'POST',
-                matcher: `begin:${expectedEndpoint}`,
-                response: result,
-            });
+                .route({
+                    method: 'GET',
+                    matcher: configuration.cidAssignerEndpointUrl,
+                    response: '123',
+                })
+                .route({
+                    method: 'POST',
+                    matcher: `begin:${expectedEndpoint}`,
+                    response: result,
+                });
 
             const {baseEndpointUrl: _, ...baseConfiguration} = configuration;
 
