@@ -24,7 +24,7 @@ export enum ContentErrorType {
 type FetchPayload = {
     slotId: string,
     version?: string,
-    schema?: boolean,
+    includeSchema?: boolean,
     preferredLocale?: string,
     previewToken?: string,
     context?: EvaluationContext,
@@ -43,7 +43,7 @@ export class ContentError<T extends ErrorResponse = ErrorResponse> extends Error
 }
 
 export type FetchResponseOptions = {
-    schema?: boolean,
+    includeSchema?: boolean,
 };
 
 type BasicOptions = FetchResponseOptions & {
@@ -91,7 +91,7 @@ export type SlotMetadata = {
 };
 
 export type FetchResponse<P = JsonObject, O = FetchResponseOptions> = {
-    metadata: With<SlotMetadata, O extends {schema: true} ? 'schema' : never>,
+    metadata: With<SlotMetadata, O extends {includeSchema: true} ? 'schema' : never>,
     content: P,
 };
 
@@ -250,8 +250,8 @@ export class ContentFetcher {
             slotId: slotId,
         };
 
-        if (options.schema === true) {
-            payload.schema = true;
+        if (options.includeSchema === true) {
+            payload.includeSchema = true;
         }
 
         if (options.version !== undefined) {
