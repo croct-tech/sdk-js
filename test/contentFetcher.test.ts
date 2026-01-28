@@ -1,5 +1,4 @@
-import * as fetchMock from 'fetch-mock';
-import {MockOptions} from 'fetch-mock';
+import fetchMock, {CallLog, UserRouteConfig} from 'fetch-mock';
 import {EvaluationContext} from '../src/evaluator';
 import {Token} from '../src/token';
 import {
@@ -44,8 +43,8 @@ describe('A content fetcher', () => {
         },
     };
 
-    const requestMatcher: MockOptions = {
-        functionMatcher: (_, req) => req.mode === 'cors',
+    const requestMatcher: UserRouteConfig = {
+        matcherFunction: (callLog: CallLog) => callLog !== undefined && callLog.options.mode === 'cors',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -57,9 +56,14 @@ describe('A content fetcher', () => {
     };
 
     afterEach(() => {
-        fetchMock.reset();
+        fetchMock.removeRoutes();
+        fetchMock.clearHistory();
         jest.clearAllMocks();
         jest.useRealTimers();
+    });
+
+    afterEach(() => {
+        fetchMock.unmockGlobal();
     });
 
     it('should require either an application ID or API key', async () => {
@@ -80,7 +84,7 @@ describe('A content fetcher', () => {
             baseEndpointUrl: customEndpoint,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             matcher: `${customEndpoint}/client/web/content`,
             response: result,
@@ -102,7 +106,7 @@ describe('A content fetcher', () => {
             static: true,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             matcher: `${BASE_ENDPOINT_URL}/external/web/static-content`,
             headers: {
@@ -129,7 +133,7 @@ describe('A content fetcher', () => {
             apiKey: apiKeyIdentifier,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             matcher: `${BASE_ENDPOINT_URL}/external/web/content`,
             headers: {
@@ -152,7 +156,7 @@ describe('A content fetcher', () => {
             version: 2,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             matcher: `${BASE_ENDPOINT_URL}/external/web/static-content`,
             headers: {
@@ -179,7 +183,7 @@ describe('A content fetcher', () => {
             preferredLocale: 'en-US',
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             matcher: `${BASE_ENDPOINT_URL}/external/web/static-content`,
             headers: {
@@ -207,7 +211,7 @@ describe('A content fetcher', () => {
             clientId: clientId,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             headers: {
                 ...requestMatcher.headers,
@@ -230,7 +234,7 @@ describe('A content fetcher', () => {
             clientIp: clientIp,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             headers: {
                 ...requestMatcher.headers,
@@ -253,7 +257,7 @@ describe('A content fetcher', () => {
             clientAgent: userAgent,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             headers: {
                 ...requestMatcher.headers,
@@ -272,7 +276,7 @@ describe('A content fetcher', () => {
             appId: appId,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             headers: {
                 ...requestMatcher.headers,
@@ -295,7 +299,7 @@ describe('A content fetcher', () => {
             appId: appId,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             body: {
                 ...requestMatcher.body,
@@ -316,7 +320,7 @@ describe('A content fetcher', () => {
             appId: appId,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: result,
         });
@@ -347,7 +351,7 @@ describe('A content fetcher', () => {
             },
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             body: {
                 ...requestMatcher.body,
@@ -368,7 +372,7 @@ describe('A content fetcher', () => {
             appId: appId,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 result: 'Carol',
@@ -395,8 +399,11 @@ describe('A content fetcher', () => {
 
         await fetcher.fetch(slotId, {extra: extraOptions as FetchOptions['extra']});
 
-        expect(fetchMock.lastOptions()).toEqual(expect.objectContaining(overridableOptions));
-        expect(fetchMock.lastOptions()).not.toEqual(expect.objectContaining(nonOverridableOptions));
+        const lastCall = fetchMock.callHistory.lastCall();
+
+        expect(lastCall).toBeDefined();
+        expect(lastCall!.options).toEqual(expect.objectContaining(overridableOptions));
+        expect(lastCall!.options).not.toEqual(expect.objectContaining(nonOverridableOptions));
     });
 
     it('should abort after reaching the timeout', async () => {
@@ -416,7 +423,7 @@ describe('A content fetcher', () => {
             defaultTimeout: 15,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             delay: 20,
             response: {
@@ -430,7 +437,11 @@ describe('A content fetcher', () => {
 
         jest.advanceTimersByTime(11);
 
-        const fetchOptions = fetchMock.lastOptions() as MockOptions & {signal: AbortSignal} | undefined;
+        const calls = fetchMock.callHistory.lastCall();
+
+        expect(calls).toBeDefined();
+
+        const fetchOptions = calls!.options;
 
         expect(fetchOptions?.signal).toBeDefined();
 
@@ -443,7 +454,7 @@ describe('A content fetcher', () => {
             status: 408,
         });
 
-        expect(fetchOptions?.signal.aborted).toBe(true);
+        expect(fetchOptions!.signal!.aborted).toBe(true);
 
         expect(logger.error).toHaveBeenCalledWith(Help.forStatusCode(408));
     });
@@ -456,7 +467,7 @@ describe('A content fetcher', () => {
             defaultTimeout: 10,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             delay: 20,
             response: {
@@ -494,7 +505,7 @@ describe('A content fetcher', () => {
             defaultTimeout: 10,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 result: 'Carol',
@@ -513,7 +524,7 @@ describe('A content fetcher', () => {
             appId: appId,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 status: 202,
@@ -556,7 +567,7 @@ describe('A content fetcher', () => {
             },
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             body: {
                 ...requestMatcher.body,
@@ -577,7 +588,7 @@ describe('A content fetcher', () => {
 
         const version = 2;
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             body: {
                 ...requestMatcher.body,
@@ -597,7 +608,7 @@ describe('A content fetcher', () => {
             defaultPreferredLocale: 'en-us',
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             body: {
                 ...requestMatcher.body,
@@ -618,7 +629,7 @@ describe('A content fetcher', () => {
 
         const preferredLocale = 'pt-br';
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             body: {
                 ...requestMatcher.body,
@@ -643,7 +654,7 @@ describe('A content fetcher', () => {
             status: 400,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 status: 400,
@@ -669,7 +680,7 @@ describe('A content fetcher', () => {
             status: 500,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 status: 500,
@@ -684,6 +695,13 @@ describe('A content fetcher', () => {
     });
 
     it('should catch unexpected error responses', async () => {
+        fetchMock.mockGlobal().route({
+            ...requestMatcher,
+            response: {
+                body: 'Invalid JSON payload',
+            },
+        });
+
         const fetcher = new ContentFetcher({
             appId: appId,
         });
@@ -695,13 +713,6 @@ describe('A content fetcher', () => {
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,
         };
-
-        fetchMock.mock({
-            ...requestMatcher,
-            response: {
-                body: 'Invalid JSON payload',
-            },
-        });
 
         const promise = fetcher.fetch(slotId);
 
@@ -721,7 +732,7 @@ describe('A content fetcher', () => {
             status: 500,
         };
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 throws: new Error(response.title),
@@ -765,7 +776,7 @@ describe('A content fetcher', () => {
             logger: logger,
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 status: scenario.status,
@@ -803,7 +814,7 @@ describe('A content fetcher', () => {
         const region = 'us-central1';
         const processingTime = 120.1234;
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 status: 200,

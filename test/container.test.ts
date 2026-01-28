@@ -1,4 +1,4 @@
-import * as fetchMock from 'fetch-mock';
+import fetchMock from 'fetch-mock';
 import {Configuration, Container, DependencyResolver} from '../src/container';
 import {NullLogger, Logger} from '../src/logging';
 import {BeaconPayload, PartialTrackingEvent} from '../src/trackingEvents';
@@ -18,7 +18,12 @@ describe('A container', () => {
         }
 
         jest.resetAllMocks();
-        fetchMock.reset();
+        fetchMock.removeRoutes();
+        fetchMock.clearHistory();
+    });
+
+    afterEach(() => {
+        fetchMock.unmockGlobal();
     });
 
     const configuration: Configuration = {
@@ -258,7 +263,7 @@ describe('A container', () => {
     });
 
     it('should flush the beacon queue on initialization', async () => {
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             method: 'GET',
             matcher: configuration.cidAssignerEndpointUrl,
             response: '123',
@@ -266,7 +271,7 @@ describe('A container', () => {
 
         let attempts = 0;
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             method: 'POST',
             matcher: (url: string) => url === configuration.trackerEndpointUrl && attempts++ === 0,
             response: {
@@ -274,7 +279,7 @@ describe('A container', () => {
             },
         });
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             method: 'POST',
             matcher: (url: string) => url === configuration.trackerEndpointUrl && attempts > 0,
             response: 200,
@@ -297,14 +302,14 @@ describe('A container', () => {
         await container.dispose();
         await expect(promise).rejects.toThrow();
 
-        expect(fetchMock.calls(configuration.trackerEndpointUrl)).toHaveLength(1);
+        expect(fetchMock.callHistory.calls(configuration.trackerEndpointUrl)).toHaveLength(1);
 
         container = new Container(configuration);
         tracker = container.getTracker();
 
         await expect(tracker.flushed).resolves.toBeUndefined();
 
-        expect(fetchMock.calls(configuration.trackerEndpointUrl)).toHaveLength(2);
+        expect(fetchMock.callHistory.calls(configuration.trackerEndpointUrl)).toHaveLength(2);
     });
 
     it.each([
@@ -329,7 +334,7 @@ describe('A container', () => {
         const cid = 'e6a133ffd3d2410681403d5e1bd95505';
         const endpoint = `${configuration.cidAssignerEndpointUrl}?cid=${cid}`;
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             method: 'GET',
             matcher: endpoint,
             response: '123',
@@ -346,13 +351,16 @@ describe('A container', () => {
 
         await expect(assigner.assignCid()).resolves.toBe(cid);
 
-        expect(fetchMock.lastUrl()).toBe(endpoint);
+        const calls = fetchMock.callHistory.lastCall();
+
+        expect(calls).toBeDefined();
+        expect(calls!.url).toBe(endpoint);
     });
 
     it('should not refresh the CID when mirroring is disabled', async () => {
         const cid = 'e6a133ffd3d2410681403d5e1bd95505';
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             method: 'GET',
             matcher: `begin:${configuration.cidAssignerEndpointUrl}`,
             response: '123',
@@ -369,11 +377,11 @@ describe('A container', () => {
 
         await expect(assigner.assignCid()).resolves.toBe(cid);
 
-        expect(fetchMock.lastUrl()).toBeUndefined();
+        expect(fetchMock.callHistory.lastCall()).toBeUndefined();
     });
 
     it('should not refresh the CID when there is no cached CID', async () => {
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             method: 'GET',
             matcher: configuration.cidAssignerEndpointUrl,
             response: '123',
@@ -401,7 +409,7 @@ describe('A container', () => {
     });
 
     it('should configure the CID assigner using local storage by default', async () => {
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             method: 'GET',
             matcher: configuration.cidAssignerEndpointUrl,
             response: '123',
@@ -418,7 +426,7 @@ describe('A container', () => {
     it('should configure the CID assigner to use cookies if specified', async () => {
         expect(document.cookie).toBe('');
 
-        fetchMock.mock({
+        fetchMock.mockGlobal().route({
             method: 'GET',
             matcher: configuration.cidAssignerEndpointUrl,
             response: '123',
@@ -466,7 +474,9 @@ describe('A container', () => {
 
         expect(localStorage.getItem('croct.cid')).toBeNull();
 
-        expect(fetchMock.calls()).toHaveLength(0);
+        const calls = fetchMock.callHistory.lastCall();
+
+        expect(calls).toBeUndefined();
     });
 
     it('should use a stub beacon channel in test mode', async () => {
