@@ -300,29 +300,28 @@ describe('A SDK', () => {
             };
         }
 
-        fetchMock.mockGlobal().route({
-            method: 'GET',
-            matcherFunction: configuration.cidAssignerEndpointUrl,
-            response: '123',
-        });
-
-        fetchMock.mockGlobal().route({
-            method: 'POST',
-            matcher: createMatcher(1),
-            // Add a delay to ensure the second message is sent before the first one is processed
-            delay: 200,
-            response: {
-                ok: true,
-            },
-        });
-
-        fetchMock.mockGlobal().route({
-            method: 'POST',
-            matcher: createMatcher(1, true),
-            response: {
-                ok: true,
-            },
-        });
+        fetchMock.mockGlobal()
+            .route({
+                method: 'GET',
+                matcherFunction: configuration.cidAssignerEndpointUrl,
+                response: '123',
+            })
+            .route({
+                method: 'POST',
+                matcher: createMatcher(1),
+                // Add a delay to ensure the second message is sent before the first one is processed
+                delay: 200,
+                response: {
+                    ok: true,
+                },
+            })
+            .route({
+                method: 'POST',
+                matcher: createMatcher(1, true),
+                response: {
+                    ok: true,
+                },
+            });
 
         const sdk = Sdk.init(configuration);
 
@@ -365,13 +364,13 @@ describe('A SDK', () => {
     ])(
         'should configure the tracker with the specified base endpoint',
         async (baseEndpoint: string | undefined, expectedEndpoint: string) => {
-            fetchMock.mockGlobal().route({
+            fetchMock.mockGlobal()
+                .route({
                 method: 'GET',
                 matcher: configuration.cidAssignerEndpointUrl,
                 response: '123',
-            });
-
-            fetchMock.mockGlobal().route({
+            })
+            .route({
                 method: 'POST',
                 matcher: expectedEndpoint,
                 response: {
@@ -430,13 +429,13 @@ describe('A SDK', () => {
             const query = '1 + 2';
             const result = 3;
 
-            fetchMock.mockGlobal().route({
+            fetchMock.mockGlobal()
+            .route({
                 method: 'GET',
                 matcher: configuration.cidAssignerEndpointUrl,
                 response: '123',
-            });
-
-            fetchMock.mockGlobal().route({
+            })
+            .route({
                 method: 'POST',
                 matcher: `begin:${expectedEndpoint}`,
                 body: {
@@ -544,13 +543,13 @@ describe('A SDK', () => {
             },
         };
 
-        fetchMock.mockGlobal().route({
+        fetchMock.mockGlobal()
+        .route({
             method: 'GET',
             matcher: configuration.cidAssignerEndpointUrl,
             response: '123',
-        });
-
-        fetchMock.mockGlobal().route({
+        })
+        .route({
             method: 'POST',
             matcher: `begin:${configuration.baseEndpointUrl}`,
             body: {
@@ -672,13 +671,13 @@ describe('A SDK', () => {
                 },
             };
 
-            fetchMock.mockGlobal().route({
+            fetchMock.mockGlobal()
+            .route({
                 method: 'GET',
                 matcher: configuration.cidAssignerEndpointUrl,
                 response: '123',
-            });
-
-            fetchMock.mockGlobal().route({
+            })
+            .route({
                 method: 'POST',
                 matcher: `begin:${expectedEndpoint}`,
                 response: result,

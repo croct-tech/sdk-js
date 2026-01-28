@@ -263,28 +263,26 @@ describe('A container', () => {
     });
 
     it('should flush the beacon queue on initialization', async () => {
-        fetchMock.mockGlobal().route({
-            method: 'GET',
-            matcher: configuration.cidAssignerEndpointUrl,
-            response: '123',
-        });
+        fetchMock.mockGlobal()
+            .route({
+                method: 'GET',
+                matcher: configuration.cidAssignerEndpointUrl,
+                response: '123',
+            })
+            .route({
+                method: 'POST',
+                matcher: (url: string) => url === configuration.trackerEndpointUrl && attempts++ === 0,
+                response: {
+                    status: 500,
+                },
+            })
+            .route({
+                method: 'POST',
+                matcher: (url: string) => url === configuration.trackerEndpointUrl && attempts > 0,
+                response: 200,
+            });
 
         let attempts = 0;
-
-        fetchMock.mockGlobal().route({
-            method: 'POST',
-            matcher: (url: string) => url === configuration.trackerEndpointUrl && attempts++ === 0,
-            response: {
-                status: 500,
-            },
-        });
-
-        fetchMock.mockGlobal().route({
-            method: 'POST',
-            matcher: (url: string) => url === configuration.trackerEndpointUrl && attempts > 0,
-            response: 200,
-        });
-
         let container = new Container(configuration);
         let tracker = container.getTracker();
 
