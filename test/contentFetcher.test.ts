@@ -66,13 +66,13 @@ describe('A content fetcher', () => {
         fetchMock.unmockGlobal();
     });
 
-    it('should require either an application ID or API key', async () => {
-        await expect(() => new ContentFetcher({}))
+    it('should require either an application ID or API key', () => {
+        expect(() => new ContentFetcher({}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
-    it('should require either an application ID or API key, but not both', async () => {
-        await expect(() => new ContentFetcher({apiKey: apiKeyIdentifier, appId: appId}))
+    it('should require either an application ID or API key, but not both', () => {
+        expect(() => new ContentFetcher({apiKey: apiKeyIdentifier, appId: appId}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
@@ -119,12 +119,12 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(slotId, options)).resolves.toEqual(result);
     });
 
-    it('should require an API key to fetch static content', async () => {
+    it('should require an API key to fetch static content', () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
 
-        await expect(() => fetcher.fetch(slotId, {static: true}))
+        expect(() => fetcher.fetch(slotId, {static: true}))
             .toThrowWithMessage(Error, 'The API key must be provided to fetch static content.');
     });
 
@@ -707,8 +707,7 @@ describe('A content fetcher', () => {
         });
 
         const response: ErrorResponse = {
-            title: `Invalid json response body at ${BASE_ENDPOINT_URL}/client/web/content reason: `
-            + 'Unexpected token \'I\', "Invalid JSON payload" is not valid JSON',
+            title: 'Unknown error',
             type: ContentErrorType.UNEXPECTED_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,
@@ -834,8 +833,9 @@ describe('A content fetcher', () => {
     });
 
     it('should not be serializable', () => {
-        expect(() => new ContentFetcher({appId: appId}).toJSON())
-            .toThrowWithMessage(Error, 'Unserializable value.');
+        expect(() => {
+            new ContentFetcher({appId: appId}).toJSON();
+        }).toThrowWithMessage(Error, 'Unserializable value.');
     });
 });
 

@@ -1,5 +1,5 @@
 import fetchMock, {CallLog} from 'fetch-mock';
-import { RouteMatcherFunction } from "fetch-mock/dist/esm/Matchers";
+import {RouteMatcherFunction} from 'fetch-mock/dist/esm/Matchers';
 import {Sdk, Configuration} from '../src';
 import {NullLogger, Logger} from '../src/logging';
 import {Token} from '../src/token';
@@ -464,15 +464,15 @@ describe('A SDK', () => {
         const query = '1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10';
         const result = 3;
 
-        fetchMock.callHistory.calls(undefined, {
+        fetchMock.callHistory.calls({}, {
             method: 'GET',
-            matcher: configuration.cidAssignerEndpointUrl,
+            url: configuration.cidAssignerEndpointUrl,
             response: '123',
         });
 
-        fetchMock.callHistory.calls(undefined, {
+        fetchMock.callHistory.calls({}, {
             method: 'POST',
-            matcher: `begin:${configuration.baseEndpointUrl}`,
+            url: `begin:${configuration.baseEndpointUrl}`,
             delay: 200,
             response: JSON.stringify(result),
         });
@@ -502,15 +502,15 @@ describe('A SDK', () => {
         const query = '1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10';
         const result = 3;
 
-        fetchMock.callHistory.calls({
+        fetchMock.callHistory.calls({}, {
             method: 'GET',
-            matcher: configuration.cidAssignerEndpointUrl,
+            url: configuration.cidAssignerEndpointUrl,
             response: '123',
         });
 
-        fetchMock.callHistory.calls({
+        fetchMock.callHistory.calls({}, {
             method: 'POST',
-            matcher: `begin:${configuration.baseEndpointUrl}`,
+            url: `begin:${configuration.baseEndpointUrl}`,
             delay: Container.DEFAULT_FETCH_TIMEOUT * 2,
             response: JSON.stringify(result),
         });
@@ -580,15 +580,15 @@ describe('A SDK', () => {
             },
         };
 
-        fetchMock.callHistory.calls({
+        fetchMock.callHistory.calls({}, {
             method: 'GET',
-            matcher: configuration.cidAssignerEndpointUrl,
+            url: configuration.cidAssignerEndpointUrl,
             response: '123',
         });
 
-        fetchMock.callHistory.calls({
+        fetchMock.callHistory.calls({}, {
             method: 'POST',
-            matcher: `begin:${configuration.baseEndpointUrl}`,
+            url: `begin:${configuration.baseEndpointUrl}`,
             delay: 200,
             response: result,
         });
@@ -625,15 +625,15 @@ describe('A SDK', () => {
             },
         };
 
-        fetchMock.callHistory.calls({
+        fetchMock.callHistory.calls({}, {
             method: 'GET',
-            matcher: configuration.cidAssignerEndpointUrl,
+            url: configuration.cidAssignerEndpointUrl,
             response: '123',
         });
 
-        fetchMock.callHistory.calls({
+        fetchMock.callHistory.calls({}, {
             method: 'POST',
-            matcher: `begin:${configuration.baseEndpointUrl}`,
+            url: `begin:${configuration.baseEndpointUrl}`,
             delay: Container.DEFAULT_FETCH_TIMEOUT * 2,
             response: result,
         });
@@ -764,9 +764,9 @@ describe('A SDK', () => {
     });
 
     it('should clean up resources on close', async () => {
-        fetchMock.callHistory.calls({
+        fetchMock.callHistory.calls({}, {
             method: 'GET',
-            matcher: configuration.cidAssignerEndpointUrl,
+            url: configuration.cidAssignerEndpointUrl,
             response: '123',
         });
 

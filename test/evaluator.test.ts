@@ -570,8 +570,7 @@ describe('An evaluator', () => {
         });
 
         const response: ErrorResponse = {
-            title: `Invalid json response body at ${BASE_ENDPOINT_URL}/client/web/evaluate reason: `
-                + 'Unexpected token \'I\', "Invalid JSON payload" is not valid JSON',
+            title: 'Unknown error',
             type: EvaluationErrorType.UNEXPECTED_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,
@@ -708,8 +707,9 @@ describe('An evaluator', () => {
     });
 
     it('should not be serializable', () => {
-        expect(() => new Evaluator({appId: appId}).toJSON())
-            .toThrowWithMessage(Error, 'Unserializable value.');
+        expect(() => {
+            new Evaluator({appId: appId}).toJSON();
+        }).toThrowWithMessage(Error, 'Unserializable value.');
     });
 });
 
