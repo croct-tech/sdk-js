@@ -148,12 +148,12 @@ describe('A content fetcher facade', () => {
             timeout: options.timeout,
             version: options.version,
             attributes: options?.context?.attributes,
-            schema: true,
+            includeSchema: true,
         });
 
         expect(fetcher.fetch).toHaveBeenNthCalledWith(3, slotId, {
             ...options,
-            schema: true,
+            includeSchema: true,
         });
     });
 });
