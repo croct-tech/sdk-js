@@ -1,6 +1,7 @@
-import {Logger, NullLogger} from '../logging';
+import type {Logger} from '../logging';
+import {NullLogger} from '../logging';
 import {formatCause} from '../error';
-import {CidAssigner} from './assigner';
+import type {CidAssigner} from './assigner';
 import {CLIENT_LIBRARY} from '../constants';
 
 export class RemoteAssigner implements CidAssigner {

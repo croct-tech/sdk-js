@@ -1,4 +1,4 @@
-import {RetryPolicy} from './policy';
+import type {RetryPolicy} from './policy';
 
 type Options = {
     minRetryDelay: number, // min retry delay in ms (used in exp. backoff calcs)

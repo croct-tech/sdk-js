@@ -1,10 +1,11 @@
-import {Context, TokenScope} from '../src/context';
+import type {TokenScope} from '../src/context';
+import {Context} from '../src/context';
 import {Token} from '../src/token';
 import {TabEventEmulator} from './utils/tabEventEmulator';
 import {LocalStorageCache} from '../src/cache';
 import {DumbStorage} from './utils/dumbStorage';
-import {EventDispatcher} from '../src/eventManager';
-import {SdkEventMap} from '../src/sdkEvents';
+import type {EventDispatcher} from '../src/eventManager';
+import type {SdkEventMap} from '../src/sdkEvents';
 
 describe('A context', () => {
     const tabEventEmulator: TabEventEmulator = new TabEventEmulator();

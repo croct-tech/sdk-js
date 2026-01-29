@@ -1,7 +1,8 @@
 import {MinimalContextFactory, TabContextFactory} from '../../src/facade';
 import {Tab} from '../../src/tab';
-import {ContentFetcher, FetchOptions} from '../../src/contentFetcher';
-import {ContentFetcherFacade, FetchOptions as FetchFacadeOptions} from '../../src/facade/contentFetcherFacade';
+import type {ContentFetcher, FetchOptions} from '../../src/contentFetcher';
+import type {FetchOptions as FetchFacadeOptions} from '../../src/facade/contentFetcherFacade';
+import {ContentFetcherFacade} from '../../src/facade/contentFetcherFacade';
 import {FixedAssigner} from '../../src/cid';
 import {InMemoryTokenStore, FixedTokenProvider, Token} from '../../src/token';
 

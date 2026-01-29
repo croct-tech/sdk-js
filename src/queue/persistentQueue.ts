@@ -1,4 +1,4 @@
-import {Queue} from './queue';
+import type {Queue} from './queue';
 
 export class PersistentQueue<T> implements Queue<T> {
     private readonly storage: Storage;

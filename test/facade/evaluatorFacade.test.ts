@@ -1,6 +1,6 @@
-import {JsonObject} from '@croct/json';
+import type {JsonObject} from '@croct/json';
 import {EvaluatorFacade, MinimalContextFactory, TabContextFactory} from '../../src/facade';
-import {Evaluator, EvaluationOptions, Page} from '../../src/evaluator';
+import type {Evaluator, EvaluationOptions, Page} from '../../src/evaluator';
 import {Tab} from '../../src/tab';
 import {FixedAssigner} from '../../src/cid';
 import {InMemoryTokenStore, FixedTokenProvider, Token} from '../../src/token';

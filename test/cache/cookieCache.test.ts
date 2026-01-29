@@ -1,4 +1,5 @@
-import {CookieCache, CookieCacheConfiguration} from '../../src/cache/cookieCache';
+import type {CookieCacheConfiguration} from '../../src/cache/cookieCache';
+import {CookieCache} from '../../src/cache/cookieCache';
 
 describe('A cookie cache', () => {
     beforeEach(() => {
@@ -116,7 +117,7 @@ describe('A cookie cache', () => {
 
         expect(jar).not.toBeEmpty();
 
-        const cookie: Record<string, string|boolean> = {};
+        const cookie: Record<string, string | boolean> = {};
 
         for (const entry of jar.split(';')) {
             const [name, value = ''] = entry.split('=');

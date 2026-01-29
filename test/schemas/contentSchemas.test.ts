@@ -1,5 +1,5 @@
 import {postDetails} from '../../src/schema/contentSchemas';
-import {PostDetails} from '../../src/trackingEvents';
+import type {PostDetails} from '../../src/trackingEvents';
 
 describe('The product details schema', () => {
     it.each<PostDetails[]>([

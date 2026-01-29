@@ -1,6 +1,6 @@
-import {Cart, CartItem, Order, OrderItem, ProductDetails} from '../../src/trackingEvents';
+import type {Cart, CartItem, Order, OrderItem, ProductDetails} from '../../src/trackingEvents';
 import {cart, cartItem, order, orderItem, productDetails} from '../../src/schema';
-import {Optional} from '../../src/utilityTypes';
+import type {Optional} from '../../src/utilityTypes';
 
 const minimalProductDetails: ProductDetails = {
     productId: '12345',

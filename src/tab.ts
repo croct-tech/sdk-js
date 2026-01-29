@@ -1,4 +1,5 @@
-import {SynchronousEventManager, EventListener} from './eventManager';
+import type {EventListener} from './eventManager';
+import {SynchronousEventManager} from './eventManager';
 
 export type TabEvent<T = Record<string, unknown>> = CustomEvent<{tab: Tab} & T>;
 export type TabVisibilityChangeEvent = TabEvent<{visible: boolean}>;

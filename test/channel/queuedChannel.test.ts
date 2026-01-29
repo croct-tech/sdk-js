@@ -1,6 +1,7 @@
 import {InMemoryQueue, CapacityRestrictedQueue} from '../../src/queue';
-import {QueuedChannel, OutputChannel, MessageDeliveryError} from '../../src/channel';
-import {Logger} from '../../src/logging';
+import type {OutputChannel} from '../../src/channel';
+import {QueuedChannel, MessageDeliveryError} from '../../src/channel';
+import type {Logger} from '../../src/logging';
 
 describe('A queued channel', () => {
     afterEach(() => {

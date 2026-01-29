@@ -1,6 +1,6 @@
-import {Tracker} from '../../src/tracker';
+import type {Tracker} from '../../src/tracker';
 import {TrackerFacade} from '../../src/facade';
-import {
+import type {
     ExternalTrackingEvent as ExternalEvent,
     ExternalTrackingEventPayload as ExternalEventPayload,
     ExternalTrackingEventType as ExternalEventType,
@@ -359,7 +359,7 @@ describe('A tracker facade', () => {
 
         const {type, ...payload} = event;
 
-        trackerFacade.track(type, payload);
+        void trackerFacade.track(type, payload);
 
         expect(tracker.track).toHaveBeenNthCalledWith(1, event);
     });
@@ -372,7 +372,7 @@ describe('A tracker facade', () => {
         const trackerFacade = new TrackerFacade(tracker);
 
         function track(): void {
-            trackerFacade.track(null as unknown as 'userSignedUp', {} as ExternalEventPayload<'userSignedUp'>);
+            void trackerFacade.track(null as unknown as 'userSignedUp', {} as ExternalEventPayload<'userSignedUp'>);
         }
 
         expect(track).toThrow();
@@ -387,7 +387,7 @@ describe('A tracker facade', () => {
         const trackerFacade = new TrackerFacade(tracker);
 
         function track(): void {
-            trackerFacade.track('invalidType' as ExternalEventType, {} as ExternalEventPayload<'userSignedUp'>);
+            void trackerFacade.track('invalidType' as ExternalEventType, {} as ExternalEventPayload<'userSignedUp'>);
         }
 
         expect(track).toThrow();
@@ -402,7 +402,7 @@ describe('A tracker facade', () => {
         const trackerFacade = new TrackerFacade(tracker);
 
         function track(): void {
-            trackerFacade.track('userSignedUp', null as unknown as ExternalEventPayload<'userSignedUp'>);
+            void trackerFacade.track('userSignedUp', null as unknown as ExternalEventPayload<'userSignedUp'>);
         }
 
         expect(track).toThrow();
@@ -417,7 +417,7 @@ describe('A tracker facade', () => {
         const trackerFacade = new TrackerFacade(tracker);
 
         function track(): void {
-            trackerFacade.track('userSignedUp', {} as ExternalEventPayload<'userSignedUp'>);
+            void trackerFacade.track('userSignedUp', {} as ExternalEventPayload<'userSignedUp'>);
         }
 
         expect(track).toThrow();

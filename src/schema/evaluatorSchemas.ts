@@ -1,3 +1,4 @@
+import type {TypeSchema} from '../validation';
 import {
     ObjectType,
     NumberType,
@@ -6,7 +7,6 @@ import {
     StringType,
     NullType,
     BooleanType,
-    TypeSchema,
     ArrayType,
 } from '../validation';
 

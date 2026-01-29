@@ -1,11 +1,11 @@
-import {CacheListener, ObservableCache} from './cache';
+import type {CacheListener, ObservableCache} from './cache';
 
 export class LocalStorageCache implements ObservableCache {
     private readonly storage: Storage;
 
     private readonly key: string;
 
-    private value: string|null;
+    private value: string | null;
 
     private readonly listeners: CacheListener[] = [];
 
@@ -23,7 +23,7 @@ export class LocalStorageCache implements ObservableCache {
         return (): void => window.removeEventListener('storage', listener);
     }
 
-    public get(): string|null {
+    public get(): string | null {
         return this.value;
     }
 
@@ -59,7 +59,7 @@ export class LocalStorageCache implements ObservableCache {
         }
     }
 
-    private notifyChange(value: string|null): void {
+    private notifyChange(value: string | null): void {
         this.listeners.forEach(listener => listener(value));
     }
 

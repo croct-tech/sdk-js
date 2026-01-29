@@ -1,4 +1,4 @@
-import {Logger} from '../../src/logging';
+import type {Logger} from '../../src/logging';
 import {FilteredLogger} from '../../src/logging/filteredLogger';
 
 describe('A filtered logger', () => {

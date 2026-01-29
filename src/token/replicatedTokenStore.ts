@@ -1,4 +1,4 @@
-import {Token, TokenStore} from './token';
+import type {Token, TokenStore} from './token';
 
 export class ReplicatedTokenStore implements TokenStore {
     private primary: TokenStore;

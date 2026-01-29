@@ -1,4 +1,4 @@
-import {Cache} from './cache';
+import type {Cache} from './cache';
 
 export class FallbackCache implements Cache {
     private readonly caches: Cache[];
@@ -7,7 +7,7 @@ export class FallbackCache implements Cache {
         this.caches = caches;
     }
 
-    public get(): string|null {
+    public get(): string | null {
         for (const cache of this.caches) {
             const value = cache.get();
 

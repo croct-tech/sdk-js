@@ -1,4 +1,4 @@
-import {
+import type {
     Cart,
     CartItem,
     EventOccurred,
@@ -26,7 +26,7 @@ import {
     productViewed,
     userSignedUp,
 } from '../../src/schema';
-import {Optional} from '../../src/utilityTypes';
+import type {Optional} from '../../src/utilityTypes';
 
 const minimalProductDetails: ProductDetails = {
     productId: '12345',

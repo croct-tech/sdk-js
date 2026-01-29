@@ -1,6 +1,7 @@
-import {Logger, NullLogger} from '../logging';
-import {Cache} from '../cache';
-import {CidAssigner} from './assigner';
+import type {Logger} from '../logging';
+import {NullLogger} from '../logging';
+import type {Cache} from '../cache';
+import type {CidAssigner} from './assigner';
 
 type CachedAssignerOptions = {
     logger?: Logger,

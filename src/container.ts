@@ -1,29 +1,30 @@
-import {Logger, ConsoleLogger, NamespacedLogger} from './logging';
-import {Context, TokenScope} from './context';
+import type {Logger} from './logging';
+import {ConsoleLogger, NamespacedLogger} from './logging';
+import type {TokenScope} from './context';
+import {Context} from './context';
 import {NamespacedStorage} from './namespacedStorage';
 import {BackoffPolicy, ArbitraryPolicy} from './retry';
 import {PersistentQueue, MonitoredQueue, CapacityRestrictedQueue} from './queue';
-import {Beacon} from './trackingEvents';
-import {CachedTokenStore, TokenStore} from './token';
-import {Tracker, TrackingEventProcessor} from './tracker';
+import type {Beacon} from './trackingEvents';
+import type {TokenStore} from './token';
+import {CachedTokenStore} from './token';
+import type {TrackingEventProcessor} from './tracker';
+import {Tracker} from './tracker';
 import {Evaluator} from './evaluator';
 import {encodeJson} from './transformer';
-import {CidAssigner, CachedAssigner, RemoteAssigner, FixedAssigner} from './cid';
-import {EventManager, SynchronousEventManager} from './eventManager';
-import {SdkEventMap} from './sdkEvents';
+import type {CidAssigner} from './cid';
+import {CachedAssigner, RemoteAssigner, FixedAssigner} from './cid';
+import type {EventManager} from './eventManager';
+import {SynchronousEventManager} from './eventManager';
+import type {SdkEventMap} from './sdkEvents';
 import {LocalStorageCache} from './cache';
-import {UrlSanitizer} from './tab';
+import type {UrlSanitizer} from './tab';
 import {TimeStamper} from './channel/guaranteedChannel';
-import {
-    OutputChannel,
-    QueuedChannel,
-    RetryChannel,
-    GuaranteedChannel,
-    EncodedChannel,
-    SandboxChannel,
-} from './channel';
+import type {OutputChannel} from './channel';
+import {QueuedChannel, RetryChannel, GuaranteedChannel, EncodedChannel, SandboxChannel} from './channel';
 import {ContentFetcher} from './contentFetcher';
-import {CookieCache, CookieCacheConfiguration} from './cache/cookieCache';
+import type {CookieCacheConfiguration} from './cache/cookieCache';
+import {CookieCache} from './cache/cookieCache';
 import {FilteredLogger} from './logging/filteredLogger';
 import {HttpBeaconChannel} from './channel/httpBeaconChannel';
 import {DeduplicatedLogger} from './logging/deduplicatedLogger';

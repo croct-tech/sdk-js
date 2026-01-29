@@ -1,4 +1,5 @@
-import {MonitoredQueue, QueueStatus} from '../../src/queue/monitoredQueue';
+import type {QueueStatus} from '../../src/queue/monitoredQueue';
+import {MonitoredQueue} from '../../src/queue/monitoredQueue';
 import {InMemoryQueue, CapacityRestrictedQueue} from '../../src/queue';
 import {NullLogger} from '../../src/logging';
 

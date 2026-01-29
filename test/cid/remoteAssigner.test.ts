@@ -1,4 +1,5 @@
-import fetchMock, {UserRouteConfig} from 'fetch-mock';
+import type {UserRouteConfig} from 'fetch-mock';
+import fetchMock from 'fetch-mock';
 import {RemoteAssigner} from '../../src/cid';
 import {CLIENT_LIBRARY} from '../../src/constants';
 
@@ -67,8 +68,8 @@ describe('A remote CID assigner', () => {
         const firstCid = cachedAssigner.assignCid();
         const secondCid = cachedAssigner.assignCid();
 
-        firstCid.then(done);
-        secondCid.then(done);
+        void firstCid.then(done);
+        void secondCid.then(done);
 
         expect(done).not.toHaveBeenCalled();
 

@@ -12,7 +12,7 @@ export function describe(value: unknown): string {
     }
 
     if (typeof value === 'object') {
-        return (value as object).constructor.name;
+        return (value).constructor.name;
     }
 
     return typeof value;

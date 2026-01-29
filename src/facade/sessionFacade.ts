@@ -1,4 +1,4 @@
-import {Tracker} from '../tracker';
+import type {Tracker} from '../tracker';
 import {SessionPatch} from './sessionPatch';
 
 export class SessionFacade {

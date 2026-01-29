@@ -1,4 +1,5 @@
-import {ChannelListener, DuplexChannel, MessageDeliveryError} from './channel';
+import type {ChannelListener, DuplexChannel} from './channel';
+import {MessageDeliveryError} from './channel';
 
 export class SandboxChannel<I, O> implements DuplexChannel<I, O> {
     private readonly listeners: Array<ChannelListener<I>> = [];

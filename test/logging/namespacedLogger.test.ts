@@ -1,4 +1,5 @@
-import {NamespacedLogger, Logger} from '../../src/logging';
+import type {Logger} from '../../src/logging';
+import {NamespacedLogger} from '../../src/logging';
 
 describe('A namespaced logger', () => {
     let innerLogger: Logger;

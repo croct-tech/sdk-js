@@ -1,4 +1,4 @@
-import {RetryPolicy} from './policy';
+import type {RetryPolicy} from './policy';
 
 export class MaxAttemptsPolicy<T> implements RetryPolicy<T> {
     private readonly maxAttempts: number;

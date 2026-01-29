@@ -1,6 +1,6 @@
-import {JsonStructure, JsonValue} from '@croct/json';
-import {Operation, Patch} from './patch';
-import {TrackingEvent} from './trackingEvents';
+import type {JsonStructure, JsonValue} from '@croct/json';
+import type {Operation, Patch} from './patch';
+import type {TrackingEvent} from './trackingEvents';
 import {
     addOperation,
     clearOperation,

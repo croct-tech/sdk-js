@@ -1,7 +1,9 @@
-import {ChannelListener, DuplexChannel, MessageDeliveryError} from './channel';
-import {Envelope} from './guaranteedChannel';
-import {Logger, NullLogger} from '../logging';
-import {CidAssigner} from '../cid';
+import type {ChannelListener, DuplexChannel} from './channel';
+import {MessageDeliveryError} from './channel';
+import type {Envelope} from './guaranteedChannel';
+import type {Logger} from '../logging';
+import {NullLogger} from '../logging';
+import type {CidAssigner} from '../cid';
 import {formatMessage} from '../error';
 import {CLIENT_LIBRARY} from '../constants';
 import {Help} from '../help';

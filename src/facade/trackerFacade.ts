@@ -1,10 +1,10 @@
-import {
+import type {
     ExternalTrackingEvent as ExternalEvent,
     ExternalTrackingEventPayload as ExternalEventPayload,
     ExternalTrackingEventType as ExternalEventType,
 } from '../trackingEvents';
 import {formatCause} from '../error';
-import {Tracker, EventListener} from '../tracker';
+import type {Tracker, EventListener} from '../tracker';
 import {
     cartModified,
     cartViewed,

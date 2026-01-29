@@ -1,6 +1,6 @@
 import {ActiveRecord} from '../activeRecord';
-import {Tracker} from '../tracker';
-import {UserProfileChanged} from '../trackingEvents';
+import type {Tracker} from '../tracker';
+import type {UserProfileChanged} from '../trackingEvents';
 
 export class UserPatch extends ActiveRecord<UserProfileChanged> {
     private readonly tracker: Tracker;

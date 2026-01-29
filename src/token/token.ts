@@ -1,7 +1,7 @@
-import {JsonObject} from '@croct/json';
+import type {JsonObject} from '@croct/json';
 import {tokenSchema} from '../schema';
 import {formatCause} from '../error';
-import {ApiKey} from '../apiKey';
+import type {ApiKey} from '../apiKey';
 import {base64UrlDecode, base64UrlEncode} from '../base64Url';
 
 export type TokenHeaders = {
@@ -13,7 +13,7 @@ export type TokenHeaders = {
 
 export type TokenClaims = {
     iss: string,
-    aud: string|string[],
+    aud: string | string[],
     iat: number,
     exp?: number,
     sub?: string,
@@ -39,7 +39,7 @@ export class Token {
 
     public static issue(
         appId: string,
-        subject: string|null = null,
+        subject: string | null = null,
         timestamp: number = Math.floor(Date.now() / 1000),
     ): Token {
         if (timestamp < 0) {
@@ -83,7 +83,7 @@ export class Token {
         try {
             headers = JSON.parse(base64UrlDecode(parts[0], true));
             payload = JSON.parse(base64UrlDecode(parts[1], true));
-        } catch (error) {
+        } catch {
             throw new Error('The token is corrupted.');
         }
 
@@ -101,7 +101,7 @@ export class Token {
             throw new Error(`The token is invalid: ${formatCause(violation)}`);
         }
 
-        return new Token(headers as TokenHeaders, payload as TokenPayload, signature as string);
+        return new Token(headers, payload, signature);
     }
 
     public async signedWith(apiKey: ApiKey): Promise<Token> {
