@@ -52,13 +52,13 @@ describe('An evaluator', () => {
         jest.clearAllMocks();
     });
 
-    it('should require either an application ID or API key', async () => {
-        await expect(() => new Evaluator({}))
+    it('should require either an application ID or API key', () => {
+        expect(() => new Evaluator({}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
-    it('should require either an application ID or API key, but not both', async () => {
-        await expect(() => new Evaluator({apiKey: apiKeyIdentifier, appId: appId}))
+    it('should require either an application ID or API key, but not both', () => {
+        expect(() => new Evaluator({apiKey: apiKeyIdentifier, appId: appId}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 

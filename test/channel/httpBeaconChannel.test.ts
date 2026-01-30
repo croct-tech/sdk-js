@@ -420,7 +420,7 @@ describe('An HTTP beacon channel', () => {
 
         channel.subscribe(listener);
 
-        void channel.close();
+        channel.close();
 
         const promise = channel.publish({
             id: 'receipt-id',

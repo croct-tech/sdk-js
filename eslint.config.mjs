@@ -12,6 +12,7 @@ export default defineConfig(
     {
         rules: {
             '@typescript-eslint/unbound-method': 'off',
+            '@typescript-eslint/no-floating-promises': 'off',
         },
     },
 );

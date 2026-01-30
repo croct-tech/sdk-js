@@ -359,7 +359,7 @@ describe('A tracker facade', () => {
 
         const {type, ...payload} = event;
 
-        void trackerFacade.track(type, payload);
+        trackerFacade.track(type, payload);
 
         expect(tracker.track).toHaveBeenNthCalledWith(1, event);
     });
@@ -372,7 +372,7 @@ describe('A tracker facade', () => {
         const trackerFacade = new TrackerFacade(tracker);
 
         function track(): void {
-            void trackerFacade.track(null as unknown as 'userSignedUp', {} as ExternalEventPayload<'userSignedUp'>);
+            trackerFacade.track(null as unknown as 'userSignedUp', {} as ExternalEventPayload<'userSignedUp'>);
         }
 
         expect(track).toThrow();
@@ -387,7 +387,7 @@ describe('A tracker facade', () => {
         const trackerFacade = new TrackerFacade(tracker);
 
         function track(): void {
-            void trackerFacade.track('invalidType' as ExternalEventType, {} as ExternalEventPayload<'userSignedUp'>);
+            trackerFacade.track('invalidType' as ExternalEventType, {} as ExternalEventPayload<'userSignedUp'>);
         }
 
         expect(track).toThrow();
@@ -402,7 +402,7 @@ describe('A tracker facade', () => {
         const trackerFacade = new TrackerFacade(tracker);
 
         function track(): void {
-            void trackerFacade.track('userSignedUp', null as unknown as ExternalEventPayload<'userSignedUp'>);
+            trackerFacade.track('userSignedUp', null as unknown as ExternalEventPayload<'userSignedUp'>);
         }
 
         expect(track).toThrow();
@@ -417,7 +417,7 @@ describe('A tracker facade', () => {
         const trackerFacade = new TrackerFacade(tracker);
 
         function track(): void {
-            void trackerFacade.track('userSignedUp', {} as ExternalEventPayload<'userSignedUp'>);
+            trackerFacade.track('userSignedUp', {} as ExternalEventPayload<'userSignedUp'>);
         }
 
         expect(track).toThrow();

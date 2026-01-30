@@ -68,8 +68,8 @@ describe('A remote CID assigner', () => {
         const firstCid = cachedAssigner.assignCid();
         const secondCid = cachedAssigner.assignCid();
 
-        void firstCid.then(done);
-        void secondCid.then(done);
+        firstCid.then(done);
+        secondCid.then(done);
 
         expect(done).not.toHaveBeenCalled();
 

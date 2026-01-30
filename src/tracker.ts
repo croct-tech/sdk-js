@@ -367,7 +367,7 @@ export class Tracker {
                 continue;
             }
 
-            void this.publish(processedEvent);
+            this.publish(processedEvent);
         }
 
         if (result === null) {
@@ -423,8 +423,8 @@ export class Tracker {
 
             this.pending.push(promise);
 
-            void promise.finally(() => {
-                void this.pending.splice(this.pending.indexOf(promise), 1);
+            promise.finally(() => {
+                this.pending.splice(this.pending.indexOf(promise), 1);
             });
 
             if (this.state.enabled && event.type !== 'nothingChanged') {
