@@ -149,7 +149,7 @@ describe('An API key', () => {
         expect(apiKey.toString()).toBe('[redacted]');
     });
 
-    function createArrayBuffer(data: string): ArrayBuffer {
+    function createArrayBuffer(data: string): Uint8Array<ArrayBuffer> {
         const buffer = new ArrayBuffer(data.length);
         const view = new Uint8Array(buffer);
 
