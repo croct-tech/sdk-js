@@ -1,13 +1,18 @@
-import fetchMock, {CallLog} from 'fetch-mock';
-import {RouteMatcherFunction} from 'fetch-mock/dist/esm/Matchers';
-import {Sdk, Configuration} from '../src';
-import {NullLogger, Logger} from '../src/logging';
+import type {CallLog} from 'fetch-mock';
+import fetchMock from 'fetch-mock';
+import type {RouteMatcherFunction} from 'fetch-mock/dist/esm/Matchers';
+import type {Configuration} from '../src';
+import {Sdk} from '../src';
+import type {Logger} from '../src/logging';
+import {NullLogger} from '../src/logging';
 import {Token} from '../src/token';
 import {TabEventEmulator} from './utils/tabEventEmulator';
-import {BeaconPayload, NothingChanged} from '../src/trackingEvents';
-import {ContentError, ErrorResponse as ContentFetchErrorResponse, FetchResponse} from '../src/contentFetcher';
+import type {BeaconPayload, NothingChanged} from '../src/trackingEvents';
+import type {ErrorResponse as ContentFetchErrorResponse, FetchResponse} from '../src/contentFetcher';
+import {ContentError} from '../src/contentFetcher';
 import {BASE_ENDPOINT_URL} from '../src/constants';
-import {ErrorResponse as EvaluationErrorResponse, EvaluationError} from '../src/evaluator';
+import type {ErrorResponse as EvaluationErrorResponse} from '../src/evaluator';
+import {EvaluationError} from '../src/evaluator';
 import {Container} from '../src/container';
 
 jest.mock(
@@ -414,7 +419,7 @@ describe('A SDK', () => {
                 'Content-Type': 'application/json',
             }));
 
-            expect(JSON.parse(request.body as string)).toEqual(expect.objectContaining({
+            expect(JSON.parse(request.body)).toEqual(expect.objectContaining({
                 payload: event,
             }));
         },

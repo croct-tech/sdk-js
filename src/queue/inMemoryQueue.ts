@@ -1,4 +1,4 @@
-import {Queue} from './queue';
+import type {Queue} from './queue';
 
 export class InMemoryQueue<T> implements Queue<T> {
     private queue: T[] = [];

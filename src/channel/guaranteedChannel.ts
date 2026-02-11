@@ -1,5 +1,7 @@
-import {Logger, NullLogger} from '../logging';
-import {DuplexChannel, MessageDeliveryError, OutputChannel} from './channel';
+import type {Logger} from '../logging';
+import {NullLogger} from '../logging';
+import type {DuplexChannel, OutputChannel} from './channel';
+import {MessageDeliveryError} from './channel';
 
 export type MessageStamper<M, S> = {
     generate(message: M): S,
@@ -79,7 +81,7 @@ export class GuaranteedChannel<M, S> implements OutputChannel<M> {
 
             this.channel.subscribe(acknowledge);
 
-            const abort = (error: any): void => {
+            const abort = (error: Error): void => {
                 window.clearTimeout(timeoutTimer);
                 window.clearInterval(closeWatcher);
 

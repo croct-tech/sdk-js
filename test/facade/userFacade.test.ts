@@ -1,7 +1,7 @@
-import {Tracker} from '../../src/tracker';
+import type {Tracker} from '../../src/tracker';
 import {UserFacade} from '../../src/facade';
-import {UserProfileChanged} from '../../src/trackingEvents';
-import {Context} from '../../src/context';
+import type {UserProfileChanged} from '../../src/trackingEvents';
+import type {Context} from '../../src/context';
 
 describe('A user facade', () => {
     function createContextMock(): Context {

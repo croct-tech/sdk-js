@@ -1,4 +1,5 @@
-import {TypeSchema, Violation} from './schema';
+import type {TypeSchema} from './schema';
+import {Violation} from './schema';
 import {describe, formatPath} from './violation';
 
 export class FunctionType implements TypeSchema {

@@ -1,10 +1,10 @@
-import {JsonObject, JsonValue} from '@croct/json';
-import {Evaluator, EvaluationContext, Page} from '../evaluator';
-import {Tab} from '../tab';
+import type {JsonObject, JsonValue} from '@croct/json';
+import type {Evaluator, EvaluationContext, Page} from '../evaluator';
+import type {Tab} from '../tab';
 import {evaluationOptionsSchema as optionsSchema} from '../schema';
 import {formatCause} from '../error';
-import {TokenProvider} from '../token';
-import {CidAssigner} from '../cid';
+import type {TokenProvider} from '../token';
+import type {CidAssigner} from '../cid';
 
 export type EvaluationOptions = {
     timeout?: number,

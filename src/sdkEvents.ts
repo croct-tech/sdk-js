@@ -1,8 +1,8 @@
-import {Token} from './token';
+import type {Token} from './token';
 
 export interface TokenChanged {
-    oldToken: Token|null;
-    newToken: Token|null;
+    oldToken: Token | null;
+    newToken: Token | null;
 }
 
 export type SdkEventMap = Record<string, Record<string, unknown>> & {

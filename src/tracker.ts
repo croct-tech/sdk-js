@@ -1,18 +1,18 @@
-import {Logger, NullLogger} from './logging';
-import {Tab, TabEvent, TabUrlChangeEvent, TabVisibilityChangeEvent} from './tab';
-import {OutputChannel} from './channel';
+import type {Logger} from './logging';
+import {NullLogger} from './logging';
+import type {Tab, TabEvent, TabUrlChangeEvent, TabVisibilityChangeEvent} from './tab';
+import type {OutputChannel} from './channel';
 import {formatCause} from './error';
-import {Token, TokenProvider} from './token';
-import {RetryPolicy} from './retry';
-import {
+import type {Token, TokenProvider} from './token';
+import type {RetryPolicy} from './retry';
+import type {
     Beacon,
     BeaconPayload,
-    isCartPartialEvent,
-    isIdentifiedUserEvent,
     PartialTrackingEvent,
     TrackingEvent,
     TrackingEventContext,
 } from './trackingEvents';
+import {isCartPartialEvent, isIdentifiedUserEvent} from './trackingEvents';
 
 type Options = {
     eventMetadata?: {[key: string]: string},
@@ -358,7 +358,7 @@ export class Tracker {
         // sort events by timestamp in ascending order
         processedEvents.sort((left, right) => left.timestamp - right.timestamp);
 
-        let result: Promise<T>|null = null;
+        let result: Promise<T> | null = null;
 
         for (const processedEvent of processedEvents) {
             if (processedEvent === queuedEvent) {
@@ -412,7 +412,7 @@ export class Tracker {
 
                         resolve(event);
                     },
-                    cause => {
+                    (cause: Error) => {
                         this.logger.error(`Failed to publish event "${event.type}", reason: ${formatCause(cause)}`);
 
                         this.notifyEvent({...eventInfo, status: 'failed'});

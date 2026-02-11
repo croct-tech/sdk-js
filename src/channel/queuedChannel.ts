@@ -1,6 +1,8 @@
-import {MessageDeliveryError, OutputChannel} from './channel';
-import {Queue} from '../queue';
-import {Logger, NullLogger} from '../logging';
+import type {OutputChannel} from './channel';
+import {MessageDeliveryError} from './channel';
+import type {Queue} from '../queue';
+import type {Logger} from '../logging';
+import {NullLogger} from '../logging';
 
 export class QueuedChannel<T> implements OutputChannel<T> {
     private readonly channel: OutputChannel<T>;

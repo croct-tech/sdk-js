@@ -1,18 +1,11 @@
-import fetchMock, {CallLog, UserRouteConfig} from 'fetch-mock';
-import {
-    ErrorResponse,
-    EvaluationContext,
-    EvaluationError,
-    EvaluationErrorType,
-    EvaluationOptions,
-    Evaluator,
-    QueryError,
-    QueryErrorResponse,
-} from '../src/evaluator';
+import type {CallLog, UserRouteConfig} from 'fetch-mock';
+import fetchMock from 'fetch-mock';
+import type {ErrorResponse, EvaluationContext, EvaluationOptions, QueryErrorResponse} from '../src/evaluator';
+import {EvaluationError, EvaluationErrorType, Evaluator, QueryError} from '../src/evaluator';
 import {Token} from '../src/token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
 import {ApiKey} from '../src/apiKey';
-import {Logger} from '../src/logging';
+import type {Logger} from '../src/logging';
 import {Help} from '../src/help';
 
 jest.mock(
@@ -37,7 +30,7 @@ describe('An evaluator', () => {
 
     const query = 'user\'s name';
     const requestMatcher: UserRouteConfig = {
-        matcherFunction: (callLog: CallLog) => callLog !== undefined && callLog.options.mode === 'cors',
+        matcherFunction: (callLog: CallLog) => callLog?.options.mode === 'cors',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -59,13 +52,13 @@ describe('An evaluator', () => {
         jest.clearAllMocks();
     });
 
-    it('should require either an application ID or API key', async () => {
-        await expect(() => new Evaluator({}))
+    it('should require either an application ID or API key', () => {
+        expect(() => new Evaluator({}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
-    it('should require either an application ID or API key, but not both', async () => {
-        await expect(() => new Evaluator({apiKey: apiKeyIdentifier, appId: appId}))
+    it('should require either an application ID or API key, but not both', () => {
+        expect(() => new Evaluator({apiKey: apiKeyIdentifier, appId: appId}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
@@ -88,7 +81,7 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query)).resolves.toBe(result);
     });
 
-    it.each<[string, string|ApiKey]>([
+    it.each<[string, string | ApiKey]>([
         ['an API key', apiKey],
         ['an plain-text API key identifier', apiKeyIdentifier],
         ['an plain-text API key', plainTextApiKey],
@@ -308,8 +301,8 @@ describe('An evaluator', () => {
             status: 408,
         });
 
-        expect(fetchOptions!.signal).toBeDefined();
-        expect(fetchOptions!.signal!.aborted).toBe(true);
+        expect(fetchOptions.signal).toBeDefined();
+        expect(fetchOptions.signal!.aborted).toBe(true);
         expect(logger.error).toHaveBeenCalledWith(Help.forStatusCode(408));
     });
 

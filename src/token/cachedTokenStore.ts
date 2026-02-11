@@ -1,5 +1,6 @@
-import {Token, TokenStore} from './token';
-import {Cache} from '../cache';
+import type {TokenStore} from './token';
+import {Token} from './token';
+import type {Cache} from '../cache';
 
 export class CachedTokenStore implements TokenStore {
     private readonly cache: Cache;
@@ -17,7 +18,7 @@ export class CachedTokenStore implements TokenStore {
 
         try {
             return Token.parse(data);
-        } catch (error) {
+        } catch {
             return null;
         }
     }

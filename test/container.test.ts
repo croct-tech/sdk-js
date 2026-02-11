@@ -1,10 +1,12 @@
 import fetchMock from 'fetch-mock';
-import {Configuration, Container, DependencyResolver} from '../src/container';
-import {NullLogger, Logger} from '../src/logging';
-import {BeaconPayload, PartialTrackingEvent} from '../src/trackingEvents';
+import type {Configuration, DependencyResolver} from '../src/container';
+import {Container} from '../src/container';
+import type {Logger} from '../src/logging';
+import {NullLogger} from '../src/logging';
+import type {BeaconPayload, PartialTrackingEvent} from '../src/trackingEvents';
 import {LocalStorageCache} from '../src/cache';
 import {Token} from '../src/token';
-import {TrackingEventProcessor} from '../src/tracker';
+import type {TrackingEventProcessor} from '../src/tracker';
 
 describe('A container', () => {
     beforeEach(() => {

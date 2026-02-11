@@ -1,11 +1,11 @@
 export interface Cache {
-    get(): string|null;
+    get(): string | null;
     put(value: string): void;
     clear(): void;
 }
 
 export interface CacheListener {
-    (value: string|null): void;
+    (value: string | null): void;
 }
 
 export interface ObservableCache extends Cache {

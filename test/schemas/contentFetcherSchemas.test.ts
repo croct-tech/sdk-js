@@ -1,5 +1,5 @@
 import {fetchOptionsSchema} from '../../src/schema';
-import {FetchOptions} from '../../src/facade/contentFetcherFacade';
+import type {FetchOptions} from '../../src/facade/contentFetcherFacade';
 
 describe('The content fetcher option schema', () => {
     it.each<FetchOptions[]>([

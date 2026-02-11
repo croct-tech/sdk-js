@@ -1,4 +1,4 @@
-import {Logger} from './logger';
+import type {Logger} from './logger';
 
 export class NamespacedLogger implements Logger {
     private readonly logger: Logger;

@@ -1,4 +1,4 @@
-import {JsonStructure, JsonValue} from '@croct/json';
+import type {JsonStructure, JsonValue} from '@croct/json';
 
 interface AbstractOperation {
     type: string;

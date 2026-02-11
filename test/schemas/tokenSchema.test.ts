@@ -1,5 +1,5 @@
 import {tokenSchema} from '../../src/schema';
-import {TokenPayload, TokenHeaders} from '../../src/token';
+import type {TokenPayload, TokenHeaders} from '../../src/token';
 
 type ParsedToken = {
     headers: TokenHeaders,

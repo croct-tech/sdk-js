@@ -1,6 +1,6 @@
-import {Logger} from '../src/logging';
+import type {Logger} from '../src/logging';
 import {EventSubjectProcessor} from '../src/eventSubjectProcessor';
-import {QueuedEventInfo} from '../src/tracker';
+import type {QueuedEventInfo} from '../src/tracker';
 import {Token} from '../src/token';
 
 describe('EventSubjectProcessor', () => {

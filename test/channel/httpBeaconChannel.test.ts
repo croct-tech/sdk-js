@@ -1,8 +1,8 @@
 import fetchMock from '@fetch-mock/jest';
 import {HttpBeaconChannel, MessageDeliveryError} from '../../src/channel';
-import {Logger} from '../../src/logging';
+import type {Logger} from '../../src/logging';
 import {FixedAssigner} from '../../src/cid';
-import {Beacon} from '../../src/trackingEvents';
+import type {Beacon} from '../../src/trackingEvents';
 import {Token} from '../../src/token';
 import {CLIENT_LIBRARY} from '../../src/constants';
 import {Help} from '../../src/help';
@@ -96,7 +96,7 @@ describe('An HTTP beacon channel', () => {
             'Content-Type': 'application/json',
         });
 
-        expect(JSON.parse(lastRequest.body as string)).toEqual({
+        expect(JSON.parse(lastRequest.body)).toEqual({
             ...expectedBeacon,
             originalTime: originalTime,
             departureTime: 2,

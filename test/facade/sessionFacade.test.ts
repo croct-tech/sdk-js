@@ -1,6 +1,6 @@
-import {Tracker} from '../../src/tracker';
+import type {Tracker} from '../../src/tracker';
 import {SessionFacade} from '../../src/facade';
-import {SessionAttributesChanged} from '../../src/trackingEvents';
+import type {SessionAttributesChanged} from '../../src/trackingEvents';
 
 describe('A session facade', () => {
     let tracker: Tracker;

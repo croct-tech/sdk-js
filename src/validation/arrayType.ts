@@ -1,4 +1,5 @@
-import {Schema, TypeSchema, Violation} from './schema';
+import type {Schema, TypeSchema} from './schema';
+import {Violation} from './schema';
 import {describe, formatPath} from './violation';
 
 type ArrayDefinition = {

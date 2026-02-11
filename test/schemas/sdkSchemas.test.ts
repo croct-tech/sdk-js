@@ -1,5 +1,5 @@
 import {sdkConfigurationSchema, eventMetadataSchema, cookieOptionsSchema} from '../../src/schema';
-import {Configuration} from '../../src';
+import type {Configuration} from '../../src';
 
 describe('The event metadata schema', () => {
     it.each([

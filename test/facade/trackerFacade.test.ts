@@ -1,6 +1,6 @@
-import {Tracker} from '../../src/tracker';
+import type {Tracker} from '../../src/tracker';
 import {TrackerFacade} from '../../src/facade';
-import {
+import type {
     ExternalTrackingEvent as ExternalEvent,
     ExternalTrackingEventPayload as ExternalEventPayload,
     ExternalTrackingEventType as ExternalEventType,

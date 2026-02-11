@@ -1,4 +1,4 @@
-import {RetryPolicy} from './policy';
+import type {RetryPolicy} from './policy';
 
 export class NeverPolicy<T> implements RetryPolicy<T> {
     public getDelay(): number {

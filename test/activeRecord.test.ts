@@ -1,5 +1,5 @@
 import {ActiveRecord} from '../src/activeRecord';
-import {Patch} from '../src/patch';
+import type {Patch} from '../src/patch';
 
 class TestRecord extends ActiveRecord<any> {
     public save(): Promise<any> {

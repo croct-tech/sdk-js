@@ -1,9 +1,11 @@
-import {JsonObject, JsonValue} from '@croct/json';
-import {Token} from './token';
+import type {JsonObject, JsonValue} from '@croct/json';
+import type {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
-import {getLength, getLocation, Location} from './sourceLocation';
-import {Logger, NullLogger} from './logging';
+import type {Location} from './sourceLocation';
+import {getLength, getLocation} from './sourceLocation';
+import type {Logger} from './logging';
+import {NullLogger} from './logging';
 import {ApiKey} from './apiKey';
 import {Help} from './help';
 
@@ -38,7 +40,7 @@ export type EvaluationOptions = {
     clientId?: string,
     clientIp?: string,
     clientAgent?: string,
-    userToken?: Token|string,
+    userToken?: Token | string,
     timeout?: number,
     context?: EvaluationContext,
     extra?: ExtraFetchOptions,
@@ -93,7 +95,7 @@ export class QueryError extends EvaluationError<QueryErrorResponse> {
 
 export type Configuration = {
     appId?: string,
-    apiKey?: string|ApiKey,
+    apiKey?: string | ApiKey,
     baseEndpointUrl?: string,
     logger?: Logger,
     defaultTimeout?: number,

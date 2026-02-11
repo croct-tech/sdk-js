@@ -1,19 +1,22 @@
-import {SdkFacade, Configuration} from '../../src/facade/sdkFacade';
-import {Configuration as ResolvedConfiguration} from '../../src/sdk';
+import type {Configuration} from '../../src/facade/sdkFacade';
+import {SdkFacade} from '../../src/facade/sdkFacade';
+import type {Configuration as ResolvedConfiguration} from '../../src/sdk';
 import {InMemoryTokenStore, Token} from '../../src/token';
 import {Sdk} from '../../src';
-import {Context} from '../../src/context';
+import type {Context} from '../../src/context';
 import {UserFacade, SessionFacade, TrackerFacade} from '../../src/facade';
-import {Tracker} from '../../src/tracker';
+import type {Tracker} from '../../src/tracker';
 import {NullLogger} from '../../src/logging';
 import {DumbStorage} from '../utils/dumbStorage';
-import {EventManager} from '../../src/eventManager';
-import {SdkEventMap} from '../../src/sdkEvents';
-import {CidAssigner, FixedAssigner} from '../../src/cid';
-import {Evaluator} from '../../src/evaluator';
-import {Tab, UrlSanitizer} from '../../src/tab';
-import {ContentFetcher, FetchResponse} from '../../src/contentFetcher';
-import {FetchOptions} from '../../src/facade/contentFetcherFacade';
+import type {EventManager} from '../../src/eventManager';
+import type {SdkEventMap} from '../../src/sdkEvents';
+import type {CidAssigner} from '../../src/cid';
+import {FixedAssigner} from '../../src/cid';
+import type {Evaluator} from '../../src/evaluator';
+import type {UrlSanitizer} from '../../src/tab';
+import {Tab} from '../../src/tab';
+import type {ContentFetcher, FetchResponse} from '../../src/contentFetcher';
+import type {FetchOptions} from '../../src/facade/contentFetcherFacade';
 
 describe('A SDK facade', () => {
     const appId = '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a';
@@ -29,7 +32,7 @@ describe('A SDK facade', () => {
         const mock = jest.createMockFromModule<{Context: new() => Context}>('../../src/context');
         const context = new mock.Context();
 
-        let token: Token|null = null;
+        let token: Token | null = null;
 
         jest.spyOn(context, 'getToken')
             .mockImplementation()
@@ -585,7 +588,7 @@ describe('A SDK facade', () => {
     it('should allow anonymizing a user', () => {
         const context = createContextMock();
 
-        let token: Token|null = null;
+        let token: Token | null = null;
 
         jest.spyOn(context, 'getToken')
             .mockImplementation()
@@ -1118,7 +1121,7 @@ describe('A SDK facade', () => {
         expect(cidAssigner.assignCid).toHaveBeenCalled();
     });
 
-    it('should provide a user token store', async () => {
+    it('should provide a user token store', () => {
         const tokenStore = new InMemoryTokenStore();
 
         jest.spyOn(Sdk, 'init')
@@ -1135,10 +1138,10 @@ describe('A SDK facade', () => {
             track: false,
         });
 
-        await expect(sdkFacade.userTokenStore).toBe(tokenStore);
+        expect(sdkFacade.userTokenStore).toBe(tokenStore);
     });
 
-    it('should provide a preview token store', async () => {
+    it('should provide a preview token store', () => {
         const tokenStore = new InMemoryTokenStore();
 
         jest.spyOn(Sdk, 'init')
@@ -1155,7 +1158,7 @@ describe('A SDK facade', () => {
             track: false,
         });
 
-        await expect(sdkFacade.previewTokenStore).toBe(tokenStore);
+        expect(sdkFacade.previewTokenStore).toBe(tokenStore);
     });
 
     it('should allow to subscribe and unsubscribe to events', () => {

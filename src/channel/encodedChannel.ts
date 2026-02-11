@@ -1,5 +1,5 @@
-import {OutputChannel} from './channel';
-import {Transformer} from '../transformer';
+import type {OutputChannel} from './channel';
+import type {Transformer} from '../transformer';
 
 export class EncodedChannel<D, E> implements OutputChannel<D> {
     private readonly encode: Transformer<D, E>;

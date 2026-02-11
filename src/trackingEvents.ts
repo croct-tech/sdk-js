@@ -1,5 +1,5 @@
-import {Patch} from './patch';
-import {DistributiveOmit, Optional} from './utilityTypes';
+import type {Patch} from './patch';
+import type {DistributiveOmit, Optional} from './utilityTypes';
 
 /*
  * Object values
@@ -326,7 +326,7 @@ export interface PostViewed extends BaseEvent {
 export interface EventOccurred extends BaseEvent {
     type: 'eventOccurred';
     name: string;
-    details?: {[key: string]: string|number|boolean|null};
+    details?: {[key: string]: string | number | boolean | null};
 }
 
 export interface LinkOpened extends BaseEvent {

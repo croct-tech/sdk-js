@@ -1,4 +1,5 @@
-import {Tab, UrlSanitizer} from '../src/tab';
+import type {UrlSanitizer} from '../src/tab';
+import {Tab} from '../src/tab';
 import {TabEventEmulator} from './utils/tabEventEmulator';
 
 describe('A tab', () => {

@@ -1,5 +1,6 @@
-import {Queue} from './queue';
-import {Logger, NullLogger} from '../logging';
+import type {Queue} from './queue';
+import type {Logger} from '../logging';
+import {NullLogger} from '../logging';
 
 export type QueueStatus = 'halfEmpty' | 'almostEmpty' | 'empty' | 'halfFull' | 'almostFull' | 'full';
 

@@ -1,5 +1,5 @@
 import {userProfileSchema} from '../../src/schema';
-import {UserProfile} from '../../src/trackingEvents';
+import type {UserProfile} from '../../src/trackingEvents';
 
 describe('The user profile schema', () => {
     it.each<UserProfile[]>([

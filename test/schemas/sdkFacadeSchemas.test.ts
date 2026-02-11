@@ -1,5 +1,5 @@
 import {sdkFacadeConfigurationSchema} from '../../src/schema';
-import {Configuration} from '../../src/facade/sdkFacade';
+import type {Configuration} from '../../src/facade/sdkFacade';
 
 describe('The SDK facade configuration schema', () => {
     it.each<Configuration[]>([

@@ -1,5 +1,5 @@
-import {Tracker} from '../../src/tracker';
-import {UserProfileChanged} from '../../src/trackingEvents';
+import type {Tracker} from '../../src/tracker';
+import type {UserProfileChanged} from '../../src/trackingEvents';
 import {UserPatch} from '../../src/facade';
 
 describe('A user patch', () => {

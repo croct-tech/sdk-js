@@ -1,18 +1,19 @@
-import {Container, DependencyResolver} from './container';
-import {Context, TokenScope} from './context';
-import {Logger} from './logging';
+import type {DependencyResolver} from './container';
+import {Container} from './container';
+import type {Context, TokenScope} from './context';
+import type {Logger} from './logging';
 import {BASE_ENDPOINT_URL, VERSION} from './constants';
 import {sdkConfigurationSchema} from './schema';
 import {formatCause} from './error';
-import {Tracker, TrackingEventProcessor} from './tracker';
-import {Evaluator} from './evaluator';
-import {SdkEventMap} from './sdkEvents';
-import {EventManager} from './eventManager';
-import {CidAssigner} from './cid';
-import {UrlSanitizer} from './tab';
-import {ContentFetcher} from './contentFetcher';
-import {TokenStore} from './token';
-import {CookieCacheConfiguration} from './cache/cookieCache';
+import type {Tracker, TrackingEventProcessor} from './tracker';
+import type {Evaluator} from './evaluator';
+import type {SdkEventMap} from './sdkEvents';
+import type {EventManager} from './eventManager';
+import type {CidAssigner} from './cid';
+import type {UrlSanitizer} from './tab';
+import type {ContentFetcher} from './contentFetcher';
+import type {TokenStore} from './token';
+import type {CookieCacheConfiguration} from './cache/cookieCache';
 
 export type Configuration = {
     appId: string,

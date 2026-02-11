@@ -163,7 +163,7 @@ export class ApiKey {
      * @param data The string to convert.
      * @returns The array buffer.
      */
-    private static createByteArrayFromString(data: string): Uint8Array {
+    private static createByteArrayFromString(data: string): Uint8Array<ArrayBuffer> {
         const byteArray = new Uint8Array(data.length);
 
         for (let i = 0; i < byteArray.length; i++) {
@@ -173,7 +173,7 @@ export class ApiKey {
         return byteArray;
     }
 
-    private static createByteArrayFromHexString(data: string): Uint8Array {
+    private static createByteArrayFromHexString(data: string): Uint8Array<ArrayBuffer> {
         const byteArray = new Uint8Array(data.length / 2);
 
         for (let i = 0; i < byteArray.length; i++) {
@@ -191,11 +191,11 @@ export class ApiKey {
      * @param buffer The buffer to convert.
      * @returns The string.
      */
-    private static convertBufferToString(buffer: ArrayLike<number> | ArrayBufferLike): string {
+    private static convertBufferToString(buffer: ArrayLike<number> | ArrayBuffer): string {
         return String.fromCharCode(...new Uint8Array(buffer));
     }
 
-    private static convertBufferToHexString(buffer: ArrayLike<number> | ArrayBufferLike): string {
+    private static convertBufferToHexString(buffer: ArrayLike<number> | ArrayBuffer): string {
         const bytes = new Uint8Array(buffer);
         let hexString = '';
 

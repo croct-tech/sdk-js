@@ -1,10 +1,11 @@
-import {JsonObject} from '@croct/json';
+import type {JsonObject} from '@croct/json';
 import type {ContentDefinitionBundle} from '@croct/content-model/definition';
-import {EvaluationContext} from './evaluator';
-import {Token} from './token';
+import type {EvaluationContext} from './evaluator';
+import type {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from './constants';
 import {formatMessage} from './error';
-import {Logger, NullLogger} from './logging';
+import type {Logger} from './logging';
+import {NullLogger} from './logging';
 import {ApiKey} from './apiKey';
 import {Help} from './help';
 
@@ -62,8 +63,8 @@ export type DynamicContentOptions = BasicOptions & {
     clientId?: string,
     clientIp?: string,
     clientAgent?: string,
-    userToken?: Token|string,
-    previewToken?: Token|string,
+    userToken?: Token | string,
+    previewToken?: Token | string,
     context?: EvaluationContext,
 };
 
@@ -97,7 +98,7 @@ export type FetchResponse<P = JsonObject, O = FetchResponseOptions> = {
 
 export type Configuration = {
     appId?: string,
-    apiKey?: string|ApiKey,
+    apiKey?: string | ApiKey,
     baseEndpointUrl?: string,
     logger?: Logger,
     defaultTimeout?: number,

@@ -1,4 +1,5 @@
-import {Envelope, GuaranteedChannel, MessageStamper, TimeStamper} from '../../src/channel/guaranteedChannel';
+import type {Envelope, MessageStamper} from '../../src/channel/guaranteedChannel';
+import {GuaranteedChannel, TimeStamper} from '../../src/channel/guaranteedChannel';
 import {MessageDeliveryError, SandboxChannel} from '../../src/channel';
 
 describe('A guaranteed channel', () => {

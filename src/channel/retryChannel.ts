@@ -1,6 +1,8 @@
-import {MessageDeliveryError, OutputChannel} from './channel';
-import {Logger, NullLogger} from '../logging';
-import {RetryPolicy} from '../retry';
+import type {OutputChannel} from './channel';
+import {MessageDeliveryError} from './channel';
+import type {Logger} from '../logging';
+import {NullLogger} from '../logging';
+import type {RetryPolicy} from '../retry';
 
 type Configuration<T> = {
     channel: OutputChannel<T>,

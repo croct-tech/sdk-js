@@ -1,9 +1,12 @@
-import {Token, TokenStore, CachedTokenStore, ReplicatedTokenStore, InMemoryTokenStore} from './token';
-import {Tab, UrlSanitizer} from './tab';
+import type {Token, TokenStore} from './token';
+import {CachedTokenStore, ReplicatedTokenStore, InMemoryTokenStore} from './token';
+import type {UrlSanitizer} from './tab';
+import {Tab} from './tab';
 import {uuid4} from './uuid';
-import {EventDispatcher} from './eventManager';
-import {SdkEventMap} from './sdkEvents';
-import {Cache, ObservableCache} from './cache';
+import type {EventDispatcher} from './eventManager';
+import type {SdkEventMap} from './sdkEvents';
+import type {Cache} from './cache';
+import {ObservableCache} from './cache';
 
 export type TokenScope = 'isolated' | 'global' | 'contextual';
 
@@ -20,7 +23,7 @@ export type Configuration = {
 
 type ContextEventDispatcher = EventDispatcher<Pick<SdkEventMap, 'tokenChanged'>>;
 
-function tokenEquals(left: Token|null, right: Token|null): boolean {
+function tokenEquals(left: Token | null, right: Token | null): boolean {
     return left === right || (left !== null && right !== null && left.toString() === right.toString());
 }
 
@@ -31,7 +34,7 @@ export class Context {
 
     private readonly eventDispatcher: ContextEventDispatcher;
 
-    private lastToken: Token|null;
+    private lastToken: Token | null;
 
     private constructor(tab: Tab, tokenStore: TokenStore, eventDispatcher: ContextEventDispatcher) {
         this.tab = tab;

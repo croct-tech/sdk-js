@@ -1,5 +1,6 @@
 import {webcrypto} from 'crypto';
-import {Token, FixedTokenProvider, TokenHeaders, TokenPayload, TokenClaims} from '../../src/token';
+import type {TokenHeaders, TokenPayload, TokenClaims} from '../../src/token';
+import {Token, FixedTokenProvider} from '../../src/token';
 import {ApiKey} from '../../src/apiKey';
 import {base64UrlEncode} from '../../src/base64Url';
 
@@ -464,12 +465,12 @@ describe('A token', () => {
         const tokenWithExpiration = Token.parse(
             'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaXNzIjoiQ3JvY3QiLCJh'
             + 'dWQiOiJjcm9jdC5jb20iLCJpYXQiOjE3MTQ2MTcyODgsImV4cCI6MTcxNDYyMDg4OH0',
-        )!;
+        );
 
         const tokenWithoutExpiration = Token.parse(
             'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaXNzIjoiQ3JvY3QiLCJhd'
             + 'WQiOiJjcm9jdC5jb20iLCJpYXQiOjE3MTQ2MTcyODh9',
-        )!;
+        );
 
         expect(tokenWithExpiration).not.toBeNull();
         expect(tokenWithoutExpiration).not.toBeNull();

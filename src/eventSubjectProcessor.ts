@@ -1,10 +1,10 @@
-import {QueuedEventInfo, TrackingEventProcessor} from './tracker';
-import {Token} from './token';
-import {Logger} from './logging';
-import {TrackingEvent} from './trackingEvents';
+import type {QueuedEventInfo, TrackingEventProcessor} from './tracker';
+import type {Token} from './token';
+import type {Logger} from './logging';
+import type {TrackingEvent} from './trackingEvents';
 
 export class EventSubjectProcessor implements TrackingEventProcessor {
-    private currentToken?: Token|null;
+    private currentToken?: Token | null;
 
     private logger: Logger;
 

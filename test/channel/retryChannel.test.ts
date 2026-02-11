@@ -1,4 +1,5 @@
-import {RetryChannel, OutputChannel, MessageDeliveryError} from '../../src/channel';
+import type {OutputChannel} from '../../src/channel';
+import {RetryChannel, MessageDeliveryError} from '../../src/channel';
 import {MaxAttemptsPolicy} from '../../src/retry';
 
 describe('A retry channel', () => {

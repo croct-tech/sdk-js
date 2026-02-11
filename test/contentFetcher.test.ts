@@ -1,17 +1,12 @@
-import fetchMock, {CallLog, UserRouteConfig} from 'fetch-mock';
-import {EvaluationContext} from '../src/evaluator';
+import type {CallLog, UserRouteConfig} from 'fetch-mock';
+import fetchMock from 'fetch-mock';
+import type {EvaluationContext} from '../src/evaluator';
 import {Token} from '../src/token';
-import {
-    ContentFetcher,
-    ContentError,
-    ContentErrorType,
-    ErrorResponse,
-    FetchOptions,
-    FetchResponse,
-} from '../src/contentFetcher';
+import type {ErrorResponse, FetchOptions, FetchResponse} from '../src/contentFetcher';
+import {ContentFetcher, ContentError, ContentErrorType} from '../src/contentFetcher';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
 import {ApiKey} from '../src/apiKey';
-import {Logger} from '../src/logging';
+import type {Logger} from '../src/logging';
 import {Help} from '../src/help';
 
 jest.mock(
@@ -44,7 +39,7 @@ describe('A content fetcher', () => {
     };
 
     const requestMatcher: UserRouteConfig = {
-        matcherFunction: (callLog: CallLog) => callLog !== undefined && callLog.options.mode === 'cors',
+        matcherFunction: (callLog: CallLog) => callLog?.options.mode === 'cors',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -93,7 +88,7 @@ describe('A content fetcher', () => {
         await expect(fetcher.fetch(slotId)).resolves.toEqual(result);
     });
 
-    it.each<[string, string|ApiKey]>([
+    it.each<[string, string | ApiKey]>([
         ['an API key', apiKey],
         ['an plain-text API key identifier', apiKeyIdentifier],
         ['an plain-text API key', plainTextApiKey],
@@ -454,7 +449,7 @@ describe('A content fetcher', () => {
             status: 408,
         });
 
-        expect(fetchOptions!.signal!.aborted).toBe(true);
+        expect(fetchOptions.signal!.aborted).toBe(true);
 
         expect(logger.error).toHaveBeenCalledWith(Help.forStatusCode(408));
     });

@@ -1,4 +1,4 @@
-import {RetryPolicy} from './policy';
+import type {RetryPolicy} from './policy';
 
 export class ArbitraryPolicy<T> implements RetryPolicy<T> {
     private readonly delays: number[];

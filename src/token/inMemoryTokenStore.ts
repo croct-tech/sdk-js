@@ -1,4 +1,4 @@
-import {Token, TokenStore} from './token';
+import type {Token, TokenStore} from './token';
 
 export class InMemoryTokenStore implements TokenStore {
     private token: Token | null = null;

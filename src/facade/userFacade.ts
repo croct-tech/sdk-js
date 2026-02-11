@@ -1,6 +1,6 @@
-import {Tracker} from '../tracker';
+import type {Tracker} from '../tracker';
 import {UserPatch} from './userPatch';
-import {Context} from '../context';
+import type {Context} from '../context';
 
 export class UserFacade {
     private readonly context: Context;

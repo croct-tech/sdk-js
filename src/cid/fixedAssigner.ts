@@ -1,4 +1,4 @@
-import {CidAssigner} from './assigner';
+import type {CidAssigner} from './assigner';
 
 export class FixedAssigner implements CidAssigner {
     private readonly cid: string;

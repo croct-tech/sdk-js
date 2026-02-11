@@ -1,4 +1,4 @@
-import {Logger} from '../../src/logging';
+import type {Logger} from '../../src/logging';
 import {DeduplicatedLogger} from '../../src/logging/deduplicatedLogger';
 
 describe('A deduplicated logger', () => {

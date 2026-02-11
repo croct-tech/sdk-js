@@ -41,15 +41,17 @@
     "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@croct/eslint-plugin": "^0.7.0",
+    "@croct/eslint-plugin": "^0.8.3",
+    "@eslint/eslintrc": "^3.3.3",
     "@fetch-mock/jest": "^0.2.20",
+    "@typescript-eslint/parser": "^8.53.0",
     "@types/jest": "^30.0.0",
     "esbuild-fix-imports-plugin": "^1.0.19",
-    "eslint": "^8.57.0",
+    "eslint": "^9.39.0",
     "fetch-mock": "^12.6.0",
     "jest": "^30.0.0",
     "jest-environment-jsdom": "^30.0.0",
-    "jest-extended": "^6.0.0",
+    "jest-extended": "^7.0.0",
     "ts-jest": "^29.0.3",
     "tsup": "^8.4.0",
     "typescript": "^5.0.0"

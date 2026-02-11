@@ -1,4 +1,5 @@
-import fetchMock, {UserRouteConfig} from 'fetch-mock';
+import type {UserRouteConfig} from 'fetch-mock';
+import fetchMock from 'fetch-mock';
 import {RemoteAssigner} from '../../src/cid';
 import {CLIENT_LIBRARY} from '../../src/constants';
 

@@ -1,20 +1,21 @@
 import {EvaluatorFacade, TabContextFactory} from './evaluatorFacade';
 import {TrackerFacade} from './trackerFacade';
-import {Context, TokenScope} from '../context';
+import type {Context, TokenScope} from '../context';
 import {UserFacade} from './userFacade';
-import {Token, TokenStore} from '../token';
+import type {TokenStore} from '../token';
+import {Token} from '../token';
 import {formatCause} from '../error';
 import {sdkFacadeConfigurationSchema} from '../schema';
 import {Sdk} from '../sdk';
 import {SessionFacade} from './sessionFacade';
-import {Logger} from '../logging';
-import {SdkEventMap} from '../sdkEvents';
-import {EventManager} from '../eventManager';
-import {CidAssigner} from '../cid';
-import {PartialTrackingEvent} from '../trackingEvents';
-import {UrlSanitizer} from '../tab';
+import type {Logger} from '../logging';
+import type {SdkEventMap} from '../sdkEvents';
+import type {EventManager} from '../eventManager';
+import type {CidAssigner} from '../cid';
+import type {PartialTrackingEvent} from '../trackingEvents';
+import type {UrlSanitizer} from '../tab';
 import {ContentFetcherFacade} from './contentFetcherFacade';
-import {CookieCacheConfiguration} from '../cache/cookieCache';
+import type {CookieCacheConfiguration} from '../cache/cookieCache';
 import {EventSubjectProcessor} from '../eventSubjectProcessor';
 
 export type Configuration = {
@@ -213,7 +214,7 @@ export class SdkFacade {
         }
     }
 
-    public getToken(): Token|null {
+    public getToken(): Token | null {
         return this.context.getToken();
     }
 
