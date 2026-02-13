@@ -329,6 +329,30 @@ describe('A cookie cache', () => {
         disable();
     });
 
+    it('should match encoded cookie names in change events', () => {
+        const cache = new CookieCache({name: 'cookie;name'});
+        const listener = jest.fn();
+
+        cache.addListener(listener);
+
+        const disable = CookieCache.autoSync(cache);
+
+        cache.put('foo');
+
+        // CookieStore API reports encoded cookie names
+        dispatchCookieChange({changed: [{name: 'cookie%3Bname'}], deleted: []});
+
+        expect(listener).toHaveBeenCalledTimes(1);
+        expect(listener).toHaveBeenCalledWith('foo');
+
+        // Should ignore unrelated encoded cookie changes
+        dispatchCookieChange({changed: [{name: 'other%3Bname'}], deleted: []});
+
+        expect(listener).toHaveBeenCalledTimes(1);
+
+        disable();
+    });
+
     it('should not sync when CookieStore API is unavailable', () => {
         delete (window as {cookieStore?: unknown}).cookieStore;
 
