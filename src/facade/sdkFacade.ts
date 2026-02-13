@@ -9,14 +9,13 @@ import {sdkFacadeConfigurationSchema} from '../schema';
 import {Sdk} from '../sdk';
 import {SessionFacade} from './sessionFacade';
 import type {Logger} from '../logging';
-import type {SdkEventMap} from '../sdkEvents';
+import type {SdkEventMap, TokenChanged} from '../sdkEvents';
 import type {EventManager} from '../eventManager';
 import type {CidAssigner} from '../cid';
 import type {PartialTrackingEvent} from '../trackingEvents';
 import type {UrlSanitizer} from '../tab';
 import {ContentFetcherFacade} from './contentFetcherFacade';
 import type {CookieCacheConfiguration} from '../cache/cookieCache';
-import {EventSubjectProcessor} from '../eventSubjectProcessor';
 
 export type Configuration = {
     appId: string,
@@ -76,41 +75,66 @@ export class SdkFacade {
             throw new Error('Either the user ID or token can be specified, but not both.');
         }
 
-        const sdk = new SdkFacade(
-            Sdk.init({
-                ...containerConfiguration,
-                tokenScope: containerConfiguration.tokenScope ?? 'global',
-                debug: containerConfiguration.debug ?? false,
-                test: containerConfiguration.test ?? false,
-                disableCidMirroring: containerConfiguration.disableCidMirroring ?? false,
-                eventProcessor: container => new EventSubjectProcessor(container.getLogger('EventSubjectProcessor')),
-            }),
-        );
+        const sdk = Sdk.init({
+            ...containerConfiguration,
+            tokenScope: containerConfiguration.tokenScope ?? 'global',
+            debug: containerConfiguration.debug ?? false,
+            test: containerConfiguration.test ?? false,
+            disableCidMirroring: containerConfiguration.disableCidMirroring ?? false,
+        });
+
+        const facade = new SdkFacade(sdk);
+
+        sdk.eventManager.addListener('tokenChanged', ({oldToken, newToken}: TokenChanged) => {
+            const oldSubject = oldToken?.getSubject() ?? null;
+            const newSubject = newToken?.getSubject() ?? null;
+
+            if (newSubject === oldSubject) {
+                return;
+            }
+
+            if (oldToken !== null && oldSubject !== null) {
+                facade.trackInternalEvent(
+                    {
+                        type: 'userSignedOut',
+                        userId: oldSubject,
+                    },
+                    oldToken,
+                );
+            }
+
+            if (newSubject !== null) {
+                facade.trackInternalEvent({
+                    type: 'userSignedIn',
+                    userId: newSubject,
+                });
+            }
+        });
 
         if (userId !== undefined) {
-            const currentToken = sdk.context.getToken();
+            const currentToken = facade.context.getToken();
             const currentSubject = currentToken?.getSubject() ?? null;
 
             if (currentSubject !== userId) {
                 if (userId === null) {
-                    sdk.unsetToken();
+                    facade.unsetToken();
                 } else {
-                    sdk.identify(userId);
+                    facade.identify(userId);
                 }
             }
         } else if (token !== undefined) {
             if (token === null) {
-                sdk.unsetToken();
+                facade.unsetToken();
             } else {
-                sdk.setToken(Token.parse(token));
+                facade.setToken(Token.parse(token));
             }
         }
 
         if (track) {
-            sdk.tracker.enable();
+            facade.tracker.enable();
         }
 
-        return sdk;
+        return facade;
     }
 
     public get context(): Context {
@@ -225,39 +249,7 @@ export class SdkFacade {
             return;
         }
 
-        const currentSubject = currentToken?.getSubject() ?? null;
-        const subject = token.getSubject();
-        const logger = this.getLogger();
-
-        if (subject === currentSubject) {
-            this.context.setToken(token);
-
-            logger.debug('Token refreshed');
-
-            return;
-        }
-
-        if (currentSubject !== null) {
-            this.trackInternalEvent({
-                type: 'userSignedOut',
-                userId: currentSubject,
-            });
-
-            logger.info('User signed out');
-        }
-
         this.context.setToken(token);
-
-        if (subject !== null) {
-            this.trackInternalEvent({
-                type: 'userSignedIn',
-                userId: subject,
-            });
-
-            logger.info(`User signed in as ${subject}`);
-        }
-
-        logger.debug('New token saved, ');
     }
 
     public unsetToken(): void {
@@ -267,27 +259,13 @@ export class SdkFacade {
             return;
         }
 
-        const logger = this.getLogger();
-        const subject = token.getSubject();
-
-        if (subject !== null) {
-            this.trackInternalEvent({
-                type: 'userSignedOut',
-                userId: subject,
-            });
-
-            logger.info('User signed out');
-        }
-
         this.context.setToken(null);
-
-        logger.debug('Token removed');
     }
 
-    private trackInternalEvent(event: PartialTrackingEvent): void {
+    private trackInternalEvent(event: PartialTrackingEvent, token?: Token): void {
         this.sdk
             .tracker
-            .track(event)
+            .track(event, {token: token})
             .catch(() => {
                 // suppress error as it is already logged by the tracker
             });

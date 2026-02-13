@@ -18,6 +18,11 @@ type Options = {
     eventMetadata?: {[key: string]: string},
 };
 
+export type TrackOptions = {
+    timestamp?: number,
+    token?: Token,
+};
+
 export type Configuration = Options & {
     channel: OutputChannel<Beacon>,
     logger?: Logger,
@@ -274,8 +279,10 @@ export class Tracker {
         startTimer();
     }
 
-    public track<T extends PartialTrackingEvent>(event: T, timestamp: number = Date.now()): Promise<T> {
-        return this.dispatch(this.enrichEvent(event, timestamp), timestamp).then(() => event);
+    public track<T extends PartialTrackingEvent>(event: T, options: TrackOptions = {}): Promise<T> {
+        const {timestamp = Date.now(), token} = options;
+
+        return this.dispatch(this.enrichEvent(event, timestamp), timestamp, token).then(() => event);
     }
 
     private trackPageOpen({referrer, ...payload}: {url: string, referrer: string}): void {
@@ -335,8 +342,8 @@ export class Tracker {
         this.listeners.map(listener => listener(event));
     }
 
-    private dispatch<T extends TrackingEvent>(event: T, timestamp: number): Promise<T> {
-        const userToken = this.tokenProvider.getToken();
+    private dispatch<T extends TrackingEvent>(event: T, timestamp: number, token?: Token): Promise<T> {
+        const userToken = token ?? this.tokenProvider.getToken();
         const metadata = this.options.eventMetadata;
         const context: TrackingEventContext = {
             tabId: this.tab.id,

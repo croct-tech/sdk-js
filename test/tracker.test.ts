@@ -129,19 +129,19 @@ describe('A tracker', () => {
 
         tracker.suspend();
 
-        await expect(tracker.track(event, 1)).rejects.toThrow();
+        await expect(tracker.track(event, {timestamp: 1})).rejects.toThrow();
 
         tracker.unsuspend();
 
-        await expect(tracker.track(event, 2)).resolves.toBeDefined();
+        await expect(tracker.track(event, {timestamp: 2})).resolves.toBeDefined();
 
-        await expect(tracker.track(event, 3)).rejects.toThrow();
+        await expect(tracker.track(event, {timestamp: 3})).rejects.toThrow();
 
         // Listeners can be added more than once, should remove both
         tracker.addListener(listener);
         tracker.removeListener(listener);
 
-        await expect(tracker.track(event, 4)).resolves.toBeDefined();
+        await expect(tracker.track(event, {timestamp: 4})).resolves.toBeDefined();
 
         expect(listener).toHaveBeenNthCalledWith(1, {
             status: 'ignored',
@@ -429,6 +429,41 @@ describe('A tracker', () => {
         expect(channel.publish).toHaveBeenCalledWith(
             expect.objectContaining({
                 token: token.toString(),
+            }),
+        );
+    });
+
+    it('should use the token override instead of the token provider when specified', async () => {
+        const channel: OutputChannel<Beacon> = {
+            close: jest.fn(),
+            publish: jest.fn().mockResolvedValue(undefined),
+        };
+
+        const providerToken = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'provider-user');
+        const overrideToken = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'override-user');
+
+        const store = new InMemoryTokenStore();
+
+        store.setToken(providerToken);
+
+        const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
+            tokenProvider: store,
+            tab: new Tab(uuid4(), true),
+            channel: channel,
+        });
+
+        await tracker.track(
+            {
+                type: 'nothingChanged',
+                sinceTime: 0,
+            },
+            {token: overrideToken},
+        );
+
+        expect(channel.publish).toHaveBeenCalledWith(
+            expect.objectContaining({
+                token: overrideToken.toString(),
             }),
         );
     });

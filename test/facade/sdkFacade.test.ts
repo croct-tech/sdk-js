@@ -28,7 +28,9 @@ describe('A SDK facade', () => {
         return new mock.Tracker();
     }
 
-    function createContextMock(): Context {
+    function createContextMock(
+        eventManager?: {dispatch(name: string, event: any): void},
+    ): Context {
         const mock = jest.createMockFromModule<{Context: new() => Context}>('../../src/context');
         const context = new mock.Context();
 
@@ -40,8 +42,18 @@ describe('A SDK facade', () => {
 
         jest.spyOn(context, 'setToken')
             .mockImplementation()
-            .mockImplementation(newToken => {
+            .mockImplementation((newToken: Token | null) => {
+                const oldToken = token;
+
                 token = newToken;
+
+                if (eventManager !== undefined
+                    && (oldToken?.toString() ?? null) !== (newToken?.toString() ?? null)) {
+                    eventManager.dispatch('tokenChanged', {
+                        oldToken: oldToken,
+                        newToken: newToken,
+                    });
+                }
             });
 
         jest.spyOn(context, 'isAnonymous')
@@ -99,7 +111,6 @@ describe('A SDK facade', () => {
                 disableCidMirroring: false,
                 debug: false,
                 test: false,
-                eventProcessor: expect.any(Function),
             } satisfies ResolvedConfiguration,
         );
     });
@@ -136,7 +147,6 @@ describe('A SDK facade', () => {
                 tokenScope: 'isolated',
                 logger: logger,
                 urlSanitizer: urlSanitizer,
-                eventProcessor: expect.any(Function),
                 defaultFetchTimeout: 5,
                 defaultPreferredLocale: 'en-us',
             } satisfies ResolvedConfiguration,
@@ -702,7 +712,6 @@ describe('A SDK facade', () => {
     });
 
     it('should allow to refresh the token of the current anonymous user', () => {
-        const context = createContextMock();
         const tracker = createTrackerMock();
 
         jest.spyOn(tracker, 'track').mockImplementation();
@@ -711,7 +720,7 @@ describe('A SDK facade', () => {
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(createContextMock(sdk.eventManager));
                 jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
 
                 return sdk;
@@ -740,14 +749,13 @@ describe('A SDK facade', () => {
     });
 
     it('should allow to refresh the token of the current identified user', () => {
-        const context = createContextMock();
         const tracker = createTrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(createContextMock(sdk.eventManager));
                 jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
 
                 return sdk;
@@ -780,21 +788,20 @@ describe('A SDK facade', () => {
         expect(sdkFacade.getToken()).toEqual(newCarolToken);
 
         expect(tracker.track).toHaveBeenCalledTimes(1);
-        expect(tracker.track).toHaveBeenCalledWith({
-            type: 'userSignedIn',
-            userId: 'c4r0l',
-        });
+        expect(tracker.track).toHaveBeenCalledWith(
+            {type: 'userSignedIn', userId: 'c4r0l'},
+            {token: undefined},
+        );
     });
 
     it('should track "userSignedIn" event when setting a token with an identified subject', () => {
-        const context = createContextMock();
         const tracker = createTrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(createContextMock(sdk.eventManager));
                 jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
 
                 return sdk;
@@ -816,10 +823,10 @@ describe('A SDK facade', () => {
 
         sdkFacade.setToken(carolToken);
 
-        expect(tracker.track).toHaveBeenLastCalledWith({
-            type: 'userSignedIn',
-            userId: 'c4r0l',
-        });
+        expect(tracker.track).toHaveBeenLastCalledWith(
+            {type: 'userSignedIn', userId: 'c4r0l'},
+            {token: undefined},
+        );
 
         sdkFacade.setToken(carolToken);
 
@@ -827,7 +834,6 @@ describe('A SDK facade', () => {
     });
 
     it('should track "userSignedIn" event when replacing an anonymous token with an identified token', () => {
-        const context = createContextMock();
         const tracker = createTrackerMock();
 
         jest.spyOn(tracker, 'track').mockImplementation();
@@ -836,7 +842,7 @@ describe('A SDK facade', () => {
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(createContextMock(sdk.eventManager));
                 jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
 
                 return sdk;
@@ -860,23 +866,22 @@ describe('A SDK facade', () => {
 
         sdkFacade.setToken(Token.issue(appId, 'c4r0l'));
 
-        expect(tracker.track).toHaveBeenLastCalledWith({
-            type: 'userSignedIn',
-            userId: 'c4r0l',
-        });
+        expect(tracker.track).toHaveBeenLastCalledWith(
+            {type: 'userSignedIn', userId: 'c4r0l'},
+            {token: undefined},
+        );
 
         expect(tracker.track).toHaveBeenCalledTimes(1);
     });
 
     it('should track both "userSignedIn" and "userSignedOut" events when setting a token with a new subject', () => {
-        const context = createContextMock();
         const tracker = createTrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(createContextMock(sdk.eventManager));
                 jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
 
                 return sdk;
@@ -906,37 +911,38 @@ describe('A SDK facade', () => {
 
         sdkFacade.setToken(carolToken);
 
-        expect(tracker.track).toHaveBeenLastCalledWith({
-            type: 'userSignedIn',
-            userId: 'c4r0l',
-        });
+        expect(tracker.track).toHaveBeenLastCalledWith(
+            {type: 'userSignedIn', userId: 'c4r0l'},
+            {token: undefined},
+        );
 
         const erickToken = Token.issue(appId, 'erick');
 
         sdkFacade.setToken(erickToken);
 
-        expect(tracker.track).toHaveBeenNthCalledWith(2, {
-            type: 'userSignedOut',
-            userId: 'c4r0l',
-        });
+        expect(tracker.track).toHaveBeenNthCalledWith(
+            2,
+            {type: 'userSignedOut', userId: 'c4r0l'},
+            {token: carolToken},
+        );
 
-        expect(tracker.track).toHaveBeenNthCalledWith(3, {
-            type: 'userSignedIn',
-            userId: 'erick',
-        });
+        expect(tracker.track).toHaveBeenNthCalledWith(
+            3,
+            {type: 'userSignedIn', userId: 'erick'},
+            {token: undefined},
+        );
 
         expect(tracker.track).toHaveBeenCalledTimes(3);
     });
 
     it('should track "userSignedOut" event when unsetting a token with an identified subject', () => {
-        const context = createContextMock();
         const tracker = createTrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(createContextMock(sdk.eventManager));
                 jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
 
                 return sdk;
@@ -962,30 +968,29 @@ describe('A SDK facade', () => {
 
         sdkFacade.setToken(carolToken);
 
-        expect(tracker.track).toHaveBeenLastCalledWith({
-            type: 'userSignedIn',
-            userId: 'c4r0l',
-        });
+        expect(tracker.track).toHaveBeenLastCalledWith(
+            {type: 'userSignedIn', userId: 'c4r0l'},
+            {token: undefined},
+        );
 
         sdkFacade.unsetToken();
 
-        expect(tracker.track).toHaveBeenLastCalledWith({
-            type: 'userSignedOut',
-            userId: 'c4r0l',
-        });
+        expect(tracker.track).toHaveBeenLastCalledWith(
+            {type: 'userSignedOut', userId: 'c4r0l'},
+            {token: carolToken},
+        );
 
         expect(tracker.track).toHaveBeenCalledTimes(2);
     });
 
     it('should track "userSignedOut" event when setting an anonymous token', () => {
-        const context = createContextMock();
         const tracker = createTrackerMock();
 
         jest.spyOn(Sdk, 'init')
             .mockImplementationOnce(config => {
                 const sdk = Sdk.init(config);
 
-                jest.spyOn(sdk, 'context', 'get').mockReturnValue(context);
+                jest.spyOn(sdk, 'context', 'get').mockReturnValue(createContextMock(sdk.eventManager));
                 jest.spyOn(sdk, 'tracker', 'get').mockReturnValue(tracker);
 
                 return sdk;
@@ -1011,17 +1016,17 @@ describe('A SDK facade', () => {
 
         sdkFacade.setToken(carolToken);
 
-        expect(tracker.track).toHaveBeenLastCalledWith({
-            type: 'userSignedIn',
-            userId: 'c4r0l',
-        });
+        expect(tracker.track).toHaveBeenLastCalledWith(
+            {type: 'userSignedIn', userId: 'c4r0l'},
+            {token: undefined},
+        );
 
         sdkFacade.setToken(Token.issue(appId));
 
-        expect(tracker.track).toHaveBeenLastCalledWith({
-            type: 'userSignedOut',
-            userId: 'c4r0l',
-        });
+        expect(tracker.track).toHaveBeenLastCalledWith(
+            {type: 'userSignedOut', userId: 'c4r0l'},
+            {token: carolToken},
+        );
 
         expect(tracker.track).toHaveBeenCalledTimes(2);
     });
