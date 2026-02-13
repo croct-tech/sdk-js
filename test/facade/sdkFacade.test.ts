@@ -28,9 +28,7 @@ describe('A SDK facade', () => {
         return new mock.Tracker();
     }
 
-    function createContextMock(
-        eventManager?: {dispatch(name: string, event: any): void},
-    ): Context {
+    function createContextMock(eventManager?: EventManager<SdkEventMap>): Context {
         const mock = jest.createMockFromModule<{Context: new() => Context}>('../../src/context');
         const context = new mock.Context();
 
@@ -47,8 +45,10 @@ describe('A SDK facade', () => {
 
                 token = newToken;
 
-                if (eventManager !== undefined
-                    && (oldToken?.toString() ?? null) !== (newToken?.toString() ?? null)) {
+                if (
+                    eventManager !== undefined
+                    && (oldToken?.toString() ?? null) !== (newToken?.toString() ?? null)
+                ) {
                     eventManager.dispatch('tokenChanged', {
                         oldToken: oldToken,
                         newToken: newToken,
