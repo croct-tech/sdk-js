@@ -80,19 +80,19 @@ export class CookieCache implements ObservableCache {
         }
     }
 
-    private notifyChange(value: string | null): void {
-        this.listeners.forEach(listener => listener(value));
-    }
-
     private sync(event: CookieChangeEvent): void {
         const isRelevant = [...event.changed, ...event.deleted]
-            .some(cookie => cookie.name === this.config.name);
+            .some(cookie => cookie.name !== undefined && CookieCache.decode(cookie.name) === this.config.name);
 
         if (!isRelevant) {
             return;
         }
 
         this.notifyChange(this.get());
+    }
+
+    private notifyChange(value: string | null): void {
+        this.listeners.forEach(listener => listener(value));
     }
 
     private static serializeCookie(value: string, config: CookieCacheConfiguration): string {
