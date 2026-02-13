@@ -14,6 +14,7 @@ export type ProductDetails = {
     variant?: string,
     displayPrice: number,
     originalPrice?: number,
+    currency?: string,
     url?: string,
     imageUrl?: string,
 };

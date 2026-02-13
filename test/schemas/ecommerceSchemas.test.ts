@@ -47,6 +47,7 @@ describe('The product details schema', () => {
             variant: '64GB Green',
             displayPrice: 599.00,
             originalPrice: 699.00,
+            currency: 'USD',
             url: 'https://www.acme.com/product/smartphone9',
             imageUrl: 'https://www.acme.com/images/smartphone9-64gb-green',
         }],
@@ -126,6 +127,14 @@ describe('The product details schema', () => {
         [
             {productId: '12345', name: 'Smartphone 9', displayPrice: 599.00, originalPrice: -1},
             'Expected a value greater than or equal to 0 at path \'/originalPrice\', actual -1.',
+        ],
+        [
+            {productId: '12345', name: 'Smartphone 9', displayPrice: 599.00, currency: ''},
+            'Expected at least 1 character at path \'/currency\', actual 0.',
+        ],
+        [
+            {productId: '12345', name: 'Smartphone 9', displayPrice: 599.00, currency: 'elevennnnnn'},
+            'Expected at most 10 characters at path \'/currency\', actual 11.',
         ],
         [
             {productId: '12345', name: 'Smartphone 9', displayPrice: 599.00, url: 'foo'},
@@ -611,6 +620,7 @@ describe('The order schema', () => {
                         variant: '64GB Green',
                         displayPrice: 699.00,
                         originalPrice: 799.00,
+                        currency: 'USD',
                         url: 'https://www.acme.com/product/smartphone9',
                         imageUrl: 'https://www.acme.com/images/smartphone9-64gb-green',
                     },
@@ -630,6 +640,7 @@ describe('The order schema', () => {
                         variant: 'Black',
                         displayPrice: 39.00,
                         originalPrice: 49.00,
+                        currency: 'USD',
                         url: 'https://www.acme.com/product/silicone-case',
                         imageUrl: 'https://www.acme.com/images/silicone-case-black',
                     },
