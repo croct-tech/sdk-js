@@ -1,4 +1,4 @@
-import type {Cache} from './cache';
+import type {CacheListener, ObservableCache} from './cache';
 
 export type CookieCacheConfiguration = {
     name: string,
@@ -9,8 +9,10 @@ export type CookieCacheConfiguration = {
     sameSite?: 'strict' | 'lax' | 'none',
 };
 
-export class CookieCache implements Cache {
+export class CookieCache implements ObservableCache {
     private readonly config: CookieCacheConfiguration;
+
+    private readonly listeners: CacheListener[] = [];
 
     public constructor(config: CookieCacheConfiguration, defaultSecure = window.location.protocol === 'https:') {
         this.config = {
@@ -50,6 +52,47 @@ export class CookieCache implements Cache {
             ...this.config,
             maxAge: 0,
         });
+    }
+
+    public static autoSync(cache: CookieCache): () => void {
+        if (typeof window.cookieStore === 'undefined') {
+            return (): void => { /* unsupported */ };
+        }
+
+        const listener = cache.sync.bind(cache);
+
+        window.cookieStore.addEventListener('change', listener);
+
+        return (): void => window.cookieStore.removeEventListener('change', listener);
+    }
+
+    public addListener(listener: CacheListener): void {
+        if (!this.listeners.includes(listener)) {
+            this.listeners.push(listener);
+        }
+    }
+
+    public removeListener(listener: CacheListener): void {
+        const index = this.listeners.indexOf(listener);
+
+        if (index > -1) {
+            this.listeners.splice(index, 1);
+        }
+    }
+
+    private sync(event: CookieChangeEvent): void {
+        const isRelevant = [...event.changed, ...event.deleted]
+            .some(cookie => cookie.name !== undefined && CookieCache.decode(cookie.name) === this.config.name);
+
+        if (!isRelevant) {
+            return;
+        }
+
+        this.notifyChange(this.get());
+    }
+
+    private notifyChange(value: string | null): void {
+        this.listeners.forEach(listener => listener(value));
     }
 
     private static serializeCookie(value: string, config: CookieCacheConfiguration): string {

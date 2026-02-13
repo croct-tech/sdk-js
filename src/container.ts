@@ -201,6 +201,8 @@ export class Container {
 
         if (browserCache instanceof LocalStorageCache) {
             this.removeTokenSyncListener = LocalStorageCache.autoSync(browserCache);
+        } else if (browserCache instanceof CookieCache) {
+            this.removeTokenSyncListener = CookieCache.autoSync(browserCache);
         }
 
         return Context.load({

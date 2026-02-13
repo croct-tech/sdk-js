@@ -3,9 +3,12 @@ import {Context} from '../src/context';
 import {Token} from '../src/token';
 import {TabEventEmulator} from './utils/tabEventEmulator';
 import {LocalStorageCache} from '../src/cache';
+import {CookieCache} from '../src/cache/cookieCache';
 import {DumbStorage} from './utils/dumbStorage';
 import type {EventDispatcher} from '../src/eventManager';
 import type {SdkEventMap} from '../src/sdkEvents';
+
+type CookieChange = {changed: Array<{name: string}>, deleted: Array<{name: string}>};
 
 describe('A context', () => {
     const tabEventEmulator: TabEventEmulator = new TabEventEmulator();
@@ -13,12 +16,26 @@ describe('A context', () => {
     const carolToken = Token.issue(appId, 'c4r0l');
     const erickToken = Token.issue(appId, '3r1ck');
 
+    let dispatchCookieChange: (change: CookieChange) => void;
+
     beforeEach(() => {
         tabEventEmulator.registerListeners();
         localStorage.clear();
+
+        Object.defineProperty(window, 'cookieStore', {
+            value: {
+                addEventListener: jest.fn((_: string, listener: (event: CookieChange) => void) => {
+                    dispatchCookieChange = listener;
+                }),
+                removeEventListener: jest.fn(),
+            },
+            configurable: true,
+        });
     });
 
     afterEach(() => {
+        delete (window as {cookieStore?: unknown}).cookieStore;
+
         tabEventEmulator.reset();
     });
 
@@ -386,5 +403,58 @@ describe('A context', () => {
             oldToken: anonymousToken,
             newToken: erickToken,
         });
+    });
+
+    it('should report external cookie token changes via cookieStore events', () => {
+        const cookieName = 'ct.token';
+        const browserCache = new CookieCache({name: cookieName});
+        const tabStorage = new DumbStorage();
+        const eventDispatcher: EventDispatcher<SdkEventMap> = {dispatch: jest.fn()};
+
+        browserCache.put(erickToken.toString());
+
+        const disable = CookieCache.autoSync(browserCache);
+
+        const context = Context.load({
+            tokenScope: 'global',
+            eventDispatcher: eventDispatcher,
+            cache: {
+                tabId: new LocalStorageCache(tabStorage, 'tab'),
+                tabToken: new LocalStorageCache(tabStorage, 'token'),
+                browserToken: browserCache,
+            },
+        });
+
+        expect(context.getToken()?.toString()).toBe(erickToken.toString());
+
+        // Simulate a server-side login (Set-Cookie sets a new token)
+        document.cookie = `${cookieName}=${carolToken.toString()}`;
+
+        dispatchCookieChange({changed: [{name: cookieName}], deleted: []});
+
+        expect(eventDispatcher.dispatch).toHaveBeenCalledTimes(1);
+
+        expect(eventDispatcher.dispatch).toHaveBeenNthCalledWith(1, 'tokenChanged', {
+            oldToken: erickToken,
+            newToken: carolToken,
+        });
+
+        expect(context.getToken()?.toString()).toBe(carolToken.toString());
+
+        // Simulate a server-side logout (Set-Cookie removes the token)
+        document.cookie = `${cookieName}=; Max-Age=0`;
+
+        dispatchCookieChange({changed: [], deleted: [{name: cookieName}]});
+
+        expect(eventDispatcher.dispatch).toHaveBeenCalledTimes(2);
+
+        expect(eventDispatcher.dispatch).toHaveBeenNthCalledWith(2, 'tokenChanged', {
+            oldToken: carolToken,
+            newToken: null,
+        });
+
+        expect(context.getToken()).toBeNull();
+
+        disable();
     });
 });
