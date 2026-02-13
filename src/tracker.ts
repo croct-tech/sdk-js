@@ -28,7 +28,6 @@ export type Configuration = Options & {
     logger?: Logger,
     tab: Tab,
     tokenProvider: TokenProvider,
-    processor?: TrackingEventProcessor,
     inactivityRetryPolicy: RetryPolicy<number>,
 };
 
@@ -42,10 +41,6 @@ type InactivityTimer = {
     id?: number,
     since: number,
 };
-
-export interface TrackingEventProcessor {
-    process(event: QueuedEventInfo): QueuedEventInfo[];
-}
 
 export type QueuedEventInfo<T extends TrackingEvent = TrackingEvent> = Omit<EventInfo<T>, 'status'>;
 
@@ -76,8 +71,6 @@ export class Tracker {
 
     private readonly logger: Logger;
 
-    private readonly processor?: TrackingEventProcessor;
-
     private readonly listeners: EventListener[] = [];
 
     private readonly pending: Array<Promise<void>> = [];
@@ -100,7 +93,6 @@ export class Tracker {
         this.inactivityRetryPolicy = inactivityRetryPolicy;
         this.channel = channel;
         this.logger = logger ?? new NullLogger();
-        this.processor = config.processor;
         this.options = {
             ...options,
             eventMetadata: options.eventMetadata ?? {},
@@ -351,37 +343,12 @@ export class Tracker {
             ...(Object.keys(metadata).length > 0 ? {metadata: metadata} : {}),
         };
 
-        const queuedEvent: QueuedEventInfo<T> = {
+        return this.publish({
             ...(userToken !== null ? {userToken: userToken} : {}),
             event: event,
             timestamp: timestamp,
             context: context,
-        };
-
-        const processedEvents = this.processor !== undefined
-            ? this.processor.process(queuedEvent)
-            : [queuedEvent];
-
-        // sort events by timestamp in ascending order
-        processedEvents.sort((left, right) => left.timestamp - right.timestamp);
-
-        let result: Promise<T> | null = null;
-
-        for (const processedEvent of processedEvents) {
-            if (processedEvent === queuedEvent) {
-                result = this.publish(queuedEvent);
-
-                continue;
-            }
-
-            this.publish(processedEvent);
-        }
-
-        if (result === null) {
-            return Promise.reject(new Error('Event suppressed.'));
-        }
-
-        return result;
+        });
     }
 
     private publish<T extends TrackingEvent>(queuedEvent: QueuedEventInfo<T>): Promise<T> {
