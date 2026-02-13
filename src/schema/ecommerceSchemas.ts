@@ -33,6 +33,10 @@ export const productDetails = new ObjectType({
         originalPrice: new NumberType({
             minimum: 0,
         }),
+        currency: new StringType({
+            minLength: 1,
+            maxLength: 10,
+        }),
         url: new StringType({
             format: 'url',
         }),
