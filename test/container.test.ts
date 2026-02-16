@@ -1,12 +1,11 @@
 import fetchMock from 'fetch-mock';
-import type {Configuration, DependencyResolver} from '../src/container';
+import type {Configuration} from '../src/container';
 import {Container} from '../src/container';
 import type {Logger} from '../src/logging';
 import {NullLogger} from '../src/logging';
 import type {BeaconPayload, PartialTrackingEvent} from '../src/trackingEvents';
 import {LocalStorageCache} from '../src/cache';
 import {Token} from '../src/token';
-import type {TrackingEventProcessor} from '../src/tracker';
 
 describe('A container', () => {
     beforeEach(() => {
@@ -236,32 +235,6 @@ describe('A container', () => {
             newToken: thirdToken,
             oldToken: secondToken,
         });
-    });
-
-    it('should configure the event tracker with the specified event processor', async () => {
-        const process: TrackingEventProcessor['process'] = jest.fn(event => [event]);
-        const processor: DependencyResolver<TrackingEventProcessor> = jest.fn(() => ({process: process}));
-
-        const container = new Container({
-            ...configuration,
-            test: true,
-            eventProcessor: processor,
-        });
-
-        const tracker = container.getTracker();
-
-        expect(processor).toHaveBeenCalledWith(container);
-
-        const event: PartialTrackingEvent = {
-            type: 'nothingChanged',
-            sinceTime: Date.now(),
-        };
-
-        await tracker.track(event);
-
-        expect(process).toHaveBeenCalledTimes(1);
-
-        expect(process).toHaveBeenCalledWith(expect.objectContaining({event: event}));
     });
 
     it('should flush the beacon queue on initialization', async () => {

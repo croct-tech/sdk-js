@@ -1,4 +1,4 @@
-import type {EventInfo, EventListener, TrackingEventProcessor} from '../src/tracker';
+import type {EventInfo, EventListener} from '../src/tracker';
 import {Tracker} from '../src/tracker';
 import type {OutputChannel} from '../src/channel';
 import {SandboxChannel} from '../src/channel';
@@ -129,19 +129,19 @@ describe('A tracker', () => {
 
         tracker.suspend();
 
-        await expect(tracker.track(event, 1)).rejects.toThrow();
+        await expect(tracker.track(event, {timestamp: 1})).rejects.toThrow();
 
         tracker.unsuspend();
 
-        await expect(tracker.track(event, 2)).resolves.toBeDefined();
+        await expect(tracker.track(event, {timestamp: 2})).resolves.toBeDefined();
 
-        await expect(tracker.track(event, 3)).rejects.toThrow();
+        await expect(tracker.track(event, {timestamp: 3})).rejects.toThrow();
 
         // Listeners can be added more than once, should remove both
         tracker.addListener(listener);
         tracker.removeListener(listener);
 
-        await expect(tracker.track(event, 4)).resolves.toBeDefined();
+        await expect(tracker.track(event, {timestamp: 4})).resolves.toBeDefined();
 
         expect(listener).toHaveBeenNthCalledWith(1, {
             status: 'ignored',
@@ -433,111 +433,39 @@ describe('A tracker', () => {
         );
     });
 
-    it('should process events using the specified event processor', async () => {
+    it('should use the token override instead of the token provider when specified', async () => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),
             publish: jest.fn().mockResolvedValue(undefined),
         };
 
-        const processor: TrackingEventProcessor = {
-            process: jest.fn(
-                event => [
-                    {
-                        ...event,
-                        timestamp: event.timestamp + 1,
-                    },
-                    event,
-                ],
-            ),
-        };
-
-        const tracker = new Tracker({
-            inactivityRetryPolicy: new NeverPolicy(),
-            tokenProvider: new InMemoryTokenStore(),
-            tab: new Tab(uuid4(), true),
-            channel: channel,
-            processor: processor,
-        });
-
-        const event: TrackingEvent = {
-            type: 'nothingChanged',
-            sinceTime: 0,
-        };
-
-        const promise = tracker.track(event);
-
-        await expect(promise).resolves.toEqual(event);
-
-        expect(processor.process).toHaveBeenCalledWith(expect.objectContaining({
-            timestamp: now,
-            event: event,
-        }));
-
-        expect(channel.publish).toHaveBeenCalledTimes(2);
-
-        expect(channel.publish).toHaveBeenNthCalledWith(1, expect.objectContaining({
-            timestamp: now,
-            payload: event,
-        }));
-
-        expect(channel.publish).toHaveBeenNthCalledWith(2, expect.objectContaining({
-            timestamp: now + 1,
-            payload: event,
-        }));
-    });
-
-    it('should report ignored events', async () => {
-        const channel: OutputChannel<Beacon> = {
-            close: jest.fn(),
-            publish: jest.fn().mockResolvedValue(undefined),
-        };
-
-        const processor: TrackingEventProcessor = {
-            process: jest.fn(
-                event => [
-                    {
-                        ...event,
-                        timestamp: event.timestamp + 1,
-                    },
-                ],
-            ),
-        };
-
-        const token = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'c4r0l');
+        const providerToken = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'provider-user');
+        const overrideToken = Token.issue('7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a', 'override-user');
 
         const store = new InMemoryTokenStore();
 
-        store.setToken(token);
+        store.setToken(providerToken);
 
         const tracker = new Tracker({
             inactivityRetryPolicy: new NeverPolicy(),
             tokenProvider: store,
             tab: new Tab(uuid4(), true),
             channel: channel,
-            processor: processor,
         });
 
-        const event: TrackingEvent = {
-            type: 'nothingChanged',
-            sinceTime: 0,
-        };
+        await tracker.track(
+            {
+                type: 'nothingChanged',
+                sinceTime: 0,
+            },
+            {token: overrideToken},
+        );
 
-        const promise = tracker.track(event);
-
-        await expect(promise).rejects.toThrow('Event suppressed');
-
-        expect(processor.process).toHaveBeenCalledWith(expect.objectContaining({
-            timestamp: now,
-            userToken: token,
-            event: event,
-        }));
-
-        expect(channel.publish).toHaveBeenCalledTimes(1);
-
-        expect(channel.publish).toHaveBeenCalledWith(expect.objectContaining({
-            timestamp: now + 1,
-            payload: event,
-        }));
+        expect(channel.publish).toHaveBeenCalledWith(
+            expect.objectContaining({
+                token: overrideToken.toString(),
+            }),
+        );
     });
 
     it('should track "tabOpened" event when enabled on a tab for the first time', () => {

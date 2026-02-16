@@ -1,11 +1,10 @@
-import type {DependencyResolver} from './container';
 import {Container} from './container';
 import type {Context, TokenScope} from './context';
 import type {Logger} from './logging';
 import {BASE_ENDPOINT_URL, VERSION} from './constants';
 import {sdkConfigurationSchema} from './schema';
 import {formatCause} from './error';
-import type {Tracker, TrackingEventProcessor} from './tracker';
+import type {Tracker} from './tracker';
 import type {Evaluator} from './evaluator';
 import type {SdkEventMap} from './sdkEvents';
 import type {EventManager} from './eventManager';
@@ -33,7 +32,6 @@ export type Configuration = {
         userToken?: CookieCacheConfiguration,
         previewToken?: CookieCacheConfiguration,
     },
-    eventProcessor?: DependencyResolver<TrackingEventProcessor>,
     defaultFetchTimeout?: number,
     defaultPreferredLocale?: string,
 };
