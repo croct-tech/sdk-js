@@ -81,6 +81,7 @@ type With<T, K extends keyof T> = T & {[P in K]-?: T[P]};
 export type SlotMetadata = {
     version: string,
     schema?: ContentDefinitionBundle,
+    contentSource: 'slot' | 'experience' | 'experiment',
     experience?: {
         experienceId: string,
         audienceId: string,

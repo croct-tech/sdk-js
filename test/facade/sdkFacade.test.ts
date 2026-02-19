@@ -368,6 +368,7 @@ describe('A SDK facade', () => {
         const result: FetchResponse<{example: string}> = {
             metadata: {
                 version: '1.0',
+                contentSource: 'slot',
             },
             content: {
                 example: 'example',
