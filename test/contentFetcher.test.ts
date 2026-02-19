@@ -32,6 +32,7 @@ describe('A content fetcher', () => {
     const result: FetchResponse = {
         metadata: {
             version: '1.0',
+            contentSource: 'slot',
         },
         content: {
             title: 'Hello World',

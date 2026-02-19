@@ -542,6 +542,7 @@ describe('A SDK', () => {
         const result: FetchResponse = {
             metadata: {
                 version: '1.0',
+                contentSource: 'slot',
             },
             content: {
                 title: 'Hello world',
@@ -578,6 +579,7 @@ describe('A SDK', () => {
         const result: FetchResponse = {
             metadata: {
                 version: '1.0',
+                contentSource: 'slot',
             },
             content: {
                 title: 'Hello world',
@@ -623,6 +625,7 @@ describe('A SDK', () => {
         const result: FetchResponse = {
             metadata: {
                 version: '1.0',
+                contentSource: 'slot',
             },
             content: {
                 title: 'Hello world',
@@ -670,6 +673,7 @@ describe('A SDK', () => {
             const result: FetchResponse = {
                 metadata: {
                     version: '1.0',
+                    contentSource: 'slot',
                 },
                 content: {
                     title: 'Hello world',
