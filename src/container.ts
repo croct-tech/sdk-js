@@ -8,7 +8,6 @@ import {PersistentQueue, MonitoredQueue, CapacityRestrictedQueue} from './queue'
 import type {Beacon} from './trackingEvents';
 import type {TokenStore} from './token';
 import {CachedTokenStore} from './token';
-import type {TrackingEventProcessor} from './tracker';
 import {Tracker} from './tracker';
 import {Evaluator} from './evaluator';
 import {encodeJson} from './transformer';
@@ -28,8 +27,6 @@ import {CookieCache} from './cache/cookieCache';
 import {FilteredLogger} from './logging/filteredLogger';
 import {HttpBeaconChannel} from './channel/httpBeaconChannel';
 import {DeduplicatedLogger} from './logging/deduplicatedLogger';
-
-export type DependencyResolver<T> = (container: Container) => T;
 
 export type Configuration = {
     appId: string,
@@ -51,7 +48,6 @@ export type Configuration = {
         previewToken?: CookieCacheConfiguration,
     },
     eventMetadata?: {[key: string]: string},
-    eventProcessor?: DependencyResolver<TrackingEventProcessor>,
     defaultFetchTimeout?: number,
     defaultPreferredLocale?: string,
 };
@@ -156,9 +152,6 @@ export class Container {
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
             eventMetadata: this.configuration.eventMetadata,
-            processor: this.configuration.eventProcessor === undefined
-                ? undefined
-                : this.configuration.eventProcessor(this),
         });
 
         const queue = this.getBeaconQueue();

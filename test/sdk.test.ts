@@ -25,7 +25,7 @@ jest.mock(
 
 describe('A SDK', () => {
     const tabEventEmulator = new TabEventEmulator();
-    const configuration: Required<Omit<Configuration, 'eventProcessor'>> = {
+    const configuration: Required<Configuration> = {
         appId: '00000000-0000-0000-0000-000000000000',
         clientId: 'e6a133ffd3d2410681403d5e1bd95505',
         tokenScope: 'global',

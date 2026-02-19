@@ -70,7 +70,6 @@ export const sdkConfigurationSchema = new ObjectType({
         logger: loggerSchema,
         urlSanitizer: new FunctionType(),
         eventMetadata: eventMetadataSchema,
-        eventProcessor: new FunctionType(),
         defaultFetchTimeout: new NumberType({
             integer: true,
             minimum: 1,

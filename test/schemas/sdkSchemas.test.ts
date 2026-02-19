@@ -299,7 +299,6 @@ describe('The SDK configuration schema', () => {
                     maxAge: 0,
                 },
             },
-            eventProcessor: jest.fn(),
             defaultFetchTimeout: 1000,
             defaultPreferredLocale: 'en-us',
         }],
@@ -525,17 +524,6 @@ describe('The SDK configuration schema', () => {
                 },
             },
             "Expected at least 1 character at path '/cookie/previewToken/name', actual 0.",
-        ],
-        [
-            {
-                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-                tokenScope: 'global',
-                disableCidMirroring: true,
-                debug: true,
-                test: true,
-                eventProcessor: null,
-            },
-            "Expected value of type function at path '/eventProcessor', actual null.",
         ],
         [
             {
