@@ -38,11 +38,11 @@ export class ApiKey {
     }
 
     public static from(apiKey: string | ApiKey): ApiKey {
-        if (apiKey instanceof ApiKey) {
-            return apiKey;
+        if (typeof apiKey === 'string') {
+            return ApiKey.parse(apiKey);
         }
 
-        return ApiKey.parse(apiKey);
+        return apiKey;
     }
 
     public static parse(apiKey: string): ApiKey {
