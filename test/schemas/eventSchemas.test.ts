@@ -633,7 +633,7 @@ describe('The "userClicked" payload schema', () => {
                     y: 0,
                 },
             },
-            'Expected value of type number at path \'/point/x\', actual string.',
+            'Expected value of type integer at path \'/point/x\', actual string.',
         ],
         [
             {
@@ -642,7 +642,25 @@ describe('The "userClicked" payload schema', () => {
                     y: 'b',
                 },
             },
-            'Expected value of type number at path \'/point/y\', actual string.',
+            'Expected value of type integer at path \'/point/y\', actual string.',
+        ],
+        [
+            {
+                point: {
+                    x: -1,
+                    y: 0,
+                },
+            },
+            'Expected a value greater than or equal to 0 at path \'/point/x\', actual -1.',
+        ],
+        [
+            {
+                point: {
+                    x: 0,
+                    y: -1,
+                },
+            },
+            'Expected a value greater than or equal to 0 at path \'/point/y\', actual -1.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
@@ -699,7 +717,7 @@ describe('The "userScrolled" payload schema', () => {
                     y: 0,
                 },
             },
-            'Expected value of type number at path \'/end/x\', actual string.',
+            'Expected value of type integer at path \'/end/x\', actual string.',
         ],
         [
             {
@@ -708,7 +726,25 @@ describe('The "userScrolled" payload schema', () => {
                     y: 'b',
                 },
             },
-            'Expected value of type number at path \'/end/y\', actual string.',
+            'Expected value of type integer at path \'/end/y\', actual string.',
+        ],
+        [
+            {
+                end: {
+                    x: -1,
+                    y: 0,
+                },
+            },
+            'Expected a value greater than or equal to 0 at path \'/end/x\', actual -1.',
+        ],
+        [
+            {
+                end: {
+                    x: 0,
+                    y: -1,
+                },
+            },
+            'Expected a value greater than or equal to 0 at path \'/end/y\', actual -1.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {

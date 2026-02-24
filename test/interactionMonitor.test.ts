@@ -59,6 +59,62 @@ describe('An interaction monitor', () => {
         monitor.disable();
     });
 
+    it('should clamp negative click coordinates to zero', () => {
+        const listener = jest.fn();
+        const monitor = new InteractionMonitor();
+
+        monitor.addListener('userClicked', listener);
+        monitor.enable();
+
+        click(-10, -20);
+
+        expect(listener).toHaveBeenCalledTimes(1);
+
+        const event = listener.mock.calls[0][0] as UserClicked;
+
+        expect(event.point).toEqual({x: 0, y: 0});
+
+        monitor.disable();
+    });
+
+    it('should clamp negative scroll positions to zero', () => {
+        const listener = jest.fn();
+        const monitor = new InteractionMonitor({scrollDebounceInterval: 150});
+
+        monitor.addListener('userScrolled', listener);
+        monitor.enable();
+
+        scrollTo(-5, -10);
+        scrollTo(100, 200);
+
+        jest.advanceTimersByTime(150);
+
+        expect(listener).toHaveBeenCalledTimes(1);
+
+        const event = listener.mock.calls[0][0] as UserScrolled;
+
+        expect(event.start).toEqual({x: 0, y: 0});
+        expect(event.end).toEqual({x: 100, y: 200});
+
+        monitor.disable();
+    });
+
+    it('should not emit a scroll event when start and end are the same', () => {
+        const listener = jest.fn();
+        const monitor = new InteractionMonitor({scrollDebounceInterval: 150});
+
+        monitor.addListener('userScrolled', listener);
+        monitor.enable();
+
+        scrollTo(-5, -10);
+
+        jest.advanceTimersByTime(150);
+
+        expect(listener).not.toHaveBeenCalled();
+
+        monitor.disable();
+    });
+
     it('should throttle rapid clicks', () => {
         const listener = jest.fn();
         const monitor = new InteractionMonitor({clickThrottleInterval: 1000});
@@ -202,26 +258,23 @@ describe('An interaction monitor', () => {
         // Reverse vertical direction while continuing horizontally
         scrollTo(150, 300);
 
-        // The downward scroll should have been flushed
+        // The completed downward scroll should be flushed immediately
         expect(listener).toHaveBeenCalledTimes(1);
 
         const downEvent = listener.mock.calls[0][0] as UserScrolled;
 
         expect(downEvent.start).toEqual({x: 0, y: 0});
-        expect(downEvent.end).toEqual({x: 150, y: 300});
+        expect(downEvent.end).toEqual({x: 100, y: 500});
 
-        // Continue scrolling up
-        scrollTo(200, 100);
-
+        // The reversal is emitted after the debounce
         jest.advanceTimersByTime(150);
 
-        // The upward scroll should now be flushed by debounce
         expect(listener).toHaveBeenCalledTimes(2);
 
         const upEvent = listener.mock.calls[1][0] as UserScrolled;
 
-        expect(upEvent.start).toEqual({x: 150, y: 300});
-        expect(upEvent.end).toEqual({x: 200, y: 100});
+        expect(upEvent.start).toEqual({x: 100, y: 500});
+        expect(upEvent.end).toEqual({x: 150, y: 300});
 
         monitor.disable();
     });
@@ -241,14 +294,23 @@ describe('An interaction monitor', () => {
         // Reverse horizontal direction
         scrollTo(100, 0);
 
+        // The completed rightward scroll should be flushed immediately
         expect(listener).toHaveBeenCalledTimes(1);
 
-        const event = listener.mock.calls[0][0] as UserScrolled;
+        const rightEvent = listener.mock.calls[0][0] as UserScrolled;
 
-        expect(event.start).toEqual({x: 0, y: 0});
-        expect(event.end).toEqual({x: 100, y: 0});
+        expect(rightEvent.start).toEqual({x: 0, y: 0});
+        expect(rightEvent.end).toEqual({x: 300, y: 0});
 
+        // The reversal is emitted after the debounce
         jest.advanceTimersByTime(150);
+
+        expect(listener).toHaveBeenCalledTimes(2);
+
+        const leftEvent = listener.mock.calls[1][0] as UserScrolled;
+
+        expect(leftEvent.start).toEqual({x: 300, y: 0});
+        expect(leftEvent.end).toEqual({x: 100, y: 0});
 
         monitor.disable();
     });

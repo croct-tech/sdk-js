@@ -12,6 +12,11 @@ type Options = {
     scrollDebounceInterval?: number,
 };
 
+type ScrollState = {
+    start: Point,
+    lastPosition: Point,
+};
+
 export class InteractionMonitor {
     private readonly eventManager = new SynchronousEventManager<InteractionEventMap>();
 
@@ -19,15 +24,13 @@ export class InteractionMonitor {
 
     private readonly scrollDebounceInterval: number;
 
-    private enabled = false;
-
     private lastClickTime = 0;
 
-    private scrollStart: Point | null = null;
+    private scrollState?: ScrollState;
 
-    private lastScrollPosition: Point | null = null;
+    private scrollDebounceTimer?: number;
 
-    private scrollDebounceTimer: number | undefined;
+    private enabled = false;
 
     public constructor(options: Options = {}) {
         this.clickThrottleInterval = options.clickThrottleInterval ?? 500;
@@ -91,8 +94,8 @@ export class InteractionMonitor {
         this.eventManager.dispatch('userClicked', {
             type: 'userClicked',
             point: {
-                x: event.pageX,
-                y: event.pageY,
+                x: Math.max(0, Math.round(event.pageX)),
+                y: Math.max(0, Math.round(event.pageY)),
             },
             surfaceSize: {
                 width: document.documentElement.scrollWidth,
@@ -103,20 +106,27 @@ export class InteractionMonitor {
 
     private handleScroll(): void {
         const currentPosition: Point = {
-            x: window.scrollX,
-            y: window.scrollY,
+            x: Math.max(0, Math.round(window.scrollX)),
+            y: Math.max(0, Math.round(window.scrollY)),
         };
 
-        if (this.scrollStart === null) {
-            this.scrollStart = currentPosition;
-            this.lastScrollPosition = currentPosition;
-        } else if (this.hasDirectionChanged(currentPosition)) {
-            this.flushPendingScroll();
+        if (this.scrollState === undefined) {
+            this.scrollState = {
+                start: currentPosition,
+                lastPosition: currentPosition,
+            };
+        } else if (this.hasDirectionChanged(this.scrollState, currentPosition)) {
+            const turningPoint = this.scrollState.lastPosition;
 
-            this.scrollStart = currentPosition;
+            this.flushPendingScroll(turningPoint);
+
+            this.scrollState = {
+                start: turningPoint,
+                lastPosition: currentPosition,
+            };
+        } else {
+            this.scrollState.lastPosition = currentPosition;
         }
-
-        this.lastScrollPosition = currentPosition;
 
         if (this.scrollDebounceTimer !== undefined) {
             window.clearTimeout(this.scrollDebounceTimer);
@@ -157,9 +167,8 @@ export class InteractionMonitor {
      *   movementDirectionX = sign(300 - 300) = 0 (no movement)
      *   movementDirectionX is 0 => ignored, not a reversal
      */
-    private hasDirectionChanged(current: Point): boolean {
-        const start = this.scrollStart!;
-        const previous = this.lastScrollPosition!;
+    private hasDirectionChanged(state: {start: Point, lastPosition: Point}, current: Point): boolean {
+        const {start, lastPosition: previous} = state;
 
         const scrollDirectionX = Math.sign(previous.x - start.x);
         const scrollDirectionY = Math.sign(previous.y - start.y);
@@ -171,28 +180,32 @@ export class InteractionMonitor {
             || (scrollDirectionY !== 0 && movementDirectionY !== 0 && scrollDirectionY !== movementDirectionY);
     }
 
-    private flushPendingScroll(): void {
+    private flushPendingScroll(end?: Point): void {
         if (this.scrollDebounceTimer !== undefined) {
             window.clearTimeout(this.scrollDebounceTimer);
             this.scrollDebounceTimer = undefined;
         }
 
-        if (this.scrollStart === null) {
+        if (this.scrollState === undefined) {
             return;
         }
 
-        const start = this.scrollStart;
+        const {start} = this.scrollState;
+        const destination = end ?? {
+            x: Math.max(0, Math.round(window.scrollX)),
+            y: Math.max(0, Math.round(window.scrollY)),
+        };
 
-        this.scrollStart = null;
-        this.lastScrollPosition = null;
+        this.scrollState = undefined;
+
+        if (start.x === destination.x && start.y === destination.y) {
+            return;
+        }
 
         this.eventManager.dispatch('userScrolled', {
             type: 'userScrolled',
             start: start,
-            end: {
-                x: window.scrollX,
-                y: window.scrollY,
-            },
+            end: destination,
             surfaceSize: {
                 width: document.documentElement.scrollWidth,
                 height: document.documentElement.scrollHeight,
