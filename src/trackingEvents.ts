@@ -68,6 +68,16 @@ export type Order = {
     status?: OrderStatus,
 };
 
+export type Point = {
+    x: number,
+    y: number,
+};
+
+export type Size = {
+    width: number,
+    height: number,
+};
+
 export type Gender = 'male' | 'female' | 'neutral' | 'unknown';
 
 /*
@@ -108,6 +118,11 @@ export const userEventTypes = [
     'userProfileChanged',
 ] as const;
 
+export const interactionEventTypes = [
+    'userClicked',
+    'userScrolled',
+] as const;
+
 export const miscEventTypes = [
     'nothingChanged',
     'sessionAttributesChanged',
@@ -123,6 +138,7 @@ export const eventTypes = [
     ...pageEventTypes,
     ...ecommerceEventTypes,
     ...userEventTypes,
+    ...interactionEventTypes,
     ...miscEventTypes,
 ] as const;
 
@@ -283,6 +299,26 @@ export interface PageLoaded extends BasePageEvent {
 export type PageEvent = PageLoaded | PageOpened;
 
 /*
+ * Interaction events
+ */
+
+export interface UserClicked extends BaseEvent {
+    type: 'userClicked';
+    point: Point;
+    surfaceSize?: Size;
+}
+
+export interface UserScrolled extends BaseEvent {
+    type: 'userScrolled';
+    start?: Point;
+    end: Point;
+    surfaceSize?: Size;
+    viewportSize?: Size;
+}
+
+export type InteractionEvent = UserClicked | UserScrolled;
+
+/*
  * Misc events
  */
 
@@ -366,6 +402,9 @@ type EventMap = {
     userSignedOut: UserSignedOut,
     userSignedUp: UserSignedUp,
     userProfileChanged: UserProfileChanged,
+    // Interaction events
+    userClicked: UserClicked,
+    userScrolled: UserScrolled,
     // E-commerce events
     productViewed: ProductViewed,
     cartViewed: CartViewed,
