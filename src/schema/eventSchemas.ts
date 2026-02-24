@@ -133,6 +133,40 @@ export const eventOccurred = new ObjectType({
     },
 });
 
+const point = new ObjectType({
+    required: ['x', 'y'],
+    properties: {
+        x: new NumberType(),
+        y: new NumberType(),
+    },
+});
+
+const size = new ObjectType({
+    required: ['width', 'height'],
+    properties: {
+        width: new NumberType(),
+        height: new NumberType(),
+    },
+});
+
+export const userClicked = new ObjectType({
+    required: ['point'],
+    properties: {
+        point: point,
+        surfaceSize: size,
+    },
+});
+
+export const userScrolled = new ObjectType({
+    required: ['end'],
+    properties: {
+        start: point,
+        end: point,
+        surfaceSize: size,
+        viewportSize: size,
+    },
+});
+
 export const leadGenerated = new ObjectType({
     properties: {
         leadId: new StringType({

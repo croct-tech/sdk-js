@@ -24,6 +24,8 @@ import {
     orderPlaced,
     postViewed,
     productViewed,
+    userClicked,
+    userScrolled,
     userSignedUp,
 } from '../../src/schema';
 import type {Optional} from '../../src/utilityTypes';
@@ -587,6 +589,130 @@ describe('The "leadGenerated" payload schema', () => {
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
             leadGenerated.validate(value);
+        }
+
+        expect(validate).toThrowWithMessage(Error, message);
+    });
+});
+
+describe('The "userClicked" payload schema', () => {
+    it.each([
+        [{
+            point: {
+                x: 100,
+                y: 200,
+            },
+        }],
+        [{
+            point: {
+                x: 0,
+                y: 0,
+            },
+            surfaceSize: {
+                width: 1920,
+                height: 1080,
+            },
+        }],
+    ])('should allow %s', (value: Record<string, unknown>) => {
+        function validate(): void {
+            userClicked.validate(value);
+        }
+
+        expect(validate).not.toThrow();
+    });
+
+    it.each([
+        [
+            {},
+            'Missing property \'/point\'.',
+        ],
+        [
+            {
+                point: {
+                    x: 'a',
+                    y: 0,
+                },
+            },
+            'Expected value of type number at path \'/point/x\', actual string.',
+        ],
+        [
+            {
+                point: {
+                    x: 0,
+                    y: 'b',
+                },
+            },
+            'Expected value of type number at path \'/point/y\', actual string.',
+        ],
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
+        function validate(): void {
+            userClicked.validate(value);
+        }
+
+        expect(validate).toThrowWithMessage(Error, message);
+    });
+});
+
+describe('The "userScrolled" payload schema', () => {
+    it.each([
+        [{
+            end: {
+                x: 0,
+                y: 500,
+            },
+        }],
+        [{
+            start: {
+                x: 0,
+                y: 0,
+            },
+            end: {
+                x: 0,
+                y: 500,
+            },
+            surfaceSize: {
+                width: 1920,
+                height: 3000,
+            },
+            viewportSize: {
+                width: 1920,
+                height: 1080,
+            },
+        }],
+    ])('should allow %s', (value: Record<string, unknown>) => {
+        function validate(): void {
+            userScrolled.validate(value);
+        }
+
+        expect(validate).not.toThrow();
+    });
+
+    it.each([
+        [
+            {},
+            'Missing property \'/end\'.',
+        ],
+        [
+            {
+                end: {
+                    x: 'a',
+                    y: 0,
+                },
+            },
+            'Expected value of type number at path \'/end/x\', actual string.',
+        ],
+        [
+            {
+                end: {
+                    x: 0,
+                    y: 'b',
+                },
+            },
+            'Expected value of type number at path \'/end/y\', actual string.',
+        ],
+    ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
+        function validate(): void {
+            userScrolled.validate(value);
         }
 
         expect(validate).toThrowWithMessage(Error, message);

@@ -1447,4 +1447,117 @@ describe('A tracker', () => {
 
         await expect(promise).resolves.toEqual(event);
     });
+
+    describe('interaction tracking', () => {
+        function click(x: number, y: number): void {
+            const event = new MouseEvent('click', {bubbles: true, cancelable: true});
+
+            Object.defineProperty(event, 'pageX', {value: x});
+            Object.defineProperty(event, 'pageY', {value: y});
+
+            tabEventEmulator.dispatchEvent(window, event);
+        }
+
+        function scrollTo(x: number, y: number): void {
+            Object.defineProperty(window, 'scrollX', {value: x, configurable: true});
+            Object.defineProperty(window, 'scrollY', {value: y, configurable: true});
+
+            tabEventEmulator.dispatchEvent(window, new Event('scroll', {bubbles: true}));
+        }
+
+        function createTracker(): {tracker: Tracker, channel: OutputChannel<Beacon>} {
+            const channel: OutputChannel<Beacon> = {
+                close: jest.fn(),
+                publish: jest.fn().mockResolvedValue(undefined),
+            };
+
+            const tracker = new Tracker({
+                inactivityRetryPolicy: new NeverPolicy(),
+                tokenProvider: new InMemoryTokenStore(),
+                tab: new Tab(uuid4(), true),
+                channel: channel,
+            });
+
+            return {tracker: tracker, channel: channel};
+        }
+
+        it('should track click events when enabled', async () => {
+            const {tracker, channel} = createTracker();
+
+            tracker.enable();
+
+            click(50, 100);
+
+            await tracker.flushed;
+
+            expect(channel.publish).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    payload: expect.objectContaining({
+                        type: 'userClicked',
+                        point: {x: 50, y: 100},
+                    }),
+                }),
+            );
+        });
+
+        it('should track scroll events when enabled', async () => {
+            jest.useFakeTimers();
+
+            const {tracker, channel} = createTracker();
+
+            tracker.enable();
+
+            scrollTo(0, 0);
+            scrollTo(100, 200);
+
+            jest.advanceTimersByTime(150);
+
+            await tracker.flushed;
+
+            expect(channel.publish).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    payload: expect.objectContaining({
+                        type: 'userScrolled',
+                        start: {x: 0, y: 0},
+                        end: {x: 100, y: 200},
+                    }),
+                }),
+            );
+
+            jest.useRealTimers();
+        });
+
+        it('should not track interaction events when disabled', () => {
+            const {channel} = createTracker();
+
+            click(50, 100);
+
+            expect(channel.publish).not.toHaveBeenCalledWith(
+                expect.objectContaining({
+                    payload: expect.objectContaining({
+                        type: 'userClicked',
+                    }),
+                }),
+            );
+        });
+
+        it('should not track interaction events when suspended', async () => {
+            const {tracker, channel} = createTracker();
+
+            tracker.enable();
+            tracker.suspend();
+
+            click(50, 100);
+
+            await tracker.flushed;
+
+            expect(channel.publish).not.toHaveBeenCalledWith(
+                expect.objectContaining({
+                    payload: expect.objectContaining({
+                        type: 'userClicked',
+                    }),
+                }),
+            );
+        });
+    });
 });

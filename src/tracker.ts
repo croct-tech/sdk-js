@@ -2,6 +2,7 @@ import type {Logger} from './logging';
 import {NullLogger} from './logging';
 import type {Tab, TabEvent, TabUrlChangeEvent, TabVisibilityChangeEvent} from './tab';
 import type {OutputChannel} from './channel';
+import {InteractionMonitor} from './interactionMonitor';
 import {formatCause} from './error';
 import type {Token, TokenProvider} from './token';
 import type {RetryPolicy} from './retry';
@@ -81,6 +82,8 @@ export class Tracker {
         suspended: false,
     };
 
+    private readonly interactionMonitor: InteractionMonitor;
+
     private readonly inactivityTimer: InactivityTimer = {
         since: 0,
     };
@@ -97,6 +100,10 @@ export class Tracker {
             ...options,
             eventMetadata: options.eventMetadata ?? {},
         };
+
+        this.interactionMonitor = new InteractionMonitor();
+        this.interactionMonitor.addListener('userClicked', event => this.enqueue(event));
+        this.interactionMonitor.addListener('userScrolled', event => this.enqueue(event));
 
         this.enable = this.enable.bind(this);
         this.disable = this.disable.bind(this);
@@ -160,6 +167,8 @@ export class Tracker {
         this.tab.addListener('load', this.trackPageLoad);
         this.tab.addListener('urlChange', this.trackTabUrlChange);
         this.tab.addListener('visibilityChange', this.trackTabVisibilityChange);
+
+        this.interactionMonitor.enable();
     }
 
     public disable(): void {
@@ -174,6 +183,8 @@ export class Tracker {
         if (this.state.suspended) {
             return;
         }
+
+        this.interactionMonitor.disable();
 
         this.tab.removeListener('load', this.trackPageLoad);
         this.tab.removeListener('urlChange', this.trackTabUrlChange);
