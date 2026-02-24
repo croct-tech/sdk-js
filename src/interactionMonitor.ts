@@ -29,16 +29,12 @@ export class InteractionMonitor {
 
     private scrollDebounceTimer: number | undefined;
 
-    private readonly handleClick: (event: MouseEvent) => void;
-
-    private readonly handleScroll: () => void;
-
     public constructor(options: Options = {}) {
         this.clickThrottleInterval = options.clickThrottleInterval ?? 500;
         this.scrollDebounceInterval = options.scrollDebounceInterval ?? 250;
 
-        this.handleClick = this.onClick.bind(this);
-        this.handleScroll = this.onScroll.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+        this.handleScroll = this.handleScroll.bind(this);
     }
 
     public addListener<T extends keyof InteractionEventMap>(
@@ -83,7 +79,7 @@ export class InteractionMonitor {
         this.flushPendingScroll();
     }
 
-    private onClick(event: MouseEvent): void {
+    private handleClick(event: MouseEvent): void {
         const currentTime = Date.now();
 
         if (currentTime - this.lastClickTime < this.clickThrottleInterval) {
@@ -105,7 +101,7 @@ export class InteractionMonitor {
         });
     }
 
-    private onScroll(): void {
+    private handleScroll(): void {
         const currentPosition: Point = {
             x: window.scrollX,
             y: window.scrollY,
