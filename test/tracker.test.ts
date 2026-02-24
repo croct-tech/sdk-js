@@ -1510,7 +1510,7 @@ describe('A tracker', () => {
             scrollTo(0, 0);
             scrollTo(100, 200);
 
-            jest.advanceTimersByTime(150);
+            jest.advanceTimersByTime(250);
 
             await tracker.flushed;
 

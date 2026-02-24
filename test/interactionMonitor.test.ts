@@ -142,8 +142,8 @@ describe('An interaction monitor', () => {
         });
 
         expect(event.viewportSize).toEqual({
-            width: window.innerWidth,
-            height: window.innerHeight,
+            width: document.documentElement.clientWidth,
+            height: document.documentElement.clientHeight,
         });
 
         monitor.disable();

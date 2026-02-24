@@ -34,8 +34,8 @@ export class InteractionMonitor {
     private readonly handleScroll: () => void;
 
     public constructor(options: Options = {}) {
-        this.clickThrottleInterval = options.clickThrottleInterval ?? 1000;
-        this.scrollDebounceInterval = options.scrollDebounceInterval ?? 150;
+        this.clickThrottleInterval = options.clickThrottleInterval ?? 500;
+        this.scrollDebounceInterval = options.scrollDebounceInterval ?? 250;
 
         this.handleClick = this.onClick.bind(this);
         this.handleScroll = this.onScroll.bind(this);
@@ -201,9 +201,12 @@ export class InteractionMonitor {
                 width: document.documentElement.scrollWidth,
                 height: document.documentElement.scrollHeight,
             },
+            // Uses clientWidth/clientHeight instead of innerWidth/innerHeight to get the
+            // layout viewport size, which remains stable regardless of pinch-to-zoom level
+            // on mobile devices.
             viewportSize: {
-                width: window.innerWidth,
-                height: window.innerHeight,
+                width: document.documentElement.clientWidth,
+                height: document.documentElement.clientHeight,
             },
         });
     }
