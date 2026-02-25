@@ -708,7 +708,7 @@ describe('A SDK', () => {
     it('should provide the timezone', () => {
         const sdk = Sdk.init(configuration);
 
-        expect(sdk.timeZone).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone);
+        expect(sdk.timeZone).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone ?? null);
     });
 
     it('should provide a CID assigner', async () => {
