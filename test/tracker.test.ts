@@ -452,13 +452,9 @@ describe('A tracker', () => {
             sinceTime: 0,
         });
 
-        expect(channel.publish).toHaveBeenCalledWith(
-            expect.objectContaining({
-                context: expect.not.objectContaining({
-                    timeZone: expect.anything(),
-                }),
-            }),
-        );
+        const {context} = jest.mocked(channel.publish).mock.calls[0][0];
+
+        expect(context).not.toHaveProperty('timeZone');
     });
 
     it('should include the token in the beacons', async () => {
