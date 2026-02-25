@@ -57,13 +57,17 @@ describe('A container', () => {
     it('should resolve the timezone lazily from the Intl API', () => {
         const container = new Container(configuration);
 
-        expect(container.getTimeZone()).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone);
+        expect(container.getTimeZone()).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone ?? null);
     });
 
     it('should cache the resolved time zone', () => {
+        const dateTimeFormatSpy = jest.spyOn(Intl, 'DateTimeFormat');
         const container = new Container(configuration);
 
-        expect(container.getTimeZone()).toBe(container.getTimeZone());
+        container.getTimeZone();
+        container.getTimeZone();
+
+        expect(dateTimeFormatSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should return null when the timezone is unavailable', () => {
