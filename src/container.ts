@@ -79,12 +79,22 @@ export class Container {
 
     private readonly eventManager = new SynchronousEventManager<SdkEventMap>();
 
+    private timeZone?: string | null;
+
     public constructor(configuration: Configuration) {
         this.configuration = configuration;
     }
 
     public getConfiguration(): Configuration {
         return this.configuration;
+    }
+
+    public getTimeZone(): string | null {
+        if (this.timeZone === undefined) {
+            this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? null;
+        }
+
+        return this.timeZone;
     }
 
     public getEvaluator(): Evaluator {
@@ -152,6 +162,7 @@ export class Container {
             logger: this.getLogger('Tracker'),
             channel: this.getBeaconChannel(),
             eventMetadata: this.configuration.eventMetadata,
+            timeZone: this.getTimeZone() ?? undefined,
         });
 
         const queue = this.getBeaconQueue();

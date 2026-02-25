@@ -100,7 +100,7 @@ describe('A content fetcher facade', () => {
             cidAssigner: new FixedAssigner(clientId),
             userTokenProvider: new FixedTokenProvider(userToken),
             previewTokenProvider: new FixedTokenProvider(previewToken),
-            contextFactory: new TabContextFactory(tab),
+            contextFactory: new TabContextFactory(tab, timeZone),
         });
 
         const options: FetchOptions = {

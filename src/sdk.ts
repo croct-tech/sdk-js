@@ -122,6 +122,10 @@ export class Sdk {
         return appId;
     }
 
+    public get timeZone(): string | null {
+        return this.container.getTimeZone();
+    }
+
     public get cidAssigner(): CidAssigner {
         return this.container.getCidAssigner();
     }

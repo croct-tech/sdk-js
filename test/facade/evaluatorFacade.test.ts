@@ -98,7 +98,7 @@ describe('An evaluator facade', () => {
             evaluator: evaluator,
             cidAssigner: new FixedAssigner(clientId),
             userTokenProvider: new FixedTokenProvider(token),
-            contextFactory: new TabContextFactory(tab),
+            contextFactory: new TabContextFactory(tab, timeZone),
         });
 
         const options: EvaluationOptions = {
@@ -167,7 +167,7 @@ describe('A tab context factory', () => {
             configurable: true,
         });
 
-        const factory = new TabContextFactory(new Tab('1', true));
+        const factory = new TabContextFactory(new Tab('1', true), timeZone);
 
         const attributes: JsonObject = {
             foo: 1,
@@ -186,5 +186,15 @@ describe('A tab context factory', () => {
         expect(context.campaign).toBeUndefined();
         expect(context.page).toEqual(page);
         expect(context.timeZone).toBe(timeZone);
+    });
+
+    it('should omit the timezone when not provided', () => {
+        window.history.replaceState({}, 'Landing page', 'http://localhost');
+        window.document.title = 'Welcome';
+
+        const factory = new TabContextFactory(new Tab('1', true));
+        const context = factory.createContext();
+
+        expect(context).not.toHaveProperty('timeZone');
     });
 });
