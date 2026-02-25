@@ -483,6 +483,7 @@ export function isCartPartialEvent(event: PartialTrackingEvent): event is CartPa
 export type TrackingEventContext = {
     tabId: string,
     url: string,
+    timeZone?: string,
     metadata?: {[key: string]: string},
 };
 

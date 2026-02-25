@@ -18,7 +18,7 @@ describe('A container', () => {
             document.cookie = `${name}=; Max-Age=0`;
         }
 
-        jest.resetAllMocks();
+        jest.restoreAllMocks();
         fetchMock.removeRoutes();
         fetchMock.clearHistory();
     });
@@ -52,6 +52,40 @@ describe('A container', () => {
         const container = new Container(fullConfiguration);
 
         expect(container.getConfiguration()).toEqual(fullConfiguration);
+    });
+
+    it('should resolve the timezone lazily from the Intl API', () => {
+        const container = new Container(configuration);
+
+        expect(container.getTimeZone()).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    });
+
+    it('should cache the resolved time zone', () => {
+        const container = new Container(configuration);
+
+        expect(container.getTimeZone()).toBe(container.getTimeZone());
+    });
+
+    it('should return null when the timezone is unavailable', () => {
+        const OriginalDateTimeFormat = Intl.DateTimeFormat;
+
+        jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(
+            (...args) => {
+                const instance = new OriginalDateTimeFormat(...args);
+
+                return {
+                    ...instance,
+                    resolvedOptions: () => ({
+                        ...instance.resolvedOptions(),
+                        timeZone: undefined as unknown as string,
+                    }),
+                };
+            },
+        );
+
+        const container = new Container(configuration);
+
+        expect(container.getTimeZone()).toBeNull();
     });
 
     it('should load the context only once', () => {

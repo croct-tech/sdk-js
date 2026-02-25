@@ -75,8 +75,11 @@ export class MinimalContextFactory implements ContextFactory {
 export class TabContextFactory implements ContextFactory {
     private readonly tab: Tab;
 
-    public constructor(tab: Tab) {
+    private readonly timeZone?: string;
+
+    public constructor(tab: Tab, timeZone?: string) {
         this.tab = tab;
+        this.timeZone = timeZone;
     }
 
     public createContext(attributes?: JsonObject): EvaluationContext {
@@ -96,10 +99,8 @@ export class TabContextFactory implements ContextFactory {
 
         context.page = page;
 
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? null;
-
-        if (timeZone !== null) {
-            context.timeZone = timeZone;
+        if (this.timeZone !== undefined) {
+            context.timeZone = this.timeZone;
         }
 
         if (attributes !== undefined && Object.keys(attributes).length > 0) {

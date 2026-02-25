@@ -181,9 +181,12 @@ export class SdkFacade {
         if (this.evaluatorFacade === undefined) {
             this.evaluatorFacade = new EvaluatorFacade({
                 evaluator: this.sdk.evaluator,
-                contextFactory: new TabContextFactory(this.sdk
-                    .context
-                    .getTab()),
+                contextFactory: new TabContextFactory(
+                    this.sdk
+                        .context
+                        .getTab(),
+                    this.sdk.timeZone ?? undefined,
+                ),
                 cidAssigner: this.sdk.cidAssigner,
                 userTokenProvider: this.sdk.userTokenStore,
             });
@@ -196,9 +199,12 @@ export class SdkFacade {
         if (this.contentFetcherFacade === undefined) {
             this.contentFetcherFacade = new ContentFetcherFacade({
                 contentFetcher: this.sdk.contentFetcher,
-                contextFactory: new TabContextFactory(this.sdk
-                    .context
-                    .getTab()),
+                contextFactory: new TabContextFactory(
+                    this.sdk
+                        .context
+                        .getTab(),
+                    this.sdk.timeZone ?? undefined,
+                ),
                 cidAssigner: this.sdk.cidAssigner,
                 previewTokenProvider: this.sdk.previewTokenStore,
                 userTokenProvider: this.sdk.userTokenStore,

@@ -402,6 +402,65 @@ describe('A tracker', () => {
         );
     });
 
+    it('should include the time zone in the context when provided', async () => {
+        const channel: OutputChannel<Beacon> = {
+            close: jest.fn(),
+            publish: jest.fn().mockResolvedValue(undefined),
+        };
+
+        const tab = new Tab(uuid4(), true);
+
+        const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: tab,
+            channel: channel,
+            timeZone: 'America/Sao_Paulo',
+        });
+
+        await tracker.track({
+            type: 'nothingChanged',
+            sinceTime: 0,
+        });
+
+        expect(channel.publish).toHaveBeenCalledWith(
+            expect.objectContaining({
+                context: expect.objectContaining({
+                    timeZone: 'America/Sao_Paulo',
+                }),
+            }),
+        );
+    });
+
+    it('should omit the time zone from the context when not provided', async () => {
+        const channel: OutputChannel<Beacon> = {
+            close: jest.fn(),
+            publish: jest.fn().mockResolvedValue(undefined),
+        };
+
+        const tab = new Tab(uuid4(), true);
+
+        const tracker = new Tracker({
+            inactivityRetryPolicy: new NeverPolicy(),
+            tokenProvider: new InMemoryTokenStore(),
+            tab: tab,
+            channel: channel,
+        });
+
+        await tracker.track({
+            type: 'nothingChanged',
+            sinceTime: 0,
+        });
+
+        expect(channel.publish).toHaveBeenCalledWith(
+            expect.objectContaining({
+                context: expect.not.objectContaining({
+                    timeZone: expect.anything(),
+                }),
+            }),
+        );
+    });
+
     it('should include the token in the beacons', async () => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),

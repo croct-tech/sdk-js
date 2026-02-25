@@ -28,6 +28,7 @@ export type Configuration = Options & {
     channel: OutputChannel<Beacon>,
     logger?: Logger,
     tab: Tab,
+    timeZone?: string,
     tokenProvider: TokenProvider,
     inactivityRetryPolicy: RetryPolicy<number>,
 };
@@ -68,6 +69,8 @@ export class Tracker {
 
     private inactivityRetryPolicy: RetryPolicy<any>;
 
+    private readonly timeZone?: string;
+
     private readonly channel: OutputChannel<Beacon>;
 
     private readonly logger: Logger;
@@ -89,12 +92,13 @@ export class Tracker {
     };
 
     public constructor(config: Configuration) {
-        const {tab, tokenProvider, channel, logger, inactivityRetryPolicy, ...options} = config;
+        const {tab, tokenProvider, channel, logger, inactivityRetryPolicy, timeZone, ...options} = config;
 
         this.tab = tab;
         this.tokenProvider = tokenProvider;
         this.inactivityRetryPolicy = inactivityRetryPolicy;
         this.channel = channel;
+        this.timeZone = timeZone;
         this.logger = logger ?? new NullLogger();
         this.options = {
             ...options,
@@ -351,6 +355,7 @@ export class Tracker {
         const context: TrackingEventContext = {
             tabId: this.tab.id,
             url: this.tab.url,
+            ...(this.timeZone !== undefined ? {timeZone: this.timeZone} : {}),
             ...(Object.keys(metadata).length > 0 ? {metadata: metadata} : {}),
         };
 
