@@ -402,7 +402,7 @@ describe('A tracker', () => {
         );
     });
 
-    it('should include the time zone in the context when provided', async () => {
+    it('should include the timezone in the context when provided', async () => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),
             publish: jest.fn().mockResolvedValue(undefined),
@@ -432,7 +432,7 @@ describe('A tracker', () => {
         );
     });
 
-    it('should omit the time zone from the context when not provided', async () => {
+    it('should omit the timezone from the context when not provided', async () => {
         const channel: OutputChannel<Beacon> = {
             close: jest.fn(),
             publish: jest.fn().mockResolvedValue(undefined),

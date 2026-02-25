@@ -60,7 +60,7 @@ describe('A container', () => {
         expect(container.getTimeZone()).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone ?? null);
     });
 
-    it('should cache the resolved time zone', () => {
+    it('should cache the resolved timezone', () => {
         const dateTimeFormatSpy = jest.spyOn(Intl, 'DateTimeFormat');
         const container = new Container(configuration);
 

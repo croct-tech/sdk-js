@@ -188,7 +188,7 @@ describe('A tab context factory', () => {
         expect(context.timeZone).toBe(timeZone);
     });
 
-    it('should omit the time zone when not provided', () => {
+    it('should omit the timezone when not provided', () => {
         window.history.replaceState({}, 'Landing page', 'http://localhost');
         window.document.title = 'Welcome';
 
