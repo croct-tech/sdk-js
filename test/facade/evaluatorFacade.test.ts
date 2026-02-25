@@ -195,6 +195,6 @@ describe('A tab context factory', () => {
         const factory = new TabContextFactory(new Tab('1', true));
         const context = factory.createContext();
 
-        expect(context.timeZone).toBeUndefined();
+        expect(context).not.toHaveProperty('timeZone');
     });
 });
