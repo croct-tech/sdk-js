@@ -92,6 +92,28 @@ describe('A container', () => {
         expect(container.getTimeZone()).toBeNull();
     });
 
+    it('should return null when the timezone is Etc/Unknown', () => {
+        const OriginalDateTimeFormat = Intl.DateTimeFormat;
+
+        jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(
+            (...args) => {
+                const instance = new OriginalDateTimeFormat(...args);
+
+                return {
+                    ...instance,
+                    resolvedOptions: () => ({
+                        ...instance.resolvedOptions(),
+                        timeZone: 'Etc/Unknown',
+                    }),
+                };
+            },
+        );
+
+        const container = new Container(configuration);
+
+        expect(container.getTimeZone()).toBeNull();
+    });
+
     it('should load the context only once', () => {
         const container = new Container(configuration);
 
