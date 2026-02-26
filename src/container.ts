@@ -91,7 +91,7 @@ export class Container {
 
     public getTimeZone(): string | null {
         if (this.timeZone === undefined) {
-            this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? null;
+            this.timeZone = Container.detectTimeZone();
         }
 
         return this.timeZone;
@@ -414,5 +414,15 @@ export class Container {
         delete this.removeTokenSyncListener;
 
         logger.debug('Container resources released.');
+    }
+
+    private static detectTimeZone(): string | null {
+        const {timeZone} = Intl.DateTimeFormat().resolvedOptions();
+
+        if (timeZone === undefined || timeZone === 'Etc/Unknown') {
+            return null;
+        }
+
+        return timeZone;
     }
 }
