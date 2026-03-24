@@ -54,7 +54,7 @@
     "jest-extended": "^7.0.0",
     "ts-jest": "^29.0.3",
     "tsup": "^8.4.0",
-    "typescript": "^5.0.0"
+    "typescript": "^6.0.0"
   },
   "files": [
     "**/*.js",
