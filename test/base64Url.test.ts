@@ -32,7 +32,9 @@ describe('A base64 URL encoder/decoder function', () => {
         expect(base64UrlEncode(decoded, utf8)).toBe(encoded);
     });
 
-    const decodeTests = encodeTests.map(([encoded, decoded, utf8]) => [decoded, encoded, utf8]);
+    const decodeTests = encodeTests.map(
+        ([encoded, decoded, utf8]): [string, string, boolean] => [decoded, encoded, utf8],
+    );
 
     it.each(decodeTests)('should decode "%s" as "%s"', (encoded: string, decoded: string, utf8: boolean) => {
         expect(base64UrlDecode(encoded, utf8)).toBe(decoded);

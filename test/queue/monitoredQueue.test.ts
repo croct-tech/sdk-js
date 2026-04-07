@@ -1,6 +1,5 @@
 import type {QueueStatus} from '../../src/queue/monitoredQueue';
-import {MonitoredQueue} from '../../src/queue/monitoredQueue';
-import {InMemoryQueue, CapacityRestrictedQueue} from '../../src/queue';
+import {MonitoredQueue, InMemoryQueue, CapacityRestrictedQueue} from '../../src/queue';
 import {NullLogger} from '../../src/logging';
 
 describe('A monitored queue', () => {
@@ -84,7 +83,9 @@ describe('A monitored queue', () => {
         expect(queue.length()).toBe(2);
     });
 
-    it.each([
+    type Scenario = [QueueStatus, string[]];
+
+    it.each<Scenario>([
         [
             'empty',
             [],

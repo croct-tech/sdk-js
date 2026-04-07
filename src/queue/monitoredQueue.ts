@@ -15,7 +15,7 @@ export class MonitoredQueue<T> implements Queue<T> {
 
     private readonly callbacks: Partial<{[key in QueueStatus]: Array<QueueCallback<T>>}> = {};
 
-    private status: QueueStatus;
+    private status!: QueueStatus;
 
     public constructor(queue: Queue<T>, logger?: Logger) {
         this.queue = queue;

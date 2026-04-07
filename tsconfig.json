@@ -5,6 +5,7 @@
     "importHelpers": true,
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
+    "ignoreDeprecations": "6.0",
     "resolveJsonModule": true,
     "noImplicitAny": true,
     "noFallthroughCasesInSwitch": true,
@@ -15,10 +16,10 @@
     "strictNullChecks": true,
     "removeComments": false,
     "isolatedModules": true,
-    "outDir": "build",
-    "downlevelIteration": true,
+    "rootDir": ".",
     "declaration": true,
-    "lib": ["dom"]
+    "lib": ["dom"],
+    "types": ["node", "jest"]
   },
   "include": [
     "src/**/*.ts",

@@ -55,7 +55,7 @@ export class DeduplicatedLogger implements Logger {
 
         // Evict oldest if at capacity
         if (this.recentMessages.size >= this.maxSize) {
-            const oldest = this.recentMessages.values().next().value;
+            const oldest = this.recentMessages.values().next().value!;
 
             this.recentMessages.delete(oldest);
         }

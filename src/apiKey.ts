@@ -30,7 +30,7 @@ export class ApiKey {
 
     private readonly privateKey?: ParsedPrivateKey;
 
-    private importedKey: Promise<CryptoKey>;
+    private importedKey!: Promise<CryptoKey>;
 
     private constructor(identifier: string, privateKey?: ParsedPrivateKey) {
         this.identifier = identifier;
