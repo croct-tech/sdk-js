@@ -915,7 +915,7 @@ describe('The order schema', () => {
                 items: [minimalOrderItem],
                 status: 'foo',
             },
-            'Unexpected value at path \'/status\', expecting \'placed\', \'paid\' or \'completed\', found \'foo\'.',
+            'Unexpected value at path \'/status\', expecting \'placed\', \'paid\' or \'complete\', found \'foo\'.',
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
