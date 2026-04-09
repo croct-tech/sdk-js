@@ -177,7 +177,7 @@ export const order = new ObjectType({
             minimum: 1,
         }),
         status: new StringType({
-            enumeration: ['placed', 'paid', 'complete'],
+            enumeration: ['placed', 'paid', 'completed'],
         }),
     },
 });
