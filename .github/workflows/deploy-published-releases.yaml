@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    uses: croct-tech/github-workflows/.github/workflows/publish-npm-package.yml@unify-workflows
+    uses: croct-tech/renovate-public-presets/.github/workflows/publish-npm-package.yml@unify-workflows
     with:
       publish-access: "public"
       prepare-script: >-
