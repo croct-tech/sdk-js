@@ -3,7 +3,7 @@
     "module": "ES2020",
     "target": "ES2020",
     "importHelpers": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "ignoreDeprecations": "6.0",
     "resolveJsonModule": true,
