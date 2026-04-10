@@ -51,7 +51,7 @@ function validateConfiguration(configuration: unknown): asserts configuration is
 export class Sdk {
     private container: Container;
 
-    private closed: boolean;
+    private closed!: boolean;
 
     private constructor(container: Container) {
         this.container = container;

@@ -5,55 +5,15 @@ on:
     types:
       - published
 
-env:
-  BASE_ENDPOINT: https://api.croct.io
-  MAX_QUERY_LENGTH: 500
-
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          registry-url: 'https://registry.npmjs.org'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Cache dependencies
-        id: cache-dependencies
-        uses: actions/cache@v5
-        with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Install dependencies
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        run: npm ci
-
-      - name: Build package
-        run: |-
-          npm run build
-
-      - name: Prepare release
-        run: |-
-          cp LICENSE README.md build/
-          cd build
-          find . -type f -path '*/*\.js.map' -exec sed -i -e "s~../src~src~" {} +          
-          sed -i -e "s~\"version\": \"0.0.0-dev\"~\"version\": \"${GITHUB_REF##*/}\"~" package.json
-          sed -i -e "s~<@version@>~${GITHUB_REF##*/}~" constants.*
-          sed -i -e "s~<@baseEndpointUrl@>~${BASE_ENDPOINT}~" constants.*
-          sed -i -e "s~parseInt('<@maxQueryLength@>', 10)~${MAX_QUERY_LENGTH}~" constants.*
-
-      - name: Publish pre-release to NPM
-        if: ${{ github.event.release.prerelease }}
-        run: |-
-          cd build
-          npm publish --access public --tag next
-
-      - name: Publish release to NPM
-        if: ${{ !github.event.release.prerelease }}
-        run: |-
-          cd build
-          npm publish --access public
+    uses: croct-tech/shared-public-configs/.github/workflows/publish-public-npm-package.yml@master
+    with:
+      prepare-script: >-
+        cp LICENSE README.md build/ &&
+        cd build &&
+        find . -type f -path '*/*\.js.map' -exec sed -i -e "s~../src~src~" {} + &&
+        sed -i -e "s~\"version\": \"0.0.0-dev\"~\"version\": \"${GITHUB_REF##*/}\"~" package.json &&
+        sed -i -e "s~<@version@>~${GITHUB_REF##*/}~" constants.* &&
+        sed -i -e "s~<@baseEndpointUrl@>~https://api.croct.io~" constants.* &&
+        sed -i -e "s~parseInt('<@maxQueryLength@>', 10)~500~" constants.*

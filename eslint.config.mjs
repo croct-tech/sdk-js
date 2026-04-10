@@ -15,4 +15,14 @@ export default defineConfig(
             '@typescript-eslint/no-floating-promises': 'off',
         },
     },
+    {
+        files: ['test/**/*.ts'],
+        languageOptions: {
+            parserOptions: {
+                projectService: false,
+                project: './test/tsconfig.json',
+                tsconfigRootDir: import.meta.dirname,
+            },
+        },
+    },
 );

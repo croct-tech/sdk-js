@@ -3,8 +3,10 @@
     "module": "ES2020",
     "target": "ES2020",
     "importHelpers": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "ignoreDeprecations": "6.0",
     "resolveJsonModule": true,
     "noImplicitAny": true,
     "noFallthroughCasesInSwitch": true,
@@ -15,14 +17,11 @@
     "strictNullChecks": true,
     "removeComments": false,
     "isolatedModules": true,
+    "rootDir": "src",
     "outDir": "build",
-    "downlevelIteration": true,
     "declaration": true,
-    "lib": ["dom"]
+    "lib": ["dom", "es2024"],
   },
-  "include": [
-    "src/**/*.ts",
-    "test/**/*.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "build"]
 }
