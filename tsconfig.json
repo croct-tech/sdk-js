@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "module": "ES2020",
-    "target": "ES2020",
+    "module": "CommonJS",
+    "target": "es2024",
     "importHelpers": true,
     "moduleResolution": "bundler",
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "ignoreDeprecations": "6.0",
     "resolveJsonModule": true,
@@ -16,11 +17,11 @@
     "strictNullChecks": true,
     "removeComments": false,
     "isolatedModules": true,
-    "rootDir": ".",
+    "rootDir": "src",
     "outDir": "build",
     "declaration": true,
     "lib": ["dom"],
-    "types": ["node", "jest"]
+    "types": ["jest", "node"]
   },
   "include": [
     "src/**/*.ts",
