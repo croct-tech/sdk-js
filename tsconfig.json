@@ -20,12 +20,9 @@
     "rootDir": "src",
     "outDir": "build",
     "declaration": true,
-    "lib": ["dom"],
-    "types": ["jest", "node"]
+    "lib": ["dom", "es2024"],
+    "types": ["jest"]
   },
-  "include": [
-    "src/**/*.ts",
-    "test/**/*.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "build"]
 }
