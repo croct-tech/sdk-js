@@ -169,7 +169,7 @@ export class Evaluator {
             const abortController = new AbortController();
             const timeout = options.timeout ?? this.configuration.defaultTimeout;
 
-            let timer: number | NodeJS.Timeout | undefined;
+            let timer: number | undefined;
 
             if (timeout !== undefined) {
                 timer = setTimeout(

@@ -12,7 +12,7 @@ export class TabEventEmulator {
     public registerListeners(): void {
         this.windowAddEventListener = window.addEventListener;
 
-        window.addEventListener = (type: string, listener: Listener): void => {
+        (window.addEventListener as (...args: any[]) => any) = (type: string, listener: Listener): void => {
             this.addEventListener(window, type, listener);
         };
 
