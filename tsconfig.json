@@ -17,6 +17,7 @@
     "removeComments": false,
     "isolatedModules": true,
     "rootDir": ".",
+    "outDir": "build",
     "declaration": true,
     "lib": ["dom"],
     "types": ["node", "jest"]

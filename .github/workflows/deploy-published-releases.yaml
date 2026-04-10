@@ -7,9 +7,8 @@ on:
 
 jobs:
   deploy:
-    uses: croct-tech/renovate-public-presets/.github/workflows/publish-npm-package.yml@unify-workflows
+    uses: croct-tech/renovate-public-presets/.github/workflows/publish-public-npm-package.yml@unify-workflows
     with:
-      publish-access: "public"
       prepare-script: >-
         cp LICENSE README.md build/ &&
         cd build &&
@@ -18,5 +17,3 @@ jobs:
         sed -i -e "s~<@version@>~${GITHUB_REF##*/}~" constants.* &&
         sed -i -e "s~<@baseEndpointUrl@>~https://api.croct.io~" constants.* &&
         sed -i -e "s~parseInt('<@maxQueryLength@>', 10)~500~" constants.*
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
