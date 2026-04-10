@@ -21,7 +21,6 @@
     "outDir": "build",
     "declaration": true,
     "lib": ["dom", "es2024"],
-    "types": ["jest"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "build"]
