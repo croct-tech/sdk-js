@@ -1,6 +1,5 @@
 import type {CallLog} from 'fetch-mock';
 import fetchMock from 'fetch-mock';
-import type {RouteMatcherFunction} from 'fetch-mock/dist/esm/Matchers';
 import type {Configuration} from '../src';
 import {Sdk} from '../src';
 import type {Logger} from '../src/logging';
@@ -291,7 +290,7 @@ describe('A SDK', () => {
     it('should ensure that events are delivered one at a time and in order', async () => {
         const now = Date.now();
 
-        function createMatcher(index: number, negated: boolean = false): RouteMatcherFunction {
+        function createMatcher(index: number, negated: boolean = false) {
             return (callLog: CallLog) => {
                 const {url, options: {body}} = callLog;
 
