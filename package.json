@@ -36,25 +36,25 @@
     "postbuild": "./post-build.mjs"
   },
   "dependencies": {
-    "@croct/content-model": "^0.21.1",
-    "@croct/json": "^2.0.1",
-    "tslib": "^2.5.0"
+    "@croct/content-model": "^0.21.4",
+    "@croct/json": "^2.1.0",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@croct/eslint-plugin": "^0.8.3",
-    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/eslintrc": "^3.3.5",
     "@fetch-mock/jest": "^0.2.20",
     "@types/jest": "^30.0.0",
-    "@typescript-eslint/parser": "^8.53.0",
-    "esbuild-fix-imports-plugin": "^1.0.19",
-    "eslint": "^9.39.0",
+    "@typescript-eslint/parser": "^8.59.2",
+    "esbuild-fix-imports-plugin": "^1.0.23",
+    "eslint": "^10.3.0",
     "fetch-mock": "^12.6.0",
-    "jest": "^30.0.0",
-    "jest-environment-jsdom": "^30.0.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
     "jest-extended": "^7.0.0",
     "ts-jest": "^29.4.9",
-    "tsup": "^8.4.0",
-    "typescript": "^6.0.0"
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
   },
   "files": [
     "**/*.js",
