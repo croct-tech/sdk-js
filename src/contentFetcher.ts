@@ -1,4 +1,4 @@
-import type {JsonObject} from '@croct/json';
+import type {JsonObject, JsonPrimitive} from '@croct/json';
 import type {ContentDefinitionBundle} from '@croct/content-model/definition';
 import type {EvaluationContext} from './evaluator';
 import type {Token} from './token';
@@ -18,8 +18,10 @@ export type ErrorResponse = {
 
 export enum ContentErrorType {
     TIMEOUT = 'https://croct.help/sdk/javascript/request-timeout',
-    UNEXPECTED_ERROR = 'https://croct.help/sdk/javascript/unexpected-error',
+    INTERNAL_ERROR = 'https://croct.help/sdk/javascript/internal-error',
     SUSPENDED_SERVICE = 'https://croct.help/sdk/javascript/suspended-service',
+    // Server errors
+    INVALID_PAYLOAD = 'https://croct.help/api/content/invalid-payload',
 }
 
 type FetchPayload = {
@@ -42,6 +44,25 @@ export class ContentError<T extends ErrorResponse = ErrorResponse> extends Error
         Object.setPrototypeOf(this, ContentError.prototype);
     }
 }
+
+export type InputViolation = {
+    path: string,
+    reason?: string,
+    details?: Record<string, JsonPrimitive>,
+};
+
+export type InputErrorResponse = ErrorResponse & {
+    violations?: InputViolation[],
+};
+
+export class InputError extends ContentError<InputErrorResponse> {
+    public constructor(response: InputErrorResponse) {
+        super(response);
+
+        Object.setPrototypeOf(this, InputError.prototype);
+    }
+}
+
 
 export type FetchResponseOptions = {
     includeSchema?: boolean,
@@ -206,7 +227,13 @@ export class ContentFetcher {
 
                             this.logHelp(response.status);
 
-                            reject(new ContentError(body));
+                            const problem: ErrorResponse = body;
+
+                            if (problem.type === ContentErrorType.INVALID_PAYLOAD) {
+                                return reject(new InputError(problem as InputErrorResponse));
+                            }
+
+                            reject(new ContentError(problem));
                         })
                         .catch(error => {
                             if (!response.ok) {
@@ -221,7 +248,7 @@ export class ContentFetcher {
                         reject(
                             new ContentError({
                                 title: formatMessage(error),
-                                type: ContentErrorType.UNEXPECTED_ERROR,
+                                type: ContentErrorType.INTERNAL_ERROR,
                                 detail: 'Please try again or contact Croct support if the error persists.',
                                 status: 500, // Internal Server Error
                             }),

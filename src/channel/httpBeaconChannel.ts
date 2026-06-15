@@ -22,6 +22,11 @@ type ApiProblem = {
     detail: string,
 };
 
+export enum TrackingErrorType {
+    INTERNAL_ERROR = 'https://croct.help/sdk/javascript/internal-error',
+    SUSPENDED_SERVICE = 'https://croct.help/sdk/javascript/suspended-service',
+}
+
 export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string, string>> {
     private readonly configuration: Omit<Configuration, 'logger'>;
 
@@ -65,7 +70,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
                 if (response.status === 202) {
                     this.logger.warn(
                         'Event tracking is currently suspended for this application, check the workspace settings. '
-                        + 'For help, see https://croct.help/sdk/javascript/suspended-service',
+                        + `For help, see ${TrackingErrorType.SUSPENDED_SERVICE}`,
                     );
                 }
 
@@ -76,7 +81,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
 
             const problem: ApiProblem = await response.json().catch(
                 () => ({
-                    type: 'https://croct.help/api/event-tracker#unexpected-error',
+                    type: TrackingErrorType.INTERNAL_ERROR,
                     title: response.statusText,
                     status: response.status,
                 }),
