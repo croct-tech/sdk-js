@@ -1,5 +1,31 @@
+import {ApiProblem} from "./error";
+
+enum AuthErrorType {
+    FORBIDDEN_ORIGIN = 'https://croct.help/api/authentication/forbidden-origin',
+    QUOTA_EXCEEDED = 'https://croct.help/api/authentication/quota-exceeded',
+}
+
 export namespace Help {
-    export function forStatusCode(statusCode: 204 | 401 | 403 | 408 | 402): string;
+    export function forApiProblem(problem: ApiProblem): string | undefined {
+        const forStatus = Help.forStatusCode(problem.status);
+
+        if (forStatus !== undefined) {
+            return forStatus;
+        }
+
+        switch (problem.type) {
+            case AuthErrorType.FORBIDDEN_ORIGIN:
+                return 'The request was not authorized, most likely due to invalid credentials. '
+                    + 'For help, see https://croct.help/sdk/javascript/invalid-credentials';
+            case AuthErrorType.QUOTA_EXCEEDED:
+                return 'The application has exceeded the monthly active users (MAU) quota. '
+                    + 'For help, see https://croct.help/sdk/javascript/mau-exceeded';
+            default:
+                return undefined;
+        }
+    }
+
+    export function forStatusCode(statusCode: 204 | 401 | 408 | 402): string;
 
     export function forStatusCode(statusCode: number): string | undefined;
 
@@ -12,14 +38,6 @@ export namespace Help {
             case 401:
                 return 'The request was not authorized, most likely due to invalid credentials. '
                     + 'For help, see https://croct.help/sdk/javascript/invalid-credentials';
-
-            case 403:
-                return 'The application has exceeded the monthly active users (MAU) quota. '
-                    + 'For help, see https://croct.help/sdk/javascript/mau-exceeded';
-
-            case 403:
-                return 'The origin of the request is not allowed in your application settings. '
-                    + 'For help, see https://croct.help/sdk/javascript/unauthorized-origin';
 
             case 408:
                 return 'The request timed out. '

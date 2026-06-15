@@ -1,3 +1,11 @@
+export type ApiProblem = {
+    title: string,
+    type: string,
+    status: number,
+    detail?: string,
+    instance?: string,
+};
+
 function extractMessage(error: unknown): string {
     if (error instanceof Error) {
         return error.message;

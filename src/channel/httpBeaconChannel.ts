@@ -4,7 +4,7 @@ import type {Envelope} from './guaranteedChannel';
 import type {Logger} from '../logging';
 import {NullLogger} from '../logging';
 import type {CidAssigner} from '../cid';
-import {formatMessage} from '../error';
+import {ApiProblem, formatMessage} from '../error';
 import {CLIENT_LIBRARY} from '../constants';
 import {Help} from '../help';
 
@@ -13,13 +13,6 @@ export type Configuration = {
     endpointUrl: string,
     cidAssigner: CidAssigner,
     logger?: Logger,
-};
-
-type ApiProblem = {
-    type: string,
-    title: string,
-    status: number,
-    detail: string,
 };
 
 export enum TrackingErrorType {
@@ -88,7 +81,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
             );
 
             const isRetryable = HttpBeaconChannel.isRetryable(problem.status);
-            const help = Help.forStatusCode(problem.status);
+            const help = Help.forApiProblem(problem);
 
             if (help !== undefined) {
                 this.logger.error(help);

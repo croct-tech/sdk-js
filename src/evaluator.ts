@@ -1,7 +1,7 @@
 import type {JsonObject, JsonValue} from '@croct/json';
 import type {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, MAX_QUERY_LENGTH} from './constants';
-import {formatMessage} from './error';
+import {ApiProblem, formatMessage} from './error';
 import type {Location} from './sourceLocation';
 import {getLength, getLocation} from './sourceLocation';
 import type {Logger} from './logging';
@@ -56,14 +56,7 @@ export enum EvaluationErrorType {
     EVALUATION_FAILED = 'https://croct.help/api/evaluation/evaluation-failed',
 }
 
-export type ErrorResponse = {
-    type: EvaluationErrorType,
-    title: string,
-    status: number,
-    detail?: string,
-};
-
-export class EvaluationError<T extends ErrorResponse = ErrorResponse> extends Error {
+export class EvaluationError<T extends ApiProblem = ApiProblem> extends Error {
     public readonly response: T;
 
     public constructor(response: T) {
@@ -80,7 +73,7 @@ type QueryErrorDetail = {
     location: Location,
 };
 
-export type QueryErrorResponse = ErrorResponse & {
+export type QueryErrorResponse = ApiProblem & {
     errors: QueryErrorDetail[],
 };
 
@@ -173,7 +166,7 @@ export class Evaluator {
             if (timeout !== undefined) {
                 timer = setTimeout(
                     () => {
-                        const response: ErrorResponse = {
+                        const response: ApiProblem = {
                             title: `Evaluation could not be completed in time for query "${reference}".`,
                             type: EvaluationErrorType.TIMEOUT,
                             detail: `The evaluation took more than ${timeout}ms to complete.`,
@@ -182,7 +175,7 @@ export class Evaluator {
 
                         abortController.abort();
 
-                        this.logHelp(response.status);
+                        this.logHelp(response);
 
                         reject(new EvaluationError(response));
                     },
@@ -216,9 +209,9 @@ export class Evaluator {
                                     return resolve(body);
                                 }
 
-                                this.logHelp(response.status);
+                                const problem: ApiProblem = body;
 
-                                const problem: ErrorResponse = body;
+                                this.logHelp(problem);
 
                                 switch (problem.type) {
                                     case EvaluationErrorType.INVALID_QUERY:
@@ -308,8 +301,8 @@ export class Evaluator {
         });
     }
 
-    private logHelp(statusCode: number): void {
-        const help = Help.forStatusCode(statusCode);
+    private logHelp(problem: ApiProblem): void {
+        const help = Help.forApiProblem(problem);
 
         if (help !== undefined) {
             this.logger.error(help);
