@@ -1,7 +1,8 @@
 import type {CallLog, UserRouteConfig} from 'fetch-mock';
 import fetchMock from 'fetch-mock';
-import type {ErrorResponse, EvaluationContext, EvaluationOptions, QueryErrorResponse} from '../src/evaluator';
+import type {EvaluationContext, EvaluationOptions, QueryErrorResponse} from '../src/evaluator';
 import {EvaluationError, EvaluationErrorType, Evaluator, QueryError} from '../src/evaluator';
+import type {ApiProblem} from '../src/error';
 import {Token} from '../src/token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
 import {ApiKey} from '../src/apiKey';
@@ -429,8 +430,8 @@ describe('An evaluator', () => {
             appId: appId,
         });
 
-        const response: ErrorResponse = {
-            type: EvaluationErrorType.UNALLOWED_RESULT,
+        const response: ApiProblem = {
+            type: EvaluationErrorType.INTERNAL_ERROR,
             title: 'Error title',
             status: 400,
         };
@@ -448,11 +449,9 @@ describe('An evaluator', () => {
         await expect(promise).rejects.toThrow(EvaluationError);
         await expect(promise).rejects.toHaveProperty('response', response);
     });
-
     it.each([
         [EvaluationErrorType.EVALUATION_FAILED],
         [EvaluationErrorType.INVALID_QUERY],
-        [EvaluationErrorType.TOO_COMPLEX_QUERY],
     ])(
         'should report an query error if the error that can be traced back to the offending input (%s)',
         async (errorType: EvaluationErrorType) => {
@@ -536,7 +535,7 @@ describe('An evaluator', () => {
             appId: appId,
         });
 
-        const response: ErrorResponse = {
+        const response: ApiProblem = {
             title: 'Error 500 - Internal Server Error',
             type: EvaluationErrorType.INTERNAL_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
@@ -562,7 +561,7 @@ describe('An evaluator', () => {
             appId: appId,
         });
 
-        const response: ErrorResponse = {
+        const response: ApiProblem = {
             title: 'Unknown error',
             type: EvaluationErrorType.INTERNAL_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
@@ -587,7 +586,7 @@ describe('An evaluator', () => {
             appId: appId,
         });
 
-        const response: ErrorResponse = {
+        const response: ApiProblem = {
             title: 'Network error.',
             type: EvaluationErrorType.INTERNAL_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
@@ -609,23 +608,27 @@ describe('An evaluator', () => {
 
     type HelpScenario = {
         status: number,
+        type: string,
         title: string,
     };
 
     it.each<HelpScenario>([
         {
             status: 401,
+            type: 'https://croct.help/api/evaluation/some-error',
             title: 'Unauthorized request',
         },
         {
             status: 403,
+            type: 'https://croct.help/api/authentication/quota-exceeded',
             title: 'Quota exceeded',
         },
         {
             status: 403,
+            type: 'https://croct.help/api/authentication/forbidden-origin',
             title: 'Unallowed origin',
         },
-    ])('should log help messages for status code $status', async scenario => {
+    ])('should log help messages for the API problem $type', async scenario => {
         const logger: Logger = {
             debug: jest.fn(),
             info: jest.fn(),
@@ -638,9 +641,9 @@ describe('An evaluator', () => {
             logger: logger,
         });
 
-        const response: ErrorResponse = {
+        const response: ApiProblem = {
             title: scenario.title,
-            type: EvaluationErrorType.INTERNAL_ERROR,
+            type: scenario.type,
             status: scenario.status,
         };
 
@@ -656,7 +659,7 @@ describe('An evaluator', () => {
 
         await expect(promise).rejects.toThrowWithMessage(EvaluationError, scenario.title);
 
-        const help = Help.forStatusCode(scenario.status);
+        const help = Help.forApiProblem(response);
 
         expect(help).toBeDefined();
 
@@ -708,8 +711,8 @@ describe('An evaluator', () => {
 
 describe('An evaluation error', () => {
     it('should have a response', () => {
-        const response: ErrorResponse = {
-            type: EvaluationErrorType.UNALLOWED_RESULT,
+        const response: ApiProblem = {
+            type: EvaluationErrorType.INTERNAL_ERROR,
             title: 'Error title',
             status: 400,
         };

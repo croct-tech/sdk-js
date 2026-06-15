@@ -1,4 +1,4 @@
-import {ApiProblem} from "./error";
+import type {ApiProblem} from './error';
 
 enum AuthErrorType {
     FORBIDDEN_ORIGIN = 'https://croct.help/api/authentication/forbidden-origin',
@@ -15,8 +15,8 @@ export namespace Help {
 
         switch (problem.type) {
             case AuthErrorType.FORBIDDEN_ORIGIN:
-                return 'The request was not authorized, most likely due to invalid credentials. '
-                    + 'For help, see https://croct.help/sdk/javascript/invalid-credentials';
+                return 'The origin of the request is not allowed in your application settings. '
+                    + 'For help, see https://croct.help/sdk/javascript/unauthorized-origin';
             case AuthErrorType.QUOTA_EXCEEDED:
                 return 'The application has exceeded the monthly active users (MAU) quota. '
                     + 'For help, see https://croct.help/sdk/javascript/mau-exceeded';
@@ -25,7 +25,7 @@ export namespace Help {
         }
     }
 
-    export function forStatusCode(statusCode: 204 | 401 | 408 | 402): string;
+    export function forStatusCode(statusCode: 202 | 401 | 408): string;
 
     export function forStatusCode(statusCode: number): string | undefined;
 

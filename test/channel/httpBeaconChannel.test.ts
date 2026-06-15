@@ -188,6 +188,7 @@ describe('An HTTP beacon channel', () => {
 
     type NonRetryableErrorScenario = {
         status: number,
+        type?: string,
         title: string,
         log?: string,
     };
@@ -209,22 +210,25 @@ describe('An HTTP beacon channel', () => {
         },
         {
             status: 403,
+            type: 'https://croct.help/api/authentication/quota-exceeded',
             title: 'Quota exceeded',
         },
         {
             status: 403,
+            type: 'https://croct.help/api/authentication/forbidden-origin',
             title: 'Unallowed origin',
         },
     ])('should report a non-retryable error if the response status is $status', async scenario => {
         const {status, title} = scenario;
-        const log = scenario.log ?? Help.forStatusCode(status);
+        const type = scenario.type ?? 'https://croct.help/api/event-tracker#error';
+        const log = scenario.log ?? Help.forApiProblem({status: status, type: type, title: title});
 
         expect(log).toBeDefined();
 
         fetchMock.mockGlobal().route(endpointUrl, {
             status: status,
             body: JSON.stringify({
-                type: 'https://croct.help/api/event-tracker#error',
+                type: type,
                 title: title,
                 status: status,
             }),

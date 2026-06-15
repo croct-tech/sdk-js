@@ -7,10 +7,10 @@ import {NullLogger} from '../src/logging';
 import {Token} from '../src/token';
 import {TabEventEmulator} from './utils/tabEventEmulator';
 import type {BeaconPayload, NothingChanged} from '../src/trackingEvents';
-import type {ErrorResponse as ContentFetchErrorResponse, FetchResponse} from '../src/contentFetcher';
+import type {FetchResponse} from '../src/contentFetcher';
 import {ContentError} from '../src/contentFetcher';
+import type {ApiProblem} from '../src/error';
 import {BASE_ENDPOINT_URL} from '../src/constants';
-import type {ErrorResponse as EvaluationErrorResponse} from '../src/evaluator';
 import {EvaluationError} from '../src/evaluator';
 import {Container} from '../src/container';
 
@@ -496,7 +496,7 @@ describe('A SDK', () => {
 
         await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
             detail: 'The evaluation took more than 5ms to complete.',
-        } satisfies Partial<EvaluationErrorResponse>));
+        } satisfies Partial<ApiProblem>));
     });
 
     it('should configure the evaluator with the default timeout', async () => {
@@ -533,7 +533,7 @@ describe('A SDK', () => {
 
         await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
             detail: 'The evaluation took more than 5000ms to complete.',
-        } satisfies Partial<EvaluationErrorResponse>));
+        } satisfies Partial<ApiProblem>));
     });
 
     it('should configure the content fetch with the default preferred locale', async () => {
@@ -614,7 +614,7 @@ describe('A SDK', () => {
 
         await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
             detail: 'The content took more than 5ms to load.',
-        } satisfies Partial<ContentFetchErrorResponse>));
+        } satisfies Partial<ApiProblem>));
     });
 
     it('should configure the content fetcher with the default timeout', async () => {
@@ -659,7 +659,7 @@ describe('A SDK', () => {
 
         await expect(promise).rejects.toHaveProperty('response', expect.objectContaining({
             detail: 'The content took more than 5000ms to load.',
-        } satisfies Partial<ContentFetchErrorResponse>));
+        } satisfies Partial<ApiProblem>));
     });
 
     it.each([

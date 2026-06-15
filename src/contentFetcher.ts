@@ -3,7 +3,8 @@ import type {ContentDefinitionBundle} from '@croct/content-model/definition';
 import type {EvaluationContext} from './evaluator';
 import type {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from './constants';
-import {ApiProblem, formatMessage} from './error';
+import {formatMessage} from './error';
+import type {ApiProblem} from './error';
 import type {Logger} from './logging';
 import {NullLogger} from './logging';
 import {ApiKey} from './apiKey';
@@ -55,7 +56,6 @@ export class InputError extends ContentError<InputErrorResponse> {
         Object.setPrototypeOf(this, InputError.prototype);
     }
 }
-
 
 export type FetchResponseOptions = {
     includeSchema?: boolean,

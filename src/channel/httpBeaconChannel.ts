@@ -4,7 +4,8 @@ import type {Envelope} from './guaranteedChannel';
 import type {Logger} from '../logging';
 import {NullLogger} from '../logging';
 import type {CidAssigner} from '../cid';
-import {ApiProblem, formatMessage} from '../error';
+import {formatMessage} from '../error';
+import type {ApiProblem} from '../error';
 import {CLIENT_LIBRARY} from '../constants';
 import {Help} from '../help';
 

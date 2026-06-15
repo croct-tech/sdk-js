@@ -1,7 +1,8 @@
 import type {JsonObject, JsonValue} from '@croct/json';
 import type {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, MAX_QUERY_LENGTH} from './constants';
-import {ApiProblem, formatMessage} from './error';
+import {formatMessage} from './error';
+import type {ApiProblem} from './error';
 import type {Location} from './sourceLocation';
 import {getLength, getLocation} from './sourceLocation';
 import type {Logger} from './logging';
