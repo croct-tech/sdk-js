@@ -48,13 +48,12 @@ export type EvaluationOptions = {
 
 export enum EvaluationErrorType {
     TIMEOUT = 'https://croct.help/sdk/javascript/request-timeout',
-    UNEXPECTED_ERROR = 'https://croct.help/sdk/javascript/unexpected-error',
-    INVALID_QUERY = 'https://croct.help/sdk/javascript/invalid-query',
-    TOO_COMPLEX_QUERY = 'https://croct.help/sdk/javascript/too-complex-query',
-    EVALUATION_FAILED = 'https://croct.help/sdk/javascript/evaluation-failed',
-    UNALLOWED_RESULT = 'https://croct.help/sdk/javascript/unallowed-result',
+    INTERNAL_ERROR = 'https://croct.help/sdk/javascript/internal-error',
     SUSPENDED_SERVICE = 'https://croct.help/sdk/javascript/suspended-service',
-    UNSERIALIZABLE_RESULT = 'https://croct.help/sdk/javascript/unserializable-result',
+    TOO_COMPLEX_QUERY = 'https://croct.help/sdk/javascript/too-complex-query',
+    // Server errors
+    INVALID_QUERY = 'https://croct.help/api/evaluation/invalid-query',
+    EVALUATION_FAILED = 'https://croct.help/api/evaluation/evaluation-failed',
 }
 
 export type ErrorResponse = {
@@ -224,7 +223,6 @@ export class Evaluator {
                                 switch (problem.type) {
                                     case EvaluationErrorType.INVALID_QUERY:
                                     case EvaluationErrorType.EVALUATION_FAILED:
-                                    case EvaluationErrorType.TOO_COMPLEX_QUERY:
                                         reject(new QueryError(problem as QueryErrorResponse));
 
                                         break;
@@ -250,7 +248,7 @@ export class Evaluator {
                             reject(
                                 new EvaluationError({
                                     title: formatMessage(error),
-                                    type: EvaluationErrorType.UNEXPECTED_ERROR,
+                                    type: EvaluationErrorType.INTERNAL_ERROR,
                                     detail: 'Please try again or contact Croct support if the error persists.',
                                     status: 500, // Internal Server Error
                                 }),

@@ -17,15 +17,15 @@ describe('A function to provide help for errors', () => {
         },
         {
             status: 403,
+            help: 'https://croct.help/sdk/javascript/mau-exceeded',
+        },
+        {
+            status: 403,
             help: 'https://croct.help/sdk/javascript/unauthorized-origin',
         },
         {
             status: 408,
             help: 'https://croct.help/sdk/javascript/request-timeout',
-        },
-        {
-            status: 423,
-            help: 'https://croct.help/sdk/javascript/mau-exceeded',
         },
     ])('should provide help for status code %i', scenario => {
         expect(Help.forStatusCode(scenario.status)).toContain(scenario.help);

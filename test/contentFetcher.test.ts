@@ -752,11 +752,11 @@ describe('A content fetcher', () => {
         },
         {
             status: 403,
-            title: 'Unallowed origin',
+            title: 'Quota exceeded',
         },
         {
-            status: 423,
-            title: 'Quota exceeded',
+            status: 403,
+            title: 'Unallowed origin',
         },
     ])('should log help messages for status code $status', async scenario => {
         const logger: Logger = {

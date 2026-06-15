@@ -209,11 +209,11 @@ describe('An HTTP beacon channel', () => {
         },
         {
             status: 403,
-            title: 'Unallowed origin',
+            title: 'Quota exceeded',
         },
         {
-            status: 423,
-            title: 'Quota exceeded',
+            status: 403,
+            title: 'Unallowed origin',
         },
     ])('should report a non-retryable error if the response status is $status', async scenario => {
         const {status, title} = scenario;

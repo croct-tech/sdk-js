@@ -538,7 +538,7 @@ describe('An evaluator', () => {
 
         const response: ErrorResponse = {
             title: 'Error 500 - Internal Server Error',
-            type: EvaluationErrorType.UNEXPECTED_ERROR,
+            type: EvaluationErrorType.INTERNAL_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,
         };
@@ -564,7 +564,7 @@ describe('An evaluator', () => {
 
         const response: ErrorResponse = {
             title: 'Unknown error',
-            type: EvaluationErrorType.UNEXPECTED_ERROR,
+            type: EvaluationErrorType.INTERNAL_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,
         };
@@ -589,7 +589,7 @@ describe('An evaluator', () => {
 
         const response: ErrorResponse = {
             title: 'Network error.',
-            type: EvaluationErrorType.UNEXPECTED_ERROR,
+            type: EvaluationErrorType.INTERNAL_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,
         };
@@ -619,11 +619,11 @@ describe('An evaluator', () => {
         },
         {
             status: 403,
-            title: 'Unallowed origin',
+            title: 'Quota exceeded',
         },
         {
-            status: 423,
-            title: 'Quota exceeded',
+            status: 403,
+            title: 'Unallowed origin',
         },
     ])('should log help messages for status code $status', async scenario => {
         const logger: Logger = {
@@ -640,7 +640,7 @@ describe('An evaluator', () => {
 
         const response: ErrorResponse = {
             title: scenario.title,
-            type: EvaluationErrorType.UNEXPECTED_ERROR,
+            type: EvaluationErrorType.INTERNAL_ERROR,
             status: scenario.status,
         };
 
