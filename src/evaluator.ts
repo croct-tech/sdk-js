@@ -49,10 +49,10 @@ export type EvaluationOptions = {
 
 export enum EvaluationErrorType {
     TIMEOUT = 'https://croct.help/sdk/javascript/request-timeout',
-    INTERNAL_ERROR = 'https://croct.help/sdk/javascript/internal-error',
     SUSPENDED_SERVICE = 'https://croct.help/sdk/javascript/suspended-service',
     TOO_COMPLEX_QUERY = 'https://croct.help/sdk/javascript/too-complex-query',
     // Server errors
+    INTERNAL_ERROR = 'https://croct.help/api/evaluation/internal-error',
     INVALID_QUERY = 'https://croct.help/api/evaluation/invalid-query',
     EVALUATION_FAILED = 'https://croct.help/api/evaluation/evaluation-failed',
 }

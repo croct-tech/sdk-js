@@ -12,9 +12,9 @@ import {Help} from './help';
 
 export enum ContentErrorType {
     TIMEOUT = 'https://croct.help/sdk/javascript/request-timeout',
-    INTERNAL_ERROR = 'https://croct.help/sdk/javascript/internal-error',
     SUSPENDED_SERVICE = 'https://croct.help/sdk/javascript/suspended-service',
     // Server errors
+    INTERNAL_ERROR = 'https://croct.help/api/content/internal-error',
     INVALID_PAYLOAD = 'https://croct.help/api/content/invalid-payload',
 }
 

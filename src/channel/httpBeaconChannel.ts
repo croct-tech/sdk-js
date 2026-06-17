@@ -17,8 +17,9 @@ export type Configuration = {
 };
 
 export enum TrackingErrorType {
-    INTERNAL_ERROR = 'https://croct.help/sdk/javascript/internal-error',
     SUSPENDED_SERVICE = 'https://croct.help/sdk/javascript/suspended-service',
+    // Server errors
+    INTERNAL_ERROR = 'https://croct.help/api/event-tracking/internal-error',
 }
 
 export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string, string>> {
