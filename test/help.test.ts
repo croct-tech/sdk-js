@@ -78,12 +78,12 @@ describe('A function to provide help for errors', () => {
         expect(Help.forApiProblem(scenario.problem)).toContain(scenario.help);
     });
 
-    it('should prioritize status code help', () => {
+    it('should prioritize the error type help', () => {
         expect(Help.forApiProblem({
             type: 'https://croct.help/api/authentication/quota-exceeded',
             title: 'Unauthorized request.',
             status: 401,
-        })).toContain('https://croct.help/sdk/javascript/invalid-credentials');
+        })).toContain('https://croct.help/sdk/javascript/mau-exceeded');
     });
 
     it('should return undefined for API problems without help', () => {

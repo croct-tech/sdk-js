@@ -7,12 +7,6 @@ enum AuthErrorType {
 
 export namespace Help {
     export function forApiProblem(problem: ApiProblem): string | undefined {
-        const forStatus = Help.forStatusCode(problem.status);
-
-        if (forStatus !== undefined) {
-            return forStatus;
-        }
-
         switch (problem.type) {
             case AuthErrorType.FORBIDDEN_ORIGIN:
                 return 'The origin of the request is not allowed in your application settings. '
@@ -21,7 +15,7 @@ export namespace Help {
                 return 'The application has exceeded the monthly active users (MAU) quota. '
                     + 'For help, see https://croct.help/sdk/javascript/mau-exceeded';
             default:
-                return undefined;
+                return Help.forStatusCode(problem.status);
         }
     }
 
