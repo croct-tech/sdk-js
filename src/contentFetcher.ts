@@ -1,25 +1,21 @@
-import type {JsonObject} from '@croct/json';
+import type {JsonObject, JsonPrimitive} from '@croct/json';
 import type {ContentDefinitionBundle} from '@croct/content-model/definition';
 import type {EvaluationContext} from './evaluator';
 import type {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from './constants';
 import {formatMessage} from './error';
+import type {ApiProblem} from './error';
 import type {Logger} from './logging';
 import {NullLogger} from './logging';
 import {ApiKey} from './apiKey';
 import {Help} from './help';
 
-export type ErrorResponse = {
-    type: string,
-    title: string,
-    status: number,
-    detail?: string,
-};
-
 export enum ContentErrorType {
     TIMEOUT = 'https://croct.help/sdk/javascript/request-timeout',
-    UNEXPECTED_ERROR = 'https://croct.help/sdk/javascript/unexpected-error',
     SUSPENDED_SERVICE = 'https://croct.help/sdk/javascript/suspended-service',
+    // Server errors
+    INTERNAL_ERROR = 'https://croct.help/api/content/internal-error',
+    INVALID_PAYLOAD = 'https://croct.help/api/content/invalid-payload',
 }
 
 type FetchPayload = {
@@ -31,7 +27,7 @@ type FetchPayload = {
     context?: EvaluationContext,
 };
 
-export class ContentError<T extends ErrorResponse = ErrorResponse> extends Error {
+export class ContentError<T extends ApiProblem = ApiProblem> extends Error {
     public readonly response: T;
 
     public constructor(response: T) {
@@ -40,6 +36,24 @@ export class ContentError<T extends ErrorResponse = ErrorResponse> extends Error
         this.response = response;
 
         Object.setPrototypeOf(this, ContentError.prototype);
+    }
+}
+
+export type InputViolation = {
+    path: string,
+    reason?: string,
+    details?: Record<string, JsonPrimitive>,
+};
+
+export type InputErrorResponse = ApiProblem & {
+    violations?: InputViolation[],
+};
+
+export class InputError extends ContentError<InputErrorResponse> {
+    public constructor(response: InputErrorResponse) {
+        super(response);
+
+        Object.setPrototypeOf(this, InputError.prototype);
     }
 }
 
@@ -164,7 +178,7 @@ export class ContentFetcher {
             if (timeout !== undefined) {
                 timer = setTimeout(
                     () => {
-                        const response: ErrorResponse = {
+                        const response: ApiProblem = {
                             title: `Content could not be loaded in time for slot '${slotId}'.`,
                             type: ContentErrorType.TIMEOUT,
                             detail: `The content took more than ${timeout}ms to load.`,
@@ -173,7 +187,7 @@ export class ContentFetcher {
 
                         abortController.abort();
 
-                        this.logHelp(response.status);
+                        this.logHelp(response);
 
                         reject(new ContentError(response));
                     },
@@ -204,9 +218,15 @@ export class ContentFetcher {
                                 return resolve(body);
                             }
 
-                            this.logHelp(response.status);
+                            const problem: ApiProblem = body;
 
-                            reject(new ContentError(body));
+                            this.logHelp(problem);
+
+                            if (problem.type === ContentErrorType.INVALID_PAYLOAD) {
+                                return reject(new InputError(problem as InputErrorResponse));
+                            }
+
+                            reject(new ContentError(problem));
                         })
                         .catch(error => {
                             if (!response.ok) {
@@ -221,7 +241,7 @@ export class ContentFetcher {
                         reject(
                             new ContentError({
                                 title: formatMessage(error),
-                                type: ContentErrorType.UNEXPECTED_ERROR,
+                                type: ContentErrorType.INTERNAL_ERROR,
                                 detail: 'Please try again or contact Croct support if the error persists.',
                                 status: 500, // Internal Server Error
                             }),
@@ -311,8 +331,8 @@ export class ContentFetcher {
         });
     }
 
-    private logHelp(statusCode: number): void {
-        const help = Help.forStatusCode(statusCode);
+    private logHelp(problem: ApiProblem): void {
+        const help = Help.forApiProblem(problem);
 
         if (help !== undefined) {
             this.logger.error(help);

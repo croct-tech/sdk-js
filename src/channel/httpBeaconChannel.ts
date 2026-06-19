@@ -5,6 +5,7 @@ import type {Logger} from '../logging';
 import {NullLogger} from '../logging';
 import type {CidAssigner} from '../cid';
 import {formatMessage} from '../error';
+import type {ApiProblem} from '../error';
 import {CLIENT_LIBRARY} from '../constants';
 import {Help} from '../help';
 
@@ -15,12 +16,11 @@ export type Configuration = {
     logger?: Logger,
 };
 
-type ApiProblem = {
-    type: string,
-    title: string,
-    status: number,
-    detail: string,
-};
+export enum TrackingErrorType {
+    SUSPENDED_SERVICE = 'https://croct.help/sdk/javascript/suspended-service',
+    // Server errors
+    INTERNAL_ERROR = 'https://croct.help/api/event-tracking/internal-error',
+}
 
 export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string, string>> {
     private readonly configuration: Omit<Configuration, 'logger'>;
@@ -65,7 +65,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
                 if (response.status === 202) {
                     this.logger.warn(
                         'Event tracking is currently suspended for this application, check the workspace settings. '
-                        + 'For help, see https://croct.help/sdk/javascript/suspended-service',
+                        + `For help, see ${TrackingErrorType.SUSPENDED_SERVICE}`,
                     );
                 }
 
@@ -76,14 +76,14 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
 
             const problem: ApiProblem = await response.json().catch(
                 () => ({
-                    type: 'https://croct.help/api/event-tracker#unexpected-error',
+                    type: TrackingErrorType.INTERNAL_ERROR,
                     title: response.statusText,
                     status: response.status,
                 }),
             );
 
             const isRetryable = HttpBeaconChannel.isRetryable(problem.status);
-            const help = Help.forStatusCode(problem.status);
+            const help = Help.forApiProblem(problem);
 
             if (help !== undefined) {
                 this.logger.error(help);

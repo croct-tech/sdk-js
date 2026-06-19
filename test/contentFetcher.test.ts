@@ -2,8 +2,9 @@ import type {CallLog, UserRouteConfig} from 'fetch-mock';
 import fetchMock from 'fetch-mock';
 import type {EvaluationContext} from '../src/evaluator';
 import {Token} from '../src/token';
-import type {ErrorResponse, FetchOptions, FetchResponse} from '../src/contentFetcher';
-import {ContentFetcher, ContentError, ContentErrorType} from '../src/contentFetcher';
+import type {FetchOptions, FetchResponse, InputErrorResponse} from '../src/contentFetcher';
+import {ContentFetcher, ContentError, ContentErrorType, InputError} from '../src/contentFetcher';
+import type {ApiProblem} from '../src/error';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
 import {ApiKey} from '../src/apiKey';
 import type {Logger} from '../src/logging';
@@ -644,7 +645,7 @@ describe('A content fetcher', () => {
             appId: appId,
         });
 
-        const response: ErrorResponse = {
+        const response: ApiProblem = {
             type: 'error',
             title: 'Error title',
             status: 400,
@@ -664,14 +665,49 @@ describe('A content fetcher', () => {
         await expect(promise).rejects.toHaveProperty('response', response);
     });
 
+    it('should report an input error if the request payload is invalid', async () => {
+        const fetcher = new ContentFetcher({
+            appId: appId,
+        });
+
+        const response: InputErrorResponse = {
+            type: ContentErrorType.INVALID_PAYLOAD,
+            title: 'The request payload is invalid.',
+            status: 422,
+            violations: [
+                {
+                    path: 'slotId',
+                    reason: 'The slot ID is invalid.',
+                    details: {
+                        pattern: '^[a-z-]+$',
+                    },
+                },
+            ],
+        };
+
+        fetchMock.mockGlobal().route({
+            ...requestMatcher,
+            response: {
+                status: response.status,
+                body: response,
+            },
+        });
+
+        const promise = fetcher.fetch(slotId);
+
+        await expect(promise).rejects.toThrow(InputError);
+        await expect(promise).rejects.toBeInstanceOf(ContentError);
+        await expect(promise).rejects.toHaveProperty('response', response);
+    });
+
     it('should catch deserialization errors', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
         });
 
-        const response: ErrorResponse = {
+        const response: ApiProblem = {
             title: 'Error 500 - Internal Server Error',
-            type: ContentErrorType.UNEXPECTED_ERROR,
+            type: ContentErrorType.INTERNAL_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,
         };
@@ -702,9 +738,9 @@ describe('A content fetcher', () => {
             appId: appId,
         });
 
-        const response: ErrorResponse = {
+        const response: ApiProblem = {
             title: 'Unknown error',
-            type: ContentErrorType.UNEXPECTED_ERROR,
+            type: ContentErrorType.INTERNAL_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,
         };
@@ -720,9 +756,9 @@ describe('A content fetcher', () => {
             appId: appId,
         });
 
-        const response: ErrorResponse = {
+        const response: ApiProblem = {
             title: 'Something went wrong',
-            type: ContentErrorType.UNEXPECTED_ERROR,
+            type: ContentErrorType.INTERNAL_ERROR,
             detail: 'Please try again or contact Croct support if the error persists.',
             status: 500,
         };
@@ -742,23 +778,27 @@ describe('A content fetcher', () => {
 
     type HelpScenario = {
         status: number,
+        type: string,
         title: string,
     };
 
     it.each<HelpScenario>([
         {
             status: 401,
+            type: 'https://croct.help/api/content/some-error',
             title: 'Unauthorized request',
         },
         {
             status: 403,
-            title: 'Unallowed origin',
-        },
-        {
-            status: 423,
+            type: 'https://croct.help/api/authentication/quota-exceeded',
             title: 'Quota exceeded',
         },
-    ])('should log help messages for status code $status', async scenario => {
+        {
+            status: 403,
+            type: 'https://croct.help/api/authentication/forbidden-origin',
+            title: 'Unallowed origin',
+        },
+    ])('should log help messages for the API problem $type', async scenario => {
         const logger: Logger = {
             debug: jest.fn(),
             info: jest.fn(),
@@ -771,15 +811,17 @@ describe('A content fetcher', () => {
             logger: logger,
         });
 
+        const response: ApiProblem = {
+            type: scenario.type,
+            status: scenario.status,
+            title: scenario.title,
+        };
+
         fetchMock.mockGlobal().route({
             ...requestMatcher,
             response: {
                 status: scenario.status,
-                body: {
-                    type: 'https://croct.help/api/content',
-                    status: scenario.status,
-                    title: scenario.title,
-                } satisfies ErrorResponse,
+                body: response,
             },
         });
 
@@ -787,7 +829,7 @@ describe('A content fetcher', () => {
 
         await expect(promise).rejects.toThrowWithMessage(ContentError, scenario.title);
 
-        const log = Help.forStatusCode(scenario.status);
+        const log = Help.forApiProblem(response);
 
         expect(log).toBeDefined();
         expect(logger.error).toHaveBeenCalledWith(log);
@@ -837,8 +879,8 @@ describe('A content fetcher', () => {
 
 describe('A content error', () => {
     it('should have a response', () => {
-        const response: ErrorResponse = {
-            type: ContentErrorType.UNEXPECTED_ERROR,
+        const response: ApiProblem = {
+            type: ContentErrorType.INTERNAL_ERROR,
             title: 'Error title',
             status: 400,
         };

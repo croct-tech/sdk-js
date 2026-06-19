@@ -2,6 +2,7 @@ import type {JsonObject, JsonValue} from '@croct/json';
 import type {Token} from './token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
+import type {ApiProblem} from './error';
 import type {Location} from './sourceLocation';
 import {getLength, getLocation} from './sourceLocation';
 import type {Logger} from './logging';
@@ -48,23 +49,15 @@ export type EvaluationOptions = {
 
 export enum EvaluationErrorType {
     TIMEOUT = 'https://croct.help/sdk/javascript/request-timeout',
-    UNEXPECTED_ERROR = 'https://croct.help/sdk/javascript/unexpected-error',
-    INVALID_QUERY = 'https://croct.help/sdk/javascript/invalid-query',
-    TOO_COMPLEX_QUERY = 'https://croct.help/sdk/javascript/too-complex-query',
-    EVALUATION_FAILED = 'https://croct.help/sdk/javascript/evaluation-failed',
-    UNALLOWED_RESULT = 'https://croct.help/sdk/javascript/unallowed-result',
     SUSPENDED_SERVICE = 'https://croct.help/sdk/javascript/suspended-service',
-    UNSERIALIZABLE_RESULT = 'https://croct.help/sdk/javascript/unserializable-result',
+    TOO_COMPLEX_QUERY = 'https://croct.help/sdk/javascript/too-complex-query',
+    // Server errors
+    INTERNAL_ERROR = 'https://croct.help/api/evaluation/internal-error',
+    INVALID_QUERY = 'https://croct.help/api/evaluation/invalid-query',
+    EVALUATION_FAILED = 'https://croct.help/api/evaluation/evaluation-failed',
 }
 
-export type ErrorResponse = {
-    type: EvaluationErrorType,
-    title: string,
-    status: number,
-    detail?: string,
-};
-
-export class EvaluationError<T extends ErrorResponse = ErrorResponse> extends Error {
+export class EvaluationError<T extends ApiProblem = ApiProblem> extends Error {
     public readonly response: T;
 
     public constructor(response: T) {
@@ -81,7 +74,7 @@ type QueryErrorDetail = {
     location: Location,
 };
 
-export type QueryErrorResponse = ErrorResponse & {
+export type QueryErrorResponse = ApiProblem & {
     errors: QueryErrorDetail[],
 };
 
@@ -174,7 +167,7 @@ export class Evaluator {
             if (timeout !== undefined) {
                 timer = setTimeout(
                     () => {
-                        const response: ErrorResponse = {
+                        const response: ApiProblem = {
                             title: `Evaluation could not be completed in time for query "${reference}".`,
                             type: EvaluationErrorType.TIMEOUT,
                             detail: `The evaluation took more than ${timeout}ms to complete.`,
@@ -183,7 +176,7 @@ export class Evaluator {
 
                         abortController.abort();
 
-                        this.logHelp(response.status);
+                        this.logHelp(response);
 
                         reject(new EvaluationError(response));
                     },
@@ -217,14 +210,13 @@ export class Evaluator {
                                     return resolve(body);
                                 }
 
-                                this.logHelp(response.status);
+                                const problem: ApiProblem = body;
 
-                                const problem: ErrorResponse = body;
+                                this.logHelp(problem);
 
                                 switch (problem.type) {
                                     case EvaluationErrorType.INVALID_QUERY:
                                     case EvaluationErrorType.EVALUATION_FAILED:
-                                    case EvaluationErrorType.TOO_COMPLEX_QUERY:
                                         reject(new QueryError(problem as QueryErrorResponse));
 
                                         break;
@@ -250,7 +242,7 @@ export class Evaluator {
                             reject(
                                 new EvaluationError({
                                     title: formatMessage(error),
-                                    type: EvaluationErrorType.UNEXPECTED_ERROR,
+                                    type: EvaluationErrorType.INTERNAL_ERROR,
                                     detail: 'Please try again or contact Croct support if the error persists.',
                                     status: 500, // Internal Server Error
                                 }),
@@ -310,8 +302,8 @@ export class Evaluator {
         });
     }
 
-    private logHelp(statusCode: number): void {
-        const help = Help.forStatusCode(statusCode);
+    private logHelp(problem: ApiProblem): void {
+        const help = Help.forApiProblem(problem);
 
         if (help !== undefined) {
             this.logger.error(help);
