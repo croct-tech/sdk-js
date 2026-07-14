@@ -1,6 +1,6 @@
 import type {EventListener} from './eventManager';
 import {SynchronousEventManager} from './eventManager';
-import type {UserClicked, UserScrolled, Point} from './trackingEvents';
+import type {UserClicked, UserScrolled, Point, Size} from './trackingEvents';
 
 type InteractionEventMap = {
     userClicked: UserClicked,
@@ -15,6 +15,7 @@ type Options = {
 type ScrollState = {
     start: Point,
     lastPosition: Point,
+    surfaceSize: Size,
 };
 
 export class InteractionMonitor {
@@ -38,6 +39,7 @@ export class InteractionMonitor {
 
         this.handleClick = this.handleClick.bind(this);
         this.handleScroll = this.handleScroll.bind(this);
+        this.handleResize = this.handleResize.bind(this);
     }
 
     public addListener<T extends keyof InteractionEventMap>(
@@ -67,6 +69,7 @@ export class InteractionMonitor {
 
         window.addEventListener('click', this.handleClick, true);
         window.addEventListener('scroll', this.handleScroll, true);
+        window.addEventListener('resize', this.handleResize, true);
     }
 
     public disable(): void {
@@ -78,6 +81,7 @@ export class InteractionMonitor {
 
         window.removeEventListener('click', this.handleClick, true);
         window.removeEventListener('scroll', this.handleScroll, true);
+        window.removeEventListener('resize', this.handleResize, true);
 
         this.flushPendingScroll();
     }
@@ -104,16 +108,48 @@ export class InteractionMonitor {
         });
     }
 
+    private handleResize(): void {
+        if (this.scrollDebounceTimer !== undefined) {
+            window.clearTimeout(this.scrollDebounceTimer);
+            this.scrollDebounceTimer = undefined;
+        }
+
+        const currentPosition: Point = {
+            x: Math.max(0, Math.round(window.scrollX)),
+            y: Math.max(0, Math.round(window.scrollY)),
+        };
+
+        const currentSurfaceSize: Size = {
+            width: document.documentElement.scrollWidth,
+            height: document.documentElement.scrollHeight,
+        };
+
+        this.scrollState = {
+            start: currentPosition,
+            lastPosition: currentPosition,
+            surfaceSize: currentSurfaceSize,
+        };
+    }
+
     private handleScroll(): void {
         const currentPosition: Point = {
             x: Math.max(0, Math.round(window.scrollX)),
             y: Math.max(0, Math.round(window.scrollY)),
         };
 
-        if (this.scrollState === undefined) {
+        const currentSurfaceSize: Size = {
+            width: document.documentElement.scrollWidth,
+            height: document.documentElement.scrollHeight,
+        };
+
+        if (
+            this.scrollState?.surfaceSize.width !== currentSurfaceSize.width
+            || this.scrollState.surfaceSize.height !== currentSurfaceSize.height
+        ) {
             this.scrollState = {
                 start: currentPosition,
                 lastPosition: currentPosition,
+                surfaceSize: currentSurfaceSize,
             };
         } else if (this.hasDirectionChanged(this.scrollState, currentPosition)) {
             const turningPoint = this.scrollState.lastPosition;
@@ -123,6 +159,7 @@ export class InteractionMonitor {
             this.scrollState = {
                 start: turningPoint,
                 lastPosition: currentPosition,
+                surfaceSize: currentSurfaceSize,
             };
         } else {
             this.scrollState.lastPosition = currentPosition;
@@ -190,13 +227,27 @@ export class InteractionMonitor {
             return;
         }
 
-        const {start} = this.scrollState;
+        const state = this.scrollState;
+
+        this.scrollState = undefined;
+
+        const currentSurfaceSize: Size = {
+            width: document.documentElement.scrollWidth,
+            height: document.documentElement.scrollHeight,
+        };
+
+        if (
+            state.surfaceSize.width !== currentSurfaceSize.width
+            || state.surfaceSize.height !== currentSurfaceSize.height
+        ) {
+            return;
+        }
+
+        const {start} = state;
         const destination = end ?? {
             x: Math.max(0, Math.round(window.scrollX)),
             y: Math.max(0, Math.round(window.scrollY)),
         };
-
-        this.scrollState = undefined;
 
         if (start.x === destination.x && start.y === destination.y) {
             return;
@@ -206,10 +257,7 @@ export class InteractionMonitor {
             type: 'userScrolled',
             start: start,
             end: destination,
-            surfaceSize: {
-                width: document.documentElement.scrollWidth,
-                height: document.documentElement.scrollHeight,
-            },
+            surfaceSize: state.surfaceSize,
             // Uses clientWidth/clientHeight instead of innerWidth/innerHeight to get the
             // layout viewport size, which remains stable regardless of pinch-to-zoom level
             // on mobile devices.
