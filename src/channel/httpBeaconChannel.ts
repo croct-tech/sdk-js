@@ -84,17 +84,20 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
 
             const isRetryable = HttpBeaconChannel.isRetryable(problem.status);
             const help = Help.forApiProblem(problem);
+            const reason = problem.detail !== undefined && problem.detail !== ''
+                ? `${problem.title}: ${problem.detail}`
+                : problem.title;
 
             if (help !== undefined) {
                 this.logger.error(help);
             } else if (!isRetryable) {
-                this.logger.error(`Beacon rejected with non-retryable status: ${problem.title}`);
+                this.logger.error(`Beacon rejected with non-retryable status: ${reason}`);
             }
 
             return Promise.reject(
                 isRetryable
-                    ? MessageDeliveryError.retryable(problem.title)
-                    : MessageDeliveryError.nonRetryable(problem.title),
+                    ? MessageDeliveryError.retryable(reason)
+                    : MessageDeliveryError.nonRetryable(reason),
             );
         }).catch(error => {
             this.logger.error(`Failed to publish beacon: ${formatMessage(error)}`);

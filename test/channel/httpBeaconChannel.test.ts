@@ -271,6 +271,47 @@ describe('An HTTP beacon channel', () => {
         expect(logger.error).toHaveBeenCalledWith(`Failed to publish beacon: ${title}`);
     });
 
+    it('should include the problem detail in the rejection reason when present', async () => {
+        fetchMock.mockGlobal().route(endpointUrl, {
+            status: 422,
+            body: JSON.stringify({
+                type: 'https://croct.help/api/event-tracking/invalid-payload',
+                title: 'Invalid payload',
+                status: 422,
+                detail: 'Some of the request parameters are invalid.',
+            }),
+        });
+
+        const channel = new HttpBeaconChannel({
+            appId: appId,
+            endpointUrl: endpointUrl,
+            cidAssigner: cidAssigner,
+            logger: logger,
+        });
+
+        const promise = channel.publish({
+            id: 'receipt-id',
+            message: JSON.stringify({
+                context: {
+                    tabId: tabId,
+                    url: 'http://example.com',
+                },
+                payload: {
+                    type: 'nothingChanged',
+                    sinceTime: 0,
+                },
+                timestamp: 1,
+            }),
+        });
+
+        const reason = 'Invalid payload: Some of the request parameters are invalid.';
+
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, reason);
+        await expect(promise).rejects.toHaveProperty('retryable', false);
+
+        expect(logger.error).toHaveBeenCalledWith(`Beacon rejected with non-retryable status: ${reason}`);
+    });
+
     it.each([
         [429, 'Rate limit exceeded'],
         [408, 'Request timeout'],
