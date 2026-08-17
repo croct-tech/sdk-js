@@ -777,7 +777,7 @@ describe('An evaluation context', () => {
         expect(EvaluationContext.createPageContext()).not.toHaveProperty('timeZone');
     });
 
-    it('should extend the captured page with the reported one', () => {
+    it('should extend the captured page with the provided one', () => {
         setTimeZone(timeZone);
         setReferrer('http://referrer.com/');
 
@@ -797,7 +797,7 @@ describe('An evaluation context', () => {
         });
     });
 
-    it('should give precedence to the reported values', () => {
+    it('should give precedence to the provided values', () => {
         setTimeZone(timeZone);
         setReferrer('http://referrer.com/');
 
@@ -846,7 +846,7 @@ describe('An evaluation context', () => {
         });
     });
 
-    it('should sanitize the reported URL and referrer', () => {
+    it('should sanitize the provided URL and referrer', () => {
         const context = EvaluationContext.createPageContext(
             {
                 page: {

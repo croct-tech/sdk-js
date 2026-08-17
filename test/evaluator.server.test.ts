@@ -4,7 +4,7 @@
 import {EvaluationContext} from '../src/evaluator';
 
 describe('An evaluation context created outside a browser', () => {
-    it('should report the page reported by the caller', () => {
+    it('should report the page provided by the caller', () => {
         const context = EvaluationContext.createPageContext({
             page: {
                 url: 'http://localhost/products/1',
@@ -20,7 +20,7 @@ describe('An evaluation context created outside a browser', () => {
         });
     });
 
-    it('should not report a page when the caller reports none', () => {
+    it('should not report a page when none is provided', () => {
         expect(EvaluationContext.createPageContext()).toEqual({});
     });
 
@@ -29,7 +29,7 @@ describe('An evaluation context created outside a browser', () => {
             .toHaveProperty('timeZone');
     });
 
-    it('should report the time zone reported by the caller', () => {
+    it('should report the time zone provided by the caller', () => {
         const context = EvaluationContext.createPageContext({
             page: {url: 'http://localhost/'},
             timeZone: 'America/Sao_Paulo',
@@ -38,7 +38,7 @@ describe('An evaluation context created outside a browser', () => {
         expect(context.timeZone).toBe('America/Sao_Paulo');
     });
 
-    it('should sanitize the reported URL and referrer', () => {
+    it('should sanitize the provided URL and referrer', () => {
         const context = EvaluationContext.createPageContext(
             {
                 page: {

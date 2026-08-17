@@ -46,12 +46,12 @@ export namespace EvaluationContext {
      * Creates a context describing the page an evaluation refers to.
      *
      * The context describes the page currently open in the browser, if any,
-     * extended with the given context. Values reported by the caller take
+     * extended with the given context. Values provided by the caller take
      * precedence over the captured ones, so the context can describe a page
      * other than the one running the code, as in server-side evaluations.
      *
      * The URLs of the resulting page are sanitized, whether captured or
-     * reported, so the context never carries what the sanitizer strips.
+     * provided, so the context never carries what the sanitizer strips.
      *
      * @param base The context to extend the captured one with.
      * @param options The options for creating the context.
@@ -94,12 +94,12 @@ export namespace EvaluationContext {
         };
     }
 
-    function mergePage(currentPage?: Page, reportedPage?: Page): Page | undefined {
-        if (reportedPage === undefined) {
+    function mergePage(currentPage?: Page, providedPage?: Page): Page | undefined {
+        if (providedPage === undefined) {
             return currentPage;
         }
 
-        return currentPage === undefined ? reportedPage : {...currentPage, ...reportedPage};
+        return currentPage === undefined ? providedPage : {...currentPage, ...providedPage};
     }
 
     function normalizePage({url, title, referrer}: Page, urlSanitizer?: UrlSanitizer): Page {
