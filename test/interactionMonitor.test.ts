@@ -4,13 +4,30 @@ import type {UserClicked, UserScrolled} from '../src/trackingEvents';
 
 describe('An interaction monitor', () => {
     const tabEventEmulator = new TabEventEmulator();
+    let originalScrollWidth: PropertyDescriptor | undefined;
+    let originalScrollHeight: PropertyDescriptor | undefined;
 
     beforeEach(() => {
+        originalScrollWidth = Object.getOwnPropertyDescriptor(document.documentElement, 'scrollWidth');
+        originalScrollHeight = Object.getOwnPropertyDescriptor(document.documentElement, 'scrollHeight');
+
         jest.useFakeTimers();
         tabEventEmulator.registerListeners();
     });
 
     afterEach(() => {
+        if (originalScrollWidth === undefined) {
+            Reflect.deleteProperty(document.documentElement, 'scrollWidth');
+        } else {
+            Object.defineProperty(document.documentElement, 'scrollWidth', originalScrollWidth);
+        }
+
+        if (originalScrollHeight === undefined) {
+            Reflect.deleteProperty(document.documentElement, 'scrollHeight');
+        } else {
+            Object.defineProperty(document.documentElement, 'scrollHeight', originalScrollHeight);
+        }
+
         jest.clearAllMocks();
         jest.useRealTimers();
         tabEventEmulator.reset();
@@ -33,6 +50,13 @@ describe('An interaction monitor', () => {
         Object.defineProperty(window, 'scrollY', {value: y, configurable: true});
 
         tabEventEmulator.dispatchEvent(window, new Event('scroll', {bubbles: true}));
+    }
+
+    function setDocumentDimensions(width: number, height: number): void {
+        Object.defineProperties(document.documentElement, {
+            scrollWidth: {configurable: true, value: width},
+            scrollHeight: {configurable: true, value: height},
+        });
     }
 
     it('should track a click with correct position and surface size', () => {
@@ -205,6 +229,86 @@ describe('An interaction monitor', () => {
         monitor.disable();
     });
 
+    it('should discard a pending scroll after document dimensions change', () => {
+        const listener = jest.fn();
+        const monitor = new InteractionMonitor({scrollDebounceInterval: 150});
+
+        setDocumentDimensions(1000, 5000);
+        monitor.addListener('userScrolled', listener);
+        monitor.enable();
+
+        scrollTo(0, 4000);
+        scrollTo(0, 4500);
+
+        setDocumentDimensions(1000, 800);
+        scrollTo(0, 0);
+        scrollTo(0, 200);
+
+        jest.advanceTimersByTime(150);
+
+        expect(listener).toHaveBeenCalledTimes(1);
+
+        const event = listener.mock.calls[0][0] as UserScrolled;
+
+        expect(event.start).toEqual({x: 0, y: 0});
+        expect(event.end).toEqual({x: 0, y: 200});
+        expect(event.surfaceSize).toEqual({width: 1000, height: 800});
+
+        monitor.disable();
+    });
+
+    it('should suppress a pending scroll when dimensions change before debounce flush', () => {
+        const listener = jest.fn();
+        const monitor = new InteractionMonitor({scrollDebounceInterval: 150});
+
+        setDocumentDimensions(1000, 5000);
+        monitor.addListener('userScrolled', listener);
+        monitor.enable();
+
+        scrollTo(0, 4000);
+        scrollTo(0, 4500);
+
+        setDocumentDimensions(1000, 800);
+
+        jest.advanceTimersByTime(150);
+
+        expect(listener).not.toHaveBeenCalled();
+
+        monitor.disable();
+    });
+
+    it('should discard a pending scroll and establish a new baseline on resize', () => {
+        const listener = jest.fn();
+        const monitor = new InteractionMonitor({scrollDebounceInterval: 150});
+
+        setDocumentDimensions(1000, 5000);
+        monitor.addListener('userScrolled', listener);
+        monitor.enable();
+
+        scrollTo(50, 800);
+        scrollTo(150, 1600);
+
+        Object.defineProperties(window, {
+            scrollX: {configurable: true, value: -10.6},
+            scrollY: {configurable: true, value: 200.6},
+        });
+        setDocumentDimensions(800, 1200);
+        tabEventEmulator.dispatchEvent(window, new Event('resize'));
+
+        scrollTo(300.2, 400.8);
+        jest.advanceTimersByTime(150);
+
+        expect(listener).toHaveBeenCalledTimes(1);
+
+        const event = listener.mock.calls[0][0] as UserScrolled;
+
+        expect(event.start).toEqual({x: 0, y: 201});
+        expect(event.end).toEqual({x: 300, y: 401});
+        expect(event.surfaceSize).toEqual({width: 800, height: 1200});
+
+        monitor.disable();
+    });
+
     it('should collapse continuous scrolling into a single event', () => {
         const listener = jest.fn();
         const monitor = new InteractionMonitor({scrollDebounceInterval: 150});
@@ -368,6 +472,35 @@ describe('An interaction monitor', () => {
 
         expect(event.start).toEqual({x: 0, y: 0});
         expect(event.end).toEqual({x: 150, y: 300});
+    });
+
+    it('should not establish a scroll baseline from a resize after disable', () => {
+        const listener = jest.fn();
+        const monitor = new InteractionMonitor({scrollDebounceInterval: 150});
+
+        tabEventEmulator.reset();
+        monitor.addListener('userScrolled', listener);
+        monitor.enable();
+        monitor.disable();
+
+        Object.defineProperties(window, {
+            scrollX: {configurable: true, value: 100},
+            scrollY: {configurable: true, value: 200},
+        });
+        window.dispatchEvent(new Event('resize'));
+
+        monitor.enable();
+
+        Object.defineProperties(window, {
+            scrollX: {configurable: true, value: 300},
+            scrollY: {configurable: true, value: 400},
+        });
+        window.dispatchEvent(new Event('scroll'));
+        jest.advanceTimersByTime(150);
+
+        expect(listener).not.toHaveBeenCalled();
+
+        monitor.disable();
     });
 
     it('should be idempotent on enable', () => {
