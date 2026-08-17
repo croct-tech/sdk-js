@@ -9,8 +9,8 @@ import type {Logger} from './logging';
 import {NullLogger} from './logging';
 import {ApiKey} from './apiKey';
 import {Help} from './help';
-import type {UrlSanitizer} from './tab';
-import {sanitizeUrl} from './tab';
+import type {UrlSanitizer} from './url';
+import {sanitizeUrl} from './url';
 
 export type Campaign = {
     name?: string,
