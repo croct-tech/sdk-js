@@ -37,4 +37,29 @@ describe('An evaluation context created outside a browser', () => {
 
         expect(context.timeZone).toBe('America/Sao_Paulo');
     });
+
+    it('should sanitize the reported URL and referrer', () => {
+        const context = EvaluationContext.createPageContext(
+            {
+                page: {
+                    url: 'http://localhost/products/1?token=secret&foo=bar',
+                    referrer: 'http://google.com/?token=secret',
+                },
+            },
+            {
+                urlSanitizer: url => {
+                    const sanitized = new URL(url);
+
+                    sanitized.searchParams.delete('token');
+
+                    return sanitized;
+                },
+            },
+        );
+
+        expect(context.page).toEqual({
+            url: 'http://localhost/products/1?foo=bar',
+            referrer: 'http://google.com/',
+        });
+    });
 });

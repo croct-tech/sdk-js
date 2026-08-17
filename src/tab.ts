@@ -7,6 +7,20 @@ export type TabUrlChangeEvent = TabEvent<{url: string}>;
 
 export type UrlSanitizer = (url: string) => URL;
 
+/**
+ * Normalizes the URL and sanitizes it, if a sanitizer is given.
+ *
+ * @param url The URL to sanitize.
+ * @param sanitizer The sanitizer to apply to the normalized URL.
+ *
+ * @returns The sanitized URL.
+ */
+export function sanitizeUrl(url: string, sanitizer?: UrlSanitizer): string {
+    const normalizedUrl = encodeURI(decodeURI(url));
+
+    return sanitizer !== undefined ? sanitizer(normalizedUrl).toString() : normalizedUrl;
+}
+
 type TabEventMap = {
     focus: TabEvent,
     blur: TabEvent,
@@ -98,13 +112,7 @@ export class Tab {
     }
 
     private sanitizeUrl(url: string): string {
-        const normalized = window.encodeURI(window.decodeURI(url));
-
-        if (this.urlSanitizer !== undefined) {
-            return this.urlSanitizer(normalized).toString();
-        }
-
-        return normalized;
+        return sanitizeUrl(url, this.urlSanitizer);
     }
 
     private emit<T extends keyof TabEventMap>(type: T, event: TabEventMap[T]): void {

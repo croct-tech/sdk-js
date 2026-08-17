@@ -22,6 +22,14 @@ describe('An evaluation context', () => {
         });
     }
 
+    function sanitizeToken(url: string): URL {
+        const sanitized = new URL(url);
+
+        sanitized.searchParams.delete('token');
+
+        return sanitized;
+    }
+
     function setTimeZone(zone: string): void {
         jest.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions')
             .mockReturnValue({timeZone: zone} as Intl.ResolvedDateTimeFormatOptions);
@@ -114,6 +122,36 @@ describe('An evaluation context', () => {
         // The error comes from the realm of the document, so only the message is checked
         expect(() => EvaluationContext.createPageContext({page: {url: '/products/1'}}))
             .toThrow('Invalid URL');
+    });
+
+    it('should sanitize the captured URL and referrer', () => {
+        setReferrer('http://referrer.com/?token=secret&foo=bar');
+
+        window.history.replaceState({}, '', 'http://localhost/products/1?token=secret&foo=bar');
+
+        const context = EvaluationContext.createPageContext({}, {urlSanitizer: sanitizeToken});
+
+        expect(context.page).toEqual({
+            url: 'http://localhost/products/1?foo=bar',
+            referrer: 'http://referrer.com/?foo=bar',
+        });
+    });
+
+    it('should sanitize the reported URL and referrer', () => {
+        const context = EvaluationContext.createPageContext(
+            {
+                page: {
+                    url: 'http://localhost/products/2?token=secret&foo=bar',
+                    referrer: 'http://google.com/?token=secret',
+                },
+            },
+            {urlSanitizer: sanitizeToken},
+        );
+
+        expect(context.page).toEqual({
+            url: 'http://localhost/products/2?foo=bar',
+            referrer: 'http://google.com/',
+        });
     });
 
     it('should report the campaign and the attributes', () => {

@@ -9,6 +9,8 @@ import type {Logger} from './logging';
 import {NullLogger} from './logging';
 import {ApiKey} from './apiKey';
 import {Help} from './help';
+import type {UrlSanitizer} from './tab';
+import {sanitizeUrl} from './tab';
 
 export type Campaign = {
     name?: string,
@@ -33,6 +35,10 @@ export type EvaluationContext = {
 
 export type PageEvaluationContext = Omit<EvaluationContext, 'page'> & Required<Pick<EvaluationContext, 'page'>>;
 
+export type PageContextOptions = {
+    urlSanitizer?: UrlSanitizer,
+};
+
 const UNKNOWN_TIME_ZONE = 'Etc/Unknown';
 
 export namespace EvaluationContext {
@@ -44,23 +50,33 @@ export namespace EvaluationContext {
      * precedence over the captured ones, so the context can describe a page
      * other than the one running the code, as in server-side evaluations.
      *
+     * The URLs of the resulting page are sanitized, whether captured or
+     * reported, so the context never carries what the sanitizer strips.
+     *
      * @param base The context to extend the captured one with.
+     * @param options The options for creating the context.
      *
      * @returns The context describing the page.
      *
      * @throws {TypeError} If the URL of the page is not absolute.
      */
-    export function createPageContext(base: PageEvaluationContext): PageEvaluationContext;
+    export function createPageContext(
+        base: PageEvaluationContext,
+        options?: PageContextOptions,
+    ): PageEvaluationContext;
 
-    export function createPageContext(base?: EvaluationContext): EvaluationContext;
+    export function createPageContext(base?: EvaluationContext, options?: PageContextOptions): EvaluationContext;
 
-    export function createPageContext(base: EvaluationContext = {}): EvaluationContext {
+    export function createPageContext(
+        base: EvaluationContext = {},
+        options: PageContextOptions = {},
+    ): EvaluationContext {
         const {page, timeZone = detectTimeZone(), attributes, ...context} = base;
         const currentPage = mergePage(capturePage(), page);
 
         return {
             ...context,
-            ...(currentPage !== undefined ? {page: normalizePage(currentPage)} : {}),
+            ...(currentPage !== undefined ? {page: normalizePage(currentPage, options.urlSanitizer)} : {}),
             ...(timeZone !== undefined ? {timeZone: timeZone} : {}),
             ...(attributes !== undefined && Object.keys(attributes).length > 0 ? {attributes: attributes} : {}),
         };
@@ -86,11 +102,14 @@ export namespace EvaluationContext {
         return currentPage === undefined ? reportedPage : {...currentPage, ...reportedPage};
     }
 
-    function normalizePage({url, title, referrer}: Page): Page {
+    function normalizePage({url, title, referrer}: Page, urlSanitizer?: UrlSanitizer): Page {
         return {
-            url: new URL(url).toString(),
+            url: new URL(sanitizeUrl(url, urlSanitizer)).toString(),
             ...(title !== undefined && title !== '' ? {title: title} : {}),
-            ...(referrer !== undefined && referrer !== '' ? {referrer: referrer} : {}),
+            ...(referrer !== undefined && referrer !== ''
+                ? {referrer: sanitizeUrl(referrer, urlSanitizer)}
+                : {}
+            ),
         };
     }
 
