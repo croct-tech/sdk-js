@@ -31,6 +31,84 @@ export type EvaluationContext = {
     attributes?: JsonObject,
 };
 
+export type PageEvaluationContext = Omit<EvaluationContext, 'page'> & Required<Pick<EvaluationContext, 'page'>>;
+
+const UNKNOWN_TIME_ZONE = 'Etc/Unknown';
+
+export namespace EvaluationContext {
+    /**
+     * Creates a context describing the page an evaluation refers to.
+     *
+     * The context describes the page currently open in the browser, if any,
+     * extended with the given context. Values reported by the caller take
+     * precedence over the captured ones, so the context can describe a page
+     * other than the one running the code, as in server-side evaluations.
+     *
+     * @param base The context to extend the captured one with.
+     *
+     * @returns The context describing the page.
+     *
+     * @throws {TypeError} If the URL of the page is not absolute.
+     */
+    export function createPageContext(base: PageEvaluationContext): PageEvaluationContext;
+
+    export function createPageContext(base?: EvaluationContext): EvaluationContext;
+
+    export function createPageContext(base: EvaluationContext = {}): EvaluationContext {
+        const {page, timeZone = detectTimeZone(), attributes, ...context} = base;
+        const currentPage = mergePage(capturePage(), page);
+
+        return {
+            ...context,
+            ...(currentPage !== undefined ? {page: normalizePage(currentPage)} : {}),
+            ...(timeZone !== undefined ? {timeZone: timeZone} : {}),
+            ...(attributes !== undefined && Object.keys(attributes).length > 0 ? {attributes: attributes} : {}),
+        };
+    }
+
+    function capturePage(): Page | undefined {
+        if (typeof window === 'undefined') {
+            return undefined;
+        }
+
+        return {
+            url: window.location.href,
+            title: document.title,
+            referrer: document.referrer,
+        };
+    }
+
+    function mergePage(currentPage?: Page, reportedPage?: Page): Page | undefined {
+        if (reportedPage === undefined) {
+            return currentPage;
+        }
+
+        return currentPage === undefined ? reportedPage : {...currentPage, ...reportedPage};
+    }
+
+    function normalizePage({url, title, referrer}: Page): Page {
+        return {
+            url: new URL(url).toString(),
+            ...(title !== undefined && title !== '' ? {title: title} : {}),
+            ...(referrer !== undefined && referrer !== '' ? {referrer: referrer} : {}),
+        };
+    }
+
+    function detectTimeZone(): string | undefined {
+        if (typeof window === 'undefined') {
+            return undefined;
+        }
+
+        const {timeZone} = Intl.DateTimeFormat().resolvedOptions();
+
+        if (timeZone === undefined || timeZone === UNKNOWN_TIME_ZONE) {
+            return undefined;
+        }
+
+        return timeZone;
+    }
+}
+
 type AllowedFetchOptions = Exclude<keyof RequestInit, 'method' | 'body' | 'headers' | 'signal'>;
 
 type ExtraFetchOptions<T extends keyof RequestInit = AllowedFetchOptions> = Pick<RequestInit, T>
