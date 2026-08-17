@@ -1,11 +1,13 @@
 import type {EventListener} from './eventManager';
 import {SynchronousEventManager} from './eventManager';
+import type {UrlSanitizer} from './url';
+import {sanitizeUrl} from './url';
+
+export type {UrlSanitizer};
 
 export type TabEvent<T = Record<string, unknown>> = CustomEvent<{tab: Tab} & T>;
 export type TabVisibilityChangeEvent = TabEvent<{visible: boolean}>;
 export type TabUrlChangeEvent = TabEvent<{url: string}>;
-
-export type UrlSanitizer = (url: string) => URL;
 
 type TabEventMap = {
     focus: TabEvent,
@@ -98,13 +100,7 @@ export class Tab {
     }
 
     private sanitizeUrl(url: string): string {
-        const normalized = window.encodeURI(window.decodeURI(url));
-
-        if (this.urlSanitizer !== undefined) {
-            return this.urlSanitizer(normalized).toString();
-        }
-
-        return normalized;
+        return sanitizeUrl(url, this.urlSanitizer);
     }
 
     private emit<T extends keyof TabEventMap>(type: T, event: TabEventMap[T]): void {

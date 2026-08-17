@@ -1,5 +1,6 @@
 import type {JsonObject, JsonValue} from '@croct/json';
-import type {Evaluator, EvaluationContext, Page} from '../evaluator';
+import type {Evaluator} from '../evaluator';
+import {EvaluationContext} from '../evaluator';
 import type {Tab} from '../tab';
 import {evaluationOptionsSchema as optionsSchema} from '../schema';
 import {formatCause} from '../error';
@@ -83,30 +84,14 @@ export class TabContextFactory implements ContextFactory {
     }
 
     public createContext(attributes?: JsonObject): EvaluationContext {
-        const url = new URL(this.tab.url);
-        const context: EvaluationContext = {};
-
-        const page: Page = {
-            title: this.tab.title,
-            url: url.toString(),
-        };
-
-        const {referrer} = this.tab;
-
-        if (referrer.length > 0) {
-            page.referrer = referrer;
-        }
-
-        context.page = page;
-
-        if (this.timeZone !== undefined) {
-            context.timeZone = this.timeZone;
-        }
-
-        if (attributes !== undefined && Object.keys(attributes).length > 0) {
-            context.attributes = attributes;
-        }
-
-        return context;
+        return EvaluationContext.createPageContext({
+            page: {
+                url: this.tab.url,
+                title: this.tab.title,
+                referrer: this.tab.referrer,
+            },
+            ...(this.timeZone !== undefined ? {timeZone: this.timeZone} : {}),
+            ...(attributes !== undefined ? {attributes: attributes} : {}),
+        });
     }
 }

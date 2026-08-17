@@ -188,13 +188,13 @@ describe('A tab context factory', () => {
         expect(context.timeZone).toBe(timeZone);
     });
 
-    it('should omit the timezone when not provided', () => {
+    it('should detect the time zone when not provided', () => {
         window.history.replaceState({}, 'Landing page', 'http://localhost');
         window.document.title = 'Welcome';
 
         const factory = new TabContextFactory(new Tab('1', true));
         const context = factory.createContext();
 
-        expect(context).not.toHaveProperty('timeZone');
+        expect(context.timeZone).toBe(timeZone);
     });
 });

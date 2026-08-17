@@ -1,7 +1,7 @@
 import type {CallLog, UserRouteConfig} from 'fetch-mock';
 import fetchMock from 'fetch-mock';
-import type {EvaluationContext, EvaluationOptions, QueryErrorResponse} from '../src/evaluator';
-import {EvaluationError, EvaluationErrorType, Evaluator, QueryError} from '../src/evaluator';
+import type {EvaluationOptions, QueryErrorResponse} from '../src/evaluator';
+import {EvaluationContext, EvaluationError, EvaluationErrorType, Evaluator, QueryError} from '../src/evaluator';
 import type {ApiProblem} from '../src/error';
 import {Token} from '../src/token';
 import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
@@ -706,6 +706,189 @@ describe('An evaluator', () => {
         expect(() => {
             new Evaluator({appId: appId}).toJSON();
         }).toThrowWithMessage(Error, 'Unserializable value.');
+    });
+});
+
+describe('An evaluation context', () => {
+    const timeZone = 'America/Sao_Paulo';
+
+    beforeEach(() => {
+        window.history.replaceState({}, '', 'http://localhost/');
+
+        window.document.title = '';
+
+        setReferrer('');
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    function setReferrer(referrer: string): void {
+        Object.defineProperty(window.document, 'referrer', {
+            value: referrer,
+            configurable: true,
+        });
+    }
+
+    function sanitizeToken(url: string): URL {
+        const sanitized = new URL(url);
+
+        sanitized.searchParams.delete('token');
+
+        return sanitized;
+    }
+
+    function setTimeZone(zone: string): void {
+        jest.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions')
+            .mockReturnValue({timeZone: zone} as Intl.ResolvedDateTimeFormatOptions);
+    }
+
+    it('should describe the page currently open in the browser', () => {
+        setTimeZone(timeZone);
+        setReferrer('http://referrer.com/');
+
+        window.history.replaceState({}, '', 'http://localhost/products/1?foo=bar');
+
+        window.document.title = 'Product 1';
+
+        expect(EvaluationContext.createPageContext()).toEqual({
+            page: {
+                url: 'http://localhost/products/1?foo=bar',
+                title: 'Product 1',
+                referrer: 'http://referrer.com/',
+            },
+            timeZone: timeZone,
+        });
+    });
+
+    it('should omit the title and the referrer when the page has none', () => {
+        setTimeZone(timeZone);
+
+        expect(EvaluationContext.createPageContext()).toEqual({
+            page: {url: 'http://localhost/'},
+            timeZone: timeZone,
+        });
+    });
+
+    it('should omit the time zone when it cannot be detected', () => {
+        setTimeZone('Etc/Unknown');
+
+        expect(EvaluationContext.createPageContext()).not.toHaveProperty('timeZone');
+    });
+
+    it('should extend the captured page with the provided one', () => {
+        setTimeZone(timeZone);
+        setReferrer('http://referrer.com/');
+
+        window.document.title = 'Product 1';
+
+        const context = EvaluationContext.createPageContext({
+            page: {url: 'http://localhost/products/2'},
+        });
+
+        expect(context).toEqual({
+            page: {
+                url: 'http://localhost/products/2',
+                title: 'Product 1',
+                referrer: 'http://referrer.com/',
+            },
+            timeZone: timeZone,
+        });
+    });
+
+    it('should give precedence to the provided values', () => {
+        setTimeZone(timeZone);
+        setReferrer('http://referrer.com/');
+
+        window.document.title = 'Product 1';
+
+        const context = EvaluationContext.createPageContext({
+            page: {
+                url: 'http://localhost/products/2',
+                title: 'Product 2',
+                referrer: 'http://google.com/',
+            },
+            timeZone: 'Europe/Lisbon',
+        });
+
+        expect(context).toEqual({
+            page: {
+                url: 'http://localhost/products/2',
+                title: 'Product 2',
+                referrer: 'http://google.com/',
+            },
+            timeZone: 'Europe/Lisbon',
+        });
+    });
+
+    it('should normalize the URL of the page', () => {
+        expect(EvaluationContext.createPageContext({page: {url: 'http://localhost'}}).page.url)
+            .toBe('http://localhost/');
+    });
+
+    it('should reject a relative URL', () => {
+        // The error comes from the realm of the document, so only the message is checked
+        expect(() => EvaluationContext.createPageContext({page: {url: '/products/1'}}))
+            .toThrow('Invalid URL');
+    });
+
+    it('should sanitize the captured URL and referrer', () => {
+        setReferrer('http://referrer.com/?token=secret&foo=bar');
+
+        window.history.replaceState({}, '', 'http://localhost/products/1?token=secret&foo=bar');
+
+        const context = EvaluationContext.createPageContext({}, {urlSanitizer: sanitizeToken});
+
+        expect(context.page).toEqual({
+            url: 'http://localhost/products/1?foo=bar',
+            referrer: 'http://referrer.com/?foo=bar',
+        });
+    });
+
+    it('should sanitize the provided URL and referrer', () => {
+        const context = EvaluationContext.createPageContext(
+            {
+                page: {
+                    url: 'http://localhost/products/2?token=secret&foo=bar',
+                    referrer: 'http://google.com/?token=secret',
+                },
+            },
+            {urlSanitizer: sanitizeToken},
+        );
+
+        expect(context.page).toEqual({
+            url: 'http://localhost/products/2?foo=bar',
+            referrer: 'http://google.com/',
+        });
+    });
+
+    it('should report the campaign and the attributes', () => {
+        setTimeZone(timeZone);
+
+        const context = EvaluationContext.createPageContext({
+            page: {url: 'http://localhost/'},
+            campaign: {name: 'black-friday'},
+            attributes: {plan: 'pro'},
+        });
+
+        expect(context).toEqual({
+            page: {url: 'http://localhost/'},
+            campaign: {name: 'black-friday'},
+            attributes: {plan: 'pro'},
+            timeZone: timeZone,
+        });
+    });
+
+    it('should omit empty attributes', () => {
+        setTimeZone(timeZone);
+
+        const context = EvaluationContext.createPageContext({
+            page: {url: 'http://localhost/'},
+            attributes: {},
+        });
+
+        expect(context).not.toHaveProperty('attributes');
     });
 });
 

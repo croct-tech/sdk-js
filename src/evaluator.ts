@@ -9,6 +9,8 @@ import type {Logger} from './logging';
 import {NullLogger} from './logging';
 import {ApiKey} from './apiKey';
 import {Help} from './help';
+import type {UrlSanitizer} from './url';
+import {sanitizeUrl} from './url';
 
 export type Campaign = {
     name?: string,
@@ -30,6 +32,101 @@ export type EvaluationContext = {
     page?: Page,
     attributes?: JsonObject,
 };
+
+export type PageEvaluationContext = Omit<EvaluationContext, 'page'> & Required<Pick<EvaluationContext, 'page'>>;
+
+export type PageContextOptions = {
+    urlSanitizer?: UrlSanitizer,
+};
+
+const UNKNOWN_TIME_ZONE = 'Etc/Unknown';
+
+export namespace EvaluationContext {
+    /**
+     * Creates a context describing the page an evaluation refers to.
+     *
+     * The context describes the page currently open in the browser, if any,
+     * extended with the given context. Values provided by the caller take
+     * precedence over the captured ones, so the context can describe a page
+     * other than the one running the code, as in server-side evaluations.
+     *
+     * The URLs of the resulting page are sanitized, whether captured or
+     * provided, so the context never carries what the sanitizer strips.
+     *
+     * @param base The context to extend the captured one with.
+     * @param options The options for creating the context.
+     *
+     * @returns The context describing the page.
+     *
+     * @throws {TypeError} If the URL of the page is not absolute.
+     */
+    export function createPageContext(
+        base: PageEvaluationContext,
+        options?: PageContextOptions,
+    ): PageEvaluationContext;
+
+    export function createPageContext(base?: EvaluationContext, options?: PageContextOptions): EvaluationContext;
+
+    export function createPageContext(
+        base: EvaluationContext = {},
+        options: PageContextOptions = {},
+    ): EvaluationContext {
+        const {page, timeZone = detectTimeZone(), attributes, ...context} = base;
+        const currentPage = mergePage(capturePage(), page);
+
+        return {
+            ...context,
+            ...(currentPage !== undefined ? {page: normalizePage(currentPage, options.urlSanitizer)} : {}),
+            ...(timeZone !== undefined ? {timeZone: timeZone} : {}),
+            ...(attributes !== undefined && Object.keys(attributes).length > 0 ? {attributes: attributes} : {}),
+        };
+    }
+
+    function capturePage(): Page | undefined {
+        if (typeof window === 'undefined') {
+            return undefined;
+        }
+
+        return {
+            url: window.location.href,
+            title: document.title,
+            referrer: document.referrer,
+        };
+    }
+
+    function mergePage(currentPage?: Page, providedPage?: Page): Page | undefined {
+        if (providedPage === undefined) {
+            return currentPage;
+        }
+
+        return currentPage === undefined ? providedPage : {...currentPage, ...providedPage};
+    }
+
+    function normalizePage({url, title, referrer}: Page, urlSanitizer?: UrlSanitizer): Page {
+        return {
+            url: new URL(sanitizeUrl(url, urlSanitizer)).toString(),
+            ...(title !== undefined && title !== '' ? {title: title} : {}),
+            ...(referrer !== undefined && referrer !== ''
+                ? {referrer: sanitizeUrl(referrer, urlSanitizer)}
+                : {}
+            ),
+        };
+    }
+
+    function detectTimeZone(): string | undefined {
+        if (typeof window === 'undefined') {
+            return undefined;
+        }
+
+        const {timeZone} = Intl.DateTimeFormat().resolvedOptions();
+
+        if (timeZone === undefined || timeZone === UNKNOWN_TIME_ZONE) {
+            return undefined;
+        }
+
+        return timeZone;
+    }
+}
 
 type AllowedFetchOptions = Exclude<keyof RequestInit, 'method' | 'body' | 'headers' | 'signal'>;
 
