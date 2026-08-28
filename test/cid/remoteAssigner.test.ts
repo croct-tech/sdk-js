@@ -40,6 +40,17 @@ describe('A remote CID assigner', () => {
         await expect(cachedAssigner.assignCid()).resolves.toEqual('123');
     });
 
+    it('should use the configured client library', async () => {
+        const assigner = new RemoteAssigner(ENDPOINT, undefined, 'Croct JavaScript SDK v1.0.0');
+
+        fetchMock.mockGlobal().route({
+            ...requestMatcher,
+            headers: {'X-Client-Library': 'Croct JavaScript SDK v1.0.0'},
+        });
+
+        await expect(assigner.assignCid()).resolves.toEqual('123');
+    });
+
     it('should fail if a HTTP error occurs', async () => {
         const cachedAssigner = new RemoteAssigner(ENDPOINT);
 

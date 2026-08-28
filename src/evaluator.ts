@@ -141,6 +141,7 @@ export type EvaluationOptions = {
     userToken?: Token | string,
     timeout?: number,
     context?: EvaluationContext,
+    clientLibrary?: string,
     extra?: ExtraFetchOptions,
 };
 
@@ -189,12 +190,14 @@ export type Configuration = {
     baseEndpointUrl?: string,
     logger?: Logger,
     defaultTimeout?: number,
+    clientLibrary?: string,
 };
 
 type InternalConfiguration = {
     appId?: string,
     apiKey?: string,
     defaultTimeout?: number,
+    clientLibrary: string,
 };
 
 export class Evaluator {
@@ -224,6 +227,7 @@ export class Evaluator {
                 ? ApiKey.from(configuration.apiKey).getIdentifier()
                 : configuration.apiKey,
             defaultTimeout: configuration.defaultTimeout,
+            clientLibrary: configuration.clientLibrary ?? CLIENT_LIBRARY,
         };
     }
 
@@ -352,13 +356,13 @@ export class Evaluator {
 
     private fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
         const {appId, apiKey} = this.configuration;
-        const {clientId, clientIp, userToken, clientAgent} = options;
+        const {clientId, clientIp, userToken, clientAgent, clientLibrary} = options;
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
         };
 
-        headers['X-Client-Library'] = CLIENT_LIBRARY;
+        headers['X-Client-Library'] = clientLibrary ?? this.configuration.clientLibrary;
 
         if (apiKey !== undefined) {
             headers['X-Api-Key'] = apiKey;

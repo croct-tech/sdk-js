@@ -16,6 +16,7 @@ export type FetchOptions = FetchResponseOptions & {
     preferredLocale?: string,
     timeout?: number,
     attributes?: JsonObject,
+    clientLibrary?: string,
 };
 
 function validate(options: unknown): asserts options is FetchOptions {
@@ -75,6 +76,7 @@ export class ContentFetcherFacade {
             timeout: options?.timeout,
             preferredLocale: options?.preferredLocale,
             includeSchema: options?.includeSchema,
+            clientLibrary: options?.clientLibrary,
         });
     }
 }

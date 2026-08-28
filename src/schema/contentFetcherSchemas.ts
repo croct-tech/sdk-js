@@ -20,5 +20,9 @@ export const fetchOptionsSchema = new ObjectType({
         }),
         includeSchema: new BooleanType(),
         attributes: new JsonObjectType(),
+        clientLibrary: new StringType({
+            minLength: 1,
+            maxLength: 100,
+        }),
     },
 });

@@ -10,6 +10,7 @@ import type {CidAssigner} from '../cid';
 export type EvaluationOptions = {
     timeout?: number,
     attributes?: JsonObject,
+    clientLibrary?: string,
 };
 
 function validate(options: unknown): asserts options is EvaluationOptions {
@@ -59,6 +60,7 @@ export class EvaluatorFacade {
             userToken: this.tokenProvider.getToken() ?? undefined,
             timeout: options.timeout,
             context: this.contextFactory.createContext(options.attributes),
+            clientLibrary: options.clientLibrary,
         });
     }
 }

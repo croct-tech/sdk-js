@@ -121,6 +121,18 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query)).resolves.toBe(result);
     });
 
+    it('should use the configured client library', async () => {
+        const evaluator = new Evaluator({appId: appId, clientLibrary: 'Croct React SDK v1.0.0'});
+
+        fetchMock.mockGlobal().route({
+            ...requestMatcher,
+            headers: {...requestMatcher.headers, 'X-Client-Library': 'Croct React SDK v1.0.0'},
+            response: JSON.stringify('Anonymous'),
+        });
+
+        await expect(evaluator.evaluate(query)).resolves.toBe('Anonymous');
+    });
+
     it('should evaluate queries using the provided token', async () => {
         const token = Token.issue(appId, 'foo', Date.now());
 

@@ -103,6 +103,26 @@ describe('An HTTP beacon channel', () => {
         });
     });
 
+    it('should use the configured client library', async () => {
+        fetchMock.mockGlobal().route(endpointUrl, 200);
+
+        const channel = new HttpBeaconChannel({
+            appId: appId,
+            endpointUrl: endpointUrl,
+            cidAssigner: cidAssigner,
+            clientLibrary: 'Croct Hydrogen SDK v1.0.0',
+        });
+
+        await channel.publish({
+            id: 'receipt-id',
+            message: JSON.stringify({context: {}, payload: {}, timestamp: 1}),
+        });
+
+        expect(fetchMock.callHistory.calls()[0].options.headers).toMatchObject({
+            'x-client-library': 'Croct Hydrogen SDK v1.0.0',
+        });
+    });
+
     it('should not send the token header if the token is not provided', async () => {
         fetchMock.mockGlobal().route(endpointUrl, 200);
 

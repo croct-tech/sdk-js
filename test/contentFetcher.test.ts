@@ -68,6 +68,18 @@ describe('A content fetcher', () => {
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
+    it('should use the configured client library', async () => {
+        const fetcher = new ContentFetcher({appId: appId, clientLibrary: 'Croct React Plug v1.0.0'});
+
+        fetchMock.mockGlobal().route({
+            ...requestMatcher,
+            headers: {...requestMatcher.headers, 'X-Client-Library': 'Croct React Plug v1.0.0'},
+            response: result,
+        });
+
+        await expect(fetcher.fetch(slotId, {static: false})).resolves.toEqual(result);
+    });
+
     it('should require either an application ID or API key, but not both', () => {
         expect(() => new ContentFetcher({apiKey: apiKeyIdentifier, appId: appId}))
             .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');

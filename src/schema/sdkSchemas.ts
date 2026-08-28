@@ -50,6 +50,10 @@ export const sdkConfigurationSchema = new ObjectType({
         baseEndpointUrl: new StringType({
             format: 'url',
         }),
+        clientLibrary: new StringType({
+            minLength: 1,
+            maxLength: 100,
+        }),
         cidAssignerEndpointUrl: new StringType({
             format: 'url',
         }),

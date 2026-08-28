@@ -30,6 +30,7 @@ export type Configuration = {
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
     baseEndpointUrl?: string,
+    clientLibrary?: string,
     disableCidMirroring?: boolean,
     cidAssignerEndpointUrl?: string,
     cookie?: {

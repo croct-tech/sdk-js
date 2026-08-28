@@ -48,5 +48,9 @@ export const evaluationOptionsSchema = new ObjectType({
             }),
             properties: createJsonSchema(5),
         }),
+        clientLibrary: new StringType({
+            minLength: 1,
+            maxLength: 100,
+        }),
     },
 });
