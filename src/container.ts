@@ -39,7 +39,6 @@ export type Configuration = {
     trackerEndpointUrl: string,
     evaluationBaseEndpointUrl: string,
     contentBaseEndpointUrl: string,
-    sdkLibrary?: string,
     clientLibrary?: string,
     beaconQueueSize: number,
     logger?: Logger,
@@ -87,9 +86,7 @@ export class Container {
 
     public constructor(configuration: Configuration) {
         this.configuration = configuration;
-        this.clientLibrary = [configuration.clientLibrary, configuration.sdkLibrary]
-            .filter((library): library is string => library !== undefined)
-            .join('; ');
+        this.clientLibrary = configuration.clientLibrary;
     }
 
     public getConfiguration(): Configuration {

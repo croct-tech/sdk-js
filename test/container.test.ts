@@ -54,11 +54,10 @@ describe('A container', () => {
         expect(container.getConfiguration()).toEqual(fullConfiguration);
     });
 
-    it('should aggregate the SDK and integration libraries for every request', async () => {
+    it('should use the configured client library for every request', async () => {
         const container = new Container({
             ...configuration,
-            sdkLibrary: 'Croct SDK JS v1.0.0',
-            clientLibrary: 'Croct React SDK v1.0.0',
+            clientLibrary: 'Croct SDK JS v1.0.0; Croct React SDK v1.0.0',
             logger: new NullLogger(),
         });
         const clientLibrary = 'Croct SDK JS v1.0.0; Croct React SDK v1.0.0';
@@ -77,11 +76,14 @@ describe('A container', () => {
         await container.getContentFetcher().fetch('slot');
         await container.getTracker().track({type: 'nothingChanged', sinceTime: 0});
 
-        expect(fetchMock.callHistory.calls()).toHaveLength(4);
+        const calls = fetchMock.callHistory.calls();
 
-        for (const call of fetchMock.callHistory.calls()) {
-            expect(new Headers(call.options.headers).get('X-Client-Library')).toBe(clientLibrary);
-        }
+        expect(calls).toHaveLength(4);
+
+        expect(new Headers(calls[0].options.headers).get('X-Client-Library')).toBe(clientLibrary);
+        expect(new Headers(calls[1].options.headers).get('X-Client-Library')).toBe(clientLibrary);
+        expect(new Headers(calls[2].options.headers).get('X-Client-Library')).toBe(clientLibrary);
+        expect(new Headers(calls[3].options.headers).get('X-Client-Library')).toBe(clientLibrary);
     });
 
     it('should resolve the timezone lazily from the Intl API', () => {

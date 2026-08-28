@@ -82,7 +82,7 @@ describe('A SDK', () => {
         await sdk.evaluator.evaluate('true');
 
         expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
-            .toBe('Croct SDK JS v0.0.1-test; Croct React SDK v1.0.0');
+            .toBe('Croct React SDK v1.0.0; Croct SDK JS v0.0.1-test');
     });
 
     it('should be initialized with the specified logger', () => {
