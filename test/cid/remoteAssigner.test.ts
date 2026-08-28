@@ -15,8 +15,7 @@ describe('A remote CID assigner', () => {
 
     const requestMatcher: UserRouteConfig = {
         method: 'GET',
-        headers: {
-        },
+        headers: {},
         url: ENDPOINT,
         response: '123',
     };
