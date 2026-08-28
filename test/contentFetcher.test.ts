@@ -5,7 +5,7 @@ import {Token} from '../src/token';
 import type {FetchOptions, FetchResponse, InputErrorResponse} from '../src/contentFetcher';
 import {ContentFetcher, ContentError, ContentErrorType, InputError} from '../src/contentFetcher';
 import type {ApiProblem} from '../src/error';
-import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
+import {BASE_ENDPOINT_URL} from '../src/constants';
 import {ApiKey} from '../src/apiKey';
 import type {Logger} from '../src/logging';
 import {Help} from '../src/help';
@@ -45,7 +45,6 @@ describe('A content fetcher', () => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Client-Library': CLIENT_LIBRARY,
         },
         body: {
             slotId: slotId,
@@ -100,6 +99,8 @@ describe('A content fetcher', () => {
         });
 
         await expect(fetcher.fetch(slotId)).resolves.toEqual(result);
+
+        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).has('X-Client-Library')).toBe(false);
     });
 
     it.each<[string, string | ApiKey]>([

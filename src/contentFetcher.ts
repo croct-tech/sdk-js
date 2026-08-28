@@ -2,7 +2,7 @@ import type {JsonObject, JsonPrimitive} from '@croct/json';
 import type {ContentDefinitionBundle} from '@croct/content-model/definition';
 import type {EvaluationContext} from './evaluator';
 import type {Token} from './token';
-import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from './constants';
+import {BASE_ENDPOINT_URL} from './constants';
 import {formatMessage} from './error';
 import type {ApiProblem} from './error';
 import type {Logger} from './logging';
@@ -65,7 +65,6 @@ type BasicOptions = FetchResponseOptions & {
     version?: `${number}` | number,
     preferredLocale?: string,
     timeout?: number,
-    clientLibrary?: string,
     extra?: ExtraFetchOptions,
 };
 
@@ -127,7 +126,7 @@ type InternalConfiguration = {
     apiKey?: string,
     defaultTimeout?: number,
     defaultPreferredLocale?: string,
-    clientLibrary: string,
+    clientLibrary?: string,
 };
 
 export class ContentFetcher {
@@ -161,7 +160,7 @@ export class ContentFetcher {
                 : configuration.apiKey,
             defaultTimeout: configuration.defaultTimeout,
             defaultPreferredLocale: configuration.defaultPreferredLocale,
-            clientLibrary: configuration.clientLibrary ?? CLIENT_LIBRARY,
+            clientLibrary: configuration.clientLibrary,
         };
     }
 
@@ -262,7 +261,9 @@ export class ContentFetcher {
             'Content-Type': 'application/json',
         };
 
-        headers['X-Client-Library'] = options.clientLibrary ?? clientLibrary;
+        if (clientLibrary !== undefined) {
+            headers['X-Client-Library'] = clientLibrary;
+        }
 
         if (appId !== undefined) {
             headers['X-App-Id'] = appId;

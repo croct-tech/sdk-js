@@ -2,18 +2,17 @@ import type {Logger} from '../logging';
 import {NullLogger} from '../logging';
 import {formatCause} from '../error';
 import type {CidAssigner} from './assigner';
-import {CLIENT_LIBRARY} from '../constants';
 
 export class RemoteAssigner implements CidAssigner {
     private readonly logger: Logger;
 
     private readonly endpoint: string;
 
-    private readonly clientLibrary: string;
+    private readonly clientLibrary?: string;
 
     private pending?: Promise<string>;
 
-    public constructor(endpoint: string, logger?: Logger, clientLibrary = CLIENT_LIBRARY) {
+    public constructor(endpoint: string, logger?: Logger, clientLibrary?: string) {
         this.endpoint = endpoint;
         this.logger = logger ?? new NullLogger();
         this.clientLibrary = clientLibrary;
@@ -34,7 +33,7 @@ export class RemoteAssigner implements CidAssigner {
             method: 'GET',
             credentials: 'include',
             headers: {
-                'X-Client-Library': this.clientLibrary,
+                ...(this.clientLibrary !== undefined ? {'X-Client-Library': this.clientLibrary} : {}),
             },
         };
 

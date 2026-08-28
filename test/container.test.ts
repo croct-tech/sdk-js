@@ -54,6 +54,36 @@ describe('A container', () => {
         expect(container.getConfiguration()).toEqual(fullConfiguration);
     });
 
+    it('should aggregate the SDK and integration libraries for every request', async () => {
+        const container = new Container({
+            ...configuration,
+            sdkLibrary: 'Croct SDK JS v1.0.0',
+            clientLibrary: 'Croct React SDK v1.0.0',
+            logger: new NullLogger(),
+        });
+        const clientLibrary = 'Croct SDK JS v1.0.0; Croct React SDK v1.0.0';
+
+        fetchMock.mockGlobal()
+            .route('https://localtest/cid', '00000000-0000-0000-0000-000000000001')
+            .route('https://localtest/evaluate/client/web/evaluate', 'true')
+            .route('https://localtest/content/client/web/content', {
+                metadata: {version: '1.0', contentSource: 'slot'},
+                content: {},
+            })
+            .route('https://localtest/track', 200);
+
+        await container.getCidAssigner().assignCid();
+        await container.getEvaluator().evaluate('true');
+        await container.getContentFetcher().fetch('slot');
+        await container.getTracker().track({type: 'nothingChanged', sinceTime: 0});
+
+        expect(fetchMock.callHistory.calls()).toHaveLength(4);
+
+        for (const call of fetchMock.callHistory.calls()) {
+            expect(new Headers(call.options.headers).get('X-Client-Library')).toBe(clientLibrary);
+        }
+    });
+
     it('should resolve the timezone lazily from the Intl API', () => {
         const container = new Container(configuration);
 

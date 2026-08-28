@@ -19,6 +19,7 @@ jest.mock(
     () => ({
         VERSION: '0.0.1-test',
         BASE_ENDPOINT_URL: 'https://api.croct.io',
+        CLIENT_LIBRARY: 'Croct SDK JS v0.0.1-test',
     }),
 );
 
@@ -68,6 +69,20 @@ describe('A SDK', () => {
         const sdk = Sdk.init(configuration);
 
         expect(sdk.appId).toEqual(configuration.appId);
+    });
+
+    it('should append the integration library to the SDK library', async () => {
+        const sdk = Sdk.init({
+            ...configuration,
+            clientLibrary: 'Croct React SDK v1.0.0',
+        });
+
+        fetchMock.mockGlobal().route('https://localtest/client/web/evaluate', JSON.stringify(true));
+
+        await sdk.evaluator.evaluate('true');
+
+        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
+            .toBe('Croct SDK JS v0.0.1-test; Croct React SDK v1.0.0');
     });
 
     it('should be initialized with the specified logger', () => {

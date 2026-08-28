@@ -1,6 +1,6 @@
 import type {JsonObject, JsonValue} from '@croct/json';
 import type {Token} from './token';
-import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, MAX_QUERY_LENGTH} from './constants';
+import {BASE_ENDPOINT_URL, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
 import type {ApiProblem} from './error';
 import type {Location} from './sourceLocation';
@@ -141,7 +141,6 @@ export type EvaluationOptions = {
     userToken?: Token | string,
     timeout?: number,
     context?: EvaluationContext,
-    clientLibrary?: string,
     extra?: ExtraFetchOptions,
 };
 
@@ -197,7 +196,7 @@ type InternalConfiguration = {
     appId?: string,
     apiKey?: string,
     defaultTimeout?: number,
-    clientLibrary: string,
+    clientLibrary?: string,
 };
 
 export class Evaluator {
@@ -227,7 +226,7 @@ export class Evaluator {
                 ? ApiKey.from(configuration.apiKey).getIdentifier()
                 : configuration.apiKey,
             defaultTimeout: configuration.defaultTimeout,
-            clientLibrary: configuration.clientLibrary ?? CLIENT_LIBRARY,
+            clientLibrary: configuration.clientLibrary,
         };
     }
 
@@ -356,13 +355,15 @@ export class Evaluator {
 
     private fetch(body: JsonObject, signal: AbortSignal, options: EvaluationOptions): Promise<Response> {
         const {appId, apiKey} = this.configuration;
-        const {clientId, clientIp, userToken, clientAgent, clientLibrary} = options;
+        const {clientId, clientIp, userToken, clientAgent} = options;
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
         };
 
-        headers['X-Client-Library'] = clientLibrary ?? this.configuration.clientLibrary;
+        if (this.configuration.clientLibrary !== undefined) {
+            headers['X-Client-Library'] = this.configuration.clientLibrary;
+        }
 
         if (apiKey !== undefined) {
             headers['X-Api-Key'] = apiKey;

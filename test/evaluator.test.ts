@@ -4,7 +4,7 @@ import type {EvaluationOptions, QueryErrorResponse} from '../src/evaluator';
 import {EvaluationContext, EvaluationError, EvaluationErrorType, Evaluator, QueryError} from '../src/evaluator';
 import type {ApiProblem} from '../src/error';
 import {Token} from '../src/token';
-import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
+import {BASE_ENDPOINT_URL} from '../src/constants';
 import {ApiKey} from '../src/apiKey';
 import type {Logger} from '../src/logging';
 import {Help} from '../src/help';
@@ -35,7 +35,6 @@ describe('An evaluator', () => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Client-Library': CLIENT_LIBRARY,
         },
         body: {
             query: query,
@@ -80,6 +79,8 @@ describe('An evaluator', () => {
         });
 
         await expect(evaluator.evaluate(query)).resolves.toBe(result);
+
+        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).has('X-Client-Library')).toBe(false);
     });
 
     it.each<[string, string | ApiKey]>([

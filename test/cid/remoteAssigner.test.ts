@@ -1,7 +1,6 @@
 import type {UserRouteConfig} from 'fetch-mock';
 import fetchMock from 'fetch-mock';
 import {RemoteAssigner} from '../../src/cid';
-import {CLIENT_LIBRARY} from '../../src/constants';
 
 jest.mock(
     '../../src/constants',
@@ -17,7 +16,6 @@ describe('A remote CID assigner', () => {
     const requestMatcher: UserRouteConfig = {
         method: 'GET',
         headers: {
-            'X-Client-Library': CLIENT_LIBRARY,
         },
         url: ENDPOINT,
         response: '123',
@@ -38,6 +36,8 @@ describe('A remote CID assigner', () => {
         fetchMock.mockGlobal().route(requestMatcher);
 
         await expect(cachedAssigner.assignCid()).resolves.toEqual('123');
+
+        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).has('X-Client-Library')).toBe(false);
     });
 
     it('should use the configured client library', async () => {

@@ -6,7 +6,6 @@ import {NullLogger} from '../logging';
 import type {CidAssigner} from '../cid';
 import {formatMessage} from '../error';
 import type {ApiProblem} from '../error';
-import {CLIENT_LIBRARY} from '../constants';
 import {Help} from '../help';
 
 export type Configuration = {
@@ -50,8 +49,11 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
             headers: {
                 'X-App-Id': appId,
                 'X-Client-Id': await cidAssigner.assignCid(),
-                'X-Client-Library': this.configuration.clientLibrary ?? CLIENT_LIBRARY,
                 'Content-Type': 'application/json',
+                ...(this.configuration.clientLibrary !== undefined
+                    ? {'X-Client-Library': this.configuration.clientLibrary}
+                    : {}
+                ),
                 ...(token !== undefined ? {'X-Token': token} : {}),
             },
             body: JSON.stringify({

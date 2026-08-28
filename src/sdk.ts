@@ -64,7 +64,7 @@ export class Sdk {
         const {
             eventMetadata: customMetadata = {},
             baseEndpointUrl = BASE_ENDPOINT_URL,
-            clientLibrary = CLIENT_LIBRARY,
+            clientLibrary,
             cidAssignerEndpointUrl,
             ...containerConfiguration
         } = configuration;
@@ -86,6 +86,7 @@ export class Sdk {
             trackerEndpointUrl: `${baseHttpEndpoint}/client/web/track`,
             cidAssignerEndpointUrl: cidAssignerEndpointUrl ?? `${baseHttpEndpoint}/client/web/cid`,
             beaconQueueSize: containerConfiguration.beaconQueueSize ?? 100,
+            sdkLibrary: CLIENT_LIBRARY,
             clientLibrary: clientLibrary,
             eventMetadata: eventMetadata,
         });

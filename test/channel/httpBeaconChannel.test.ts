@@ -4,7 +4,6 @@ import type {Logger} from '../../src/logging';
 import {FixedAssigner} from '../../src/cid';
 import type {Beacon} from '../../src/trackingEvents';
 import {Token} from '../../src/token';
-import {CLIENT_LIBRARY} from '../../src/constants';
 import {Help} from '../../src/help';
 
 describe('An HTTP beacon channel', () => {
@@ -92,7 +91,6 @@ describe('An HTTP beacon channel', () => {
             'X-Client-Id': clientId,
             'X-Token': token,
             'X-App-Id': appId,
-            'X-Client-Library': CLIENT_LIBRARY,
             'Content-Type': 'application/json',
         });
 
