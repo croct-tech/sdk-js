@@ -21,7 +21,7 @@ export type Configuration = {
     test: boolean,
     clientId?: string,
     baseEndpointUrl?: string,
-    clientLibrary: string[],
+    libraryStack: string[],
     disableCidMirroring: boolean,
     cidAssignerEndpointUrl?: string,
     beaconQueueSize?: number,
@@ -64,7 +64,7 @@ export class Sdk {
         const {
             eventMetadata: customMetadata = {},
             baseEndpointUrl = BASE_ENDPOINT_URL,
-            clientLibrary: [...integrationLibrary],
+            libraryStack: [...integrationLibrary],
             cidAssignerEndpointUrl,
             ...containerConfiguration
         } = configuration;
@@ -86,7 +86,7 @@ export class Sdk {
             trackerEndpointUrl: `${baseHttpEndpoint}/client/web/track`,
             cidAssignerEndpointUrl: cidAssignerEndpointUrl ?? `${baseHttpEndpoint}/client/web/cid`,
             beaconQueueSize: containerConfiguration.beaconQueueSize ?? 100,
-            clientLibrary: integrationLibrary,
+            libraryStack: integrationLibrary,
             eventMetadata: eventMetadata,
         });
 

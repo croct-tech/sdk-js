@@ -39,7 +39,7 @@ export type Configuration = {
     trackerEndpointUrl: string,
     evaluationBaseEndpointUrl: string,
     contentBaseEndpointUrl: string,
-    clientLibrary: string[],
+    libraryStack: string[],
     beaconQueueSize: number,
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
@@ -112,7 +112,7 @@ export class Container {
             baseEndpointUrl: this.configuration.evaluationBaseEndpointUrl,
             logger: this.getLogger('Evaluator'),
             defaultTimeout: this.configuration.defaultFetchTimeout ?? Container.DEFAULT_FETCH_TIMEOUT,
-            clientLibrary: this.configuration.clientLibrary,
+            libraryStack: this.configuration.libraryStack,
         });
     }
 
@@ -131,7 +131,7 @@ export class Container {
             logger: this.getLogger('ContentFetcher'),
             defaultTimeout: this.configuration.defaultFetchTimeout ?? Container.DEFAULT_FETCH_TIMEOUT,
             defaultPreferredLocale: this.configuration.defaultPreferredLocale,
-            clientLibrary: this.configuration.clientLibrary,
+            libraryStack: this.configuration.libraryStack,
         });
     }
 
@@ -247,7 +247,7 @@ export class Container {
                         appId: appId,
                         endpointUrl: trackerEndpointUrl,
                         cidAssigner: this.getCidAssigner(),
-                        clientLibrary: this.configuration.clientLibrary,
+                        libraryStack: this.configuration.libraryStack,
                         logger: channelLogger,
                     }),
                     stamper: new TimeStamper(),
@@ -293,7 +293,7 @@ export class Container {
         const logger = this.getLogger('CidAssigner');
 
         return new CachedAssigner(
-            new RemoteAssigner(this.configuration.cidAssignerEndpointUrl, this.configuration.clientLibrary, logger),
+            new RemoteAssigner(this.configuration.cidAssignerEndpointUrl, this.configuration.libraryStack, logger),
             this.configuration.cookie?.clientId !== undefined
                 ? new CookieCache(this.configuration.cookie?.clientId)
                 : new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),

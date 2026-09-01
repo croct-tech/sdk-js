@@ -41,7 +41,7 @@ describe('A SDK', () => {
         cookie: {},
         defaultFetchTimeout: 1000,
         defaultPreferredLocale: 'en-us',
-        clientLibrary: ['Plug Javascript 1.0.0'],
+        libraryStack: ['Plug Javascript 1.0.0'],
     };
 
     beforeEach(() => {
@@ -66,12 +66,13 @@ describe('A SDK', () => {
         expect(() => Sdk.init({} as Configuration)).toThrow('Invalid configuration');
     });
 
-    it.each([
-        ['an empty client library', ['']],
-        ['an oversized client library', ['a'.repeat(101)]],
-        ['a non-array client library', 'Library'],
-    ])('should reject %s', (_, clientLibrary) => {
-        expect(() => Sdk.init({...configuration, clientLibrary: clientLibrary} as Configuration))
+    it.each(Object.entries({
+        'an empty client library': [''],
+        'an oversized client library': ['a'.repeat(51)],
+        'a non-array client library': 'Library',
+        'array exceeding max length': new Array(11).fill(''),
+    }))('should reject %s', (_, libraryStack) => {
+        expect(() => Sdk.init({...configuration, libraryStack: libraryStack} as Configuration))
             .toThrow('Invalid configuration:');
     });
 
@@ -84,7 +85,7 @@ describe('A SDK', () => {
     it('should append the integration library to the SDK library', async () => {
         const sdk = Sdk.init({
             ...configuration,
-            clientLibrary: ['First integration 1.0.0', 'Second integration 2.0.0'],
+            libraryStack: ['First integration 1.0.0', 'Second integration 2.0.0'],
         });
 
         fetchMock.mockGlobal().route('https://localtest/client/web/evaluate', JSON.stringify(true));
@@ -96,10 +97,10 @@ describe('A SDK', () => {
     });
 
     it('should snapshot the client library stack on initialization', async () => {
-        const clientLibrary = ['Plug Javascript 1.0.0'];
-        const sdk = Sdk.init({...configuration, clientLibrary: clientLibrary});
+        const libraryStack = ['Plug Javascript 1.0.0'];
+        const sdk = Sdk.init({...configuration, libraryStack: libraryStack});
 
-        clientLibrary.push('Late integration 1.0.0');
+        libraryStack.push('Late integration 1.0.0');
         fetchMock.mockGlobal().route('https://localtest/client/web/evaluate', JSON.stringify(true));
 
         await sdk.evaluator.evaluate('true');
@@ -295,7 +296,7 @@ describe('A SDK', () => {
             disableCidMirroring: false,
             debug: false,
             test: false,
-            clientLibrary: [],
+            libraryStack: ['Plug Javascript 1.0.0'],
         });
 
         await expect(sdk.cidAssigner.assignCid()).resolves.toEqual('123');
@@ -320,7 +321,7 @@ describe('A SDK', () => {
                 disableCidMirroring: false,
                 debug: false,
                 test: false,
-                clientLibrary: [],
+                libraryStack: ['Plug Javascript 1.0.0'],
             });
 
             await expect(sdk.cidAssigner.assignCid()).resolves.toEqual('123');

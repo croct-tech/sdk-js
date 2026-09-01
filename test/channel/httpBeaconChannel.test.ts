@@ -41,7 +41,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
-            clientLibrary: ['Plug Javascript 1.0.0'],
+            libraryStack: ['Plug Javascript 1.0.0'],
         });
 
         jest.useFakeTimers({now: 2});
@@ -111,7 +111,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
-            clientLibrary: ['Plug Javascript 1.0.0'],
+            libraryStack: ['Plug Javascript 1.0.0'],
         });
 
         await channel.publish({
@@ -131,7 +131,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
-            clientLibrary: ['Plug Javascript 1.0.0'],
+            libraryStack: ['Plug Javascript 1.0.0'],
         });
 
         jest.useFakeTimers({now: 2});
@@ -179,7 +179,7 @@ describe('An HTTP beacon channel', () => {
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
             logger: logger,
-            clientLibrary: ['Plug Javascript 1.0.0'],
+            libraryStack: ['Plug Javascript 1.0.0'],
         });
 
         const listener = jest.fn();
@@ -262,7 +262,7 @@ describe('An HTTP beacon channel', () => {
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
             logger: logger,
-            clientLibrary: ['Plug Javascript 1.0.0'],
+            libraryStack: ['Plug Javascript 1.0.0'],
         });
 
         const listener = jest.fn();
@@ -315,7 +315,7 @@ describe('An HTTP beacon channel', () => {
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
             logger: logger,
-            clientLibrary: ['Plug Javascript 1.0.0'],
+            libraryStack: ['Plug Javascript 1.0.0'],
         });
 
         const listener = jest.fn();
@@ -356,7 +356,7 @@ describe('An HTTP beacon channel', () => {
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
             logger: logger,
-            clientLibrary: ['Plug Javascript 1.0.0'],
+            libraryStack: ['Plug Javascript 1.0.0'],
         });
 
         const listener = jest.fn();
@@ -397,7 +397,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
-            clientLibrary: ['Plug Javascript 1.0.0'],
+            libraryStack: ['Plug Javascript 1.0.0'],
         });
 
         const beacon: Beacon = {
@@ -433,7 +433,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
-            clientLibrary: ['Plug Javascript 1.0.0'],
+            libraryStack: ['Plug Javascript 1.0.0'],
         });
 
         const beacon: Beacon = {

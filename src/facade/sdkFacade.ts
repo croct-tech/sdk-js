@@ -30,7 +30,7 @@ export type Configuration = {
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
     baseEndpointUrl?: string,
-    clientLibrary?: string[],
+    libraryStack?: string[],
     disableCidMirroring?: boolean,
     cidAssignerEndpointUrl?: string,
     cookie?: {
@@ -81,7 +81,7 @@ export class SdkFacade {
             tokenScope: containerConfiguration.tokenScope ?? 'global',
             debug: containerConfiguration.debug ?? false,
             test: containerConfiguration.test ?? false,
-            clientLibrary: containerConfiguration.clientLibrary ?? [],
+            libraryStack: containerConfiguration.libraryStack ?? [],
             disableCidMirroring: containerConfiguration.disableCidMirroring ?? false,
         });
 

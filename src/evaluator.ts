@@ -189,14 +189,14 @@ export type Configuration = {
     baseEndpointUrl?: string,
     logger?: Logger,
     defaultTimeout?: number,
-    clientLibrary: string[],
+    libraryStack: string[],
 };
 
 type InternalConfiguration = {
     appId?: string,
     apiKey?: string,
     defaultTimeout?: number,
-    clientLibrary: string,
+    libraryStack: string,
 };
 
 export class Evaluator {
@@ -226,7 +226,7 @@ export class Evaluator {
                 ? ApiKey.from(configuration.apiKey).getIdentifier()
                 : configuration.apiKey,
             defaultTimeout: configuration.defaultTimeout,
-            clientLibrary: [...configuration.clientLibrary, CLIENT_LIBRARY].join('; '),
+            libraryStack: [...configuration.libraryStack, CLIENT_LIBRARY].join('; '),
         };
     }
 
@@ -359,7 +359,7 @@ export class Evaluator {
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
-            'X-Client-Library': this.configuration.clientLibrary,
+            'X-Client-Library': this.configuration.libraryStack,
         };
 
         if (apiKey !== undefined) {

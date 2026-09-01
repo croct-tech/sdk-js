@@ -38,7 +38,7 @@ export const cookieOptionsSchema = new ObjectType({
 });
 
 export const sdkConfigurationSchema = new ObjectType({
-    required: ['appId', 'tokenScope', 'disableCidMirroring', 'debug', 'test', 'clientLibrary'],
+    required: ['appId', 'tokenScope', 'disableCidMirroring', 'debug', 'test', 'libraryStack'],
     properties: {
         appId: new StringType({
             format: 'uuid',
@@ -50,11 +50,12 @@ export const sdkConfigurationSchema = new ObjectType({
         baseEndpointUrl: new StringType({
             format: 'url',
         }),
-        clientLibrary: new ArrayType({
+        libraryStack: new ArrayType({
             items: new StringType({
                 minLength: 1,
-                maxLength: 100,
+                maxLength: 50,
             }),
+            maxItems: 10,
         }),
         cidAssignerEndpointUrl: new StringType({
             format: 'url',

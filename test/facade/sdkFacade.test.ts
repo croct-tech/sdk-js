@@ -88,13 +88,14 @@ describe('A SDK facade', () => {
 
     it.each(Object.entries({
         'empty string': [''],
-        'string exceeding max length': ['a'.repeat(101)],
+        'string exceeding max length': ['a'.repeat(51)],
         'non-array value': 'Library' as unknown as string[],
-    }))('should validate the client libraries - %s', (_description, clientLibrary) => {
+        'array exceeding max length': new Array(11).fill('a'),
+    }))('should validate the client libraries - %s', (_description, libraryStack) => {
         expect(
             () => SdkFacade.init({
                 appId: appId,
-                clientLibrary: clientLibrary,
+                libraryStack: libraryStack,
             }),
         ).toThrow('Invalid configuration:');
     });
@@ -121,7 +122,7 @@ describe('A SDK facade', () => {
             {
                 appId: appId,
                 tokenScope: 'global',
-                clientLibrary: [],
+                libraryStack: [],
                 disableCidMirroring: false,
                 debug: false,
                 test: false,
@@ -155,7 +156,7 @@ describe('A SDK facade', () => {
                 appId: appId,
                 baseEndpointUrl: 'https://api.croct.io',
                 cidAssignerEndpointUrl: 'https://api.croct.io/cid',
-                clientLibrary: [],
+                libraryStack: [],
                 disableCidMirroring: false,
                 debug: false,
                 test: false,

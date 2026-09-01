@@ -204,7 +204,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            clientLibrary: [],
+            libraryStack: ['Plug Javascript 1.0.0'],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -212,7 +212,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            clientLibrary: [],
+            libraryStack: ['Plug Javascript 1.0.0'],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -221,7 +221,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            clientLibrary: [],
+            libraryStack: ['Plug Javascript 1.0.0'],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -230,7 +230,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            clientLibrary: [],
+            libraryStack: ['Plug Javascript 1.0.0'],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -239,7 +239,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            clientLibrary: [],
+            libraryStack: ['Plug Javascript 1.0.0'],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -248,7 +248,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            clientLibrary: [],
+            libraryStack: ['Plug Javascript 1.0.0'],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -257,7 +257,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            clientLibrary: [],
+            libraryStack: ['Plug Javascript 1.0.0'],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -269,7 +269,7 @@ describe('The SDK configuration schema', () => {
             tokenScope: 'isolated',
             baseEndpointUrl: 'https://api.croct.io',
             cidAssignerEndpointUrl: 'https://api.croct.io/cid',
-            clientLibrary: [],
+            libraryStack: ['Plug Javascript 1.0.0'],
             beaconQueueSize: 1,
             disableCidMirroring: true,
             debug: true,
@@ -579,7 +579,7 @@ describe('The SDK configuration schema', () => {
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
-            sdkConfigurationSchema.validate({clientLibrary: [], ...value});
+            sdkConfigurationSchema.validate({libraryStack: ['Plug Javascript 1.0.0'], ...value});
         }
 
         expect(validate).toThrowWithMessage(Error, message);
@@ -595,6 +595,6 @@ describe('The SDK configuration schema', () => {
         };
 
         expect(() => sdkConfigurationSchema.validate(configuration))
-            .toThrowWithMessage(Error, "Missing property '/clientLibrary'.");
+            .toThrowWithMessage(Error, "Missing property '/libraryStack'.");
     });
 });

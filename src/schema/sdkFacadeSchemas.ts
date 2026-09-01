@@ -44,11 +44,12 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
         baseEndpointUrl: new StringType({
             format: 'url',
         }),
-        clientLibrary: new ArrayType({
+        libraryStack: new ArrayType({
             items: new StringType({
                 minLength: 1,
-                maxLength: 100,
+                maxLength: 50,
             }),
+            maxItems: 10,
         }),
         cidAssignerEndpointUrl: new StringType({
             format: 'url',

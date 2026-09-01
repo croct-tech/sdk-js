@@ -13,7 +13,7 @@ export type Configuration = {
     appId: string,
     endpointUrl: string,
     cidAssigner: CidAssigner,
-    clientLibrary: string[],
+    libraryStack: string[],
     logger?: Logger,
 };
 
@@ -23,8 +23,8 @@ export enum TrackingErrorType {
     INTERNAL_ERROR = 'https://croct.help/api/event-tracking/internal-error',
 }
 
-type InternalConfiguration = Omit<Configuration, 'clientLibrary' | 'logger'> & {
-    clientLibrary: string,
+type InternalConfiguration = Omit<Configuration, 'libraryStack' | 'logger'> & {
+    libraryStack: string,
 };
 
 export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string, string>> {
@@ -36,10 +36,10 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
 
     private closed = false;
 
-    public constructor({clientLibrary, logger = new NullLogger(), ...configuration}: Configuration) {
+    public constructor({libraryStack, logger = new NullLogger(), ...configuration}: Configuration) {
         this.configuration = {
             ...configuration,
-            clientLibrary: [...clientLibrary, CLIENT_LIBRARY].join('; '),
+            libraryStack: [...libraryStack, CLIENT_LIBRARY].join('; '),
         };
         this.logger = logger;
     }
@@ -57,7 +57,7 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
             headers: {
                 'X-App-Id': appId,
                 'X-Client-Id': await cidAssigner.assignCid(),
-                'X-Client-Library': this.configuration.clientLibrary,
+                'X-Client-Library': this.configuration.libraryStack,
                 'Content-Type': 'application/json',
                 ...(token !== undefined ? {'X-Token': token} : {}),
             },
