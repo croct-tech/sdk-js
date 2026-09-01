@@ -1,17 +1,11 @@
 import fetchMock from '@fetch-mock/jest';
-import {HttpBeaconChannel as BaseHttpBeaconChannel, MessageDeliveryError} from '../../src/channel';
-import type {Configuration} from '../../src/channel/httpBeaconChannel';
+import {HttpBeaconChannel, MessageDeliveryError} from '../../src/channel';
 import type {Logger} from '../../src/logging';
 import {FixedAssigner} from '../../src/cid';
 import type {Beacon} from '../../src/trackingEvents';
 import {Token} from '../../src/token';
 import {Help} from '../../src/help';
-
-class HttpBeaconChannel extends BaseHttpBeaconChannel {
-    public constructor(configuration: Omit<Configuration, 'clientLibrary'> & {clientLibrary?: string}) {
-        super({clientLibrary: 'Plug Javascript 1.0.0; SDK JS 1.0.0', ...configuration});
-    }
-}
+import {CLIENT_LIBRARY} from '../../src/constants';
 
 describe('An HTTP beacon channel', () => {
     beforeEach(() => {
@@ -47,6 +41,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
+            clientLibrary: ['Plug Javascript 1.0.0'],
         });
 
         jest.useFakeTimers({now: 2});
@@ -98,7 +93,7 @@ describe('An HTTP beacon channel', () => {
             'X-Client-Id': clientId,
             'X-Token': token,
             'X-App-Id': appId,
-            'X-Client-Library': 'Plug Javascript 1.0.0; SDK JS 1.0.0',
+            'X-Client-Library': `Plug Javascript 1.0.0; ${CLIENT_LIBRARY}`,
             'Content-Type': 'application/json',
         });
 
@@ -116,7 +111,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
-            clientLibrary: 'Plug Javascript 1.0.0; SDK JS 1.0.0',
+            clientLibrary: ['Plug Javascript 1.0.0'],
         });
 
         await channel.publish({
@@ -125,7 +120,7 @@ describe('An HTTP beacon channel', () => {
         });
 
         expect(fetchMock.callHistory.calls()[0].options.headers).toMatchObject({
-            'x-client-library': 'Plug Javascript 1.0.0; SDK JS 1.0.0',
+            'x-client-library': `Plug Javascript 1.0.0; ${CLIENT_LIBRARY}`,
         });
     });
 
@@ -136,6 +131,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
+            clientLibrary: ['Plug Javascript 1.0.0'],
         });
 
         jest.useFakeTimers({now: 2});
@@ -183,6 +179,7 @@ describe('An HTTP beacon channel', () => {
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
             logger: logger,
+            clientLibrary: ['Plug Javascript 1.0.0'],
         });
 
         const listener = jest.fn();
@@ -265,6 +262,7 @@ describe('An HTTP beacon channel', () => {
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
             logger: logger,
+            clientLibrary: ['Plug Javascript 1.0.0'],
         });
 
         const listener = jest.fn();
@@ -317,6 +315,7 @@ describe('An HTTP beacon channel', () => {
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
             logger: logger,
+            clientLibrary: ['Plug Javascript 1.0.0'],
         });
 
         const listener = jest.fn();
@@ -357,6 +356,7 @@ describe('An HTTP beacon channel', () => {
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
             logger: logger,
+            clientLibrary: ['Plug Javascript 1.0.0'],
         });
 
         const listener = jest.fn();
@@ -397,6 +397,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
+            clientLibrary: ['Plug Javascript 1.0.0'],
         });
 
         const beacon: Beacon = {
@@ -432,6 +433,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
+            clientLibrary: ['Plug Javascript 1.0.0'],
         });
 
         const beacon: Beacon = {

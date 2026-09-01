@@ -2,6 +2,7 @@ import type {Logger} from '../logging';
 import {NullLogger} from '../logging';
 import {formatCause} from '../error';
 import type {CidAssigner} from './assigner';
+import {CLIENT_LIBRARY} from '../constants';
 
 export class RemoteAssigner implements CidAssigner {
     private readonly logger: Logger;
@@ -12,9 +13,9 @@ export class RemoteAssigner implements CidAssigner {
 
     private pending?: Promise<string>;
 
-    public constructor(endpoint: string, clientLibrary: string, logger?: Logger) {
+    public constructor(endpoint: string, clientLibrary: string[], logger?: Logger) {
         this.endpoint = endpoint;
-        this.clientLibrary = clientLibrary;
+        this.clientLibrary = [...clientLibrary, CLIENT_LIBRARY].join('; ');
         this.logger = logger ?? new NullLogger();
     }
 

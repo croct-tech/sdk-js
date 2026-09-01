@@ -2,7 +2,7 @@ import type {JsonObject, JsonPrimitive} from '@croct/json';
 import type {ContentDefinitionBundle} from '@croct/content-model/definition';
 import type {EvaluationContext} from './evaluator';
 import type {Token} from './token';
-import {BASE_ENDPOINT_URL} from './constants';
+import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from './constants';
 import {formatMessage} from './error';
 import type {ApiProblem} from './error';
 import type {Logger} from './logging';
@@ -118,7 +118,7 @@ export type Configuration = {
     logger?: Logger,
     defaultTimeout?: number,
     defaultPreferredLocale?: string,
-    clientLibrary: string,
+    clientLibrary: string[],
 };
 
 type InternalConfiguration = {
@@ -160,7 +160,7 @@ export class ContentFetcher {
                 : configuration.apiKey,
             defaultTimeout: configuration.defaultTimeout,
             defaultPreferredLocale: configuration.defaultPreferredLocale,
-            clientLibrary: configuration.clientLibrary,
+            clientLibrary: [...configuration.clientLibrary, CLIENT_LIBRARY].join('; '),
         };
     }
 

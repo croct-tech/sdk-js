@@ -1,4 +1,4 @@
-import {ObjectType, StringType, BooleanType, NumberType, FunctionType} from '../validation';
+import {ObjectType, StringType, BooleanType, NumberType, FunctionType, ArrayType} from '../validation';
 import {tokenScopeSchema} from './contextSchemas';
 import {loggerSchema} from './loggerSchema';
 
@@ -38,7 +38,7 @@ export const cookieOptionsSchema = new ObjectType({
 });
 
 export const sdkConfigurationSchema = new ObjectType({
-    required: ['appId', 'tokenScope', 'disableCidMirroring', 'debug', 'test'],
+    required: ['appId', 'tokenScope', 'disableCidMirroring', 'debug', 'test', 'clientLibrary'],
     properties: {
         appId: new StringType({
             format: 'uuid',
@@ -50,9 +50,11 @@ export const sdkConfigurationSchema = new ObjectType({
         baseEndpointUrl: new StringType({
             format: 'url',
         }),
-        clientLibrary: new StringType({
-            minLength: 1,
-            maxLength: 100,
+        clientLibrary: new ArrayType({
+            items: new StringType({
+                minLength: 1,
+                maxLength: 100,
+            }),
         }),
         cidAssignerEndpointUrl: new StringType({
             format: 'url',

@@ -86,6 +86,19 @@ describe('A SDK facade', () => {
         expect(initialize).toThrow('Invalid configuration:');
     });
 
+    it.each(Object.entries({
+        'empty string': [''],
+        'string exceeding max length': ['a'.repeat(101)],
+        'non-array value': 'Library' as unknown as string[],
+    }))('should validate the client libraries - %s', (_description, clientLibrary) => {
+        expect(
+            () => SdkFacade.init({
+                appId: appId,
+                clientLibrary: clientLibrary,
+            }),
+        ).toThrow('Invalid configuration:');
+    });
+
     it('should fail if both user ID and token are specified', () => {
         function initialize(): void {
             SdkFacade.init({
@@ -108,6 +121,7 @@ describe('A SDK facade', () => {
             {
                 appId: appId,
                 tokenScope: 'global',
+                clientLibrary: [],
                 disableCidMirroring: false,
                 debug: false,
                 test: false,
@@ -141,6 +155,7 @@ describe('A SDK facade', () => {
                 appId: appId,
                 baseEndpointUrl: 'https://api.croct.io',
                 cidAssignerEndpointUrl: 'https://api.croct.io/cid',
+                clientLibrary: [],
                 disableCidMirroring: false,
                 debug: false,
                 test: false,

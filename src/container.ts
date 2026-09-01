@@ -39,7 +39,7 @@ export type Configuration = {
     trackerEndpointUrl: string,
     evaluationBaseEndpointUrl: string,
     contentBaseEndpointUrl: string,
-    clientLibrary: string,
+    clientLibrary: string[],
     beaconQueueSize: number,
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,

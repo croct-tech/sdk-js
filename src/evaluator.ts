@@ -1,6 +1,6 @@
 import type {JsonObject, JsonValue} from '@croct/json';
 import type {Token} from './token';
-import {BASE_ENDPOINT_URL, MAX_QUERY_LENGTH} from './constants';
+import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, MAX_QUERY_LENGTH} from './constants';
 import {formatMessage} from './error';
 import type {ApiProblem} from './error';
 import type {Location} from './sourceLocation';
@@ -189,7 +189,7 @@ export type Configuration = {
     baseEndpointUrl?: string,
     logger?: Logger,
     defaultTimeout?: number,
-    clientLibrary: string,
+    clientLibrary: string[],
 };
 
 type InternalConfiguration = {
@@ -226,7 +226,7 @@ export class Evaluator {
                 ? ApiKey.from(configuration.apiKey).getIdentifier()
                 : configuration.apiKey,
             defaultTimeout: configuration.defaultTimeout,
-            clientLibrary: configuration.clientLibrary,
+            clientLibrary: [...configuration.clientLibrary, CLIENT_LIBRARY].join('; '),
         };
     }
 

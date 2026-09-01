@@ -6,17 +6,18 @@ jest.mock(
     '../../src/constants',
     () => ({
         ...jest.requireActual('../../src/constants'),
-        'X-Client-Library': 'Plug v1.0.0',
+        CLIENT_LIBRARY: 'SDK JS 1.0.0',
     }),
 );
 
 describe('A remote CID assigner', () => {
     const ENDPOINT = 'https://localhost:8080/endpoint';
-    const CLIENT_LIBRARY = 'Plug JavaScript 1.0.0; SDK JS 1.0.0';
 
     const requestMatcher: UserRouteConfig = {
         method: 'GET',
-        headers: {'X-Client-Library': CLIENT_LIBRARY},
+        headers: {
+            'X-Client-Library': 'Plug JavaScript 1.0.0; SDK JS 1.0.0',
+        },
         url: ENDPOINT,
         response: '123',
     };
@@ -31,29 +32,31 @@ describe('A remote CID assigner', () => {
     });
 
     it('should call a HTTP endpoint to assign a CID', async () => {
-        const cachedAssigner = new RemoteAssigner(ENDPOINT, CLIENT_LIBRARY);
+        const cachedAssigner = new RemoteAssigner(ENDPOINT, ['Plug JavaScript 1.0.0']);
 
         fetchMock.mockGlobal().route(requestMatcher);
 
         await expect(cachedAssigner.assignCid()).resolves.toEqual('123');
 
         expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
-            .toBe(CLIENT_LIBRARY);
+            .toBe('Plug JavaScript 1.0.0; SDK JS 1.0.0');
     });
 
     it('should use the configured client library', async () => {
-        const assigner = new RemoteAssigner(ENDPOINT, CLIENT_LIBRARY);
+        const assigner = new RemoteAssigner(ENDPOINT, ['Plug JavaScript 1.0.0']);
 
         fetchMock.mockGlobal().route({
             ...requestMatcher,
-            headers: {'X-Client-Library': CLIENT_LIBRARY},
+            headers: {
+                'X-Client-Library': 'Plug JavaScript 1.0.0; SDK JS 1.0.0',
+            },
         });
 
         await expect(assigner.assignCid()).resolves.toEqual('123');
     });
 
     it('should fail if a HTTP error occurs', async () => {
-        const cachedAssigner = new RemoteAssigner(ENDPOINT, CLIENT_LIBRARY);
+        const cachedAssigner = new RemoteAssigner(ENDPOINT, ['Plug JavaScript 1.0.0']);
 
         fetchMock.mockGlobal().route({
             ...requestMatcher,
@@ -64,7 +67,7 @@ describe('A remote CID assigner', () => {
     });
 
     it('should not assign CIDs concurrently', async () => {
-        const cachedAssigner = new RemoteAssigner(ENDPOINT, CLIENT_LIBRARY);
+        const cachedAssigner = new RemoteAssigner(ENDPOINT, ['Plug JavaScript 1.0.0']);
 
         let resolve: {(value: string): void} = jest.fn();
 
@@ -94,7 +97,7 @@ describe('A remote CID assigner', () => {
     });
 
     it('should pass the current CID to the endpoint', async () => {
-        const cachedAssigner = new RemoteAssigner(ENDPOINT, CLIENT_LIBRARY);
+        const cachedAssigner = new RemoteAssigner(ENDPOINT, ['Plug JavaScript 1.0.0']);
 
         fetchMock.mockGlobal().route({
             ...requestMatcher,

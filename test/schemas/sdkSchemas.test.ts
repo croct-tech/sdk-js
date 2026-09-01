@@ -571,9 +571,22 @@ describe('The SDK configuration schema', () => {
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
-            sdkConfigurationSchema.validate(value);
+            sdkConfigurationSchema.validate({clientLibrary: [], ...value});
         }
 
         expect(validate).toThrowWithMessage(Error, message);
+    });
+
+    it('should require the client library stack', () => {
+        const configuration = {
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            tokenScope: 'global',
+            disableCidMirroring: true,
+            debug: true,
+            test: true,
+        };
+
+        expect(() => sdkConfigurationSchema.validate(configuration))
+            .toThrowWithMessage(Error, "Missing property '/clientLibrary'.");
     });
 });

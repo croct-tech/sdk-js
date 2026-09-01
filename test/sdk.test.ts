@@ -41,7 +41,7 @@ describe('A SDK', () => {
         cookie: {},
         defaultFetchTimeout: 1000,
         defaultPreferredLocale: 'en-us',
-        clientLibrary: 'Plug Javascript 1.0.0',
+        clientLibrary: ['Plug Javascript 1.0.0'],
     };
 
     beforeEach(() => {
@@ -66,6 +66,15 @@ describe('A SDK', () => {
         expect(() => Sdk.init({} as Configuration)).toThrow('Invalid configuration');
     });
 
+    it.each([
+        ['an empty client library', ['']],
+        ['an oversized client library', ['a'.repeat(101)]],
+        ['a non-array client library', 'Library'],
+    ])('should reject %s', (_, clientLibrary) => {
+        expect(() => Sdk.init({...configuration, clientLibrary: clientLibrary} as Configuration))
+            .toThrow('Invalid configuration:');
+    });
+
     it('should be initialized with the specified app ID', () => {
         const sdk = Sdk.init(configuration);
 
@@ -75,9 +84,22 @@ describe('A SDK', () => {
     it('should append the integration library to the SDK library', async () => {
         const sdk = Sdk.init({
             ...configuration,
-            clientLibrary: 'Plug Javascript 1.0.0',
+            clientLibrary: ['First integration 1.0.0', 'Second integration 2.0.0'],
         });
 
+        fetchMock.mockGlobal().route('https://localtest/client/web/evaluate', JSON.stringify(true));
+
+        await sdk.evaluator.evaluate('true');
+
+        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
+            .toBe('First integration 1.0.0; Second integration 2.0.0; SDK JS 1.0.0');
+    });
+
+    it('should snapshot the client library stack on initialization', async () => {
+        const clientLibrary = ['Plug Javascript 1.0.0'];
+        const sdk = Sdk.init({...configuration, clientLibrary: clientLibrary});
+
+        clientLibrary.push('Late integration 1.0.0');
         fetchMock.mockGlobal().route('https://localtest/client/web/evaluate', JSON.stringify(true));
 
         await sdk.evaluator.evaluate('true');
@@ -273,6 +295,7 @@ describe('A SDK', () => {
             disableCidMirroring: false,
             debug: false,
             test: false,
+            clientLibrary: [],
         });
 
         await expect(sdk.cidAssigner.assignCid()).resolves.toEqual('123');
@@ -297,6 +320,7 @@ describe('A SDK', () => {
                 disableCidMirroring: false,
                 debug: false,
                 test: false,
+                clientLibrary: [],
             });
 
             await expect(sdk.cidAssigner.assignCid()).resolves.toEqual('123');

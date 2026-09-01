@@ -7,12 +7,13 @@ import type {CidAssigner} from '../cid';
 import {formatMessage} from '../error';
 import type {ApiProblem} from '../error';
 import {Help} from '../help';
+import {CLIENT_LIBRARY} from '../constants';
 
 export type Configuration = {
     appId: string,
     endpointUrl: string,
     cidAssigner: CidAssigner,
-    clientLibrary: string,
+    clientLibrary: string[],
     logger?: Logger,
 };
 
@@ -22,8 +23,12 @@ export enum TrackingErrorType {
     INTERNAL_ERROR = 'https://croct.help/api/event-tracking/internal-error',
 }
 
+type InternalConfiguration = Omit<Configuration, 'clientLibrary' | 'logger'> & {
+    clientLibrary: string,
+};
+
 export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string, string>> {
-    private readonly configuration: Omit<Configuration, 'logger'>;
+    private readonly configuration: InternalConfiguration;
 
     private readonly logger: Logger;
 
@@ -31,8 +36,11 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
 
     private closed = false;
 
-    public constructor({logger = new NullLogger(), ...configuration}: Configuration) {
-        this.configuration = configuration;
+    public constructor({clientLibrary, logger = new NullLogger(), ...configuration}: Configuration) {
+        this.configuration = {
+            ...configuration,
+            clientLibrary: [...clientLibrary, CLIENT_LIBRARY].join('; '),
+        };
         this.logger = logger;
     }
 

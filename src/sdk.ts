@@ -1,7 +1,7 @@
 import {Container} from './container';
 import type {Context, TokenScope} from './context';
 import type {Logger} from './logging';
-import {BASE_ENDPOINT_URL, CLIENT_LIBRARY, VERSION} from './constants';
+import {BASE_ENDPOINT_URL, VERSION} from './constants';
 import {sdkConfigurationSchema} from './schema';
 import {formatCause} from './error';
 import type {Tracker} from './tracker';
@@ -21,7 +21,7 @@ export type Configuration = {
     test: boolean,
     clientId?: string,
     baseEndpointUrl?: string,
-    clientLibrary?: string,
+    clientLibrary: string[],
     disableCidMirroring: boolean,
     cidAssignerEndpointUrl?: string,
     beaconQueueSize?: number,
@@ -64,7 +64,7 @@ export class Sdk {
         const {
             eventMetadata: customMetadata = {},
             baseEndpointUrl = BASE_ENDPOINT_URL,
-            clientLibrary: integrationLibrary,
+            clientLibrary: [...integrationLibrary],
             cidAssignerEndpointUrl,
             ...containerConfiguration
         } = configuration;
@@ -86,9 +86,7 @@ export class Sdk {
             trackerEndpointUrl: `${baseHttpEndpoint}/client/web/track`,
             cidAssignerEndpointUrl: cidAssignerEndpointUrl ?? `${baseHttpEndpoint}/client/web/cid`,
             beaconQueueSize: containerConfiguration.beaconQueueSize ?? 100,
-            clientLibrary: [integrationLibrary, CLIENT_LIBRARY]
-                .filter((library): library is string => library !== undefined)
-                .join('; '),
+            clientLibrary: integrationLibrary,
             eventMetadata: eventMetadata,
         });
 
