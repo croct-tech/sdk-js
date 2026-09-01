@@ -89,7 +89,7 @@ describe('An evaluator', () => {
         await expect(evaluator.evaluate(query)).resolves.toBe(result);
 
         expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
-            .toBe('Plug JS 1.0.0; SDK JS 1.0.0');
+            .toBe('Plug Javascript 1.0.0; SDK JS 1.0.0');
     });
 
     it.each<[string, string | ApiKey]>([

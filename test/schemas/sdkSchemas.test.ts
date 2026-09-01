@@ -204,6 +204,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
+            clientLibrary: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -211,6 +212,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
+            clientLibrary: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -219,6 +221,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
+            clientLibrary: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -227,6 +230,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
+            clientLibrary: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -235,6 +239,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
+            clientLibrary: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -243,6 +248,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
+            clientLibrary: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -251,6 +257,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
+            clientLibrary: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -262,6 +269,7 @@ describe('The SDK configuration schema', () => {
             tokenScope: 'isolated',
             baseEndpointUrl: 'https://api.croct.io',
             cidAssignerEndpointUrl: 'https://api.croct.io/cid',
+            clientLibrary: [],
             beaconQueueSize: 1,
             disableCidMirroring: true,
             debug: true,
