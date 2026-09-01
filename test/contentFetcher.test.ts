@@ -2,13 +2,24 @@ import type {CallLog, UserRouteConfig} from 'fetch-mock';
 import fetchMock from 'fetch-mock';
 import type {EvaluationContext} from '../src/evaluator';
 import {Token} from '../src/token';
-import type {FetchOptions, FetchResponse, InputErrorResponse} from '../src/contentFetcher';
-import {ContentFetcher, ContentError, ContentErrorType, InputError} from '../src/contentFetcher';
+import type {Configuration, FetchOptions, FetchResponse, InputErrorResponse} from '../src/contentFetcher';
+import {
+    ContentError,
+    ContentErrorType,
+    ContentFetcher as BaseContentFetcher,
+    InputError,
+} from '../src/contentFetcher';
 import type {ApiProblem} from '../src/error';
 import {BASE_ENDPOINT_URL} from '../src/constants';
 import {ApiKey} from '../src/apiKey';
 import type {Logger} from '../src/logging';
 import {Help} from '../src/help';
+
+class ContentFetcher extends BaseContentFetcher {
+    public constructor(configuration: Omit<Configuration, 'clientLibrary'> & {clientLibrary?: string}) {
+        super({clientLibrary: 'Plug JS 1.0.0; SDK JS 1.0.0', ...configuration});
+    }
+}
 
 jest.mock(
     '../src/constants',
@@ -68,11 +79,11 @@ describe('A content fetcher', () => {
     });
 
     it('should use the configured client library', async () => {
-        const fetcher = new ContentFetcher({appId: appId, clientLibrary: 'Croct React Plug v1.0.0'});
+        const fetcher = new ContentFetcher({appId: appId, clientLibrary: 'Plug Javascript 1.0.0; SDK JS 1.0.0'});
 
         fetchMock.mockGlobal().route({
             ...requestMatcher,
-            headers: {...requestMatcher.headers, 'X-Client-Library': 'Croct React Plug v1.0.0'},
+            headers: {...requestMatcher.headers, 'X-Client-Library': 'Plug Javascript 1.0.0; SDK JS 1.0.0'},
             response: result,
         });
 
@@ -80,16 +91,23 @@ describe('A content fetcher', () => {
     });
 
     it('should require either an application ID or API key, but not both', () => {
-        expect(() => new ContentFetcher({apiKey: apiKeyIdentifier, appId: appId}))
-            .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
+        expect(
+            () => new ContentFetcher({
+                apiKey: apiKeyIdentifier,
+                appId: appId,
+                clientLibrary: 'Plug Javascript 1.0.0; SDK JS 1.0.0',
+            }),
+        ).toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
     it('should use the specified base endpoint', async () => {
         const customEndpoint = 'https://custom.endpoint.com';
+        const clientLibrary = 'Plug JS 1.0.0; SDK JS 1.0.0';
 
         const fetcher = new ContentFetcher({
             appId: appId,
             baseEndpointUrl: customEndpoint,
+            clientLibrary: clientLibrary,
         });
 
         fetchMock.mockGlobal().route({
@@ -100,7 +118,8 @@ describe('A content fetcher', () => {
 
         await expect(fetcher.fetch(slotId)).resolves.toEqual(result);
 
-        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).has('X-Client-Library')).toBe(false);
+        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
+            .toBe(clientLibrary);
     });
 
     it.each<[string, string | ApiKey]>([
@@ -110,6 +129,7 @@ describe('A content fetcher', () => {
     ])('should use the external endpoint for static content passing %s', async (_, value) => {
         const fetcher = new ContentFetcher({
             apiKey: value,
+            clientLibrary: 'Plug JS 1.0.0; SDK JS 1.0.0',
         });
 
         const options: FetchOptions = {

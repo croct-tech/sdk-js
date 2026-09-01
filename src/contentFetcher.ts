@@ -118,7 +118,7 @@ export type Configuration = {
     logger?: Logger,
     defaultTimeout?: number,
     defaultPreferredLocale?: string,
-    clientLibrary?: string,
+    clientLibrary: string,
 };
 
 type InternalConfiguration = {
@@ -126,7 +126,7 @@ type InternalConfiguration = {
     apiKey?: string,
     defaultTimeout?: number,
     defaultPreferredLocale?: string,
-    clientLibrary?: string,
+    clientLibrary: string,
 };
 
 export class ContentFetcher {
@@ -259,11 +259,8 @@ export class ContentFetcher {
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
+            'X-Client-Library': clientLibrary,
         };
-
-        if (clientLibrary !== undefined) {
-            headers['X-Client-Library'] = clientLibrary;
-        }
 
         if (appId !== undefined) {
             headers['X-App-Id'] = appId;

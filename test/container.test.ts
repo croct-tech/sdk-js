@@ -40,6 +40,7 @@ describe('A container', () => {
         trackerEndpointUrl: 'https://localtest/track',
         defaultFetchTimeout: 5000,
         defaultPreferredLocale: 'en-us',
+        clientLibrary: 'Plug Javascript 1.0.0; SDK JS 1.0.0',
     };
 
     it('should provide its configuration', () => {
@@ -57,10 +58,10 @@ describe('A container', () => {
     it('should use the configured client library for every request', async () => {
         const container = new Container({
             ...configuration,
-            clientLibrary: 'Croct SDK JS v1.0.0; Croct React SDK v1.0.0',
+            clientLibrary: 'Plug Javascript 1.0.0; SDK JS 1.0.0',
             logger: new NullLogger(),
         });
-        const clientLibrary = 'Croct SDK JS v1.0.0; Croct React SDK v1.0.0';
+        const clientLibrary = 'Plug Javascript 1.0.0; SDK JS 1.0.0';
 
         fetchMock.mockGlobal()
             .route('https://localtest/cid', '00000000-0000-0000-0000-000000000001')

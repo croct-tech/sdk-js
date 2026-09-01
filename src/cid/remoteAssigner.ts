@@ -8,14 +8,14 @@ export class RemoteAssigner implements CidAssigner {
 
     private readonly endpoint: string;
 
-    private readonly clientLibrary?: string;
+    private readonly clientLibrary: string;
 
     private pending?: Promise<string>;
 
-    public constructor(endpoint: string, logger?: Logger, clientLibrary?: string) {
+    public constructor(endpoint: string, clientLibrary: string, logger?: Logger) {
         this.endpoint = endpoint;
-        this.logger = logger ?? new NullLogger();
         this.clientLibrary = clientLibrary;
+        this.logger = logger ?? new NullLogger();
     }
 
     public assignCid(currentCid?: string): Promise<string> {
@@ -33,7 +33,7 @@ export class RemoteAssigner implements CidAssigner {
             method: 'GET',
             credentials: 'include',
             headers: {
-                ...(this.clientLibrary !== undefined ? {'X-Client-Library': this.clientLibrary} : {}),
+                'X-Client-Library': this.clientLibrary,
             },
         };
 

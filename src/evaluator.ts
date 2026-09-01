@@ -189,14 +189,14 @@ export type Configuration = {
     baseEndpointUrl?: string,
     logger?: Logger,
     defaultTimeout?: number,
-    clientLibrary?: string,
+    clientLibrary: string,
 };
 
 type InternalConfiguration = {
     appId?: string,
     apiKey?: string,
     defaultTimeout?: number,
-    clientLibrary?: string,
+    clientLibrary: string,
 };
 
 export class Evaluator {
@@ -359,11 +359,8 @@ export class Evaluator {
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
+            'X-Client-Library': this.configuration.clientLibrary,
         };
-
-        if (this.configuration.clientLibrary !== undefined) {
-            headers['X-Client-Library'] = this.configuration.clientLibrary;
-        }
 
         if (apiKey !== undefined) {
             headers['X-Api-Key'] = apiKey;

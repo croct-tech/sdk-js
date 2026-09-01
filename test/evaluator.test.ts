@@ -1,13 +1,25 @@
 import type {CallLog, UserRouteConfig} from 'fetch-mock';
 import fetchMock from 'fetch-mock';
-import type {EvaluationOptions, QueryErrorResponse} from '../src/evaluator';
-import {EvaluationContext, EvaluationError, EvaluationErrorType, Evaluator, QueryError} from '../src/evaluator';
+import type {Configuration, EvaluationOptions, QueryErrorResponse} from '../src/evaluator';
+import {
+    EvaluationContext,
+    EvaluationError,
+    EvaluationErrorType,
+    Evaluator as BaseEvaluator,
+    QueryError,
+} from '../src/evaluator';
 import type {ApiProblem} from '../src/error';
 import {Token} from '../src/token';
 import {BASE_ENDPOINT_URL} from '../src/constants';
 import {ApiKey} from '../src/apiKey';
 import type {Logger} from '../src/logging';
 import {Help} from '../src/help';
+
+class Evaluator extends BaseEvaluator {
+    public constructor(configuration: Omit<Configuration, 'clientLibrary'> & {clientLibrary?: string}) {
+        super({clientLibrary: 'Plug JS 1.0.0; SDK JS 1.0.0', ...configuration});
+    }
+}
 
 jest.mock(
     '../src/constants',
@@ -64,10 +76,12 @@ describe('An evaluator', () => {
 
     it('should use the specified base endpoint', async () => {
         const customEndpoint = 'https://custom.example.com';
+        const clientLibrary = 'Plug JS 1.0.0; SDK JS 1.0.0';
 
         const evaluator = new Evaluator({
             appId: appId,
             baseEndpointUrl: customEndpoint,
+            clientLibrary: clientLibrary,
         });
 
         const result = 'Anonymous';
@@ -80,7 +94,8 @@ describe('An evaluator', () => {
 
         await expect(evaluator.evaluate(query)).resolves.toBe(result);
 
-        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).has('X-Client-Library')).toBe(false);
+        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
+            .toBe(clientLibrary);
     });
 
     it.each<[string, string | ApiKey]>([
@@ -110,6 +125,7 @@ describe('An evaluator', () => {
     it('should evaluate queries without token when not provided', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            clientLibrary: 'Plug JS 1.0.0; SDK JS 1.0.0',
         });
 
         const result = 'Anonymous';
@@ -123,11 +139,14 @@ describe('An evaluator', () => {
     });
 
     it('should use the configured client library', async () => {
-        const evaluator = new Evaluator({appId: appId, clientLibrary: 'Croct React SDK v1.0.0'});
+        const evaluator = new Evaluator({
+            appId: appId,
+            clientLibrary: 'Plug JS 1.0.0; SDK JS 1.0.0',
+        });
 
         fetchMock.mockGlobal().route({
             ...requestMatcher,
-            headers: {...requestMatcher.headers, 'X-Client-Library': 'Croct React SDK v1.0.0'},
+            headers: {...requestMatcher.headers, 'X-Client-Library': 'Plug JS 1.0.0; SDK JS 1.0.0'},
             response: JSON.stringify('Anonymous'),
         });
 
@@ -139,6 +158,7 @@ describe('An evaluator', () => {
 
         const evaluator = new Evaluator({
             appId: appId,
+            clientLibrary: 'Plug JS 1.0.0; SDK JS 1.0.0',
         });
 
         const result = 'Carol';

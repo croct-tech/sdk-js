@@ -19,7 +19,7 @@ jest.mock(
     () => ({
         VERSION: '0.0.1-test',
         BASE_ENDPOINT_URL: 'https://api.croct.io',
-        CLIENT_LIBRARY: 'Croct SDK JS v0.0.1-test',
+        CLIENT_LIBRARY: 'SDK JS 1.0.0',
     }),
 );
 
@@ -41,6 +41,7 @@ describe('A SDK', () => {
         cookie: {},
         defaultFetchTimeout: 1000,
         defaultPreferredLocale: 'en-us',
+        clientLibrary: 'Plug Javascript 1.0.0',
     };
 
     beforeEach(() => {
@@ -74,7 +75,7 @@ describe('A SDK', () => {
     it('should append the integration library to the SDK library', async () => {
         const sdk = Sdk.init({
             ...configuration,
-            clientLibrary: 'Croct React SDK v1.0.0',
+            clientLibrary: 'Plug Javascript 1.0.0',
         });
 
         fetchMock.mockGlobal().route('https://localtest/client/web/evaluate', JSON.stringify(true));
@@ -82,7 +83,7 @@ describe('A SDK', () => {
         await sdk.evaluator.evaluate('true');
 
         expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
-            .toBe('Croct React SDK v1.0.0; Croct SDK JS v0.0.1-test');
+            .toBe('Plug Javascript 1.0.0; SDK JS 1.0.0');
     });
 
     it('should be initialized with the specified logger', () => {

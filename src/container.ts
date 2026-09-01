@@ -39,7 +39,7 @@ export type Configuration = {
     trackerEndpointUrl: string,
     evaluationBaseEndpointUrl: string,
     contentBaseEndpointUrl: string,
-    clientLibrary?: string,
+    clientLibrary: string,
     beaconQueueSize: number,
     logger?: Logger,
     urlSanitizer?: UrlSanitizer,
@@ -57,8 +57,6 @@ export class Container {
     public static readonly DEFAULT_FETCH_TIMEOUT = 5_000; // 5 seconds
 
     private readonly configuration: Configuration;
-
-    private readonly clientLibrary?: string;
 
     private context?: Context;
 
@@ -86,7 +84,6 @@ export class Container {
 
     public constructor(configuration: Configuration) {
         this.configuration = configuration;
-        this.clientLibrary = configuration.clientLibrary;
     }
 
     public getConfiguration(): Configuration {
@@ -115,7 +112,7 @@ export class Container {
             baseEndpointUrl: this.configuration.evaluationBaseEndpointUrl,
             logger: this.getLogger('Evaluator'),
             defaultTimeout: this.configuration.defaultFetchTimeout ?? Container.DEFAULT_FETCH_TIMEOUT,
-            clientLibrary: this.clientLibrary,
+            clientLibrary: this.configuration.clientLibrary,
         });
     }
 
@@ -134,7 +131,7 @@ export class Container {
             logger: this.getLogger('ContentFetcher'),
             defaultTimeout: this.configuration.defaultFetchTimeout ?? Container.DEFAULT_FETCH_TIMEOUT,
             defaultPreferredLocale: this.configuration.defaultPreferredLocale,
-            clientLibrary: this.clientLibrary,
+            clientLibrary: this.configuration.clientLibrary,
         });
     }
 
@@ -250,7 +247,7 @@ export class Container {
                         appId: appId,
                         endpointUrl: trackerEndpointUrl,
                         cidAssigner: this.getCidAssigner(),
-                        clientLibrary: this.clientLibrary,
+                        clientLibrary: this.configuration.clientLibrary,
                         logger: channelLogger,
                     }),
                     stamper: new TimeStamper(),
@@ -296,7 +293,7 @@ export class Container {
         const logger = this.getLogger('CidAssigner');
 
         return new CachedAssigner(
-            new RemoteAssigner(this.configuration.cidAssignerEndpointUrl, logger, this.clientLibrary),
+            new RemoteAssigner(this.configuration.cidAssignerEndpointUrl, this.configuration.clientLibrary, logger),
             this.configuration.cookie?.clientId !== undefined
                 ? new CookieCache(this.configuration.cookie?.clientId)
                 : new LocalStorageCache(this.getLocalStorage(), 'croct.cid'),

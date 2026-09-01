@@ -12,7 +12,7 @@ export type Configuration = {
     appId: string,
     endpointUrl: string,
     cidAssigner: CidAssigner,
-    clientLibrary?: string,
+    clientLibrary: string,
     logger?: Logger,
 };
 
@@ -49,11 +49,8 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
             headers: {
                 'X-App-Id': appId,
                 'X-Client-Id': await cidAssigner.assignCid(),
+                'X-Client-Library': this.configuration.clientLibrary,
                 'Content-Type': 'application/json',
-                ...(this.configuration.clientLibrary !== undefined
-                    ? {'X-Client-Library': this.configuration.clientLibrary}
-                    : {}
-                ),
                 ...(token !== undefined ? {'X-Token': token} : {}),
             },
             body: JSON.stringify({
