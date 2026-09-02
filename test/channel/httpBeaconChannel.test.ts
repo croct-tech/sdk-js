@@ -4,8 +4,8 @@ import type {Logger} from '../../src/logging';
 import {FixedAssigner} from '../../src/cid';
 import type {Beacon} from '../../src/trackingEvents';
 import {Token} from '../../src/token';
-import {CLIENT_LIBRARY} from '../../src/constants';
 import {Help} from '../../src/help';
+import {CLIENT_LIBRARY} from '../../src/constants';
 
 describe('An HTTP beacon channel', () => {
     beforeEach(() => {
@@ -24,6 +24,8 @@ describe('An HTTP beacon channel', () => {
     const clientId = '00000000-0000-0000-0000-000000000001';
     const tabId = '00000000-0000-0000-0000-000000000002';
     const cidAssigner = new FixedAssigner(clientId);
+    const libraryStack = ['Plug Javascript v1.0.0'];
+    const formattedLibraryStack = `Plug Javascript v1.0.0; ${CLIENT_LIBRARY}`;
 
     const logger: Logger = {
         debug: jest.fn(),
@@ -41,6 +43,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
+            libraryStack: libraryStack,
         });
 
         jest.useFakeTimers({now: 2});
@@ -92,7 +95,7 @@ describe('An HTTP beacon channel', () => {
             'X-Client-Id': clientId,
             'X-Token': token,
             'X-App-Id': appId,
-            'X-Client-Library': CLIENT_LIBRARY,
+            'X-Client-Library': formattedLibraryStack,
             'Content-Type': 'application/json',
         });
 
@@ -103,6 +106,26 @@ describe('An HTTP beacon channel', () => {
         });
     });
 
+    it('should use the configured client library', async () => {
+        fetchMock.mockGlobal().route(endpointUrl, 200);
+
+        const channel = new HttpBeaconChannel({
+            appId: appId,
+            endpointUrl: endpointUrl,
+            cidAssigner: cidAssigner,
+            libraryStack: libraryStack,
+        });
+
+        await channel.publish({
+            id: 'receipt-id',
+            message: JSON.stringify({context: {}, payload: {}, timestamp: 1}),
+        });
+
+        expect(fetchMock.callHistory.calls()[0].options.headers).toMatchObject({
+            'x-client-library': formattedLibraryStack,
+        });
+    });
+
     it('should not send the token header if the token is not provided', async () => {
         fetchMock.mockGlobal().route(endpointUrl, 200);
 
@@ -110,6 +133,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
+            libraryStack: libraryStack,
         });
 
         jest.useFakeTimers({now: 2});
@@ -157,6 +181,7 @@ describe('An HTTP beacon channel', () => {
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
             logger: logger,
+            libraryStack: libraryStack,
         });
 
         const listener = jest.fn();
@@ -239,6 +264,7 @@ describe('An HTTP beacon channel', () => {
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
             logger: logger,
+            libraryStack: libraryStack,
         });
 
         const listener = jest.fn();
@@ -291,6 +317,7 @@ describe('An HTTP beacon channel', () => {
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
             logger: logger,
+            libraryStack: libraryStack,
         });
 
         const listener = jest.fn();
@@ -331,6 +358,7 @@ describe('An HTTP beacon channel', () => {
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
             logger: logger,
+            libraryStack: libraryStack,
         });
 
         const listener = jest.fn();
@@ -371,6 +399,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
+            libraryStack: libraryStack,
         });
 
         const beacon: Beacon = {
@@ -406,6 +435,7 @@ describe('An HTTP beacon channel', () => {
             appId: appId,
             endpointUrl: endpointUrl,
             cidAssigner: cidAssigner,
+            libraryStack: libraryStack,
         });
 
         const beacon: Beacon = {

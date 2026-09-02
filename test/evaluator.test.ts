@@ -4,7 +4,7 @@ import type {EvaluationOptions, QueryErrorResponse} from '../src/evaluator';
 import {EvaluationContext, EvaluationError, EvaluationErrorType, Evaluator, QueryError} from '../src/evaluator';
 import type {ApiProblem} from '../src/error';
 import {Token} from '../src/token';
-import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
+import {BASE_ENDPOINT_URL} from '../src/constants';
 import {ApiKey} from '../src/apiKey';
 import type {Logger} from '../src/logging';
 import {Help} from '../src/help';
@@ -15,7 +15,7 @@ jest.mock(
         ...jest.requireActual('../src/constants'),
         MAX_QUERY_LENGTH: 30,
         BASE_ENDPOINT_URL: 'https://evaluation.example.com',
-        ClIENT_LIBRARY: 'Plug v1.0.0',
+        CLIENT_LIBRARY: 'SDK JS v1.0.0',
     }),
 );
 
@@ -28,6 +28,8 @@ describe('An evaluator', () => {
     );
     const apiKeyIdentifier = apiKey.getIdentifier();
     const plainTextApiKey = `${apiKey.getIdentifier()}:${apiKey.getPrivateKey()}`;
+    const libraryStack = ['Plug Javascript v1.0.0'];
+    const formattedLibraryStack = 'Plug Javascript v1.0.0; SDK JS v1.0.0';
 
     const query = 'user\'s name';
     const requestMatcher: UserRouteConfig = {
@@ -35,7 +37,6 @@ describe('An evaluator', () => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Client-Library': CLIENT_LIBRARY,
         },
         body: {
             query: query,
@@ -54,21 +55,29 @@ describe('An evaluator', () => {
     });
 
     it('should require either an application ID or API key', () => {
-        expect(() => new Evaluator({}))
-            .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
+        expect(
+            () => new Evaluator({
+                libraryStack: libraryStack,
+            }),
+        ).toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
     it('should require either an application ID or API key, but not both', () => {
-        expect(() => new Evaluator({apiKey: apiKeyIdentifier, appId: appId}))
-            .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
+        expect(
+            () => new Evaluator({
+                apiKey: apiKeyIdentifier,
+                appId: appId,
+                libraryStack: libraryStack,
+            }),
+        ).toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
     it('should use the specified base endpoint', async () => {
         const customEndpoint = 'https://custom.example.com';
-
         const evaluator = new Evaluator({
             appId: appId,
             baseEndpointUrl: customEndpoint,
+            libraryStack: libraryStack,
         });
 
         const result = 'Anonymous';
@@ -80,6 +89,9 @@ describe('An evaluator', () => {
         });
 
         await expect(evaluator.evaluate(query)).resolves.toBe(result);
+
+        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
+            .toBe(formattedLibraryStack);
     });
 
     it.each<[string, string | ApiKey]>([
@@ -89,6 +101,7 @@ describe('An evaluator', () => {
     ])('should use the external endpoint for static content passing %s', async (_, value) => {
         const evaluator = new Evaluator({
             apiKey: value,
+            libraryStack: libraryStack,
         });
 
         const result = 'Anonymous';
@@ -109,6 +122,7 @@ describe('An evaluator', () => {
     it('should evaluate queries without token when not provided', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const result = 'Anonymous';
@@ -126,6 +140,7 @@ describe('An evaluator', () => {
 
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const result = 'Carol';
@@ -149,6 +164,7 @@ describe('An evaluator', () => {
     it('should evaluate queries using the provided client ID', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const clientId = 'c3b5b9f0-5f9a-4b3c-8c9c-8b5c8b5c8b5c';
@@ -174,6 +190,7 @@ describe('An evaluator', () => {
     it('should evaluate queries using the provided client IP', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const clientIp = '192.168.0.1';
@@ -199,6 +216,7 @@ describe('An evaluator', () => {
     it('should evaluate queries using the provided user agent', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
@@ -224,6 +242,7 @@ describe('An evaluator', () => {
     it('should fetch using the extra options', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const result = 'Carol';
@@ -275,6 +294,7 @@ describe('An evaluator', () => {
             logger: logger,
             // Ensure the specified timeout has precedence over the default timeout
             defaultTimeout: 15,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -313,6 +333,7 @@ describe('An evaluator', () => {
         const evaluator = new Evaluator({
             appId: appId,
             defaultTimeout: 10,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -347,6 +368,7 @@ describe('An evaluator', () => {
         const evaluator = new Evaluator({
             appId: appId,
             logger: logger,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -364,6 +386,7 @@ describe('An evaluator', () => {
     it('should reject with a suspended service error when the response status is 204', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -388,6 +411,7 @@ describe('An evaluator', () => {
     it('should evaluate queries using the provided context', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const context: Required<EvaluationContext> = {
@@ -428,6 +452,7 @@ describe('An evaluator', () => {
     it('should report errors if the evaluation fails', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const response: ApiProblem = {
@@ -457,6 +482,7 @@ describe('An evaluator', () => {
         async (errorType: EvaluationErrorType) => {
             const evaluator = new Evaluator({
                 appId: appId,
+                libraryStack: libraryStack,
             });
 
             const response: QueryErrorResponse = {
@@ -498,6 +524,7 @@ describe('An evaluator', () => {
     it('should report an query error if the query exceeds the maximum allowed length', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const length = Evaluator.MAX_QUERY_LENGTH + 1;
@@ -533,6 +560,7 @@ describe('An evaluator', () => {
     it('should catch deserialization errors', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const response: ApiProblem = {
@@ -559,6 +587,7 @@ describe('An evaluator', () => {
     it('should catch unexpected error responses', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const response: ApiProblem = {
@@ -584,6 +613,7 @@ describe('An evaluator', () => {
     it('should report unexpected errors when the cause of the evaluation failure is unknown', async () => {
         const evaluator = new Evaluator({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const response: ApiProblem = {
@@ -639,6 +669,7 @@ describe('An evaluator', () => {
         const evaluator = new Evaluator({
             appId: appId,
             logger: logger,
+            libraryStack: libraryStack,
         });
 
         const response: ApiProblem = {
@@ -677,6 +708,7 @@ describe('An evaluator', () => {
         const evaluator = new Evaluator({
             appId: appId,
             logger: logger,
+            libraryStack: libraryStack,
         });
 
         const result = true;
@@ -704,7 +736,10 @@ describe('An evaluator', () => {
 
     it('should not be serializable', () => {
         expect(() => {
-            new Evaluator({appId: appId}).toJSON();
+            new Evaluator({
+                appId: appId,
+                libraryStack: libraryStack,
+            }).toJSON();
         }).toThrowWithMessage(Error, 'Unserializable value.');
     });
 });

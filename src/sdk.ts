@@ -21,6 +21,7 @@ export type Configuration = {
     test: boolean,
     clientId?: string,
     baseEndpointUrl?: string,
+    libraryStack: string[],
     disableCidMirroring: boolean,
     cidAssignerEndpointUrl?: string,
     beaconQueueSize?: number,

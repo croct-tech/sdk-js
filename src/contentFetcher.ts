@@ -118,6 +118,7 @@ export type Configuration = {
     logger?: Logger,
     defaultTimeout?: number,
     defaultPreferredLocale?: string,
+    libraryStack: string[],
 };
 
 type InternalConfiguration = {
@@ -125,6 +126,7 @@ type InternalConfiguration = {
     apiKey?: string,
     defaultTimeout?: number,
     defaultPreferredLocale?: string,
+    libraryStack: string,
 };
 
 export class ContentFetcher {
@@ -158,6 +160,7 @@ export class ContentFetcher {
                 : configuration.apiKey,
             defaultTimeout: configuration.defaultTimeout,
             defaultPreferredLocale: configuration.defaultPreferredLocale,
+            libraryStack: [...configuration.libraryStack, CLIENT_LIBRARY].join('; '),
         };
     }
 
@@ -252,13 +255,12 @@ export class ContentFetcher {
     }
 
     private load(slotId: string, signal: AbortSignal, options: FetchOptions): Promise<Response> {
-        const {apiKey, appId} = this.configuration;
+        const {apiKey, appId, libraryStack} = this.configuration;
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
+            'X-Client-Library': libraryStack,
         };
-
-        headers['X-Client-Library'] = CLIENT_LIBRARY;
 
         if (appId !== undefined) {
             headers['X-App-Id'] = appId;

@@ -6,6 +6,7 @@ import {NullLogger} from '../src/logging';
 import type {BeaconPayload, PartialTrackingEvent} from '../src/trackingEvents';
 import {LocalStorageCache} from '../src/cache';
 import {Token} from '../src/token';
+import {CLIENT_LIBRARY} from '../src/constants';
 
 describe('A container', () => {
     beforeEach(() => {
@@ -40,6 +41,7 @@ describe('A container', () => {
         trackerEndpointUrl: 'https://localtest/track',
         defaultFetchTimeout: 5000,
         defaultPreferredLocale: 'en-us',
+        libraryStack: ['Plug Javascript v1.0.0'],
     };
 
     it('should provide its configuration', () => {
@@ -52,6 +54,37 @@ describe('A container', () => {
         const container = new Container(fullConfiguration);
 
         expect(container.getConfiguration()).toEqual(fullConfiguration);
+    });
+
+    it('should use the configured client library for every request', async () => {
+        const container = new Container({
+            ...configuration,
+            logger: new NullLogger(),
+        });
+        const formattedLibraryStack = `Plug Javascript v1.0.0; ${CLIENT_LIBRARY}`;
+
+        fetchMock.mockGlobal()
+            .route('https://localtest/cid', '00000000-0000-0000-0000-000000000001')
+            .route('https://localtest/evaluate/client/web/evaluate', 'true')
+            .route('https://localtest/content/client/web/content', {
+                metadata: {version: '1.0', contentSource: 'slot'},
+                content: {},
+            })
+            .route('https://localtest/track', 200);
+
+        await container.getCidAssigner().assignCid();
+        await container.getEvaluator().evaluate('true');
+        await container.getContentFetcher().fetch('slot');
+        await container.getTracker().track({type: 'nothingChanged', sinceTime: 0});
+
+        const calls = fetchMock.callHistory.calls();
+
+        expect(calls).toHaveLength(4);
+
+        expect(new Headers(calls[0].options.headers).get('X-Client-Library')).toBe(formattedLibraryStack);
+        expect(new Headers(calls[1].options.headers).get('X-Client-Library')).toBe(formattedLibraryStack);
+        expect(new Headers(calls[2].options.headers).get('X-Client-Library')).toBe(formattedLibraryStack);
+        expect(new Headers(calls[3].options.headers).get('X-Client-Library')).toBe(formattedLibraryStack);
     });
 
     it('should resolve the timezone lazily from the Intl API', () => {

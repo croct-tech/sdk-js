@@ -6,6 +6,7 @@ import {
     NullType,
     FunctionType,
     NumberType,
+    ArrayType,
 } from '../validation';
 import {tokenScopeSchema} from './contextSchemas';
 import {cookieOptionsSchema, eventMetadataSchema} from './sdkSchemas';
@@ -42,6 +43,13 @@ export const sdkFacadeConfigurationSchema = new ObjectType({
         ),
         baseEndpointUrl: new StringType({
             format: 'url',
+        }),
+        libraryStack: new ArrayType({
+            items: new StringType({
+                minLength: 1,
+                maxLength: 50,
+            }),
+            maxItems: 10,
         }),
         cidAssignerEndpointUrl: new StringType({
             format: 'url',

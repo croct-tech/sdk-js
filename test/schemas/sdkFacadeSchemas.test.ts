@@ -48,6 +48,14 @@ describe('The SDK facade configuration schema', () => {
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            libraryStack: [],
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            libraryStack: Array.from({length: 10}, (_, i) => `lib${i}`),
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             baseEndpointUrl: 'https://api.croct.io/',
             cidAssignerEndpointUrl: 'https://api.croct.io/cid',
             tokenScope: 'isolated',
@@ -266,6 +274,41 @@ describe('The SDK facade configuration schema', () => {
                 defaultFetchTimeout: 0,
             },
             'Expected a value greater than or equal to 1 at path \'/defaultFetchTimeout\', actual 0.',
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                libraryStack: 'foo',
+            },
+            "Expected value of type array at path '/libraryStack', actual string.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                libraryStack: [1],
+            },
+            "Expected value of type string at path '/libraryStack/0', actual integer.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                libraryStack: [''],
+            },
+            "Expected at least 1 character at path '/libraryStack/0', actual 0.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                libraryStack: ['x'.repeat(51)],
+            },
+            "Expected at most 50 characters at path '/libraryStack/0', actual 51.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                libraryStack: new Array(11).fill('foo'),
+            },
+            "Expected at most 10 items at path '/libraryStack', actual 11.",
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {

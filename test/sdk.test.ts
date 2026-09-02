@@ -19,6 +19,7 @@ jest.mock(
     () => ({
         VERSION: '0.0.1-test',
         BASE_ENDPOINT_URL: 'https://api.croct.io',
+        CLIENT_LIBRARY: 'SDK JS v1.0.0',
     }),
 );
 
@@ -40,6 +41,7 @@ describe('A SDK', () => {
         cookie: {},
         defaultFetchTimeout: 1000,
         defaultPreferredLocale: 'en-us',
+        libraryStack: ['Plug Javascript v1.0.0'],
     };
 
     beforeEach(() => {
@@ -64,10 +66,31 @@ describe('A SDK', () => {
         expect(() => Sdk.init({} as Configuration)).toThrow('Invalid configuration');
     });
 
+    it.each(Object.entries({
+        'an empty client library': [''],
+        'an oversized client library': ['a'.repeat(51)],
+        'a non-array client library': 'Library',
+        'array exceeding max length': new Array(11).fill(''),
+    }))('should reject %s', (_, libraryStack) => {
+        expect(() => Sdk.init({...configuration, libraryStack: libraryStack} as Configuration))
+            .toThrow('Invalid configuration:');
+    });
+
     it('should be initialized with the specified app ID', () => {
         const sdk = Sdk.init(configuration);
 
         expect(sdk.appId).toEqual(configuration.appId);
+    });
+
+    it('should append the integration library to the SDK library', async () => {
+        const sdk = Sdk.init(configuration);
+
+        fetchMock.mockGlobal().route('https://localtest/client/web/evaluate', JSON.stringify(true));
+
+        await sdk.evaluator.evaluate('true');
+
+        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
+            .toBe('Plug Javascript v1.0.0; SDK JS v1.0.0');
     });
 
     it('should be initialized with the specified logger', () => {
@@ -257,6 +280,7 @@ describe('A SDK', () => {
             disableCidMirroring: false,
             debug: false,
             test: false,
+            libraryStack: configuration.libraryStack,
         });
 
         await expect(sdk.cidAssigner.assignCid()).resolves.toEqual('123');
@@ -281,6 +305,7 @@ describe('A SDK', () => {
                 disableCidMirroring: false,
                 debug: false,
                 test: false,
+                libraryStack: configuration.libraryStack,
             });
 
             await expect(sdk.cidAssigner.assignCid()).resolves.toEqual('123');

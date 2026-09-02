@@ -9,10 +9,13 @@ export class RemoteAssigner implements CidAssigner {
 
     private readonly endpoint: string;
 
+    private readonly libraryStack: string;
+
     private pending?: Promise<string>;
 
-    public constructor(endpoint: string, logger?: Logger) {
+    public constructor(endpoint: string, libraryStack: string[], logger?: Logger) {
         this.endpoint = endpoint;
+        this.libraryStack = [...libraryStack, CLIENT_LIBRARY].join('; ');
         this.logger = logger ?? new NullLogger();
     }
 
@@ -31,7 +34,7 @@ export class RemoteAssigner implements CidAssigner {
             method: 'GET',
             credentials: 'include',
             headers: {
-                'X-Client-Library': CLIENT_LIBRARY,
+                'X-Client-Library': this.libraryStack,
             },
         };
 

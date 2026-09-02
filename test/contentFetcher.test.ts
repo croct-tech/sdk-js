@@ -5,7 +5,7 @@ import {Token} from '../src/token';
 import type {FetchOptions, FetchResponse, InputErrorResponse} from '../src/contentFetcher';
 import {ContentFetcher, ContentError, ContentErrorType, InputError} from '../src/contentFetcher';
 import type {ApiProblem} from '../src/error';
-import {BASE_ENDPOINT_URL, CLIENT_LIBRARY} from '../src/constants';
+import {BASE_ENDPOINT_URL} from '../src/constants';
 import {ApiKey} from '../src/apiKey';
 import type {Logger} from '../src/logging';
 import {Help} from '../src/help';
@@ -15,7 +15,7 @@ jest.mock(
     () => ({
         ...jest.requireActual('../src/constants'),
         BASE_ENDPOINT_URL: 'https://croct.io',
-        'X-Client-Library': 'Plug v1.0.0',
+        CLIENT_LIBRARY: 'SDK JS v1.0.0',
     }),
 );
 
@@ -28,6 +28,8 @@ describe('A content fetcher', () => {
     );
     const apiKeyIdentifier = apiKey.getIdentifier();
     const plainTextApiKey = `${apiKey.getIdentifier()}:${apiKey.getPrivateKey()}`;
+    const libraryStack = ['Plug Javascript v1.0.0'];
+    const formattedLibraryStack = 'Plug Javascript v1.0.0; SDK JS v1.0.0';
 
     const slotId = 'hero-banner';
     const result: FetchResponse = {
@@ -45,7 +47,6 @@ describe('A content fetcher', () => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Client-Library': CLIENT_LIBRARY,
         },
         body: {
             slotId: slotId,
@@ -64,13 +65,36 @@ describe('A content fetcher', () => {
     });
 
     it('should require either an application ID or API key', () => {
-        expect(() => new ContentFetcher({}))
-            .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
+        expect(
+            () => new ContentFetcher({
+                libraryStack: libraryStack,
+            }),
+        ).toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
+    });
+
+    it('should use the configured client library', async () => {
+        const fetcher = new ContentFetcher({appId: appId, libraryStack: libraryStack});
+
+        fetchMock.mockGlobal().route({
+            ...requestMatcher,
+            headers: {
+                ...requestMatcher.headers,
+                'X-Client-Library': formattedLibraryStack,
+            },
+            response: result,
+        });
+
+        await expect(fetcher.fetch(slotId, {static: false})).resolves.toEqual(result);
     });
 
     it('should require either an application ID or API key, but not both', () => {
-        expect(() => new ContentFetcher({apiKey: apiKeyIdentifier, appId: appId}))
-            .toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
+        expect(
+            () => new ContentFetcher({
+                apiKey: apiKeyIdentifier,
+                appId: appId,
+                libraryStack: libraryStack,
+            }),
+        ).toThrowWithMessage(Error, 'Either the application ID or the API key must be provided.');
     });
 
     it('should use the specified base endpoint', async () => {
@@ -79,6 +103,7 @@ describe('A content fetcher', () => {
         const fetcher = new ContentFetcher({
             appId: appId,
             baseEndpointUrl: customEndpoint,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -88,6 +113,9 @@ describe('A content fetcher', () => {
         });
 
         await expect(fetcher.fetch(slotId)).resolves.toEqual(result);
+
+        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
+            .toBe(formattedLibraryStack);
     });
 
     it.each<[string, string | ApiKey]>([
@@ -97,6 +125,7 @@ describe('A content fetcher', () => {
     ])('should use the external endpoint for static content passing %s', async (_, value) => {
         const fetcher = new ContentFetcher({
             apiKey: value,
+            libraryStack: libraryStack,
         });
 
         const options: FetchOptions = {
@@ -119,6 +148,7 @@ describe('A content fetcher', () => {
     it('should require an API key to fetch static content', () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         expect(() => fetcher.fetch(slotId, {static: true}))
@@ -128,6 +158,7 @@ describe('A content fetcher', () => {
     it('should use the external endpoint when specifying an API key', async () => {
         const fetcher = new ContentFetcher({
             apiKey: apiKeyIdentifier,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -146,6 +177,7 @@ describe('A content fetcher', () => {
     it('should fetch static content for the specified slot version', async () => {
         const fetcher = new ContentFetcher({
             apiKey: apiKeyIdentifier,
+            libraryStack: libraryStack,
         });
 
         const options: FetchOptions = {
@@ -173,6 +205,7 @@ describe('A content fetcher', () => {
     it('should fetch static content for the specified preferred locale', async () => {
         const fetcher = new ContentFetcher({
             apiKey: apiKeyIdentifier,
+            libraryStack: libraryStack,
         });
 
         const options: FetchOptions = {
@@ -200,6 +233,7 @@ describe('A content fetcher', () => {
     it('should fetch dynamic content using the provided client ID', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const clientId = 'c3b5b9f0-5f9a-4b3c-8c9c-8b5c8b5c8b5c';
@@ -223,6 +257,7 @@ describe('A content fetcher', () => {
     it('should fetch dynamic content passing the provided client IP', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const clientIp = '192.168.0.1';
@@ -246,6 +281,7 @@ describe('A content fetcher', () => {
     it('should fetch dynamic content passing the provided client agent', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
@@ -271,6 +307,7 @@ describe('A content fetcher', () => {
 
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -294,6 +331,7 @@ describe('A content fetcher', () => {
 
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -315,6 +353,7 @@ describe('A content fetcher', () => {
     it('should not include the schema if not requested', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -332,6 +371,7 @@ describe('A content fetcher', () => {
     it('should fetch content including the schema', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const resultWithSchema: FetchResponse = {
@@ -367,6 +407,7 @@ describe('A content fetcher', () => {
     it('should fetch using the extra options', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -418,6 +459,7 @@ describe('A content fetcher', () => {
             logger: logger,
             // Ensure the specified timeout has precedence over the default timeout
             defaultTimeout: 15,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -462,6 +504,7 @@ describe('A content fetcher', () => {
         const fetcher = new ContentFetcher({
             appId: appId,
             defaultTimeout: 10,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -500,6 +543,7 @@ describe('A content fetcher', () => {
             appId: appId,
             logger: logger,
             defaultTimeout: 10,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -519,6 +563,7 @@ describe('A content fetcher', () => {
     it('should reject with a suspended service error when the response status is 202', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -543,6 +588,7 @@ describe('A content fetcher', () => {
     it('should fetch dynamic content using the provided context', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const context: Required<EvaluationContext> = {
@@ -581,6 +627,7 @@ describe('A content fetcher', () => {
     it('should fetch dynamic content for the specified slot version', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const version = 2;
@@ -603,6 +650,7 @@ describe('A content fetcher', () => {
         const fetcher = new ContentFetcher({
             appId: appId,
             defaultPreferredLocale: 'en-us',
+            libraryStack: libraryStack,
         });
 
         fetchMock.mockGlobal().route({
@@ -622,6 +670,7 @@ describe('A content fetcher', () => {
     it('should fetch dynamic content for the specified preferred locale', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const preferredLocale = 'pt-br';
@@ -643,6 +692,7 @@ describe('A content fetcher', () => {
     it('should report errors if the fetch fails', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const response: ApiProblem = {
@@ -668,6 +718,7 @@ describe('A content fetcher', () => {
     it('should report an input error if the request payload is invalid', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const response: InputErrorResponse = {
@@ -703,6 +754,7 @@ describe('A content fetcher', () => {
     it('should catch deserialization errors', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const response: ApiProblem = {
@@ -736,6 +788,7 @@ describe('A content fetcher', () => {
 
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const response: ApiProblem = {
@@ -754,6 +807,7 @@ describe('A content fetcher', () => {
     it('should report unexpected errors when the cause of the fetch failure is unknown', async () => {
         const fetcher = new ContentFetcher({
             appId: appId,
+            libraryStack: libraryStack,
         });
 
         const response: ApiProblem = {
@@ -809,6 +863,7 @@ describe('A content fetcher', () => {
         const fetcher = new ContentFetcher({
             appId: appId,
             logger: logger,
+            libraryStack: libraryStack,
         });
 
         const response: ApiProblem = {
@@ -846,6 +901,7 @@ describe('A content fetcher', () => {
         const fetcher = new ContentFetcher({
             appId: appId,
             logger: logger,
+            libraryStack: libraryStack,
         });
 
         const region = 'us-central1';
@@ -872,7 +928,10 @@ describe('A content fetcher', () => {
 
     it('should not be serializable', () => {
         expect(() => {
-            new ContentFetcher({appId: appId}).toJSON();
+            new ContentFetcher({
+                appId: appId,
+                libraryStack: libraryStack,
+            }).toJSON();
         }).toThrowWithMessage(Error, 'Unserializable value.');
     });
 });
