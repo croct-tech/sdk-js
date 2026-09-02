@@ -204,7 +204,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            libraryStack: ['Plug Javascript 1.0.0'],
+            libraryStack: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -212,7 +212,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            libraryStack: ['Plug Javascript 1.0.0'],
+            libraryStack: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -221,7 +221,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            libraryStack: ['Plug Javascript 1.0.0'],
+            libraryStack: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -230,7 +230,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            libraryStack: ['Plug Javascript 1.0.0'],
+            libraryStack: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -239,7 +239,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            libraryStack: ['Plug Javascript 1.0.0'],
+            libraryStack: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -248,7 +248,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            libraryStack: ['Plug Javascript 1.0.0'],
+            libraryStack: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -257,7 +257,7 @@ describe('The SDK configuration schema', () => {
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             tokenScope: 'global',
-            libraryStack: ['Plug Javascript 1.0.0'],
+            libraryStack: [],
             disableCidMirroring: true,
             debug: true,
             test: true,
@@ -277,7 +277,7 @@ describe('The SDK configuration schema', () => {
             disableCidMirroring: true,
             debug: true,
             test: true,
-            libraryStack: ['Plug Javascript 1.0.0', 'Plug React 1.0.0'],
+            libraryStack: ['Plug Javascript v1.0.0', 'SDK JS v1.0.0'],
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
@@ -293,7 +293,7 @@ describe('The SDK configuration schema', () => {
             tokenScope: 'isolated',
             baseEndpointUrl: 'https://api.croct.io',
             cidAssignerEndpointUrl: 'https://api.croct.io/cid',
-            libraryStack: ['Plug Javascript 1.0.0'],
+            libraryStack: [],
             beaconQueueSize: 1,
             disableCidMirroring: true,
             debug: true,
@@ -349,6 +349,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
             },
             "Missing property '/appId'.",
         ],
@@ -358,6 +359,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
             },
             "Missing property '/tokenScope'.",
         ],
@@ -367,6 +369,7 @@ describe('The SDK configuration schema', () => {
                 tokenScope: 'global',
                 debug: true,
                 test: true,
+                libraryStack: [],
             },
             "Missing property '/disableCidMirroring'.",
         ],
@@ -376,6 +379,7 @@ describe('The SDK configuration schema', () => {
                 tokenScope: 'global',
                 disableCidMirroring: true,
                 test: true,
+                libraryStack: [],
             },
             "Missing property '/debug'.",
         ],
@@ -386,6 +390,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 clientId: '7e9d59a9',
             },
             "Invalid format at path '/clientId'.",
@@ -396,6 +401,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 tokenScope: 'x',
             },
             "Unexpected value at path '/tokenScope', expecting 'global', 'contextual' or 'isolated', found 'x'.",
@@ -406,6 +412,7 @@ describe('The SDK configuration schema', () => {
                 tokenScope: 'global',
                 disableCidMirroring: true,
                 test: true,
+                libraryStack: [],
                 debug: 'foo',
             },
             "Expected value of type boolean at path '/debug', actual string.",
@@ -416,6 +423,7 @@ describe('The SDK configuration schema', () => {
                 tokenScope: 'global',
                 disableCidMirroring: true,
                 debug: true,
+                libraryStack: [],
                 test: 'foo',
             },
             "Expected value of type boolean at path '/test', actual string.",
@@ -427,6 +435,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 baseEndpointUrl: 'foo',
             },
             "Invalid url format at path '/baseEndpointUrl'.",
@@ -438,6 +447,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 cidAssignerEndpointUrl: 'foo',
             },
             "Invalid url format at path '/cidAssignerEndpointUrl'.",
@@ -449,6 +459,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 beaconQueueSize: -1,
             },
             "Expected a value greater than or equal to 0 at path '/beaconQueueSize', actual -1.",
@@ -460,6 +471,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 beaconQueueSize: 1.2,
             },
             "Expected value of type integer at path '/beaconQueueSize', actual number.",
@@ -471,6 +483,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 eventMetadata: {foo: 1},
             },
             "Expected value of type string at path '/eventMetadata/foo', actual integer.",
@@ -482,6 +495,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 logger: null,
             },
             "Expected value of type object at path '/logger', actual null.",
@@ -493,6 +507,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 cookie: null,
             },
             "Expected value of type object at path '/cookie', actual null.",
@@ -504,6 +519,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 cookie: {
                     clientId: {
                         name: '',
@@ -524,6 +540,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 cookie: {
                     userToken: {
                         name: '',
@@ -544,6 +561,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 cookie: {
                     previewToken: {
                         name: '',
@@ -564,6 +582,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 defaultFetchTimeout: 0,
             },
             "Expected a value greater than or equal to 1 at path '/defaultFetchTimeout', actual 0.",
@@ -575,6 +594,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 defaultPreferredLocale: '',
             },
             "Invalid format at path '/defaultPreferredLocale'.",
@@ -586,6 +606,7 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 defaultPreferredLocale: 'fooo',
             },
             'Invalid format at path \'/defaultPreferredLocale\'.',
@@ -597,9 +618,20 @@ describe('The SDK configuration schema', () => {
                 disableCidMirroring: true,
                 debug: true,
                 test: true,
+                libraryStack: [],
                 defaultPreferredLocale: 'foo-baar',
             },
             'Invalid format at path \'/defaultPreferredLocale\'.',
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+            },
+            "Missing property '/libraryStack'.",
         ],
         [
             {
@@ -658,22 +690,9 @@ describe('The SDK configuration schema', () => {
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
-            sdkConfigurationSchema.validate({libraryStack: ['Plug Javascript 1.0.0'], ...value});
+            sdkConfigurationSchema.validate(value);
         }
 
         expect(validate).toThrowWithMessage(Error, message);
-    });
-
-    it('should require the client library stack', () => {
-        const configuration = {
-            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            tokenScope: 'global',
-            disableCidMirroring: true,
-            debug: true,
-            test: true,
-        };
-
-        expect(() => sdkConfigurationSchema.validate(configuration))
-            .toThrowWithMessage(Error, "Missing property '/libraryStack'.");
     });
 });

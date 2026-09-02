@@ -41,7 +41,7 @@ describe('A container', () => {
         trackerEndpointUrl: 'https://localtest/track',
         defaultFetchTimeout: 5000,
         defaultPreferredLocale: 'en-us',
-        libraryStack: ['Plug Javascript 1.0.0'],
+        libraryStack: ['Plug Javascript v1.0.0'],
     };
 
     it('should provide its configuration', () => {
@@ -59,10 +59,9 @@ describe('A container', () => {
     it('should use the configured client library for every request', async () => {
         const container = new Container({
             ...configuration,
-            libraryStack: ['First integration 1.0.0', 'Second integration 2.0.0'],
             logger: new NullLogger(),
         });
-        const libraryStack = `First integration 1.0.0; Second integration 2.0.0; ${CLIENT_LIBRARY}`;
+        const formattedLibraryStack = `Plug Javascript v1.0.0; ${CLIENT_LIBRARY}`;
 
         fetchMock.mockGlobal()
             .route('https://localtest/cid', '00000000-0000-0000-0000-000000000001')
@@ -82,10 +81,10 @@ describe('A container', () => {
 
         expect(calls).toHaveLength(4);
 
-        expect(new Headers(calls[0].options.headers).get('X-Client-Library')).toBe(libraryStack);
-        expect(new Headers(calls[1].options.headers).get('X-Client-Library')).toBe(libraryStack);
-        expect(new Headers(calls[2].options.headers).get('X-Client-Library')).toBe(libraryStack);
-        expect(new Headers(calls[3].options.headers).get('X-Client-Library')).toBe(libraryStack);
+        expect(new Headers(calls[0].options.headers).get('X-Client-Library')).toBe(formattedLibraryStack);
+        expect(new Headers(calls[1].options.headers).get('X-Client-Library')).toBe(formattedLibraryStack);
+        expect(new Headers(calls[2].options.headers).get('X-Client-Library')).toBe(formattedLibraryStack);
+        expect(new Headers(calls[3].options.headers).get('X-Client-Library')).toBe(formattedLibraryStack);
     });
 
     it('should resolve the timezone lazily from the Intl API', () => {

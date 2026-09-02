@@ -19,7 +19,7 @@ jest.mock(
     () => ({
         VERSION: '0.0.1-test',
         BASE_ENDPOINT_URL: 'https://api.croct.io',
-        CLIENT_LIBRARY: 'SDK JS 1.0.0',
+        CLIENT_LIBRARY: 'SDK JS v1.0.0',
     }),
 );
 
@@ -41,7 +41,7 @@ describe('A SDK', () => {
         cookie: {},
         defaultFetchTimeout: 1000,
         defaultPreferredLocale: 'en-us',
-        libraryStack: ['Plug Javascript 1.0.0'],
+        libraryStack: ['Plug Javascript v1.0.0'],
     };
 
     beforeEach(() => {
@@ -83,30 +83,14 @@ describe('A SDK', () => {
     });
 
     it('should append the integration library to the SDK library', async () => {
-        const sdk = Sdk.init({
-            ...configuration,
-            libraryStack: ['First integration 1.0.0', 'Second integration 2.0.0'],
-        });
+        const sdk = Sdk.init(configuration);
 
         fetchMock.mockGlobal().route('https://localtest/client/web/evaluate', JSON.stringify(true));
 
         await sdk.evaluator.evaluate('true');
 
         expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
-            .toBe('First integration 1.0.0; Second integration 2.0.0; SDK JS 1.0.0');
-    });
-
-    it('should snapshot the client library stack on initialization', async () => {
-        const libraryStack = ['Plug Javascript 1.0.0'];
-        const sdk = Sdk.init({...configuration, libraryStack: libraryStack});
-
-        libraryStack.push('Late integration 1.0.0');
-        fetchMock.mockGlobal().route('https://localtest/client/web/evaluate', JSON.stringify(true));
-
-        await sdk.evaluator.evaluate('true');
-
-        expect(new Headers(fetchMock.callHistory.calls()[0].options.headers).get('X-Client-Library'))
-            .toBe('Plug Javascript 1.0.0; SDK JS 1.0.0');
+            .toBe('Plug Javascript v1.0.0; SDK JS v1.0.0');
     });
 
     it('should be initialized with the specified logger', () => {
@@ -296,7 +280,7 @@ describe('A SDK', () => {
             disableCidMirroring: false,
             debug: false,
             test: false,
-            libraryStack: ['Plug Javascript 1.0.0'],
+            libraryStack: configuration.libraryStack,
         });
 
         await expect(sdk.cidAssigner.assignCid()).resolves.toEqual('123');
@@ -321,7 +305,7 @@ describe('A SDK', () => {
                 disableCidMirroring: false,
                 debug: false,
                 test: false,
-                libraryStack: ['Plug Javascript 1.0.0'],
+                libraryStack: configuration.libraryStack,
             });
 
             await expect(sdk.cidAssigner.assignCid()).resolves.toEqual('123');

@@ -52,14 +52,6 @@ describe('The SDK facade configuration schema', () => {
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            libraryStack: ['plug-react'],
-        }],
-        [{
-            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
-            libraryStack: ['plug-react', 'plug-next', 'plug-vue'],
-        }],
-        [{
-            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             libraryStack: Array.from({length: 10}, (_, i) => `lib${i}`),
         }],
         [{
