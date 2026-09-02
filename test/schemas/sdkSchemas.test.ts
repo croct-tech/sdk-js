@@ -265,6 +265,30 @@ describe('The SDK configuration schema', () => {
         }],
         [{
             appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            tokenScope: 'global',
+            disableCidMirroring: true,
+            debug: true,
+            test: true,
+            libraryStack: [],
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            tokenScope: 'global',
+            disableCidMirroring: true,
+            debug: true,
+            test: true,
+            libraryStack: ['Plug Javascript 1.0.0', 'Plug React 1.0.0'],
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+            tokenScope: 'global',
+            disableCidMirroring: true,
+            debug: true,
+            test: true,
+            libraryStack: Array.from({length: 10}, (_, i) => `Plug ${i}`),
+        }],
+        [{
+            appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
             clientId: '9f62d6343c8742028df3e9e3ec596526',
             tokenScope: 'isolated',
             baseEndpointUrl: 'https://api.croct.io',
@@ -576,6 +600,61 @@ describe('The SDK configuration schema', () => {
                 defaultPreferredLocale: 'foo-baar',
             },
             'Invalid format at path \'/defaultPreferredLocale\'.',
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                libraryStack: 'foo',
+            },
+            "Expected value of type array at path '/libraryStack', actual string.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                libraryStack: [1],
+            },
+            "Expected value of type string at path '/libraryStack/0', actual integer.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                libraryStack: [''],
+            },
+            "Expected at least 1 character at path '/libraryStack/0', actual 0.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                libraryStack: ['x'.repeat(51)],
+            },
+            "Expected at most 50 characters at path '/libraryStack/0', actual 51.",
+        ],
+        [
+            {
+                appId: '7e9d59a9-e4b3-45d4-b1c7-48287f1e5e8a',
+                tokenScope: 'global',
+                disableCidMirroring: true,
+                debug: true,
+                test: true,
+                libraryStack: new Array(11).fill('foo'),
+            },
+            "Expected at most 10 items at path '/libraryStack', actual 11.",
         ],
     ])('should not allow %s', (value: Record<string, unknown>, message: string) => {
         function validate(): void {
