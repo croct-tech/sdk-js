@@ -5,17 +5,19 @@ import type {Logger} from '../logging';
 import {NullLogger} from '../logging';
 import type {CidAssigner} from '../cid';
 import {formatMessage} from '../error';
-import type {ApiProblem} from '../error';
-import {CLIENT_LIBRARY} from '../constants';
 import {Help} from '../help';
+import type {EventPublisher, PublishRequest} from '../eventPublisher';
+import {PublishError} from '../eventPublisher';
 
 export type Configuration = {
-    appId: string,
-    endpointUrl: string,
+    publisher: EventPublisher,
     cidAssigner: CidAssigner,
     logger?: Logger,
 };
 
+/**
+ * @deprecated Use `PublishErrorType` from the `eventPublisher` module instead.
+ */
 export enum TrackingErrorType {
     SUSPENDED_SERVICE = 'https://croct.help/sdk/javascript/suspended-service',
     // Server errors
@@ -41,70 +43,50 @@ export class HttpBeaconChannel implements DuplexChannel<string, Envelope<string,
             return Promise.reject(MessageDeliveryError.nonRetryable('Channel is closed'));
         }
 
-        const {token, timestamp, context, payload} = JSON.parse(message);
-        const {endpointUrl, appId, cidAssigner} = this.configuration;
+        const {token, timestamp, context, payload: {type, ...payload}} = JSON.parse(message);
+        const {publisher, cidAssigner} = this.configuration;
 
-        return fetch(endpointUrl, {
-            method: 'POST',
-            headers: {
-                'X-App-Id': appId,
-                'X-Client-Id': await cidAssigner.assignCid(),
-                'X-Client-Library': CLIENT_LIBRARY,
-                'Content-Type': 'application/json',
-                ...(token !== undefined ? {'X-Token': token} : {}),
-            },
-            body: JSON.stringify({
-                context: context,
-                payload: payload,
-                originalTime: timestamp,
-                departureTime: Date.now(),
-            }),
-            keepalive: true,
-        }).then(async response => {
-            if (response.ok) {
-                if (response.status === 202) {
-                    this.logger.warn(
-                        'Event tracking is currently suspended for this application, check the workspace settings. '
-                        + `For help, see ${TrackingErrorType.SUSPENDED_SERVICE}`,
+        const request: PublishRequest = {
+            type: type,
+            payload: payload,
+            clientId: await cidAssigner.assignCid(),
+            timestamp: timestamp,
+            context: context,
+            userToken: token,
+        };
+
+        return publisher.publish(request, {extra: {keepalive: true}})
+            .then(
+                () => this.notify(receiptId),
+                (error: unknown) => {
+                    if (!(error instanceof PublishError)) {
+                        throw error;
+                    }
+
+                    const problem = error.response;
+                    const isRetryable = HttpBeaconChannel.isRetryable(problem.status);
+
+                    // The publisher already logs the help for known problems
+                    if (!isRetryable && Help.forApiProblem(problem) === undefined) {
+                        this.logger.error(`Beacon rejected with non-retryable status: ${problem.title}`);
+                    }
+
+                    return Promise.reject(
+                        isRetryable
+                            ? MessageDeliveryError.retryable(problem.title)
+                            : MessageDeliveryError.nonRetryable(problem.title),
                     );
-                }
+                },
+            )
+            .catch(error => {
+                this.logger.error(`Failed to publish beacon: ${formatMessage(error)}`);
 
-                this.notify(receiptId);
-
-                return;
-            }
-
-            const problem: ApiProblem = await response.json().catch(
-                () => ({
-                    type: TrackingErrorType.INTERNAL_ERROR,
-                    title: response.statusText,
-                    status: response.status,
-                }),
-            );
-
-            const isRetryable = HttpBeaconChannel.isRetryable(problem.status);
-            const help = Help.forApiProblem(problem);
-
-            if (help !== undefined) {
-                this.logger.error(help);
-            } else if (!isRetryable) {
-                this.logger.error(`Beacon rejected with non-retryable status: ${problem.title}`);
-            }
-
-            return Promise.reject(
-                isRetryable
-                    ? MessageDeliveryError.retryable(problem.title)
-                    : MessageDeliveryError.nonRetryable(problem.title),
-            );
-        }).catch(error => {
-            this.logger.error(`Failed to publish beacon: ${formatMessage(error)}`);
-
-            return Promise.reject(
-                error instanceof MessageDeliveryError
-                    ? error
-                    : MessageDeliveryError.retryable(error),
-            );
-        });
+                return Promise.reject(
+                    error instanceof MessageDeliveryError
+                        ? error
+                        : MessageDeliveryError.retryable(error),
+                );
+            });
     }
 
     public subscribe(listener: ChannelListener<string>): void {

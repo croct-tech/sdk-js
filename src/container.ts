@@ -26,6 +26,7 @@ import type {CookieCacheConfiguration} from './cache/cookieCache';
 import {CookieCache} from './cache/cookieCache';
 import {FilteredLogger} from './logging/filteredLogger';
 import {HttpBeaconChannel} from './channel/httpBeaconChannel';
+import {EventPublisher} from './eventPublisher';
 import {DeduplicatedLogger} from './logging/deduplicatedLogger';
 
 export type Configuration = {
@@ -36,7 +37,7 @@ export type Configuration = {
     test: boolean,
     disableCidMirroring: boolean,
     cidAssignerEndpointUrl: string,
-    trackerEndpointUrl: string,
+    trackerBaseEndpointUrl: string,
     evaluationBaseEndpointUrl: string,
     contentBaseEndpointUrl: string,
     beaconQueueSize: number,
@@ -235,14 +236,17 @@ export class Container {
         }
 
         const channelLogger = this.getLogger('BeaconChannel');
-        const {appId, trackerEndpointUrl} = this.configuration;
+        const {appId, trackerBaseEndpointUrl} = this.configuration;
 
         const queuedChannel = new QueuedChannel(
             new RetryChannel({
                 channel: new GuaranteedChannel({
                     channel: new HttpBeaconChannel({
-                        appId: appId,
-                        endpointUrl: trackerEndpointUrl,
+                        publisher: new EventPublisher({
+                            appId: appId,
+                            baseEndpointUrl: trackerBaseEndpointUrl,
+                            logger: channelLogger,
+                        }),
                         cidAssigner: this.getCidAssigner(),
                         logger: channelLogger,
                     }),

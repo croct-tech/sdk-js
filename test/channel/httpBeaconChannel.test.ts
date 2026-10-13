@@ -6,6 +6,7 @@ import type {Beacon} from '../../src/trackingEvents';
 import {Token} from '../../src/token';
 import {CLIENT_LIBRARY} from '../../src/constants';
 import {Help} from '../../src/help';
+import {EventPublisher} from '../../src/eventPublisher';
 
 describe('An HTTP beacon channel', () => {
     beforeEach(() => {
@@ -32,14 +33,22 @@ describe('An HTTP beacon channel', () => {
         error: jest.fn(),
     };
 
-    const endpointUrl = 'http://api.croct.io/web/client/track';
+    const baseEndpointUrl = 'http://api.croct.io';
+    const endpointUrl = `${baseEndpointUrl}/client/web/track`;
+
+    function createPublisher(): EventPublisher {
+        return new EventPublisher({
+            appId: appId,
+            baseEndpointUrl: baseEndpointUrl,
+            logger: logger,
+        });
+    }
 
     it('should send a beacon to the specified URL', async () => {
         fetchMock.mockGlobal().route(endpointUrl, 200);
 
         const channel = new HttpBeaconChannel({
-            appId: appId,
-            endpointUrl: endpointUrl,
+            publisher: createPublisher(),
             cidAssigner: cidAssigner,
         });
 
@@ -82,9 +91,14 @@ describe('An HTTP beacon channel', () => {
 
         expect(args).toHaveLength(2);
 
-        const [endpoint, lastRequest] = lastCall.args as [string, {headers: Record<string, string>, body: string}];
+        const [endpoint, lastRequest] = lastCall.args as [
+            string,
+            {headers: Record<string, string>, body: string, keepalive: boolean},
+        ];
 
         expect(endpoint).toBe(endpointUrl);
+
+        expect(lastRequest.keepalive).toBeTrue();
 
         const {timestamp: originalTime, token, ...expectedBeacon} = beacon;
 
@@ -107,8 +121,7 @@ describe('An HTTP beacon channel', () => {
         fetchMock.mockGlobal().route(endpointUrl, 200);
 
         const channel = new HttpBeaconChannel({
-            appId: appId,
-            endpointUrl: endpointUrl,
+            publisher: createPublisher(),
             cidAssigner: cidAssigner,
         });
 
@@ -153,8 +166,7 @@ describe('An HTTP beacon channel', () => {
         fetchMock.mockGlobal().route(endpointUrl, 500);
 
         const channel = new HttpBeaconChannel({
-            appId: appId,
-            endpointUrl: endpointUrl,
+            publisher: createPublisher(),
             cidAssigner: cidAssigner,
             logger: logger,
         });
@@ -184,6 +196,77 @@ describe('An HTTP beacon channel', () => {
         expect(listener).not.toHaveBeenCalled();
 
         expect(logger.error).toHaveBeenCalledWith('Failed to publish beacon: Internal Server Error');
+    });
+
+    it('should report a non-retryable error if a client error response is not valid JSON', async () => {
+        fetchMock.mockGlobal().route(endpointUrl, {
+            status: 400,
+            body: 'Not JSON',
+        });
+
+        const channel = new HttpBeaconChannel({
+            publisher: createPublisher(),
+            cidAssigner: cidAssigner,
+            logger: logger,
+        });
+
+        const promise = channel.publish({
+            id: 'receipt-id',
+            message: JSON.stringify({
+                context: {
+                    tabId: tabId,
+                    url: 'http://example.com',
+                },
+                payload: {
+                    type: 'nothingChanged',
+                    sinceTime: 0,
+                },
+                timestamp: 1,
+            }),
+        });
+
+        await expect(promise).rejects.toThrowWithMessage(MessageDeliveryError, 'Bad Request');
+        await expect(promise).rejects.toHaveProperty('retryable', false);
+
+        expect(logger.error).toHaveBeenCalledWith('Beacon rejected with non-retryable status: Bad Request');
+    });
+
+    it('should report a retryable error if publishing fails unexpectedly', async () => {
+        const publisher = createPublisher();
+
+        jest.spyOn(publisher, 'publish').mockRejectedValue(new Error('Unexpected error'));
+
+        const channel = new HttpBeaconChannel({
+            publisher: publisher,
+            cidAssigner: cidAssigner,
+            logger: logger,
+        });
+
+        const listener = jest.fn();
+
+        channel.subscribe(listener);
+
+        const promise = channel.publish({
+            id: 'receipt-id',
+            message: JSON.stringify({
+                context: {
+                    tabId: tabId,
+                    url: 'http://example.com',
+                },
+                payload: {
+                    type: 'nothingChanged',
+                    sinceTime: 0,
+                },
+                timestamp: 1,
+            }),
+        });
+
+        await expect(promise).rejects.toThrow(MessageDeliveryError);
+        await expect(promise).rejects.toHaveProperty('retryable', true);
+
+        expect(listener).not.toHaveBeenCalled();
+
+        expect(logger.error).toHaveBeenCalledWith('Failed to publish beacon: Unexpected error');
     });
 
     type NonRetryableErrorScenario = {
@@ -235,8 +318,7 @@ describe('An HTTP beacon channel', () => {
         });
 
         const channel = new HttpBeaconChannel({
-            appId: appId,
-            endpointUrl: endpointUrl,
+            publisher: createPublisher(),
             cidAssigner: cidAssigner,
             logger: logger,
         });
@@ -287,8 +369,7 @@ describe('An HTTP beacon channel', () => {
         });
 
         const channel = new HttpBeaconChannel({
-            appId: appId,
-            endpointUrl: endpointUrl,
+            publisher: createPublisher(),
             cidAssigner: cidAssigner,
             logger: logger,
         });
@@ -327,8 +408,7 @@ describe('An HTTP beacon channel', () => {
         });
 
         const channel = new HttpBeaconChannel({
-            appId: appId,
-            endpointUrl: endpointUrl,
+            publisher: createPublisher(),
             cidAssigner: cidAssigner,
             logger: logger,
         });
@@ -356,10 +436,7 @@ describe('An HTTP beacon channel', () => {
 
         await expect(promise).resolves.toBeUndefined();
 
-        expect(logger.warn).toHaveBeenCalledWith(
-            'Event tracking is currently suspended for this application, check the workspace settings. '
-            + 'For help, see https://croct.help/sdk/javascript/suspended-service',
-        );
+        expect(logger.warn).toHaveBeenCalledWith(Help.forStatusCode(202));
 
         expect(listener).toHaveBeenCalledWith(receiptId);
     });
@@ -368,8 +445,7 @@ describe('An HTTP beacon channel', () => {
         fetchMock.mockGlobal().route(endpointUrl, 200);
 
         const channel = new HttpBeaconChannel({
-            appId: appId,
-            endpointUrl: endpointUrl,
+            publisher: createPublisher(),
             cidAssigner: cidAssigner,
         });
 
@@ -401,10 +477,82 @@ describe('An HTTP beacon channel', () => {
         expect(listener).not.toHaveBeenCalled();
     });
 
+    it('should notify a listener subscribed multiple times only once', async () => {
+        fetchMock.mockGlobal().route(endpointUrl, 200);
+
+        const channel = new HttpBeaconChannel({
+            publisher: createPublisher(),
+            cidAssigner: cidAssigner,
+        });
+
+        const listener = jest.fn();
+
+        channel.subscribe(listener);
+        channel.subscribe(listener);
+
+        const receiptId = 'receipt-id';
+
+        const promise = channel.publish({
+            id: receiptId,
+            message: JSON.stringify({
+                context: {
+                    tabId: tabId,
+                    url: 'http://example.com',
+                },
+                payload: {
+                    type: 'nothingChanged',
+                    sinceTime: 0,
+                },
+                timestamp: 1,
+            }),
+        });
+
+        await expect(promise).resolves.toBeUndefined();
+
+        expect(listener).toHaveBeenCalledOnce();
+        expect(listener).toHaveBeenCalledWith(receiptId);
+    });
+
+    it('should ignore unsubscribing a listener that is not subscribed', async () => {
+        fetchMock.mockGlobal().route(endpointUrl, 200);
+
+        const channel = new HttpBeaconChannel({
+            publisher: createPublisher(),
+            cidAssigner: cidAssigner,
+        });
+
+        const subscribedListener = jest.fn();
+        const unsubscribedListener = jest.fn();
+
+        channel.subscribe(subscribedListener);
+        channel.unsubscribe(unsubscribedListener);
+
+        const receiptId = 'receipt-id';
+
+        const promise = channel.publish({
+            id: receiptId,
+            message: JSON.stringify({
+                context: {
+                    tabId: tabId,
+                    url: 'http://example.com',
+                },
+                payload: {
+                    type: 'nothingChanged',
+                    sinceTime: 0,
+                },
+                timestamp: 1,
+            }),
+        });
+
+        await expect(promise).resolves.toBeUndefined();
+
+        expect(subscribedListener).toHaveBeenCalledWith(receiptId);
+        expect(unsubscribedListener).not.toHaveBeenCalled();
+    });
+
     it('should close the channel', async () => {
         const channel = new HttpBeaconChannel({
-            appId: appId,
-            endpointUrl: endpointUrl,
+            publisher: createPublisher(),
             cidAssigner: cidAssigner,
         });
 
