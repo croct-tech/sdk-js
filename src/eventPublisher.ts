@@ -174,7 +174,7 @@ export class EventPublisher {
                 .then(
                     response => {
                         if (response.status === 202) {
-                            // Tracking is suspended, but the event was accepted
+                            // Tracking is suspended, so the API discards the event without processing it
                             this.logger.warn(Help.forStatusCode(202));
 
                             return resolve();
