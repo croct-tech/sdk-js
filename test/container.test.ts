@@ -37,7 +37,7 @@ describe('A container', () => {
         cidAssignerEndpointUrl: 'https://localtest/cid',
         contentBaseEndpointUrl: 'https://localtest/content',
         evaluationBaseEndpointUrl: 'https://localtest/evaluate',
-        trackerEndpointUrl: 'https://localtest/track',
+        trackerBaseEndpointUrl: 'https://localtest',
         defaultFetchTimeout: 5000,
         defaultPreferredLocale: 'en-us',
     };
@@ -298,6 +298,8 @@ describe('A container', () => {
     });
 
     it('should flush the beacon queue on initialization', async () => {
+        const trackerEndpointUrl = `${configuration.trackerBaseEndpointUrl}/client/web/track`;
+
         fetchMock.mockGlobal()
             .route({
                 method: 'GET',
@@ -306,14 +308,14 @@ describe('A container', () => {
             })
             .route({
                 method: 'POST',
-                matcher: (url: string) => url === configuration.trackerEndpointUrl && attempts++ === 0,
+                matcher: (url: string) => url === trackerEndpointUrl && attempts++ === 0,
                 response: {
                     status: 500,
                 },
             })
             .route({
                 method: 'POST',
-                matcher: (url: string) => url === configuration.trackerEndpointUrl && attempts > 0,
+                matcher: (url: string) => url === trackerEndpointUrl && attempts > 0,
                 response: 200,
             });
 
@@ -335,14 +337,14 @@ describe('A container', () => {
         await container.dispose();
         await expect(promise).rejects.toThrow();
 
-        expect(fetchMock.callHistory.calls(configuration.trackerEndpointUrl)).toHaveLength(1);
+        expect(fetchMock.callHistory.calls(trackerEndpointUrl)).toHaveLength(1);
 
         container = new Container(configuration);
         tracker = container.getTracker();
 
         await expect(tracker.flushed).resolves.toBeUndefined();
 
-        expect(fetchMock.callHistory.calls(configuration.trackerEndpointUrl)).toHaveLength(2);
+        expect(fetchMock.callHistory.calls(trackerEndpointUrl)).toHaveLength(2);
     });
 
     it.each([

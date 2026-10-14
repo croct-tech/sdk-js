@@ -81,7 +81,7 @@ export class Sdk {
             ...containerConfiguration,
             evaluationBaseEndpointUrl: baseHttpEndpoint,
             contentBaseEndpointUrl: baseHttpEndpoint,
-            trackerEndpointUrl: `${baseHttpEndpoint}/client/web/track`,
+            trackerBaseEndpointUrl: baseHttpEndpoint,
             cidAssignerEndpointUrl: cidAssignerEndpointUrl ?? `${baseHttpEndpoint}/client/web/cid`,
             beaconQueueSize: containerConfiguration.beaconQueueSize ?? 100,
             eventMetadata: eventMetadata,
