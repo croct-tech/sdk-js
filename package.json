@@ -37,7 +37,7 @@
     "postbuild": "./post-build.mjs"
   },
   "dependencies": {
-    "@croct/content-model": "^0.21.1",
+    "@croct/content-model": "^0.26.0",
     "@croct/json": "^2.0.1",
     "tslib": "^2.5.0"
   },
